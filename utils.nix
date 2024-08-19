@@ -26,7 +26,7 @@ let
     lib.nixosSystem {
       inherit system;
       specialArgs = {
-        inherit inputs username;
+        inherit inputs username hostname;
         pkgs = import inputs.nixpkgs {
           inherit system overlays;
           config = {
