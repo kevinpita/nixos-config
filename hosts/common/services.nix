@@ -1,4 +1,5 @@
-{ pkgs, ... }:
+{ pkgs, username, ... }:
+
 {
   services = {
     power-profiles-daemon.enable = false;
@@ -11,6 +12,7 @@
         STOP_CHARGE_THRESH_BAT1 = 80;
       };
     };
+
     xserver = {
       enable = true;
       displayManager.gdm.enable = true;
@@ -18,13 +20,12 @@
       xkb.layout = "es";
     };
     libinput.enable = true;
-    udev.packages = with pkgs; [ gnome.gnome-settings-daemon ];
 
     syncthing = {
       enable = true;
-      user = "kevin";
-      dataDir = "/home/kevin/";
-      configDir = "/home/kevin/Documents/.config/syncthing";
+      user = username;
+      dataDir = "/home/${username}/";
+      configDir = "/home/${username}/Documents/.config/syncthing";
       overrideDevices = true;
       overrideFolders = true;
       settings = {
@@ -38,7 +39,7 @@
         };
         folders = {
           "afnt2-e5u36" = {
-            path = "/home/kevin/keepass";
+            path = "/home/${username}/keepass";
             devices = [
               "fium"
               "Pixel 5"
@@ -49,4 +50,5 @@
     };
   };
 
+  services.udev.packages = with pkgs; [ gnome.gnome-settings-daemon ];
 }

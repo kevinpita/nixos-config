@@ -13,14 +13,22 @@
     };
 
     nixos-hardware.url = "github:NixOS/nixos-hardware";
+
+    nix-vscode-extensions.url = "github:nix-community/nix-vscode-extensions";
   };
+
   outputs =
     { nixpkgs, ... }@inputs:
     let
-      hosts = import ./hosts {
-        inherit inputs;
-        inherit nixpkgs;
+
+      overlays = [ inputs.nix-vscode-extensions.overlays.default ];
+
+      utils = import ./utils.nix {
+        inherit inputs overlays;
+        inherit (nixpkgs) lib;
       };
+
+      hosts = import ./hosts { inherit inputs nixpkgs utils; };
     in
     {
       inherit (hosts) formatter;

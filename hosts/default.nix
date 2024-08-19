@@ -1,10 +1,10 @@
-{ inputs, nixpkgs }:
+{
+  inputs,
+  nixpkgs,
+  utils,
+}:
 let
   inherit (nixpkgs) lib;
-  myLib = import ../lib.nix {
-    inherit lib;
-    inherit inputs;
-  };
 
   linux64 = "x86_64-linux";
 
@@ -13,7 +13,7 @@ let
       hostname = "t480";
       username = "kevin";
       system = linux64;
-      modules = [ inputs.nixos-hardware.nixosModules.lenovo-thinkpad-t480 ];
+      extraModules = [ inputs.nixos-hardware.nixosModules.lenovo-thinkpad-t480 ];
     }
   ];
 in
@@ -21,7 +21,14 @@ in
   nixosConfigurations = lib.listToAttrs (
     map (host: {
       name = host.hostname;
-      value = myLib.createNixosConfig host;
+      value = utils.mkNixosSystem {
+        inherit (host)
+          hostname
+          system
+          username
+          extraModules
+          ;
+      };
     }) hosts
   );
 
