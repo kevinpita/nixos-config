@@ -2,18 +2,14 @@
 
 {
   imports = [
-
     (import ../../common/home { inherit username; })
 
     ../../common/home/packages/gui.nix
     ../../common/home/packages/multimedia.nix
-
     ../../common/home/programs/vscode.nix
-    ../../common/home/programs/gnome.nix
   ];
 
   programs = {
-    alacritty.enable = true;
     fastfetch.enable = true;
     neovim.enable = true;
     ripgrep.enable = true;
