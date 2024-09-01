@@ -5,7 +5,7 @@
     ./packages/base.nix
 
     ./programs/git.nix
-    ./programs/zsh.nix
+    ./programs/zsh
   ];
 
   home = {
