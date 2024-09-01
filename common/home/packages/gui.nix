@@ -11,6 +11,6 @@
 
     keepassxc
 
-    jetbrains-mono
+    (nerdfonts.override { fonts = [ "JetBrainsMono" ]; })
   ];
 }
