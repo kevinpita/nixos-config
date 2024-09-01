@@ -6,7 +6,7 @@
 
     ../../common/home/packages/gui.nix
     ../../common/home/packages/multimedia.nix
-    ../../common/home/programs/vscode.nix
+    ../../common/home/packages/dev.nix
   ];
 
   programs = {
