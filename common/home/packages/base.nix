@@ -7,6 +7,8 @@
 
     tree
 
+    go
+
     nnn
 
     statix
