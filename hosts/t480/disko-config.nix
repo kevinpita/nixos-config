@@ -1,13 +1,9 @@
 {
-  disks ? [ "/dev/nvme1n1" ],
-  ...
-}:
-{
   disko.devices = {
     disk = {
       main = {
         type = "disk";
-        device = builtins.elemAt disks 0;
+        device = "/dev/nvme1n1";
         content = {
           type = "gpt";
           partitions = {
