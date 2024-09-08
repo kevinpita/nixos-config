@@ -1,7 +1,6 @@
 {
   pkgs,
   username,
-  hostname,
   ...
 }:
 {
@@ -9,9 +8,10 @@
     ./hardware-configuration.nix
     ./disko-config.nix
 
-    (import ../../common/nixos { inherit pkgs username hostname; })
+    ../../common/nixos
     ../../common/nixos/services/gnome.nix
     ../../common/nixos/services/tailscale.nix
+    ../../common/nixos/vm.nix
 
     ./services/tlp.nix
     (import ./services/syncthing.nix { inherit pkgs username; })

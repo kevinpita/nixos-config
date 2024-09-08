@@ -7,6 +7,7 @@
     ../../common/home/packages/gui.nix
     ../../common/home/packages/multimedia.nix
     ../../common/home/packages/dev.nix
+    ../../common/home/packages/vm.nix
   ];
 
   programs = {
