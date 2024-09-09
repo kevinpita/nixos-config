@@ -19,7 +19,9 @@
     "kvm"
   ];
 
-  boot.extraModprobeConfig = "options kvm_intel nested=1";
-  boot.kernelModules = [ "kvm-intel" ];
-  boot.kernelParams = [ "intel_iommu=on" ];
+  boot = {
+    extraModprobeConfig = "options kvm_intel nested=1";
+    kernelModules = [ "kvm-intel" ];
+    kernelParams = [ "intel_iommu=on" ];
+  };
 }
