@@ -3,6 +3,7 @@
   imports =
     [
       ./bootloader.nix
+      ./docker.nix
       ./networking.nix
       ./nh.nix
       ./shell.nix
