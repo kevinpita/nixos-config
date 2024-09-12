@@ -1,7 +1,4 @@
-{
-  username,
-  ...
-}:
+{ username, pkgs, ... }:
 {
   virtualisation.libvirtd = {
     enable = true;
@@ -19,9 +16,17 @@
     "kvm"
   ];
 
-  boot = {
-    extraModprobeConfig = "options kvm_intel nested=1";
-    kernelModules = [ "kvm-intel" ];
-    kernelParams = [ "intel_iommu=on" ];
-  };
+  environment.systemPackages = with pkgs; [
+    qemu
+    OVMF
+    dnsmasq
+    vde2
+    bridge-utils
+    netcat-openbsd
+    libguestfs
+    spice-gtk
+    win-virtio
+    swtpm
+
+  ];
 }

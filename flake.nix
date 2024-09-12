@@ -20,18 +20,37 @@
   outputs =
     { nixpkgs, ... }@inputs:
     let
+      username = "kevin";
+      system = "x86_64-linux";
+
+      commonModules = [
+        inputs.disko.nixosModules.disko
+        inputs.home-manager.nixosModules.home-manager
+      ];
 
       overlays = [ inputs.nix-vscode-extensions.overlays.default ];
 
-      utils = import ./utils.nix {
-        inherit inputs overlays;
-        inherit (nixpkgs) lib;
+      pkgs = import nixpkgs {
+        inherit system overlays;
+        config.allowUnfree = true;
       };
 
-      hosts = import ./hosts { inherit inputs nixpkgs utils; };
     in
     {
-      inherit (hosts) formatter;
-      inherit (hosts) nixosConfigurations;
+      nixosConfigurations = {
+        t480 = nixpkgs.lib.nixosSystem {
+          inherit system pkgs;
+          modules = [
+            ./hosts/t480
+          ] ++ commonModules;
+          specialArgs = {
+            hostname = "t480";
+            gui = true;
+            inherit inputs username;
+          };
+        };
+      };
+
+      formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt-rfc-style;
     };
 }

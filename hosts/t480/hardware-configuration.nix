@@ -21,8 +21,11 @@
       ];
       kernelModules = [ ];
     };
-    kernelModules = [ "kvm-intel" ];
+    extraModprobeConfig = "options kvm_intel nested=1";
     extraModulePackages = [ ];
+
+    kernelModules = [ "kvm-intel" ];
+    kernelParams = [ "intel_iommu=on" ];
   };
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking

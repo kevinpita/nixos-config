@@ -1,8 +1,4 @@
-{ username, ... }:
-
-{
-  imports = [ (import ../../../common/nixos/services/syncthing.nix { inherit username; }) ];
-
+_: {
   services.syncthing = {
     settings = {
       devices = {

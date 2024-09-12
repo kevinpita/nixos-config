@@ -2,15 +2,10 @@
 {
   services = {
     xserver = {
-      enable = true;
-      displayManager.gdm.enable = true;
       desktopManager.gnome.enable = true;
-      xkb.layout = "es";
+      displayManager.gdm.enable = true;
     };
-
-    libinput.enable = true;
 
     udev.packages = with pkgs; [ gnome-settings-daemon ];
   };
-
 }

@@ -2,7 +2,8 @@
 
 {
   home.packages = with pkgs; [
-    vlc
-    ffmpeg
+    brave
+    chromium
+    firefox
   ];
 }

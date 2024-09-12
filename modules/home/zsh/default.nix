@@ -20,8 +20,17 @@
       vi = "vim";
       neofetch = "fastfetch";
 
-      switch = "sudo nixos-rebuild switch --flake ~/nixos-config";
-      update = "nix flake update";
+      switch = "nh os switch ~/nixos-config";
+      update = "nix flake update ~/nixos-config";
+
+      update-git = ''
+        cd ~/nixos-config && \
+        nix flake update && \
+        if ! git diff --quiet flake.lock; then
+          git add flake.lock && \
+          git commit flake.lock -m "chore: update flake.lock"
+        fi
+      '';
     };
     history = {
       size = 10000;
