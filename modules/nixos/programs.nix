@@ -15,6 +15,7 @@
 
     curl
     wget
+    mqttui
 
     go
   ];
