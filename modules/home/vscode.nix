@@ -5,10 +5,11 @@
     enable = true;
     extensions = with pkgs.vscode-marketplace; [
       brettm12345.nixfmt-vscode
-      jnoortheen.nix-ide
-      jdinhlife.gruvbox
-      vscodevim.vim
       github.vscode-github-actions
+      golang.go
+      jdinhlife.gruvbox
+      jnoortheen.nix-ide
+      vscodevim.vim
     ];
 
     userSettings = {
