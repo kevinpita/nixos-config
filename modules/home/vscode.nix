@@ -3,6 +3,7 @@
 {
   programs.vscode = {
     enable = true;
+    package = pkgs.vscodium;
     extensions = with pkgs.vscode-marketplace; [
       brettm12345.nixfmt-vscode
       github.vscode-github-actions
