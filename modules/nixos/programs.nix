@@ -10,6 +10,7 @@
     fastfetch
 
     bat
+    fzf
     ripgrep
     tree
 
