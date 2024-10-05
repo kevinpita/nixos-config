@@ -14,7 +14,7 @@
     ];
 
     userSettings = {
-      "editor.fontSize" = 16;
+      "editor.fontSize" = 18;
       "editor.fontFamily" = "'Jetbrains Mono', 'monospace', monospace";
       "telemetry.telemetryLevel" = "off";
       "files.autoSave" = "afterDelay";
