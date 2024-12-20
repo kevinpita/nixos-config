@@ -49,6 +49,18 @@
             inherit inputs username;
           };
         };
+
+        m710q = nixpkgs.lib.nixosSystem {
+          inherit system pkgs;
+          modules = [
+            ./hosts/m710q
+          ] ++ commonModules;
+          specialArgs = {
+            hostname = "m710q";
+            gui = true;
+            inherit inputs username;
+          };
+        };
       };
 
       formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt-rfc-style;
