@@ -21,11 +21,10 @@
       neofetch = "fastfetch";
 
       switch = "nh os switch ~/nixos-config";
-      update = "nix flake update ~/nixos-config";
+      update = "cd ~/nixos-config && nix flake update";
 
       update-git = ''
-        cd ~/nixos-config && \
-        nix flake update && \
+        update && \
         if ! git diff --quiet flake.lock; then
           git add flake.lock && \
           git commit flake.lock -m "chore: update flake.lock"
@@ -34,7 +33,7 @@
     };
     history = {
       size = 10000;
-      path = "$HOME/.zsh_history"; # Explicitly set history file path
+      path = "$HOME/.zsh_history";
     };
 
     plugins = [
