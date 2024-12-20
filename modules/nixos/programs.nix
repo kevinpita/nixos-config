@@ -8,6 +8,7 @@
 
     htop
     fastfetch
+    lm_sensors
 
     bat
     fzf
