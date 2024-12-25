@@ -15,5 +15,6 @@ _: {
     font = "Lat2-Terminus16";
     useXkbConfig = true;
   };
+  hardware.enableAllFirmware = true;
   system.stateVersion = "24.05";
 }

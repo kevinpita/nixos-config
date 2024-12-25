@@ -10,5 +10,6 @@
 
     ./syncthing.nix
     ./tlp.nix
+    ./fwupdmgr.nix
   ];
 }
