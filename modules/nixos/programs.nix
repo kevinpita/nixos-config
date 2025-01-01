@@ -2,13 +2,17 @@
 {
 
   environment.systemPackages = with pkgs; [
-    vim
-    neovim
+    screen
     lazygit
+    neovim
+    vim
 
-    htop
+    dmidecode
     fastfetch
+    htop
+    i2c-tools
     lm_sensors
+    pciutils
 
     bat
     fzf
@@ -16,9 +20,10 @@
     tree
 
     curl
-    wget
     mqttui
+    wget
 
     go
+    python3Full
   ];
 }
