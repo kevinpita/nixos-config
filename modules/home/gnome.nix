@@ -1,6 +1,9 @@
 { pkgs, ... }:
 {
-  home.packages = with pkgs; [ gnomeExtensions.caffeine ];
+  home.packages = with pkgs; [
+    gnomeExtensions.caffeine
+    wl-clipboard
+  ];
 
   dconf = {
     enable = true;
