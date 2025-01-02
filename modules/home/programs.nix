@@ -2,8 +2,9 @@
 
 {
   home.packages = with pkgs; [
-    telegram-desktop
+    bruno
     keepassxc
     qbittorrent
+    telegram-desktop
   ];
 }
