@@ -2,6 +2,7 @@
 {
   home.packages = with pkgs; [
     gnomeExtensions.caffeine
+    gnome-pomodoro
     wl-clipboard
   ];
 
