@@ -16,6 +16,8 @@
       ls = "ls -a";
       ll = "ls -l";
 
+      open = "xdg-open";
+
       cat = "bat";
       vi = "vim";
       neofetch = "fastfetch";
