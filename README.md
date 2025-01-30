@@ -38,22 +38,17 @@ cd nixos-config
 nix --extra-experimental-features "nix-command flakes" run 'github:nix-community/disko/latest#disko-install' -- --write-efi-boot-entries --flake .#HOSTNAME --disk main /dev/ROOT_DISK
 ```
 
-### 5. User setup
+### 5. Mount partitions and enter NixOS install
 ```bash
-passwd root
-passwd kevin
-```
-
-### 6. Post-Installation setup (if needed)
-```bash
-cryptsetup luksOpen /dev/ROOT_DISK cryptroot
-
-mount -o subvol=root /dev/mapper/cryptroot /mnt
-mount -o subvol=home /dev/mapper/cryptroot /mnt/home
-mount -o subvol=nix /dev/mapper/cryptroot /mnt/nix
+mount -o subvol=root /dev/mapper/crypted /mnt
+mount -o subvol=home /dev/mapper/crypted /mnt/home
+mount -o subvol=nix /dev/mapper/crypted /mnt/nix
 
 nixos-enter
+```
 
+### 6. User setup
+```bash
 passwd root
 passwd kevin
 ```
