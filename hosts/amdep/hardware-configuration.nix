@@ -21,13 +21,11 @@
         "usbhid"
         "xhci_pci"
       ];
-      kernelModules = [ "dm-snapshot" ];
     };
-    extraModprobeConfig = "options kvm_intel nested=1";
+
     extraModulePackages = [ ];
 
-    kernelModules = [ "kvm-intel" ];
-    kernelParams = [ "intel_iommu=on" ];
+    kernelModules = [ "kvm-amd" ];
   };
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
@@ -39,5 +37,5 @@
   # networking.interfaces.wlp3s0.useDHCP = lib.mkDefault true;
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
-  hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+  hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 }

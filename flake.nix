@@ -61,6 +61,18 @@
             inherit inputs username;
           };
         };
+
+        amdep = nixpkgs.lib.nixosSystem {
+          inherit system pkgs;
+          modules = [
+            ./hosts/amdep
+          ] ++ commonModules;
+          specialArgs = {
+            hostname = "amdep";
+            gui = true;
+            inherit inputs username;
+          };
+        };
       };
 
       formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt-rfc-style;
