@@ -1,7 +1,8 @@
 { pkgs, ... }:
 {
   home.packages = with pkgs; [
-    jetbrains.goland
+    jetbrains.clion
     jetbrains.datagrip
+    jetbrains.goland
   ];
 }
