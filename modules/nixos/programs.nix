@@ -23,6 +23,7 @@
     mqttui
     wget
 
+    elixir_1_18
     go
     python3Full
   ];
