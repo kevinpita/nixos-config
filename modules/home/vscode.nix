@@ -9,6 +9,7 @@
         brettm12345.nixfmt-vscode
         github.vscode-github-actions
         golang.go
+        jakebecker.elixir-ls
         jdinhlife.gruvbox
         jnoortheen.nix-ide
         vscodevim.vim
