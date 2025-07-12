@@ -2,9 +2,10 @@
 {
 
   environment.systemPackages = with pkgs; [
-    screen
+    gemini-cli
     lazygit
     neovim
+    screen
     vim
 
     dmidecode
@@ -23,7 +24,6 @@
     mqttui
     wget
 
-    elixir_1_18
     go
     python3Full
   ];
