@@ -3,7 +3,6 @@
 
   environment.systemPackages = with pkgs; [
     gemini-cli
-    lazygit
     neovim
     screen
     vim

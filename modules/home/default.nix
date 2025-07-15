@@ -4,6 +4,7 @@
     [
       ./develop.nix
       ./git.nix
+      ./lazygit.nix
       ./nix.nix
       ./zsh
     ]
