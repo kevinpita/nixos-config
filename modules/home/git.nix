@@ -11,6 +11,7 @@ _:
       tag.gpgsign = true;
       gpg.format = "ssh";
       user.signingkey = "~/.ssh/sign.pub";
+      pull.rebase = true;
     };
   };
 }
