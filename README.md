@@ -17,7 +17,11 @@ iso=/path/to/image
 ### 2. Create installation media and prepare USB drive
 ```bash
 sudo dd bs=4M conv=fsync oflag=direct status=progress if=$iso of=$disk && \
-sudo sh -c 'echo -e "n\pp\n\n\n\nt\n\n82\nw" | fdisk $1 && mkswap $1$(fdisk -l $1 | tail -1 | cut -d" " -f1 | grep -o "[0-9]*$")' -- "$disk"
+sudo sh -c '
+  echo -e "n\np\n\n\n\nt\n\n82\nw" | fdisk "$1" && \
+  blockdev --rereadpt "$1" && \
+  mkswap $(fdisk -l "$1" | grep "^/dev" | tail -1 | awk "{print \$1}")
+' -- "$disk"lsbl
 ```
 
 ### 3. Initial setup
