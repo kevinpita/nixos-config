@@ -21,7 +21,7 @@ sudo sh -c '
   echo -e "n\np\n\n\n\nt\n\n82\nw" | fdisk "$1" && \
   blockdev --rereadpt "$1" && \
   mkswap $(fdisk -l "$1" | grep "^/dev" | tail -1 | awk "{print \$1}")
-' -- "$disk"lsbl
+' -- "$disk"
 ```
 
 ### 3. Initial setup
