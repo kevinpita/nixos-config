@@ -1,70 +1,69 @@
-# WIP
+# NixOS Configuration
 
-# NixOS Fresh Installation Guide
+This repository contains my personal NixOS configuration files.
 
-## Prerequisites
-- [NixOS Minimal ISO](https://nixos.org/download/)
-- 64GB USB drive for installation
+## Installation using nixos-anywhere
 
-## Installation Steps
+This configuration is deployed using `nixos-anywhere`, which remotely installs a NixOS system from this flake.
 
-### 1. Set variables
-```bash
-disk=/dev/sdX
-iso=/path/to/image
-```
+### 1. Prepare the Target Machine
 
-### 2. Create installation media and prepare USB drive
-```bash
-sudo dd bs=4M conv=fsync oflag=direct status=progress if=$iso of=$disk && \
-sudo sh -c '
-  echo -e "n\np\n\n\n\nt\n\n82\nw" | fdisk "$1" && \
-  blockdev --rereadpt "$1" && \
-  mkswap $(fdisk -l "$1" | grep "^/dev" | tail -1 | awk "{print \$1}")
-' -- "$disk"
-```
+The installation requires the target machine to be running a basic NixOS environment with an active SSH server. You have two primary ways to achieve this.
 
-### 3. Initial setup
-```bash
-# Boot from USB
-sudo su -
-loadkeys es
-swapon /dev/sdX3
-mount -o remount,size=30G,noatime /nix/.rw-store
-```
+#### Option A: From a Live Environment
 
-### 4. System configuration
-```bash
-nix-shell -p git
-git clone https://github.com/kevinpita/nixos-config
-cd nixos-config
+If the target machine has no OS or you're starting fresh, boot it using the NixOS minimal live ISO. This is the most common method.
 
-nix --extra-experimental-features "nix-command flakes" run 'github:nix-community/disko/latest#disko-install' -- --write-efi-boot-entries --flake .#HOSTNAME --disk main /dev/ROOT_DISK
-```
+1.  **Download:** Get the latest [NixOS Minimal ISO](https://nixos.org/download/).
+2.  **Create a Bootable USB:**
+    ```bash
+    # Replace /dev/sdX with your USB device
+    sudo dd bs=4M conv=fsync oflag=direct status=progress if=/path/to/nixos.iso of=/dev/sdX
+    ```
+3.  **Boot and Prepare:** Boot the target machine from the USB. Once in the live environment, set a password for the `root` user to enable SSH access:
+    ```bash
+    passwd
+    ```
+    Then, find the machine's IP address:
+    ```bash
+    ip a
+    ```
 
-### 5. Mount partitions and enter NixOS install
-```bash
-mount -o subvol=root /dev/mapper/crypted /mnt
-mount -o subvol=home /dev/mapper/crypted /mnt/home
-mount -o subvol=nix /dev/mapper/crypted /mnt/nix
+#### Option B: From an Existing System
 
-nixos-enter
-```
+If the target machine already has an operating system with an SSH server, simply ensure you have root access and its IP address.
 
-### 6. User setup
-```bash
-passwd root
-passwd kevin
-```
+### 2. Deploy the Configuration
 
-### 7. Final configuration
-1. Accept Syncthing request on fium and configure KeePass folder
-2. Open KeePass
-3. Configure SSH agent
-4. Save signing key to sign.pub
+From another computer that has Nix installed, run the `nixos-anywhere` command:
 
 ```bash
-git clone git@github.com:kevinpita/nixos-config.git ~/nixos-config
-cd ~/nixos-config
-switch
+nix run github:nix-community/nixos-anywhere -- --flake ~/nixos-config#<hostname> root@<ip_address>
 ```
+
+-   Replace `<hostname>` with the desired host from this repository
+-   Replace `<ip_address>` with the target machine's IP address.
+
+After the script completes, the new system is installed. You can reboot the target machine and log in. The default username is `kevin`, with the password being the same.
+
+## Post-Installation Checklist
+
+After logging into the new system, complete the following steps:
+
+1.  **Change Passwords:** **IMPORTANT!** Immediately change the default passwords for security.
+    ```bash
+    # Change your user password
+    passwd
+
+    # Change the root password
+    sudo passwd root
+    ```
+2.  **Syncthing:** The Syncthing service runs automatically. Access its web UI at `http://localhost:8384` to accept device requests from your other machines and configure the KeePass folder.
+3.  **KeePass:** Open the application and set up your password database.
+4.  **SSH Agent:** Configure your SSH agent with your private keys.
+5.  **Clone Repository:** For future management, clone this repository locally:
+    ```bash
+    git clone git@github.com:kevinpita/nixos-config.git ~/nixos-config
+    cd ~/nixos-config
+    ```
+6.  **Apply Changes:** Run `switch` (a custom alias) to apply any final updates.
