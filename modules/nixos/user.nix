@@ -29,6 +29,7 @@
   };
 
   users.users.${username} = {
+    initialPassword = "${username}";
     useDefaultShell = true;
     isNormalUser = true;
     extraGroups = [ "wheel" ];
