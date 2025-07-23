@@ -9,14 +9,14 @@
     overrideFolders = true;
     settings = {
       devices = {
-        "Pixel 5" = {
-          id = "QEW4Z4J-EJE5RDC-UNKAH7Q-NBHVW4L-TAGE4R6-AHQKYWJ-R64A2RR-2ODRBAM";
+        "Pixel 9 Pro" = {
+          id = "I5B22T5-HRH2QH2-KX2VJAN-EYCKD26-GS5HVRM-S2VCCES-ALQ22VV-B7JN4QC";
         };
       };
       folders = {
         "afnt2-e5u36" = {
           path = "/home/${username}/keepass";
-          devices = [ "Pixel 5" ];
+          devices = [ "Pixel 9 Pro" ];
         };
       };
     };
