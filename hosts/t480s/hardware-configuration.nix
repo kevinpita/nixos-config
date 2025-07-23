@@ -16,6 +16,7 @@
       availableKernelModules = [
         "nvme"
         "sd_mod"
+        "uas"
         "usb_storage"
         "xhci_pci"
       ];

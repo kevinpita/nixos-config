@@ -52,6 +52,18 @@
           };
         };
 
+        t480s = nixpkgs.lib.nixosSystem {
+          inherit system pkgs;
+          modules = [
+            ./hosts/t480s
+          ] ++ commonModules;
+          specialArgs = {
+            hostname = "t480s";
+            gui = true;
+            inherit inputs username;
+          };
+        };
+
         m710q = nixpkgs.lib.nixosSystem {
           inherit system pkgs;
           modules = [
