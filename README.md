@@ -14,20 +14,20 @@ The installation requires the target machine to be running a basic NixOS environ
 
 If the target machine has no OS or you're starting fresh, boot it using the NixOS minimal live ISO. This is the most common method.
 
-1.  **Download:** Get the latest [NixOS Minimal ISO](https://nixos.org/download/).
-2.  **Create a Bootable USB:**
-    ```bash
-    # Replace /dev/sdX with your USB device
-    sudo dd bs=4M conv=fsync oflag=direct status=progress if=/path/to/nixos.iso of=/dev/sdX
-    ```
-3.  **Boot and Prepare:** Boot the target machine from the USB. Once in the live environment, set a password for the `root` user to enable SSH access:
-    ```bash
-    passwd
-    ```
-    Then, find the machine's IP address:
-    ```bash
-    ip a
-    ```
+1. **Download:** Get the latest [NixOS Minimal ISO](https://nixos.org/download/).
+1. **Create a Bootable USB:**
+   ```bash
+   # Replace /dev/sdX with your USB device
+   sudo dd bs=4M conv=fsync oflag=direct status=progress if=/path/to/nixos.iso of=/dev/sdX
+   ```
+1. **Boot and Prepare:** Boot the target machine from the USB. Once in the live environment, set a password for the `root` user to enable SSH access:
+   ```bash
+   passwd
+   ```
+   Then, find the machine's IP address:
+   ```bash
+   ip a
+   ```
 
 #### Option B: From an Existing System
 
@@ -41,8 +41,8 @@ From another computer that has Nix installed, run the `nixos-anywhere` command:
 nix run github:nix-community/nixos-anywhere -- --flake ~/nixos-config#<hostname> root@<ip_address>
 ```
 
--   Replace `<hostname>` with the desired host from this repository
--   Replace `<ip_address>` with the target machine's IP address.
+- Replace `<hostname>` with the desired host from this repository
+- Replace `<ip_address>` with the target machine's IP address.
 
 After the script completes, the new system is installed. You can reboot the target machine and log in. The default username is `kevin`, with the password being the same.
 
@@ -50,20 +50,20 @@ After the script completes, the new system is installed. You can reboot the targ
 
 After logging into the new system, complete the following steps:
 
-1.  **Change Passwords:** **IMPORTANT!** Immediately change the default passwords for security.
-    ```bash
-    # Change your user password
-    passwd
+1. **Change Passwords:** **IMPORTANT!** Immediately change the default passwords for security.
+   ```bash
+   # Change your user password
+   passwd
 
-    # Change the root password
-    sudo passwd root
-    ```
-2.  **Syncthing:** The Syncthing service runs automatically. Access its web UI at `http://localhost:8384` to accept device requests from your other machines and configure the KeePass folder.
-3.  **KeePass:** Open the application and set up your password database.
-4.  **SSH Agent:** Configure your SSH agent with your private keys.
-5.  **Clone Repository:** For future management, clone this repository locally:
-    ```bash
-    git clone git@github.com:kevinpita/nixos-config.git ~/nixos-config
-    cd ~/nixos-config
-    ```
-6.  **Apply Changes:** Run `switch` (a custom alias) to apply any final updates.
+   # Change the root password
+   sudo passwd root
+   ```
+1. **Syncthing:** The Syncthing service runs automatically. Access its web UI at `http://localhost:8384` to accept device requests from your other machines and configure the KeePass folder.
+1. **KeePass:** Open the application and set up your password database.
+1. **SSH Agent:** Configure your SSH agent with your private keys.
+1. **Clone Repository:** For future management, clone this repository locally:
+   ```bash
+   git clone git@github.com:kevinpita/nixos-config.git ~/nixos-config
+   cd ~/nixos-config
+   ```
+1. **Apply Changes:** Run `switch` (a custom alias) to apply any final updates.
