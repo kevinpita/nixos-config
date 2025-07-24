@@ -17,10 +17,17 @@
     nixos-hardware.url = "github:NixOS/nixos-hardware";
 
     nixos-grub-themes.url = "github:jeslie0/nixos-grub-themes";
+
+    treefmt-nix.url = "github:numtide/treefmt-nix";
   };
 
   outputs =
-    { nixpkgs, ... }@inputs:
+    {
+      self,
+      nixpkgs,
+      treefmt-nix,
+      ...
+    }@inputs:
     let
       username = "kevin";
       system = "x86_64-linux";
@@ -36,6 +43,8 @@
         inherit system overlays;
         config.allowUnfree = true;
       };
+
+      treefmtEval = treefmt-nix.lib.evalModule pkgs ./treefmt.nix;
 
     in
     {
@@ -89,6 +98,10 @@
         };
       };
 
-      formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt-rfc-style;
+      formatter.${system} = treefmtEval.config.build.wrapper;
+
+      checks.${system} = {
+        formatting = treefmtEval.config.build.check self;
+      };
     };
 }
