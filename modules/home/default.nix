@@ -9,6 +9,7 @@
       ./zsh
     ]
     ++ (lib.optionals gui [
+      ./3dprinter.nix
       ./alacritty.nix
       ./browser.nix
       ./font.nix
