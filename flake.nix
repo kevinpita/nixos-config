@@ -53,7 +53,8 @@
           inherit system pkgs;
           modules = [
             ./hosts/t480
-          ] ++ commonModules;
+          ]
+          ++ commonModules;
           specialArgs = {
             hostname = "t480";
             gui = true;
@@ -65,7 +66,8 @@
           inherit system pkgs;
           modules = [
             ./hosts/t480s
-          ] ++ commonModules;
+          ]
+          ++ commonModules;
           specialArgs = {
             hostname = "t480s";
             gui = true;
@@ -77,7 +79,8 @@
           inherit system pkgs;
           modules = [
             ./hosts/m710q
-          ] ++ commonModules;
+          ]
+          ++ commonModules;
           specialArgs = {
             hostname = "m710q";
             gui = true;
@@ -89,7 +92,8 @@
           inherit system pkgs;
           modules = [
             ./hosts/amdep
-          ] ++ commonModules;
+          ]
+          ++ commonModules;
           specialArgs = {
             hostname = "amdep";
             gui = true;
