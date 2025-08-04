@@ -1,8 +1,9 @@
 { pkgs, ... }:
 {
   home.packages = with pkgs; [
-    gnomeExtensions.caffeine
     gnome-pomodoro
+    gnomeExtensions.caffeine
+    gnomeExtensions.tailscale-status
     wl-clipboard
   ];
 
@@ -11,7 +12,10 @@
     settings = {
       "org/gnome/shell" = {
         disable-user-extensions = false;
-        enabled-extensions = [ "caffeine@patapon.info" ];
+        enabled-extensions = [
+          "caffeine@patapon.info"
+          "tailscale-status@maxgallup.github.com"
+        ];
       };
       "org/gnome/shell/extensions/caffeine" = {
         show-indicator = true;
