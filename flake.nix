@@ -100,6 +100,19 @@
             inherit inputs username;
           };
         };
+
+        microg8 = nixpkgs.lib.nixosSystem {
+          inherit system pkgs;
+          modules = [
+            ./hosts/microg8
+          ]
+          ++ commonModules;
+          specialArgs = {
+            hostname = "microg8";
+            gui = false;
+            inherit inputs username;
+          };
+        };
       };
 
       formatter.${system} = treefmtEval.config.build.wrapper;

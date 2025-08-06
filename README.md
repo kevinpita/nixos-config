@@ -46,6 +46,22 @@ nix run github:nix-community/nixos-anywhere -- --flake ~/nixos-config#<hostname>
 
 After the script completes, the new system is installed. You can reboot the target machine and log in. The default username is `kevin`, with the password being the same.
 
+## Generating a Hardware Configuration
+
+To generate a hardware configuration for a host during installation, you can use the `--generate-hardware-config` flag with `nixos-anywhere`. This is useful when the existing `hardware-configuration.nix` is invalid or missing.
+
+**Important:** This command will initiate a full NixOS installation on the target machine, not just generate the configuration file.
+
+```bash
+nix run github:nix-community/nixos-anywhere -- --flake ~/nixos-config#<hostname> --generate-hardware-config nixos-generate-config ./hosts/<hostname>/hardware-configuration.nix <user>@<ip_address>
+```
+
+- Replace `<hostname>` with the name of the host (e.g., `microg8`).
+- Replace `<ip_address>` with the target machine's IP address.
+- Replace `<user>` with the target machine's ssh user.
+
+This command connects to the target machine, generates the `hardware-configuration.nix` file, places it in the correct host directory within your configuration, and then proceeds with the full NixOS installation.
+
 ## Post-Installation Checklist
 
 After logging into the new system, complete the following steps:
