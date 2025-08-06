@@ -70,27 +70,25 @@
             data_b_part = {
               size = "100%";
               label = "data_b";
+              content = {
+                type = "btrfs";
+                extraArgs = [
+                  "-f"
+                  "-d"
+                  "raid1"
+                  "-m"
+                  "raid1"
+                  "/dev/disk/by-partlabel/data_a"
+                ];
+                mountpoint = "/data";
+                mountOptions = [
+                  "compress=zstd"
+                  "noatime"
+                ];
+              };
             };
           };
         };
-      };
-    };
-    fs = {
-      data = {
-        type = "btrfs";
-        devices = [
-          "/dev/disk/by-partlabel/data_a"
-          "/dev/disk/by-partlabel/data_b"
-        ];
-        extraArgs = [
-          "-f"
-          "-d raid1"
-        ];
-        mountpoint = "/data";
-        mountOptions = [
-          "compress=zstd"
-          "noatime"
-        ];
       };
     };
   };
