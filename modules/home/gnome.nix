@@ -3,6 +3,7 @@
   home.packages = with pkgs; [
     gnome-pomodoro
     gnomeExtensions.caffeine
+    gnomeExtensions.clipboard-history
     gnomeExtensions.tailscale-status
     wl-clipboard
   ];
@@ -14,6 +15,7 @@
         disable-user-extensions = false;
         enabled-extensions = [
           "caffeine@patapon.info"
+          "clipboard-history@alexsaveau.dev"
           "tailscale-status@maxgallup.github.com"
         ];
       };
