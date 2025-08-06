@@ -1,7 +1,6 @@
 { lib, gui, ... }:
 {
   imports = [
-    ./bootloader.nix
     ./docker.nix
     ./networking.nix
     ./nh.nix
