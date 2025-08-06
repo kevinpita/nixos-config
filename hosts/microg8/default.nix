@@ -11,5 +11,4 @@
     ./syncthing.nix
   ];
 
-  boot.loader.grub.device = "/dev/sdc";
 }
