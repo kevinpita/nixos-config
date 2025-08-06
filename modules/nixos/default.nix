@@ -15,5 +15,8 @@
     ./audio.nix
     ./gnome.nix
     ./xserver.nix
+  ])
+  ++ (lib.optionals (!gui) [
+    ./ssh.nix
   ]);
 }

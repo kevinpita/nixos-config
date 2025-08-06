@@ -7,7 +7,6 @@
 
     ../../modules/nixos
     ../../modules/nixos/bootloader-bios.nix
-    ../../modules/nixos/ssh.nix
 
     ./syncthing.nix
   ];
