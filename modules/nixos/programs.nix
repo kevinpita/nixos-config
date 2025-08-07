@@ -4,7 +4,6 @@
   environment.systemPackages = with pkgs; [
     gemini-cli
     neovim
-    screen
     vim
 
     dmidecode
@@ -13,6 +12,7 @@
     i2c-tools
     lm_sensors
     pciutils
+    screen
 
     bat
     fzf
@@ -25,5 +25,8 @@
 
     go
     python3Full
+
+    lazydocker
+    lazysql
   ];
 }
