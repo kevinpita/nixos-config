@@ -1,10 +1,10 @@
-{ gui, ... }:
+{ gui, username, ... }:
 {
   programs.ssh = {
     startAgent = true;
     extraConfig = ''
       Host github.com
-        IdentityFile ~/.ssh/id_ed25519
+        IdentityFile /home/${username}/.ssh/id_ed25519
     '';
   };
   services.openssh = {
