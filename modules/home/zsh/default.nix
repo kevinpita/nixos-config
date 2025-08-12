@@ -13,9 +13,6 @@
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
     shellAliases = {
-      ls = "ls -a";
-      ll = "ls -l";
-
       open = "xdg-open";
 
       cat = "bat";

@@ -4,6 +4,7 @@
     ./develop.nix
     ./git.nix
     ./lazygit.nix
+    ./lsd.nix
     ./zsh
   ]
   ++ (lib.optionals gui [
