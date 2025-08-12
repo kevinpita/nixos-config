@@ -2,9 +2,10 @@
 {
   imports = [
     ./disko-config.nix
-    ./hardware-configuration.nix
     ./drives.nix
+    ./hardware-configuration.nix
     ./networking.nix
+    ./update.nix
 
     ../../modules/nixos
     ../../modules/nixos/bootloader-bios.nix

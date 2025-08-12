@@ -19,11 +19,21 @@
     nixos-grub-themes.url = "github:jeslie0/nixos-grub-themes";
 
     treefmt-nix.url = "github:numtide/treefmt-nix";
+
+    comin = {
+      url = "github:nlewo/comin";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
   };
 
   outputs =
     {
       self,
+      comin,
+      disko,
+      home-manager,
+      nix-vscode-extensions,
       nixpkgs,
       treefmt-nix,
       ...
@@ -33,11 +43,11 @@
       system = "x86_64-linux";
 
       commonModules = [
-        inputs.disko.nixosModules.disko
-        inputs.home-manager.nixosModules.home-manager
+        disko.nixosModules.disko
+        home-manager.nixosModules.home-manager
       ];
 
-      overlays = [ inputs.nix-vscode-extensions.overlays.default ];
+      overlays = [ nix-vscode-extensions.overlays.default ];
 
       pkgs = import nixpkgs {
         inherit system overlays;
@@ -105,6 +115,7 @@
           inherit system pkgs;
           modules = [
             ./hosts/microg8
+            comin.nixosModules.comin
           ]
           ++ commonModules;
           specialArgs = {
