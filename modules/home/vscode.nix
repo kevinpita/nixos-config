@@ -1,12 +1,20 @@
-{ pkgs, ... }:
+{
+  hostname,
+  pkgs,
+  ...
+}:
 
 {
+  home.packages = [
+    pkgs.nixd
+    pkgs.nixfmt-rfc-style
+  ];
+
   programs.vscode = {
     enable = true;
     package = pkgs.vscodium;
     profiles.default = {
       extensions = with pkgs.vscode-marketplace; [
-        brettm12345.nixfmt-vscode
         github.vscode-github-actions
         golang.go
         jakebecker.elixir-ls
@@ -16,14 +24,32 @@
       ];
 
       userSettings = {
+        "telemetry.telemetryLevel" = "off";
+
         "editor.fontSize" = 18;
         "editor.fontFamily" = "'Jetbrains Mono', 'monospace', monospace";
-        "telemetry.telemetryLevel" = "off";
-        "files.autoSave" = "afterDelay";
         "workbench.colorTheme" = "Gruvbox Dark Hard";
+
+        "files.autoSave" = "afterDelay";
         "editor.formatOnSave" = true;
         "[nix]" = {
-          "editor.defaultFormatter" = "brettm12345.nixfmt-vscode";
+          "editor.defaultFormatter" = "jnoortheen.nix-ide";
+        };
+
+        "nix.enableLanguageServer" = true;
+        "nix.serverPath" = "nixd";
+        "nix.serverSettings" = {
+          "nixd" = {
+            "formatting" = {
+              "command" = [ "nixfmt" ];
+            };
+            "options" = {
+              "home-manager" = {
+                "expr" =
+                  "(builtins.getFlake (builtins.toString ./.)).nixosConfigurations.${hostname}.options.home-manager.users.type.getSubOptions []";
+              };
+            };
+          };
         };
       };
     };
