@@ -51,6 +51,16 @@
             };
           };
         };
+
+        "vim.normalModeKeyBindingsNonRecursive" = [
+          {
+            before = [
+              ":"
+              "w"
+            ];
+            commands = [ "workbench.action.files.save" ];
+          }
+        ];
       };
     };
   };
