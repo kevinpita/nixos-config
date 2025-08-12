@@ -17,6 +17,7 @@
     bat
     fzf
     ripgrep
+    tree
 
     curl
     mqttui
