@@ -25,11 +25,20 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    agenix = {
+      url = "github:ryantm/agenix";
+      inputs = {
+        darwin.follows = "";
+        nixpkgs.follows = "nixpkgs";
+      };
+    };
+
   };
 
   outputs =
     {
       self,
+      agenix,
       comin,
       disko,
       home-manager,
@@ -43,6 +52,7 @@
       system = "x86_64-linux";
 
       commonModules = [
+        agenix.nixosModules.default
         disko.nixosModules.disko
         home-manager.nixosModules.home-manager
       ];
