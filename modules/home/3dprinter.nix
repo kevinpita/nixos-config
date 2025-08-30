@@ -2,7 +2,7 @@
 
 {
   home.packages = with pkgs; [
-    # orca-slicer # excluded as fails to build
+    orca-slicer
     prusa-slicer
   ];
 }
