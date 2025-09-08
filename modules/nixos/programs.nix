@@ -30,8 +30,5 @@
 
       lazydocker
       lazysql
-    ]
-    ++ [
-      inputs.agenix.packages."${system}".default
     ];
 }
