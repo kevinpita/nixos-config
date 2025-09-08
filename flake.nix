@@ -25,12 +25,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    agenix = {
-      url = "github:ryantm/agenix";
-      inputs = {
-        darwin.follows = "";
-        nixpkgs.follows = "nixpkgs";
-      };
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
   };
@@ -38,12 +35,12 @@
   outputs =
     {
       self,
-      agenix,
       comin,
       disko,
       home-manager,
       nix-vscode-extensions,
       nixpkgs,
+      sops-nix,
       treefmt-nix,
       ...
     }@inputs:
@@ -52,9 +49,10 @@
       system = "x86_64-linux";
 
       commonModules = [
-        agenix.nixosModules.default
         disko.nixosModules.disko
         home-manager.nixosModules.home-manager
+        sops-nix.nixosModules.sops
+
       ];
 
       overlays = [ nix-vscode-extensions.overlays.default ];
