@@ -1,34 +1,31 @@
-{ inputs, pkgs, ... }:
+{ pkgs, ... }:
 {
 
-  environment.systemPackages =
-    with pkgs;
-    [
-      gemini-cli
-      neovim
-      vim
+  environment.systemPackages = with pkgs; [
+    gemini-cli
+    neovim
+    vim
 
-      dmidecode
-      fastfetch
-      htop
-      i2c-tools
-      lm_sensors
-      pciutils
-      screen
+    dmidecode
+    fastfetch
+    htop
+    i2c-tools
+    lm_sensors
+    pciutils
+    screen
 
-      bat
-      fzf
-      ripgrep
-      tree
+    bat
+    fzf
+    ripgrep
+    tree
 
-      curl
-      mqttui
-      wget
+    curl
+    mqttui
+    wget
 
-      go
-      python3Full
+    go
 
-      lazydocker
-      lazysql
-    ];
+    lazydocker
+    lazysql
+  ];
 }
