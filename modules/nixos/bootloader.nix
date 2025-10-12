@@ -58,7 +58,7 @@ with lib;
         };
       })
       {
-        kernelPackages = config.kernelPackages;
+        inherit (config) kernelPackages;
       }
     ];
 
