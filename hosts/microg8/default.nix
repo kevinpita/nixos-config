@@ -8,9 +8,11 @@
     ./update.nix
 
     ../../modules/nixos
-    ../../modules/nixos/bootloader-bios.nix
 
     ./syncthing.nix
   ];
 
+  config = {
+    bootloader.mode = "bios";
+  };
 }
