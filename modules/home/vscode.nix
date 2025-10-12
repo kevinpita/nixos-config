@@ -20,6 +20,7 @@
         jakebecker.elixir-ls
         jdinhlife.gruvbox
         jnoortheen.nix-ide
+        kilocode.kilo-code
         vscodevim.vim
       ];
 
