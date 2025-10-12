@@ -15,10 +15,10 @@
     package = pkgs.vscodium;
     profiles.default = {
       extensions = with pkgs.vscode-marketplace; [
+        eliverlara.andromeda
         github.vscode-github-actions
         golang.go
         jakebecker.elixir-ls
-        jdinhlife.gruvbox
         jnoortheen.nix-ide
         kilocode.kilo-code
         vscodevim.vim
@@ -29,7 +29,7 @@
 
         "editor.fontSize" = 18;
         "editor.fontFamily" = "'Jetbrains Mono', 'monospace', monospace";
-        "workbench.colorTheme" = "Gruvbox Dark Hard";
+        "workbench.colorTheme" = "Andromeda";
 
         "files.autoSave" = "afterDelay";
         "editor.formatOnSave" = true;
