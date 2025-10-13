@@ -1,4 +1,5 @@
-_: {
+{ lib, config, ... }:
+lib.mkIf config.gui.enable {
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;

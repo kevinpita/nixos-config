@@ -76,7 +76,6 @@
           ++ commonModules;
           specialArgs = {
             hostname = "t480";
-            gui = true;
             inherit inputs username;
           };
         };
@@ -89,7 +88,6 @@
           ++ commonModules;
           specialArgs = {
             hostname = "t480s";
-            gui = true;
             inherit inputs username;
           };
         };
@@ -102,7 +100,6 @@
           ++ commonModules;
           specialArgs = {
             hostname = "m710q";
-            gui = true;
             inherit inputs username;
           };
         };
@@ -115,7 +112,6 @@
           ++ commonModules;
           specialArgs = {
             hostname = "amdep";
-            gui = true;
             inherit inputs username;
           };
         };
@@ -129,7 +125,6 @@
           ++ commonModules;
           specialArgs = {
             hostname = "microg8";
-            gui = false;
             inherit inputs username;
           };
         };

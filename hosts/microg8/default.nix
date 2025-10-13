@@ -12,7 +12,6 @@
     ./syncthing.nix
   ];
 
-  config = {
-    bootloader.mode = "bios";
-  };
+  bootloader.mode = "bios";
+  gui.enable = false;
 }

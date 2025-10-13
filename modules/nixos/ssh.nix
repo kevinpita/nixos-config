@@ -1,5 +1,10 @@
-{ gui, username, ... }:
 {
+  lib,
+  config,
+  username,
+  ...
+}:
+lib.mkIf (!config.gui.enable) {
   programs.ssh = {
     startAgent = true;
     extraConfig = ''
@@ -10,9 +15,9 @@
   services.openssh = {
     enable = true;
     settings = {
-      # Even though `!gui` is redundant, as this file is only included for non-GUI systems,
+      # Even though `!config.gui.enable` is redundant, as this file is only included for non-GUI systems,
       # it's here for security reasons, ensuring password authentication is always disabled for gui systems.
-      PasswordAuthentication = !gui;
+      PasswordAuthentication = !config.gui.enable;
       PermitRootLogin = "no";
     };
   };

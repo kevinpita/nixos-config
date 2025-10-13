@@ -1,5 +1,10 @@
-{ username, ... }:
 {
+  lib,
+  config,
+  username,
+  ...
+}:
+lib.mkIf config.gui.enable {
   services = {
     xserver = {
       enable = true;

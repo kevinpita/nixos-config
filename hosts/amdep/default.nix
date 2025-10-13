@@ -9,7 +9,5 @@
     ./syncthing.nix
   ];
 
-  config = {
-    uefiOSProber = true;
-  };
+  uefiOsProber.enable = true;
 }
