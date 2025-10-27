@@ -9,5 +9,5 @@
     ./syncthing.nix
   ];
 
-  uefiOsProber.enable = true;
+  uefiOSProber.enable = true;
 }
