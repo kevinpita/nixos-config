@@ -26,7 +26,7 @@
     netcat-openbsd
     libguestfs
     spice-gtk
-    win-virtio
+    virtio-win
     swtpm
 
   ];
