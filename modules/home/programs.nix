@@ -7,5 +7,6 @@
     legcord
     qbittorrent
     telegram-desktop
+    arduino-ide
   ];
 }
