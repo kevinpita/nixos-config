@@ -3,9 +3,11 @@ _:
 {
   programs.git = {
     enable = true;
-    userName = "Kevin Pita";
-    userEmail = "gitkevin@pm.me";
-    extraConfig = {
+    settings = {
+      user = {
+        name = "Kevin Pita";
+        email = "gitkevin@pm.me";
+      };
       init.defaultBranch = "main";
       commit.gpgsign = true;
       tag.gpgsign = true;
