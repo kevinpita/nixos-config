@@ -29,8 +29,8 @@ This is a flakes-based NixOS configuration managing multiple hosts with a modula
 
 - **flake.nix** - Entry point defining all hosts and inputs
 - **hosts/** - Machine-specific configurations (each contains `default.nix`, `hardware-configuration.nix`, `disko-config.nix`)
-- **modules/nixos/** - System-level modules (bootloader, networking, docker, gnome, etc.)
-- **modules/home/** - User-level modules (git, zsh, vscode, development tools, etc.)
+- **modules/core/** - System-level modules always applied (boot, networking, nix-settings, users, shell, programs)
+- **modules/features/** - Opt-in feature modules enabled per-host via `features.<name>.enable`
 
 ### Hosts
 
@@ -43,11 +43,11 @@ This is a flakes-based NixOS configuration managing multiple hosts with a modula
 
 ### Key Configuration Patterns
 
-**Conditional GUI loading**: The `gui.enable` option (set per-host) controls whether desktop modules load. SSH server only enables on non-GUI systems.
+**Feature flags**: Hosts enable functionality via `features.<name>.enable = true`. Available features: desktop, development, virtualization, browsers, multimedia, communication, syncthing, ssh-server, printing-3d, laptop, auto-update.
 
 **Special args flow**: `hostname`, `username` ("kevin"), and `inputs` are passed through `specialArgs` to all modules.
 
-**Module imports**: Host `default.nix` imports hardware config → disko → nixos modules → home-manager → host-specific overrides.
+**Host structure**: Each host's `default.nix` imports hardware config, disko config, and optional host-specific overrides, then enables desired features.
 
 **Custom options**: Modules define options like `bootloader.mode` (bios/uefi) using `lib.mkOption`, then use `lib.mkIf` for conditional logic.
 
@@ -58,6 +58,7 @@ This is a flakes-based NixOS configuration managing multiple hosts with a modula
 - **disko** - Declarative disk partitioning
 - **nixos-hardware** - Hardware-specific configurations
 - **sops-nix** - Secrets management
+- **comin** - Automatic configuration deployment
 
 ## Code Style
 
