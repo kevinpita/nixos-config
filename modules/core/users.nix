@@ -25,10 +25,7 @@
         username
         hostname
         ;
-      # Pass the features config to home-manager
       inherit (config) features;
-      # Pass gui for backward compatibility during migration
-      gui = config.gui.enable;
     };
     users.${username} = {
       home = {
