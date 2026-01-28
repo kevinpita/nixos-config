@@ -52,7 +52,7 @@ with lib;
             devices = [ "nodev" ];
             efiSupport = true;
             enable = true;
-            theme = inputs.nixos-grub-themes.packages.${pkgs.system}.nixos;
+            theme = inputs.nixos-grub-themes.packages.${pkgs.stdenv.hostPlatform.system}.nixos;
             useOSProber = config.uefiOSProber;
           };
         };
