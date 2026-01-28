@@ -2,6 +2,8 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
+    flake-parts.url = "github:hercules-ci/flake-parts";
+
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -33,107 +35,23 @@
   };
 
   outputs =
-    {
-      self,
-      comin,
-      disko,
-      home-manager,
-      nix-vscode-extensions,
-      nixpkgs,
-      sops-nix,
-      treefmt-nix,
-      ...
-    }@inputs:
-    let
-      username = "kevin";
-      system = "x86_64-linux";
+    inputs@{ flake-parts, ... }:
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = [ "x86_64-linux" ];
 
-      commonModules = [
-        disko.nixosModules.disko
-        home-manager.nixosModules.home-manager
-        sops-nix.nixosModules.sops
-        ./modules/nixos/bootloader.nix
+      imports = [ ./flake-modules/nixos-configurations.nix ];
 
-      ];
+      perSystem =
+        { pkgs, ... }:
+        let
+          treefmtEval = inputs.treefmt-nix.lib.evalModule pkgs ./treefmt.nix;
+        in
+        {
+          formatter = treefmtEval.config.build.wrapper;
 
-      overlays = [ nix-vscode-extensions.overlays.default ];
-
-      pkgs = import nixpkgs {
-        inherit system overlays;
-        config.allowUnfree = true;
-      };
-
-      treefmtEval = treefmt-nix.lib.evalModule pkgs ./treefmt.nix;
-
-    in
-    {
-      nixosConfigurations = {
-        t480 = nixpkgs.lib.nixosSystem {
-          inherit system pkgs;
-          modules = [
-            ./hosts/t480
-          ]
-          ++ commonModules;
-          specialArgs = {
-            hostname = "t480";
-            inherit inputs username;
+          checks = {
+            formatting = treefmtEval.config.build.check inputs.self;
           };
         };
-
-        t480s = nixpkgs.lib.nixosSystem {
-          inherit system pkgs;
-          modules = [
-            ./hosts/t480s
-          ]
-          ++ commonModules;
-          specialArgs = {
-            hostname = "t480s";
-            inherit inputs username;
-          };
-        };
-
-        m710q = nixpkgs.lib.nixosSystem {
-          inherit system pkgs;
-          modules = [
-            ./hosts/m710q
-          ]
-          ++ commonModules;
-          specialArgs = {
-            hostname = "m710q";
-            inherit inputs username;
-          };
-        };
-
-        amdep = nixpkgs.lib.nixosSystem {
-          inherit system pkgs;
-          modules = [
-            ./hosts/amdep
-          ]
-          ++ commonModules;
-          specialArgs = {
-            hostname = "amdep";
-            inherit inputs username;
-          };
-        };
-
-        microg8 = nixpkgs.lib.nixosSystem {
-          inherit system pkgs;
-          modules = [
-            ./hosts/microg8
-            comin.nixosModules.comin
-          ]
-          ++ commonModules;
-          specialArgs = {
-            hostname = "microg8";
-            inherit inputs username;
-          };
-        };
-      };
-
-      formatter.${system} = treefmtEval.config.build.wrapper;
-
-      checks.${system} = {
-        formatting = treefmtEval.config.build.check self;
-      };
     };
 }
