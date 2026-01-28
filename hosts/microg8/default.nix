@@ -5,13 +5,16 @@
     ./drives.nix
     ./hardware-configuration.nix
     ./networking.nix
-    ./update.nix
 
-    ../../modules/nixos
-
+    # Host-specific syncthing additions (extra devices, guiAddress)
     ./syncthing.nix
   ];
 
   bootloader.mode = "bios";
-  gui.enable = false;
+
+  features = {
+    ssh-server.enable = true;
+    syncthing.enable = true;
+    auto-update.enable = true;
+  };
 }

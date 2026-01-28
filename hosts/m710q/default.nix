@@ -4,8 +4,12 @@
     ./disko-config.nix
     ./hardware-configuration.nix
 
-    ../../modules/nixos
-
+    # Host-specific syncthing additions (extra devices)
     ./syncthing.nix
   ];
+
+  features = {
+    ssh-server.enable = true;
+    syncthing.enable = true;
+  };
 }

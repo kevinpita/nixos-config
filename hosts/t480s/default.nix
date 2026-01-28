@@ -6,10 +6,22 @@
     ./disko-config.nix
     ./hardware-configuration.nix
 
-    ../../modules/nixos
-
+    # Host-specific syncthing additions (extra devices)
     ./syncthing.nix
-    ./tlp.nix
-    ./fwupdmgr.nix
   ];
+
+  # Dual-boot support
+  uefiOSProber = true;
+
+  features = {
+    desktop.enable = true;
+    development.enable = true;
+    virtualization.enable = true;
+    browsers.enable = true;
+    multimedia.enable = true;
+    communication.enable = true;
+    syncthing.enable = true;
+    printing-3d.enable = true;
+    laptop.enable = true;
+  };
 }
