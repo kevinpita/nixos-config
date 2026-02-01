@@ -146,6 +146,22 @@
         "type": "github"
       }
     },
+    "nixos-secrets": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1769990223,
+        "narHash": "sha256-VuC/BK76twT1ptEHV6tVIDUFSrxwXRUguL7VtVlJ2cg=",
+        "ref": "refs/heads/main",
+        "rev": "1b7f3550d0fa7f31069638608bec31988e211b9f",
+        "revCount": 3,
+        "type": "git",
+        "url": "ssh://git@github.com/kevinpita/nixos-secrets"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/kevinpita/nixos-secrets"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1766025857,
@@ -234,6 +250,7 @@
         "nix-vscode-extensions": "nix-vscode-extensions",
         "nixos-grub-themes": "nixos-grub-themes",
         "nixos-hardware": "nixos-hardware",
+        "nixos-secrets": "nixos-secrets",
         "nixpkgs": "nixpkgs_3",
         "sops-nix": "sops-nix",
         "treefmt-nix": "treefmt-nix"
