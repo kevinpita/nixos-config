@@ -15,10 +15,6 @@
       enableZshIntegration = true;
     };
 
-    home.sessionVariables = {
-      EDITOR = "nvim";
-    };
-
     programs.zsh = {
       enable = true;
       enableCompletion = true;
