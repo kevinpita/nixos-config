@@ -27,7 +27,7 @@ Flakes-based NixOS configuration managing 5 hosts (2 laptops, 1 workstation, 2 s
 
 ### Module Composition Flow
 
-`flake-modules/nixos-configurations.nix` is the orchestration center. The `mkHost` factory builds each host by composing:
+`nixos-configurations.nix` is the orchestration center. The `mkHost` factory builds each host by composing:
 
 1. `hosts/<hostname>/` — hardware config, disko partitioning, host-specific overrides
 2. `modules/core/` — always-on system config (boot, networking, users, shell, programs, nix-settings, secrets)
