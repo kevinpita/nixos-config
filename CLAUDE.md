@@ -59,7 +59,7 @@ The secrets input is optional — `inputs ? nixos-secrets` check allows the conf
 
 | Host | Type | GUI | Features |
 |------|------|-----|----------|
-| t480, t480s | ThinkPad laptops | GNOME | desktop, development, virtualization, browsers, multimedia, communication, syncthing, laptop, printing-3d |
+| t480, t480s | ThinkPad laptops | GNOME | desktop, development, virtualization, browsers, multimedia, communication, syncthing, printing-3d |
 | amdep | Workstation | GNOME | desktop, development, virtualization, browsers, multimedia, communication, syncthing |
 | m710q | Server | No | ssh-server, syncthing |
 | microg8 | Server | No | ssh-server, syncthing, auto-update (comin) |
