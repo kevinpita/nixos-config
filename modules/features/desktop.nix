@@ -1,4 +1,3 @@
-# Desktop feature - GNOME, X server, audio, alacritty, fonts
 {
   config,
   lib,
@@ -7,7 +6,6 @@
   ...
 }:
 lib.mkIf config.features.desktop.enable {
-  # NixOS: GNOME desktop manager
   services = {
     desktopManager.gnome.enable = true;
     displayManager.gdm = {
@@ -16,7 +14,6 @@ lib.mkIf config.features.desktop.enable {
     };
     udev.packages = with pkgs; [ gnome-settings-daemon ];
 
-    # X server configuration
     xserver = {
       enable = true;
       xkb.layout = "es";
@@ -30,7 +27,6 @@ lib.mkIf config.features.desktop.enable {
     libinput.enable = true;
   };
 
-  # NixOS: Audio via PipeWire
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
@@ -40,14 +36,11 @@ lib.mkIf config.features.desktop.enable {
     jack.enable = true;
   };
 
-  # Home Manager: Desktop configuration
   home-manager.users.${username} = {
-    # Font configuration
     fonts.fontconfig.enable = true;
     home.packages = with pkgs; [
       nerd-fonts.jetbrains-mono
 
-      # GNOME extensions and tools
       gnome-pomodoro
       gnomeExtensions.caffeine
       gnomeExtensions.clipboard-history
@@ -55,7 +48,6 @@ lib.mkIf config.features.desktop.enable {
       wl-clipboard
     ];
 
-    # Alacritty terminal
     programs.alacritty = {
       enable = true;
       settings = {
@@ -79,7 +71,6 @@ lib.mkIf config.features.desktop.enable {
       };
     };
 
-    # GNOME dconf settings
     dconf = {
       enable = true;
       settings = {

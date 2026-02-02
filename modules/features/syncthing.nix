@@ -1,4 +1,3 @@
-# Syncthing feature - File synchronization
 {
   config,
   lib,

@@ -1,11 +1,9 @@
-# Laptop feature - TLP power management and firmware updates
 { config, lib, ... }:
 lib.mkIf config.features.laptop.enable {
   services = {
     # Disable power-profiles-daemon as it conflicts with TLP
     power-profiles-daemon.enable = false;
 
-    # TLP for battery management
     tlp = {
       enable = true;
       settings = {
@@ -16,7 +14,6 @@ lib.mkIf config.features.laptop.enable {
       };
     };
 
-    # Firmware updates
     fwupd.enable = true;
   };
 }

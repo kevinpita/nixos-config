@@ -1,15 +1,12 @@
-# Core shell module - ZSH configuration (NixOS + Home Manager)
 {
   pkgs,
   username,
   ...
 }:
 {
-  # NixOS: Set ZSH as default shell
   programs.zsh.enable = true;
   users.defaultUserShell = pkgs.zsh;
 
-  # Home Manager: ZSH configuration with Powerlevel10k
   home-manager.users.${username} = {
     home.packages = with pkgs; [ zsh-powerlevel10k ];
 
@@ -64,7 +61,7 @@
 
     home.file.".p10k.zsh".source = ./p10k.zsh;
 
-    # LSD configuration (modern ls replacement)
+    # Modern ls replacement
     programs.lsd = {
       enable = true;
       enableZshIntegration = true;

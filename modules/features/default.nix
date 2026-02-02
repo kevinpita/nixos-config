@@ -1,4 +1,3 @@
-# Feature modules - opt-in via features.<name>.enable
 { lib, ... }:
 {
   options.features = {

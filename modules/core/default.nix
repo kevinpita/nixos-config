@@ -1,4 +1,3 @@
-# Core modules - always applied to all systems
 {
   imports = [
     ./boot.nix

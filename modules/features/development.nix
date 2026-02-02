@@ -1,4 +1,3 @@
-# Development feature - tmux, direnv, vscode, jetbrains, lazygit, and dev tools
 {
   config,
   lib,
@@ -8,12 +7,9 @@
   ...
 }:
 lib.mkIf config.features.development.enable {
-  # Development packages (system-level)
   environment.systemPackages = with pkgs; [
-    # Languages
     go
 
-    # Development tools
     claude-code
     gemini-cli
     lazydocker
@@ -21,34 +17,28 @@ lib.mkIf config.features.development.enable {
     mqttui
   ];
 
-  # Home Manager: Development tools
   home-manager.users.${username} = {
     home.packages = with pkgs; [
-      # Nix tools for VSCode
       nixd
       nixfmt
 
-      # JetBrains IDEs
       jetbrains.clion
       jetbrains.datagrip
       jetbrains.goland
     ];
 
     programs = {
-      # Tmux
       tmux = {
         enable = true;
         terminal = "tmux-256color";
       };
 
-      # Direnv with nix integration
       direnv = {
         enable = true;
         enableZshIntegration = true;
         nix-direnv.enable = true;
       };
 
-      # VSCodium
       vscode = {
         enable = true;
         package = pkgs.vscodium;
@@ -105,7 +95,6 @@ lib.mkIf config.features.development.enable {
         };
       };
 
-      # Lazygit with commitizen
       lazygit = {
         enable = true;
         settings = {

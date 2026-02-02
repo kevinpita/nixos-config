@@ -1,4 +1,3 @@
-# Virtualization feature - Docker, libvirt, virt-manager
 {
   config,
   lib,
@@ -7,7 +6,6 @@
   ...
 }:
 lib.mkIf config.features.virtualization.enable {
-  # Docker
   virtualisation.docker = {
     autoPrune.enable = true;
     enable = true;
@@ -19,7 +17,6 @@ lib.mkIf config.features.virtualization.enable {
     };
   };
 
-  # libvirtd (KVM/QEMU)
   virtualisation.libvirtd = {
     enable = true;
     qemu = {
@@ -32,14 +29,12 @@ lib.mkIf config.features.virtualization.enable {
   };
   programs.dconf.enable = true;
 
-  # User groups
   users.users.${username}.extraGroups = [
     "docker"
     "libvirtd"
     "kvm"
   ];
 
-  # System packages for virtualization
   environment.systemPackages = with pkgs; [
     qemu
     OVMF
@@ -53,7 +48,6 @@ lib.mkIf config.features.virtualization.enable {
     swtpm
   ];
 
-  # Home Manager: Virt-manager
   home-manager.users.${username} = {
     home.packages = with pkgs; [
       virt-manager

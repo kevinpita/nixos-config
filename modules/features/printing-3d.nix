@@ -1,4 +1,3 @@
-# 3D Printing feature - Prusa Slicer, Super Slicer
 {
   config,
   lib,

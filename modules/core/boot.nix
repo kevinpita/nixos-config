@@ -1,4 +1,3 @@
-# Core boot module - bootloader configuration
 {
   config,
   lib,

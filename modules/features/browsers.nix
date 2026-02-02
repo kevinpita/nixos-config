@@ -1,4 +1,3 @@
-# Browsers feature - Brave, Chromium, Firefox
 {
   config,
   lib,

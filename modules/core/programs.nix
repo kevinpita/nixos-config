@@ -1,11 +1,9 @@
-# Core programs module - essential CLI tools and nh helper
 {
   pkgs,
   username,
   ...
 }:
 {
-  # nh (NixOS helper) configuration
   programs.nh = {
     enable = true;
     clean = {
@@ -15,23 +13,18 @@
     flake = "/home/${username}/nixos-config";
   };
 
-  # Core CLI tools (always installed)
   environment.systemPackages = with pkgs; [
-    # Editors
     neovim
     vim
 
-    # File utilities
     bat
     fzf
     ripgrep
     tree
 
-    # Network utilities
     curl
     wget
 
-    # System monitoring
     dmidecode
     fastfetch
     htop
@@ -39,6 +32,9 @@
     lm_sensors
     pciutils
     screen
+
+    age
+    sops
 
     # Nix helpers (for nh)
     nix-output-monitor

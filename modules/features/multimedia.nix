@@ -1,4 +1,3 @@
-# Multimedia feature - VLC, ffmpeg, Tidal
 {
   config,
   lib,

@@ -1,4 +1,3 @@
-# Auto-update feature - comin for automatic configuration updates
 { config, lib, ... }:
 lib.mkIf config.features.auto-update.enable {
   services.comin = {

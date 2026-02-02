@@ -1,4 +1,3 @@
-# SSH Server feature - OpenSSH for remote access
 {
   config,
   lib,

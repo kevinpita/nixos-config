@@ -6,7 +6,6 @@
     ./hardware-configuration.nix
     ./networking.nix
 
-    # Host-specific syncthing additions (extra devices, guiAddress)
     ./syncthing.nix
   ];
 

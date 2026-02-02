@@ -1,4 +1,3 @@
-# Core users module - sets up user accounts and home-manager
 {
   inputs,
   username,
@@ -7,7 +6,6 @@
   ...
 }:
 {
-  # Create the user account
   users.users.${username} = {
     initialPassword = "${username}";
     useDefaultShell = true;
@@ -15,7 +13,6 @@
     extraGroups = [ "wheel" ];
   };
 
-  # Set up home-manager
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
@@ -35,7 +32,6 @@
       };
       programs.home-manager.enable = true;
 
-      # Git configuration (was in home/git.nix)
       programs.git = {
         enable = true;
         settings = {

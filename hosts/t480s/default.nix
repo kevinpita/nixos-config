@@ -6,7 +6,6 @@
     ./disko-config.nix
     ./hardware-configuration.nix
 
-    # Host-specific syncthing additions (extra devices)
     ./syncthing.nix
   ];
 

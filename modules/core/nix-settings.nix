@@ -1,4 +1,3 @@
-# Core nix settings module - Nix daemon configuration and system basics
 _: {
   nix = {
     settings = {

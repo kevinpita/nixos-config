@@ -1,4 +1,3 @@
-# Core networking module - network configuration and Tailscale
 { hostname, ... }:
 {
   networking = {
