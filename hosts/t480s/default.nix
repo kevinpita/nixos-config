@@ -7,6 +7,7 @@
     ./hardware-configuration.nix
 
     ./syncthing.nix
+    ./tlp.nix
   ];
 
   # Dual-boot support
@@ -21,6 +22,5 @@
     communication.enable = true;
     syncthing.enable = true;
     printing-3d.enable = true;
-    laptop.enable = true;
   };
 }

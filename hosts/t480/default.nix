@@ -7,6 +7,7 @@
     ./hardware-configuration.nix
 
     ./syncthing.nix
+    ./tlp.nix
   ];
 
   features = {
@@ -18,6 +19,5 @@
     communication.enable = true;
     syncthing.enable = true;
     printing-3d.enable = true;
-    laptop.enable = true;
   };
 }

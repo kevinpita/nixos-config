@@ -10,7 +10,6 @@
     syncthing.enable = lib.mkEnableOption "Syncthing file synchronization";
     ssh-server.enable = lib.mkEnableOption "SSH server for remote access";
     printing-3d.enable = lib.mkEnableOption "3D printing tools (Prusa Slicer, Super Slicer)";
-    laptop.enable = lib.mkEnableOption "Laptop power management (TLP, fwupd)";
     auto-update.enable = lib.mkEnableOption "Automatic updates via comin";
   };
 
@@ -24,7 +23,6 @@
     ./syncthing.nix
     ./ssh-server.nix
     ./printing-3d.nix
-    ./laptop.nix
     ./auto-update.nix
   ];
 }

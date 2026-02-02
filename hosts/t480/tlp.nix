@@ -1,7 +1,5 @@
-{ config, lib, ... }:
-lib.mkIf config.features.laptop.enable {
+{
   services = {
-    # Disable power-profiles-daemon as it conflicts with TLP
     power-profiles-daemon.enable = false;
 
     tlp = {
@@ -13,7 +11,5 @@ lib.mkIf config.features.laptop.enable {
         STOP_CHARGE_THRESH_BAT1 = 80;
       };
     };
-
-    fwupd.enable = true;
   };
 }
