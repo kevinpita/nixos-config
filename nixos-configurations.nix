@@ -18,8 +18,8 @@ let
     inputs.disko.nixosModules.disko
     inputs.home-manager.nixosModules.home-manager
     inputs.sops-nix.nixosModules.sops
-    ../modules/core
-    ../modules/features
+    ./modules/core
+    ./modules/features
   ];
 
   mkHost =
@@ -29,7 +29,7 @@ let
     }:
     inputs.nixpkgs.lib.nixosSystem {
       inherit system pkgs;
-      modules = [ ../hosts/${hostname} ] ++ commonModules ++ extraModules;
+      modules = [ ./hosts/${hostname} ] ++ commonModules ++ extraModules;
       specialArgs = {
         inherit inputs username hostname;
       };
