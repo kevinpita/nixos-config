@@ -15,19 +15,19 @@ All from the deploying machine:
    chmod 600 /tmp/extra-files/var/lib/sops-nix/key.txt
    age-keygen -y /tmp/extra-files/var/lib/sops-nix/key.txt
    ```
-2. Add the public key + creation rule to `~/nixos-secrets/.sops.yaml`
-3. Create secrets file: `sops secrets/<hostname>.yaml`
-4. Re-encrypt common secrets: `sops updatekeys secrets/common.yaml`
-5. Push nixos-secrets, then `nix flake update nixos-secrets` in nixos-config, push
-6. Boot target from [NixOS Minimal ISO](https://nixos.org/download/), set root password (`passwd`), get IP (`ip a`)
-7. Deploy:
+1. Add the public key + creation rule to `~/nixos-secrets/.sops.yaml`
+1. Create secrets file: `sops secrets/<hostname>.yaml`
+1. Re-encrypt common secrets: `sops updatekeys secrets/common.yaml`
+1. Push nixos-secrets, then `nix flake update nixos-secrets` in nixos-config, push
+1. Boot target from [NixOS Minimal ISO](https://nixos.org/download/), set root password (`passwd`), get IP (`ip a`)
+1. Deploy:
    ```bash
    nix run github:nix-community/nixos-anywhere -- \
      --extra-files /tmp/extra-files \
      --flake ~/nixos-config#<hostname> root@<ip>
    ```
-8. Save the key (`/tmp/extra-files/var/lib/sops-nix/key.txt`) to KeePass for future reinstalls
-9. Clean up: `rm -rf /tmp/extra-files`
+1. Save the key (`/tmp/extra-files/var/lib/sops-nix/key.txt`) to KeePass for future reinstalls
+1. Clean up: `rm -rf /tmp/extra-files`
 
 ### Reinstalling an existing host
 
@@ -39,13 +39,13 @@ All from the deploying machine. No sops changes needed — same key, same encryp
    vim /tmp/extra-files/var/lib/sops-nix/key.txt
    chmod 600 /tmp/extra-files/var/lib/sops-nix/key.txt
    ```
-2. Boot target, deploy:
+1. Boot target, deploy:
    ```bash
    nix run github:nix-community/nixos-anywhere -- \
      --extra-files /tmp/extra-files \
      --flake ~/nixos-config#<hostname> root@<ip>
    ```
-3. Clean up: `rm -rf /tmp/extra-files`
+1. Clean up: `rm -rf /tmp/extra-files`
 
 ### Generating hardware-configuration.nix
 
@@ -73,6 +73,6 @@ Everything works on first boot (SSH keys, user password) since the age key was s
    git clone git@github.com:kevinpita/nixos-config.git ~/nixos-config
    git clone git@github.com:kevinpita/nixos-secrets.git ~/nixos-secrets
    ```
-2. Restore admin key to `~/.config/sops/age/keys.txt` (from KeePass, chmod 600)
-3. Syncthing: `http://localhost:8384` — accept devices, set up KeePass folder
-4. Run `switch` to apply any pending changes
+1. Restore admin key to `~/.config/sops/age/keys.txt` (from KeePass, chmod 600)
+1. Syncthing: `http://localhost:8384` — accept devices, set up KeePass folder
+1. Run `switch` to apply any pending changes

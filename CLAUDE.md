@@ -30,9 +30,9 @@ Flakes-based NixOS configuration managing 5 hosts (2 laptops, 1 workstation, 2 s
 `nixos-configurations.nix` is the orchestration center. The `mkHost` factory builds each host by composing:
 
 1. `hosts/<hostname>/` — hardware config, disko partitioning, host-specific overrides
-2. `modules/core/` — always-on system config (boot, networking, users, shell, programs, nix-settings, secrets)
-3. `modules/features/` — conditionally enabled via `features.<name>.enable`
-4. Flake input modules (home-manager, disko, sops-nix, comin)
+1. `modules/core/` — always-on system config (boot, networking, users, shell, programs, nix-settings, secrets)
+1. `modules/features/` — conditionally enabled via `features.<name>.enable`
+1. Flake input modules (home-manager, disko, sops-nix, comin)
 
 `specialArgs` passes `inputs`, `username` ("kevin", hardcoded), and `hostname` to all modules. Home Manager is integrated directly into system config via `modules/core/users.nix`, which also forwards `features` config down via `extraSpecialArgs`.
 
