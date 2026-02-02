@@ -7,7 +7,7 @@
 }:
 {
   users.users.${username} = {
-    initialPassword = "${username}";
+    hashedPasswordFile = config.sops.secrets."user-password".path;
     useDefaultShell = true;
     isNormalUser = true;
     extraGroups = [ "wheel" ];
@@ -38,7 +38,7 @@
           user = {
             name = "Kevin Pita";
             email = "gitkevin@pm.me";
-            signingkey = "~/.ssh/sign.pub";
+            signingkey = "~/.ssh/id_ed25519_sign.pub";
           };
           init.defaultBranch = "main";
           commit.gpgsign = true;

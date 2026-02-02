@@ -23,42 +23,46 @@ nix run github:nix-community/nixos-anywhere -- --flake ~/nixos-config#<hostname>
 
 ## Architecture Overview
 
-This is a flakes-based NixOS configuration managing multiple hosts with a modular design separating system (NixOS) and user (Home Manager) configurations.
+Flakes-based NixOS configuration managing 5 hosts (2 laptops, 1 workstation, 2 servers) with a three-tier module system: core (always applied), features (opt-in per host), and host-specific overrides.
 
-### Directory Structure
+### Module Composition Flow
 
-- **flake.nix** - Entry point defining all hosts and inputs
-- **hosts/** - Machine-specific configurations (each contains `default.nix`, `hardware-configuration.nix`, `disko-config.nix`)
-- **modules/core/** - System-level modules always applied (boot, networking, nix-settings, users, shell, programs)
-- **modules/features/** - Opt-in feature modules enabled per-host via `features.<name>.enable`
+`flake-modules/nixos-configurations.nix` is the orchestration center. The `mkHost` factory builds each host by composing:
 
-### Hosts
+1. `hosts/<hostname>/` — hardware config, disko partitioning, host-specific overrides
+2. `modules/core/` — always-on system config (boot, networking, users, shell, programs, nix-settings, secrets)
+3. `modules/features/` — conditionally enabled via `features.<name>.enable`
+4. Flake input modules (home-manager, disko, sops-nix, comin)
 
-| Host | Type | GUI | Notes |
-|------|------|-----|-------|
-| t480, t480s | ThinkPad laptops | Yes | GNOME desktop |
-| amdep | Laptop | Yes | GNOME desktop |
-| m710q | Server | No | Headless |
-| microg8 | Server | No | Runs comin for config sync |
+`specialArgs` passes `inputs`, `username` ("kevin", hardcoded), and `hostname` to all modules. Home Manager is integrated directly into system config via `modules/core/users.nix`, which also forwards `features` config down via `extraSpecialArgs`.
 
 ### Key Configuration Patterns
 
-**Feature flags**: Hosts enable functionality via `features.<name>.enable = true`. Available features: desktop, development, virtualization, browsers, multimedia, communication, syncthing, ssh-server, printing-3d, laptop, auto-update.
+**Feature flags**: Hosts enable functionality via `features.<name>.enable = true` in their `default.nix`. Options defined in `modules/features/default.nix`, each feature module wraps its config in `lib.mkIf config.features.<name>.enable`.
 
-**Special args flow**: `hostname`, `username` ("kevin"), and `inputs` are passed through `specialArgs` to all modules.
+**Custom options**: Some core modules define options (e.g., `bootloader.mode` bios/uefi) using `lib.mkOption` with `lib.mkIf` for conditional logic.
 
-**Host structure**: Each host's `default.nix` imports hardware config, disko config, and optional host-specific overrides, then enables desired features.
+**Host structure**: Each host's `default.nix` imports hardware-configuration.nix, disko-config.nix, and optional host-specific files (custom networking, drive monitoring, syncthing overrides), then enables desired features.
 
-**Custom options**: Modules define options like `bootloader.mode` (bios/uefi) using `lib.mkOption`, then use `lib.mkIf` for conditional logic.
+### Secrets Architecture
 
-### Key Flake Inputs
+Secrets are managed via sops-nix with age encryption. The secrets live in a separate private repo (`nixos-secrets`) pulled as a non-flake input. `modules/core/secrets.nix` configures:
 
-- **nixpkgs** (nixos-unstable) - Package repository
-- **home-manager** - User environment management
-- **disko** - Declarative disk partitioning
-- **nixos-hardware** - Hardware-specific configurations
-- **sops-nix** - Secrets management
-- **comin** - Automatic configuration deployment
+- Per-host secrets from `secrets/<hostname>.yaml`
+- Shared secrets from `secrets/common.yaml` (user password)
+- SSH auth and signing keys deployed to `~/.ssh/`
+- Age key at `/var/lib/sops-nix/key.txt` (shipped during deploy via `--extra-files`)
+
+The secrets input is optional — `inputs ? nixos-secrets` check allows the config to compile without it.
+
+### Hosts
+
+| Host | Type | GUI | Features |
+|------|------|-----|----------|
+| t480, t480s | ThinkPad laptops | GNOME | desktop, development, virtualization, browsers, multimedia, communication, syncthing, laptop, printing-3d |
+| amdep | Workstation | GNOME | desktop, development, virtualization, browsers, multimedia, communication, syncthing |
+| m710q | Server | No | ssh-server, syncthing |
+| microg8 | Server | No | ssh-server, syncthing, auto-update (comin) |
 
 ## Code Style
 

@@ -1,85 +1,78 @@
 # NixOS Configuration
 
-This repository contains my personal NixOS configuration files.
+## Deploy with nixos-anywhere
 
-## Installation using nixos-anywhere
+Secrets (SSH keys, user password) need the host's age key to decrypt. Ship the key during deploy with `--extra-files` so everything works on first boot. The directory structure inside the extra-files dir mirrors the root filesystem.
 
-This configuration is deployed using `nixos-anywhere`, which remotely installs a NixOS system from this flake.
+### New host
 
-### 1. Prepare the Target Machine
+All from the deploying machine:
 
-The installation requires the target machine to be running a basic NixOS environment with an active SSH server. You have two primary ways to achieve this.
-
-#### Option A: From a Live Environment
-
-If the target machine has no OS or you're starting fresh, boot it using the NixOS minimal live ISO. This is the most common method.
-
-1. **Download:** Get the latest [NixOS Minimal ISO](https://nixos.org/download/).
-1. **Create a Bootable USB:**
+1. Generate an age key for the new host:
    ```bash
-   # Replace /dev/sdX with your USB device
-   sudo dd bs=4M conv=fsync oflag=direct status=progress if=/path/to/nixos.iso of=/dev/sdX
+   mkdir -p /tmp/extra-files/var/lib/sops-nix
+   age-keygen -o /tmp/extra-files/var/lib/sops-nix/key.txt
+   chmod 600 /tmp/extra-files/var/lib/sops-nix/key.txt
+   age-keygen -y /tmp/extra-files/var/lib/sops-nix/key.txt
    ```
-1. **Boot and Prepare:** Boot the target machine from the USB. Once in the live environment, set a password for the `root` user to enable SSH access:
+2. Add the public key + creation rule to `~/nixos-secrets/.sops.yaml`
+3. Create secrets file: `sops secrets/<hostname>.yaml`
+4. Re-encrypt common secrets: `sops updatekeys secrets/common.yaml`
+5. Push nixos-secrets, then `nix flake update nixos-secrets` in nixos-config, push
+6. Boot target from [NixOS Minimal ISO](https://nixos.org/download/), set root password (`passwd`), get IP (`ip a`)
+7. Deploy:
    ```bash
-   passwd
+   nix run github:nix-community/nixos-anywhere -- \
+     --extra-files /tmp/extra-files \
+     --flake ~/nixos-config#<hostname> root@<ip>
    ```
-   Then, find the machine's IP address:
+8. Save the key (`/tmp/extra-files/var/lib/sops-nix/key.txt`) to KeePass for future reinstalls
+9. Clean up: `rm -rf /tmp/extra-files`
+
+### Reinstalling an existing host
+
+All from the deploying machine. No sops changes needed — same key, same encryption.
+
+1. Get the host's age key from KeePass:
    ```bash
-   ip a
+   mkdir -p /tmp/extra-files/var/lib/sops-nix
+   vim /tmp/extra-files/var/lib/sops-nix/key.txt
+   chmod 600 /tmp/extra-files/var/lib/sops-nix/key.txt
    ```
+2. Boot target, deploy:
+   ```bash
+   nix run github:nix-community/nixos-anywhere -- \
+     --extra-files /tmp/extra-files \
+     --flake ~/nixos-config#<hostname> root@<ip>
+   ```
+3. Clean up: `rm -rf /tmp/extra-files`
 
-#### Option B: From an Existing System
+### Generating hardware-configuration.nix
 
-If the target machine already has an operating system with an SSH server, simply ensure you have root access and its IP address.
-
-### 2. Deploy the Configuration
-
-From another computer that has Nix installed, run the `nixos-anywhere` command:
+Use this when deploying to new hardware or if the existing hardware config is wrong. This does a full install, not just config generation.
 
 ```bash
-nix run github:nix-community/nixos-anywhere -- --flake ~/nixos-config#<hostname> root@<ip_address>
+nix run github:nix-community/nixos-anywhere -- \
+  --extra-files /tmp/extra-files \
+  --generate-hardware-config nixos-generate-config ./hosts/<hostname>/hardware-configuration.nix \
+  --flake ~/nixos-config#<hostname> root@<ip>
 ```
 
-- Replace `<hostname>` with the desired host from this repository
-- Replace `<ip_address>` with the target machine's IP address.
+## Secrets (sops-nix + age)
 
-After the script completes, the new system is installed. You can reboot the target machine and log in. The default username is `kevin`, with the password being the same.
+Secrets repo: `git@github.com:kevinpita/nixos-secrets.git` -> `~/nixos-secrets`
 
-## Generating a Hardware Configuration
+Admin key and host age keys are backed up in KeePass. Restore admin key to `~/.config/sops/age/keys.txt` (chmod 600).
 
-To generate a hardware configuration for a host during installation, you can use the `--generate-hardware-config` flag with `nixos-anywhere`. This is useful when the existing `hardware-configuration.nix` is invalid or missing.
+## Post-install checklist
 
-**Important:** This command will initiate a full NixOS installation on the target machine, not just generate the configuration file.
+Everything works on first boot (SSH keys, user password) since the age key was shipped during deploy.
 
-```bash
-nix run github:nix-community/nixos-anywhere -- --flake ~/nixos-config#<hostname> --generate-hardware-config nixos-generate-config ./hosts/<hostname>/hardware-configuration.nix <user>@<ip_address>
-```
-
-- Replace `<hostname>` with the name of the host (e.g., `microg8`).
-- Replace `<ip_address>` with the target machine's IP address.
-- Replace `<user>` with the target machine's ssh user.
-
-This command connects to the target machine, generates the `hardware-configuration.nix` file, places it in the correct host directory within your configuration, and then proceeds with the full NixOS installation.
-
-## Post-Installation Checklist
-
-After logging into the new system, complete the following steps:
-
-1. **Change Passwords:** **IMPORTANT!** Immediately change the default passwords for security.
-   ```bash
-   # Change your user password
-   passwd
-
-   # Change the root password
-   sudo passwd root
-   ```
-1. **Syncthing:** The Syncthing service runs automatically. Access its web UI at `http://localhost:8384` to accept device requests from your other machines and configure the KeePass folder.
-1. **KeePass:** Open the application and set up your password database.
-1. **SSH Agent:** Configure your SSH agent with your private keys.
-1. **Clone Repository:** For future management, clone this repository locally:
+1. Clone repos:
    ```bash
    git clone git@github.com:kevinpita/nixos-config.git ~/nixos-config
-   cd ~/nixos-config
+   git clone git@github.com:kevinpita/nixos-secrets.git ~/nixos-secrets
    ```
-1. **Apply Changes:** Run `switch` (a custom alias) to apply any final updates.
+2. Restore admin key to `~/.config/sops/age/keys.txt` (from KeePass, chmod 600)
+3. Syncthing: `http://localhost:8384` — accept devices, set up KeePass folder
+4. Run `switch` to apply any pending changes
