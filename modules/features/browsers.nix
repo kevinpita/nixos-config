@@ -11,6 +11,7 @@ lib.mkIf config.features.browsers.enable {
       brave
       chromium
       firefox
+      google-chrome
     ];
   };
 }
