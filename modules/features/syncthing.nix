@@ -1,15 +1,23 @@
 {
   config,
   lib,
+  pkgs,
   username,
   ...
 }:
 lib.mkIf config.features.syncthing.enable {
+  home-manager.users.${username} = lib.mkIf config.features.desktop.enable {
+    home.packages = [ pkgs.gnomeExtensions.syncthing-indicator ];
+    dconf.settings."org/gnome/shell".enabled-extensions = lib.mkAfter [
+      "syncthing@gnome.2nv2u.com"
+    ];
+  };
+
   services.syncthing = {
     enable = true;
     user = username;
     dataDir = "/home/${username}/";
-    configDir = "/home/${username}/Documents/.config/syncthing";
+    configDir = "/home/${username}/.config/syncthing";
     overrideDevices = true;
     overrideFolders = true;
     settings = {
