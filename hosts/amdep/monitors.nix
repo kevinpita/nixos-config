@@ -4,6 +4,7 @@
 }:
 {
   home-manager.users.${username} = {
+    xdg.configFile."monitors.xml".force = true;
     xdg.configFile."monitors.xml".text = ''
       <monitors version="2">
         <configuration>

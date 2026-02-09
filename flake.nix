@@ -37,6 +37,11 @@
       flake = false;
     };
 
+    nixos-work = {
+      url = "git+ssh://git@github.com/kevinpita/nixos-work";
+      flake = false;
+    };
+
   };
 
   outputs =

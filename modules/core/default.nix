@@ -7,5 +7,6 @@
     ./shell.nix
     ./programs.nix
     ./secrets.nix
+    ./work.nix
   ];
 }

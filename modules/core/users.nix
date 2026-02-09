@@ -34,14 +34,16 @@
 
       programs.git = {
         enable = true;
+        signing = {
+          key = "~/.ssh/id_ed25519_sign.pub";
+          signByDefault = true;
+        };
         settings = {
           user = {
             name = "Kevin Pita";
             email = "gitkevin@pm.me";
-            signingkey = "~/.ssh/id_ed25519_sign.pub";
           };
           init.defaultBranch = "main";
-          commit.gpgsign = true;
           tag.gpgsign = true;
           gpg.format = "ssh";
           pull.rebase = true;
