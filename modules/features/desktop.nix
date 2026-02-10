@@ -87,6 +87,7 @@ lib.mkIf config.features.desktop.enable {
         };
         "org/gnome/desktop/interface" = {
           color-scheme = "prefer-dark";
+          clock-show-seconds = true;
         };
         "org/gnome/settings-daemon/plugins/media-keys" = {
           custom-keybindings = [
