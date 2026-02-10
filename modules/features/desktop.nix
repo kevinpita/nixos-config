@@ -89,6 +89,9 @@ lib.mkIf config.features.desktop.enable {
           color-scheme = "prefer-dark";
           clock-show-seconds = true;
         };
+        "org/gnome/shell/keybindings" = {
+          show-screenshot-ui = [ "<Super>space" ];
+        };
         "org/gnome/settings-daemon/plugins/media-keys" = {
           custom-keybindings = [
             "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
