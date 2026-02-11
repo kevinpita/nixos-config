@@ -82,11 +82,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1770654520,
-        "narHash": "sha256-mg5WZMIPGsFu9MxSrUcuJUPMbfMsF77el5yb/7rc10k=",
+        "lastModified": 1770818644,
+        "narHash": "sha256-DYS4jIRpRoKOzJjnR/QqEd/MlT4OZZpt8CrBLv+cjsE=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "6c4fdbe1ad198fac36c320fd45c5957324a80b8e",
+        "rev": "0acbd1180697de56724821184ad2c3e6e7202cd7",
         "type": "github"
       },
       "original": {
@@ -100,11 +100,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1770692379,
-        "narHash": "sha256-05tn6+BH/B4Js+ele6uq2Xno0xpB0wv8fA6TNXMoXX8=",
+        "lastModified": 1770778600,
+        "narHash": "sha256-xTPaNglk/be9A9kt5U56wBr/FU2gHBmjRXMj00ZXoU8=",
         "owner": "nix-community",
         "repo": "nix-vscode-extensions",
-        "rev": "07f2af64427334c4098770884746ecf2471a574f",
+        "rev": "fccfa780f00c7fc2359088f5d79671fa1f1b91b4",
         "type": "github"
       },
       "original": {
@@ -165,11 +165,11 @@
     "nixos-work": {
       "flake": false,
       "locked": {
-        "lastModified": 1770638727,
-        "narHash": "sha256-/6CPG+pqv+9ehAYZ1LJwMZElUdaV1dTDZo/PmDrBpZ8=",
+        "lastModified": 1770832078,
+        "narHash": "sha256-EUAIQ6CwTQ5A9wmAKp5IXEKDs+UUE8PVP5Qkkqqd/Ck=",
         "ref": "refs/heads/main",
-        "rev": "63ce638cbd07a36322d2c0dbe0a7025bbe4d0ed1",
-        "revCount": 1,
+        "rev": "35de222d60c5a02613b6848e5e451750e063a7ec",
+        "revCount": 2,
         "type": "git",
         "url": "ssh://git@github.com/kevinpita/nixos-work"
       },
