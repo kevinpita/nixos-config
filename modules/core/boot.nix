@@ -62,6 +62,6 @@ with lib;
       }
     ];
 
-    time.hardwareClockInLocalTime = mkIf config.bootloader.mode == "uefi";
+    time.hardwareClockInLocalTime = true;
   };
 }
