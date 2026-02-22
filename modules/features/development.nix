@@ -22,6 +22,8 @@ lib.mkIf config.features.development.enable {
       nixd
       nixfmt
 
+      code-cursor-fhs
+
       jetbrains.clion
       jetbrains.datagrip
       jetbrains.goland
@@ -44,12 +46,12 @@ lib.mkIf config.features.development.enable {
         package = pkgs.vscodium;
         profiles.default = {
           extensions = with pkgs.vscode-marketplace; [
+            anthropic.claude-code
             eliverlara.andromeda
             github.vscode-github-actions
             golang.go
             jakebecker.elixir-ls
             jnoortheen.nix-ide
-            kilocode.kilo-code
             vscodevim.vim
           ];
 
