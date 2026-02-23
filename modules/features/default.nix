@@ -3,7 +3,8 @@
   options.features = {
     desktop.enable = lib.mkEnableOption "Desktop environment (GNOME, audio, fonts)";
     development.enable = lib.mkEnableOption "Development tools (tmux, direnv, vscode, jetbrains, lazygit)";
-    virtualization.enable = lib.mkEnableOption "Virtualization (Docker, libvirt, virt-manager)";
+    docker.enable = lib.mkEnableOption "Docker container runtime";
+    virtualization.enable = lib.mkEnableOption "Virtualization (libvirt, virt-manager)";
     browsers.enable = lib.mkEnableOption "Web browsers (Brave, Chromium, Firefox)";
     multimedia.enable = lib.mkEnableOption "Multimedia applications (VLC, ffmpeg, Tidal)";
     communication.enable = lib.mkEnableOption "Communication apps (Telegram, Legcord)";
@@ -16,6 +17,7 @@
   imports = [
     ./desktop.nix
     ./development.nix
+    ./docker.nix
     ./virtualization.nix
     ./browsers.nix
     ./multimedia.nix

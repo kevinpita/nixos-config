@@ -16,6 +16,7 @@
   features = {
     desktop.enable = true;
     development.enable = true;
+    docker.enable = true;
     virtualization.enable = true;
     browsers.enable = true;
     multimedia.enable = true;

@@ -12,6 +12,7 @@
   bootloader.mode = "bios";
 
   features = {
+    docker.enable = true;
     ssh-server.enable = true;
     syncthing.enable = true;
     auto-update.enable = true;

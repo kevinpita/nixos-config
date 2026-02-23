@@ -6,17 +6,6 @@
   ...
 }:
 lib.mkIf config.features.virtualization.enable {
-  virtualisation.docker = {
-    autoPrune.enable = true;
-    enable = true;
-    storageDriver = "btrfs";
-
-    rootless = {
-      enable = true;
-      setSocketVariable = true;
-    };
-  };
-
   virtualisation.libvirtd = {
     enable = true;
     qemu = {
@@ -30,7 +19,6 @@ lib.mkIf config.features.virtualization.enable {
   programs.dconf.enable = true;
 
   users.users.${username}.extraGroups = [
-    "docker"
     "libvirtd"
     "kvm"
   ];
