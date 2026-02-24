@@ -48,7 +48,6 @@ lib.mkIf config.features.development.enable {
         package = pkgs.vscodium;
         profiles.default = {
           extensions = with pkgs.vscode-marketplace; [
-            anthropic.claude-code
             eliverlara.andromeda
             github.vscode-github-actions
             golang.go
