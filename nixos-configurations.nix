@@ -19,6 +19,17 @@ let
         in
         nixpkgs-claude-code-pkgs.claude-code;
     })
+
+    (final: prev: {
+      sublime-merge =
+        let
+          nixpkgs-sublime-merge-pkgs = import inputs.nixpkgs-sublime-merge {
+            inherit system;
+            config.allowUnfree = true;
+          };
+        in
+        nixpkgs-sublime-merge-pkgs.sublime-merge;
+    })
   ];
 
   pkgs = import inputs.nixpkgs {
