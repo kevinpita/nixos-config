@@ -24,6 +24,7 @@
         open = "xdg-open";
 
         cat = "bat";
+        diff = "difft";
         vi = "vim";
         neofetch = "fastfetch";
 

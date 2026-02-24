@@ -38,6 +38,7 @@
           key = "~/.ssh/id_ed25519_sign.pub";
           signByDefault = true;
         };
+        difftastic.enable = true;
         settings = {
           user = {
             name = "Kevin Pita";
