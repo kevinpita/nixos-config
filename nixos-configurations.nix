@@ -9,7 +9,7 @@ let
   overlays = [
     inputs.nix-vscode-extensions.overlays.default
 
-    (final: prev: {
+    (_final: _prev: {
       claude-code =
         let
           nixpkgs-claude-code-pkgs = import inputs.nixpkgs-claude-code {
@@ -20,7 +20,7 @@ let
         nixpkgs-claude-code-pkgs.claude-code;
     })
 
-    (final: prev: {
+    (_final: _prev: {
       sublime-merge =
         let
           nixpkgs-sublime-merge-pkgs = import inputs.nixpkgs-sublime-merge {
