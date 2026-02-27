@@ -32,13 +32,17 @@
       };
       programs.home-manager.enable = true;
 
+      programs.difftastic = {
+        enable = true;
+        git.enable = true;
+      };
+
       programs.git = {
         enable = true;
         signing = {
           key = "~/.ssh/id_ed25519_sign.pub";
           signByDefault = true;
         };
-        difftastic.enable = true;
         settings = {
           user = {
             name = "Kevin Pita";
