@@ -12,6 +12,7 @@ lib.mkIf config.features.development.enable {
 
     claude-code
     gemini-cli
+    gh
     lazydocker
     lazysql
     mqttui
