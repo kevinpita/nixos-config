@@ -28,6 +28,7 @@ lib.mkIf config.features.development.enable {
       jetbrains.clion
       jetbrains.datagrip
       jetbrains.goland
+      jetbrains.idea
 
       sublime-merge
     ];
