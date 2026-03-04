@@ -102,6 +102,7 @@ lib.mkIf config.features.development.enable {
       lazygit = {
         enable = true;
         settings = {
+          git.overrideGpg = true;
           customCommands = [
             {
               key = "C";
