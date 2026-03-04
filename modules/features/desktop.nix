@@ -80,6 +80,7 @@ lib.mkIf config.features.desktop.enable {
             "caffeine@patapon.info"
             "clipboard-history@alexsaveau.dev"
             "tailscale-status@maxgallup.github.com"
+            "claude-code-usage@haletran.com"
           ];
         };
         "org/gnome/shell/extensions/caffeine" = {
