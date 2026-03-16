@@ -12,6 +12,8 @@
     ssh-server.enable = lib.mkEnableOption "SSH server for remote access";
     printing-3d.enable = lib.mkEnableOption "3D printing tools (Prusa Slicer, Super Slicer)";
     auto-update.enable = lib.mkEnableOption "Automatic updates via comin";
+    kubernetes.enable = lib.mkEnableOption "Kubernetes tools (kubectl, helm, k9s, kubectx)";
+    aws.enable = lib.mkEnableOption "AWS tools (awscli2, aws-iam-authenticator)";
   };
 
   imports = [
@@ -26,5 +28,7 @@
     ./ssh-server.nix
     ./printing-3d.nix
     ./auto-update.nix
+    ./kubernetes.nix
+    ./aws.nix
   ];
 }

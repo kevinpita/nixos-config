@@ -21,5 +21,7 @@
     communication.enable = true;
     syncthing.enable = true;
     printing-3d.enable = true;
+    kubernetes.enable = true;
+    aws.enable = true;
   };
 }

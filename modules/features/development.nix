@@ -9,6 +9,7 @@
 lib.mkIf config.features.development.enable {
   environment.systemPackages = with pkgs; [
     go
+    python3
 
     claude-code
     gemini-cli
