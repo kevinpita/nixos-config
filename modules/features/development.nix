@@ -55,6 +55,7 @@ lib.mkIf config.features.development.enable {
             golang.go
             jakebecker.elixir-ls
             jnoortheen.nix-ide
+            tim-koehler.helm-intellisense
             vscodevim.vim
           ];
 
