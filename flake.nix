@@ -43,7 +43,7 @@
     };
 
     nixpkgs-claude-code = {
-      url = "github:markus1189/nixpkgs/claude-code-2.1.66-to-2.1.69";
+      url = "github:markus1189/nixpkgs/claude-code-2.1.74-to-2.1.76";
     };
 
     nixpkgs-sublime-merge = {
