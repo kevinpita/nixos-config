@@ -23,7 +23,7 @@ nix run github:nix-community/nixos-anywhere -- --flake ~/nixos-config#<hostname>
 
 ## Architecture Overview
 
-Flakes-based NixOS configuration managing 5 hosts (2 laptops, 1 workstation, 2 servers) with a three-tier module system: core (always applied), features (opt-in per host), and host-specific overrides.
+Flakes-based NixOS configuration managing 4 hosts (1 laptop, 1 workstation, 2 servers) with a three-tier module system: core (always applied), features (opt-in per host), and host-specific overrides.
 
 ### Module Composition Flow
 
@@ -59,7 +59,7 @@ The secrets input is optional — `inputs ? nixos-secrets` check allows the conf
 
 | Host | Type | GUI | Features |
 |------|------|-----|----------|
-| t480, t480s | ThinkPad laptops | GNOME | desktop, development, virtualization, browsers, multimedia, communication, syncthing, printing-3d |
+| t480s | ThinkPad laptop | GNOME | desktop, development, virtualization, browsers, multimedia, communication, syncthing, printing-3d |
 | amdep | Workstation | GNOME | desktop, development, virtualization, browsers, multimedia, communication, syncthing |
 | m710q | Server | No | ssh-server, syncthing |
 | microg8 | Server | No | ssh-server, syncthing, auto-update (comin) |
