@@ -10,6 +10,7 @@ lib.mkIf config.features.multimedia.enable {
     home.packages = with pkgs; [
       ffmpeg
       obs-studio
+      obsidian
       tidal-hifi
       vlc
     ];
