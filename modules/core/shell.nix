@@ -28,6 +28,7 @@
         vi = "vim";
         neofetch = "fastfetch";
 
+        gittime = ''git commit --amend --date="$(date -Iseconds)" --no-edit'';
         switch = "nh os switch ~/nixos-config";
         update = "cd ~/nixos-config && nix flake update";
 
