@@ -36,13 +36,6 @@ lib.mkIf config.features.virtualization.enable {
     swtpm
   ];
 
-  # TODO: revert once upstream libvirt fixes the hardcoded /usr/bin/sh path
-  # libvirt ships this service with a hardcoded /usr/bin/sh which doesn't exist on NixOS
-  systemd.services.virt-secret-init-encryption.serviceConfig.ExecStart = lib.mkForce [
-    ""
-    "/bin/sh -c 'umask 0077 && (dd if=/dev/random status=none bs=32 count=1 | systemd-creds encrypt --name=secrets-encryption-key - /var/lib/libvirt/secrets/secrets-encryption-key)'"
-  ];
-
   home-manager.users.${username} = {
     home.packages = with pkgs; [
       virt-manager
