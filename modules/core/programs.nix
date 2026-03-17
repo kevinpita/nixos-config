@@ -29,6 +29,7 @@
     tree
 
     curl
+    jq
     wget
 
     dmidecode
