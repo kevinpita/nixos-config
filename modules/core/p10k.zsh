@@ -97,10 +97,10 @@
     chezmoi_shell           # chezmoi shell (https://www.chezmoi.io/)
     vi_mode                 # vi mode (you don't need this if you've enabled prompt_char)
     # vpn_ip                # virtual private network indicator
-    load                  # CPU load
+    # load                  # CPU load
     disk_usage            # disk usage
     ram                   # free RAM
-    swap                  # used swap
+    # swap                  # used swap
     todo                    # todo items (https://github.com/todotxt/todo.txt-cli)
     timewarrior             # timewarrior tracking status (https://timewarrior.net/)
     taskwarrior             # taskwarrior task count (https://taskwarrior.org/)
@@ -110,7 +110,7 @@
     # =========================[ Line #2 ]=========================
     newline                 # \n
     ip                    # ip address and bandwidth usage for a specified network interface
-    # public_ip             # public IP address
+    public_ip             # public IP address
     # proxy                 # system-wide http/https/ftp proxy
     battery               # internal battery
     # wifi                  # wifi speed
@@ -774,7 +774,7 @@
   # typeset -g POWERLEVEL9K_NIX_SHELL_INFER_FROM_PATH=false
 
   # Tip: If you want to see just the icon without "pure" and "impure", uncomment the next line.
-  # typeset -g POWERLEVEL9K_NIX_SHELL_CONTENT_EXPANSION=
+  typeset -g POWERLEVEL9K_NIX_SHELL_CONTENT_EXPANSION=
 
   # Custom icon.
   # typeset -g POWERLEVEL9K_NIX_SHELL_VISUAL_IDENTIFIER_EXPANSION='⭐'
@@ -795,6 +795,18 @@
   typeset -g POWERLEVEL9K_DISK_USAGE_CRITICAL_LEVEL=95
   # If set to true, hide disk usage when below $POWERLEVEL9K_DISK_USAGE_WARNING_LEVEL percent.
   typeset -g POWERLEVEL9K_DISK_USAGE_ONLY_WARNING=false
+  # Show available disk space in GB instead of usage percentage.
+  function prompt_disk_usage() {
+    local avail_gb
+    avail_gb=$(df -BG / 2>/dev/null | awk 'NR==2 {gsub(/G/,"",$4); print $4}')
+    [[ -n $avail_gb ]] || return
+    local usage_pct
+    usage_pct=$(df / 2>/dev/null | awk 'NR==2 {gsub(/%/,"",$5); print $5}')
+    local fg=35
+    (( usage_pct >= 90 )) && fg=220
+    (( usage_pct >= 95 )) && fg=160
+    p10k segment -f $fg -t "${avail_gb}GB free"
+  }
   # Custom icon.
   # typeset -g POWERLEVEL9K_DISK_USAGE_VISUAL_IDENTIFIER_EXPANSION='⭐'
 
@@ -818,6 +830,18 @@
   ######################################[ ram: free RAM ]#######################################
   # RAM color.
   typeset -g POWERLEVEL9K_RAM_FOREGROUND=66
+  # Show used/total RAM instead of just free RAM.
+  function prompt_ram() {
+    local used_mb total_mb
+    total_mb=$(awk '/^MemTotal:/ {printf "%.0f", $2/1024}' /proc/meminfo)
+    local avail_mb
+    avail_mb=$(awk '/^MemAvailable:/ {printf "%.0f", $2/1024}' /proc/meminfo)
+    used_mb=$(( total_mb - avail_mb ))
+    local used_gb total_gb
+    used_gb=$(printf '%.1f' $(( used_mb / 1024.0 )))
+    total_gb=$(printf '%.1f' $(( total_mb / 1024.0 )))
+    p10k segment -f 66 -t "${used_gb}/${total_gb}GB"
+  }
   # Custom icon.
   # typeset -g POWERLEVEL9K_RAM_VISUAL_IDENTIFIER_EXPANSION='⭐'
 
@@ -1601,7 +1625,7 @@
   #   P9K_IP_TX_BYTES_DELTA | number of bytes sent since last prompt
   #   P9K_IP_RX_RATE        | receive rate (since last prompt)
   #   P9K_IP_TX_RATE        | send rate (since last prompt)
-  typeset -g POWERLEVEL9K_IP_CONTENT_EXPANSION='${P9K_IP_RX_RATE:+%70F⇣$P9K_IP_RX_RATE }${P9K_IP_TX_RATE:+%215F⇡$P9K_IP_TX_RATE }%38F$P9K_IP_IP'
+  typeset -g POWERLEVEL9K_IP_CONTENT_EXPANSION='${P9K_IP_RX_RATE:+%70F⇣$P9K_IP_RX_RATE }${P9K_IP_TX_RATE:+%215F⇡$P9K_IP_TX_RATE }%38F${${P9K_IP_IP}##*.*.}'
   # Show information for the first network interface whose name matches this regular expression.
   # Run `ifconfig` or `ip -4 a show` to see the names of all network interfaces.
   typeset -g POWERLEVEL9K_IP_INTERFACE='[ew].*'
