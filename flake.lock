@@ -197,16 +197,16 @@
     },
     "nixpkgs-claude-code": {
       "locked": {
-        "lastModified": 1773511698,
-        "narHash": "sha256-P16bh4X/SOsWFxbQaKOZHUphAPiReRnptACLLFaauYg=",
+        "lastModified": 1773816368,
+        "narHash": "sha256-HRgz0/i56R+6xYHur1KvLCoyuogHxHb/MRNcTqVhUak=",
         "owner": "markus1189",
         "repo": "nixpkgs",
-        "rev": "a3761295d889cbd24d4f62e1b79c6eacbe83085d",
+        "rev": "48b9d1d6e18fd6134e279e9d9e85cc18cd75e6a1",
         "type": "github"
       },
       "original": {
         "owner": "markus1189",
-        "ref": "claude-code-2.1.74-to-2.1.76",
+        "ref": "claude-code-2.1.77-to-2.1.78",
         "repo": "nixpkgs",
         "type": "github"
       }
