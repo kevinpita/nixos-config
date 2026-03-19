@@ -33,7 +33,7 @@
     };
 
     nvim-config = {
-      url = "git+ssh://git@github.com/kevinpita/nixos-nvim";
+      url = "github:kevinpita/nixos-nvim";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
