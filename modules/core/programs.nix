@@ -15,10 +15,8 @@
     flake = "/home/${username}/nixos-config";
   };
 
-  programs.neovim = {
-    enable = true;
-    defaultEditor = true;
-  };
+  wrappers.neovim.enable = true;
+  environment.variables.EDITOR = "nvim";
 
   environment.systemPackages = with pkgs; [
     vim

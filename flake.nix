@@ -32,6 +32,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    nvim-config = {
+      url = "git+ssh://git@github.com/kevinpita/nixos-nvim";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     nixos-secrets = {
       url = "git+ssh://git@github.com/kevinpita/nixos-secrets";
       flake = false;

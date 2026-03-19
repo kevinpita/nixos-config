@@ -41,6 +41,7 @@ let
     inputs.comin.nixosModules.comin
     inputs.disko.nixosModules.disko
     inputs.home-manager.nixosModules.home-manager
+    inputs.nvim-config.nixosModules.neovim
     inputs.sops-nix.nixosModules.sops
     ./modules/core
     ./modules/features
