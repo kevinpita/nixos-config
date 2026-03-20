@@ -51,10 +51,6 @@
       url = "github:markus1189/nixpkgs/claude-code-2.1.77-to-2.1.78";
     };
 
-    nixpkgs-sublime-merge = {
-      url = "github:kevinpita/nixpkgs/sublime-merge-2123";
-    };
-
   };
 
   outputs =

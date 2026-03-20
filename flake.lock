@@ -226,22 +226,6 @@
         "type": "github"
       }
     },
-    "nixpkgs-sublime-merge": {
-      "locked": {
-        "lastModified": 1771957954,
-        "narHash": "sha256-DBuITNyRRm4Wcw/rtKFCeoIYpiLF/++CaWO1RAyua8o=",
-        "owner": "kevinpita",
-        "repo": "nixpkgs",
-        "rev": "3a0e1cf924e11c965ca35f4a68af02e35f35ffad",
-        "type": "github"
-      },
-      "original": {
-        "owner": "kevinpita",
-        "ref": "sublime-merge-2123",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "nixpkgs_2": {
       "locked": {
         "lastModified": 1766025857,
@@ -374,7 +358,6 @@
         "nixos-work": "nixos-work",
         "nixpkgs": "nixpkgs_4",
         "nixpkgs-claude-code": "nixpkgs-claude-code",
-        "nixpkgs-sublime-merge": "nixpkgs-sublime-merge",
         "nvim-config": "nvim-config",
         "sops-nix": "sops-nix",
         "treefmt-nix": "treefmt-nix_2"
