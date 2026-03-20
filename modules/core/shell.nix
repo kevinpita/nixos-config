@@ -26,7 +26,8 @@
         cat = "bat";
         diff = "difft";
         htop = "btm";
-        vi = "vim";
+        vi = "nvim";
+        vim = "nvim";
         neofetch = "fastfetch";
 
         gittime = ''git commit --amend --date="$(date -Iseconds)" --no-edit'';
