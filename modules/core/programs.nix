@@ -32,7 +32,7 @@
 
     dmidecode
     fastfetch
-    htop
+    bottom
     i2c-tools
     lm_sensors
     pciutils

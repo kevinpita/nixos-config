@@ -25,6 +25,7 @@
 
         cat = "bat";
         diff = "difft";
+        htop = "btm";
         vi = "vim";
         neofetch = "fastfetch";
 
