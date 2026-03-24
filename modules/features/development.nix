@@ -11,7 +11,6 @@ lib.mkIf config.features.development.enable {
     go
     python3
 
-    claude-code
     gemini-cli
     gh
     lazydocker
