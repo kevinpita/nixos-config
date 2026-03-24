@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  username,
   ...
 }:
 lib.mkIf config.features.claude.enable {
@@ -9,4 +10,10 @@ lib.mkIf config.features.claude.enable {
     claude-code
     rtk
   ];
+
+  home-manager.users.${username} = {
+    programs.zsh.shellAliases = {
+      clauded = "claude --dangerously-skip-permissions";
+    };
+  };
 }
