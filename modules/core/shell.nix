@@ -60,6 +60,8 @@
         fi
 
         [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
+
+        copy() { command cat "$1" | wl-copy; }
       '';
     };
 
