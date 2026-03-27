@@ -46,6 +46,7 @@
         signing = {
           key = "~/.ssh/id_ed25519_sign.pub";
           signByDefault = true;
+          format = "ssh";
         };
         settings = {
           user = {
