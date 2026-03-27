@@ -62,6 +62,14 @@
         [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
 
         copy() { command cat "$1" | wl-copy; }
+
+        go() {
+          if [[ "$1" == "test" ]]; then
+            shift; command gotest "$@"
+          else
+            command go "$@"
+          fi
+        }
       '';
     };
 

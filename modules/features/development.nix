@@ -9,6 +9,7 @@
 lib.mkIf config.features.development.enable {
   environment.systemPackages = with pkgs; [
     go
+    gotest
     python3
 
     gemini-cli
