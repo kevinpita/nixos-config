@@ -1,5 +1,6 @@
 {
   inputs,
+  pkgs,
   username,
   hostname,
   config,
@@ -38,6 +39,8 @@
         git.enable = true;
       };
 
+      home.packages = with pkgs; [ worktrunk ];
+
       programs.git = {
         enable = true;
         signing = {
@@ -51,7 +54,6 @@
           };
           init.defaultBranch = "main";
           tag.gpgsign = true;
-          gpg.format = "ssh";
           pull.rebase = true;
         };
       };
