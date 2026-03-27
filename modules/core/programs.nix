@@ -27,6 +27,7 @@
     curl
     jq
     wget
+    unzip
     zip
 
     dmidecode

@@ -29,6 +29,7 @@
         vi = "nvim";
         vim = "nvim";
         neofetch = "fastfetch";
+        zip = "zip -r";
 
         gittime = ''git commit --amend --date="$(date -Iseconds)" --no-edit'';
         switch = "nh os switch ~/nixos-config";
