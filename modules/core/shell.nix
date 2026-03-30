@@ -61,6 +61,7 @@
         fi
 
         [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
+        [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
 
         copy() { command cat "$1" | wl-copy; }
 
