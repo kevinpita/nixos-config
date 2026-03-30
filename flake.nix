@@ -47,9 +47,7 @@
       flake = false;
     };
 
-    nixpkgs-claude-code = {
-      url = "github:markus1189/nixpkgs/claude-code-2.1.83-to-2.1.84";
-    };
+    claude-code.url = "github:sadjow/claude-code-nix";
 
   };
 

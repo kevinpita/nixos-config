@@ -9,16 +9,7 @@ let
   overlays = [
     inputs.nix-vscode-extensions.overlays.default
 
-    (_final: _prev: {
-      claude-code =
-        let
-          nixpkgs-claude-code-pkgs = import inputs.nixpkgs-claude-code {
-            inherit system;
-            config.allowUnfree = true;
-          };
-        in
-        nixpkgs-claude-code-pkgs.claude-code;
-    })
+    inputs.claude-code.overlays.default
   ];
 
   pkgs = import inputs.nixpkgs {
