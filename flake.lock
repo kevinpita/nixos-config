@@ -133,6 +133,22 @@
         "type": "github"
       }
     },
+    "kevinpita-nixpkgs": {
+      "locked": {
+        "lastModified": 1774886847,
+        "narHash": "sha256-YZYIhwuE1pZXQvehLWwREaOuo1wvhdUtYsLO2NHqG6M=",
+        "owner": "kevinpita",
+        "repo": "nixpkgs",
+        "rev": "995032b924125e02e1311aa67c9dad24e58de65d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kevinpita",
+        "ref": "helm-tui-init",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nix-vscode-extensions": {
       "inputs": {
         "nixpkgs": "nixpkgs_3"
@@ -389,6 +405,7 @@
         "disko": "disko",
         "flake-parts": "flake-parts",
         "home-manager": "home-manager",
+        "kevinpita-nixpkgs": "kevinpita-nixpkgs",
         "nix-vscode-extensions": "nix-vscode-extensions",
         "nixos-grub-themes": "nixos-grub-themes",
         "nixos-hardware": "nixos-hardware",

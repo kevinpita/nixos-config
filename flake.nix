@@ -49,6 +49,9 @@
 
     claude-code.url = "github:sadjow/claude-code-nix";
 
+    # TODO: remove once helm-tui is merged into nixpkgs
+    kevinpita-nixpkgs.url = "github:kevinpita/nixpkgs/helm-tui-init";
+
   };
 
   outputs =

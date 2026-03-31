@@ -31,6 +31,7 @@ lib.mkIf config.features.kubernetes.enable {
     helm
     pkgs.kubectx
     pkgs.k9s
+    pkgs.helm-tui
   ];
 
   home-manager.users.${username} = {
