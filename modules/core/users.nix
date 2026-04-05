@@ -39,7 +39,10 @@
         git.enable = true;
       };
 
-      home.packages = with pkgs; [ worktrunk ];
+      home.packages = with pkgs; [
+        git-filter-repo
+        worktrunk
+      ];
 
       programs.git = {
         enable = true;
