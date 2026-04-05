@@ -26,6 +26,7 @@
 
     curl
     jq
+    yq-go
     wget
     unzip
     zip
