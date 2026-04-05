@@ -21,6 +21,7 @@ lib.mkIf config.features.development.enable {
 
   home-manager.users.${username} = {
     home.packages = with pkgs; [
+      delta
       nixd
       nixfmt
 
@@ -105,7 +106,12 @@ lib.mkIf config.features.development.enable {
       lazygit = {
         enable = true;
         settings = {
-          git.overrideGpg = true;
+          git = {
+            overrideGpg = true;
+            pagers = [
+              { pager = "delta --dark --paging=never"; }
+            ];
+          };
           customCommands = [
             {
               key = "C";
