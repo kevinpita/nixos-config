@@ -13,7 +13,7 @@ let
 
     # TODO: remove once helm-tui is merged into nixpkgs
     (_final: _prev: {
-      helm-tui = inputs.kevinpita-nixpkgs.legacyPackages.${system}.helm-tui;
+      inherit (inputs.kevinpita-nixpkgs.legacyPackages.${system}) helm-tui;
     })
   ];
 
