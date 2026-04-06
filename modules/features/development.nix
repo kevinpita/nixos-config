@@ -39,6 +39,7 @@ lib.mkIf config.features.development.enable {
       tmux = {
         enable = true;
         terminal = "tmux-256color";
+        mouse = true;
       };
 
       direnv = {
