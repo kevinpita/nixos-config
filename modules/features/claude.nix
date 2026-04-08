@@ -7,6 +7,7 @@
 }:
 lib.mkIf config.features.claude.enable {
   environment.systemPackages = with pkgs; [
+    codex
     claude-code
     rtk
   ];
