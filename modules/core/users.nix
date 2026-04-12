@@ -51,6 +51,13 @@
           signByDefault = true;
           format = "ssh";
         };
+        aliases = {
+          most = "!git log --format=format: --name-only --since=\"1 year ago\" | sort | uniq -c | sort -nr | head -20";
+          who = "shortlog -sn --no-merges";
+          bug = "!git log -i -E --grep=\"fix|bug|broken\" --name-only --format='' | sort | uniq -c | sort -nr | head -20";
+          com = "!git log --format='%ad' --date=format:'%Y-%m' | sort | uniq -c";
+          hotfix = "!git log --oneline --since=\"1 year ago\" | grep -iE 'revert|hotfix|emergency|rollback'";
+        };
         settings = {
           user = {
             name = "Kevin Pita";

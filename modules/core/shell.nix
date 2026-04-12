@@ -63,6 +63,15 @@
         [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
         [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
 
+        gith() {
+          printf "\033[1mgit aliases:\033[0m\n"
+          printf "  \033[33mmost\033[0m    most changed files in the last year\n"
+          printf "  \033[33mwho\033[0m     top contributors by commit count\n"
+          printf "  \033[33mbug\033[0m     files most associated with bug fixes\n"
+          printf "  \033[33mcom\033[0m     commit activity by month\n"
+          printf "  \033[33mhotfix\033[0m  hotfix/revert commits from the last year\n"
+        }
+
         copy() { command cat "$1" | wl-copy; }
 
         go() {
