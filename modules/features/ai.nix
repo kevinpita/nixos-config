@@ -5,7 +5,7 @@
   username,
   ...
 }:
-lib.mkIf config.features.claude.enable {
+lib.mkIf config.features.ai.enable {
   environment.systemPackages = with pkgs; [
     codex
     claude-code

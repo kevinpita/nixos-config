@@ -14,11 +14,11 @@
     auto-update.enable = lib.mkEnableOption "Automatic updates via comin";
     kubernetes.enable = lib.mkEnableOption "Kubernetes tools (kubectl, helm, k9s, kubectx)";
     aws.enable = lib.mkEnableOption "AWS tools (awscli2, aws-iam-authenticator)";
-    claude.enable = lib.mkEnableOption "Claude AI tools (claude-code, rtk)";
+    ai.enable = lib.mkEnableOption "AI tools (claude-code, codex, gemini-cli, rtk)";
   };
 
   imports = [
-    ./claude.nix
+    ./ai.nix
     ./desktop.nix
     ./development.nix
     ./docker.nix
