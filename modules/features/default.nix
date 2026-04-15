@@ -3,6 +3,7 @@
   options.features = {
     desktop.enable = lib.mkEnableOption "Desktop environment (GNOME, audio, fonts)";
     development.enable = lib.mkEnableOption "Development tools (tmux, direnv, vscode, jetbrains, lazygit)";
+    zed.enable = lib.mkEnableOption "Zed editor managed through Home Manager";
     docker.enable = lib.mkEnableOption "Docker container runtime";
     virtualization.enable = lib.mkEnableOption "Virtualization (libvirt, virt-manager)";
     browsers.enable = lib.mkEnableOption "Web browsers (Brave, Chromium, Firefox)";
@@ -21,6 +22,7 @@
     ./ai.nix
     ./desktop.nix
     ./development.nix
+    ./zed.nix
     ./docker.nix
     ./virtualization.nix
     ./browsers.nix

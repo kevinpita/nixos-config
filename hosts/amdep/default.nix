@@ -14,6 +14,7 @@
   features = {
     desktop.enable = true;
     development.enable = true;
+    zed.enable = true;
     docker.enable = true;
     virtualization.enable = true;
     browsers.enable = true;
