@@ -66,7 +66,6 @@ lib.mkIf config.features.development.enable {
 
       code-cursor-fhs
 
-      jetbrains.clion
       jetbrains.datagrip
       jetbrains.goland
       jetbrains.idea
