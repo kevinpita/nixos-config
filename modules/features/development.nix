@@ -64,8 +64,6 @@ lib.mkIf config.features.development.enable {
       nixd
       nixfmt
 
-      code-cursor-fhs
-
       jetbrains.datagrip
       jetbrains.goland
       jetbrains.idea
