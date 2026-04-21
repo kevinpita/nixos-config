@@ -28,6 +28,7 @@
     jq
     yq-go
     wget
+    lz4
     unzip
     zip
 
