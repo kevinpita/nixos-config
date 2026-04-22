@@ -11,7 +11,7 @@ lib.mkIf config.features.multimedia.enable {
       ffmpeg
       obs-studio
       obsidian
-      tidal-hifi
+      sone # tidal
       vlc
     ];
   };
