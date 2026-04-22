@@ -48,62 +48,43 @@ lib.mkIf config.features.desktop.enable {
       wl-clipboard
     ];
 
-    programs.alacritty = {
-      enable = true;
-      settings = {
-        env.TERM = "xterm-256color";
-        window.opacity = 0.95;
-        font = {
-          normal = {
-            family = "JetBrains Mono Nerd Font";
-            style = "Regular";
-          };
-          bold = {
-            family = "JetBrains Mono Nerd Font";
-            style = "Bold";
-          };
-          italic = {
-            family = "JetBrains Mono Nerd Font";
-            style = "Italic";
-          };
-          size = 20;
-        };
-      };
-    };
-
     dconf = {
       enable = true;
-      settings = {
-        "org/gnome/shell" = {
-          disable-user-extensions = false;
-          enabled-extensions = [
-            "caffeine@patapon.info"
-            "clipboard-history@alexsaveau.dev"
-            "tailscale-status@maxgallup.github.com"
-            "claude-code-usage@haletran.com"
-          ];
-        };
-        "org/gnome/shell/extensions/caffeine" = {
-          show-indicator = true;
-        };
-        "org/gnome/desktop/interface" = {
-          color-scheme = "prefer-dark";
-          clock-show-seconds = true;
-        };
-        "org/gnome/shell/keybindings" = {
-          show-screenshot-ui = [ "<Super>space" ];
-        };
-        "org/gnome/settings-daemon/plugins/media-keys" = {
-          custom-keybindings = [
-            "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
-          ];
-        };
-        "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0" = {
-          name = "Open Alacritty";
-          binding = "<Super>Return";
-          command = "alacritty";
-        };
-      };
+      settings = lib.mkMerge [
+        {
+          "org/gnome/shell" = {
+            disable-user-extensions = false;
+            enabled-extensions = [
+              "caffeine@patapon.info"
+              "clipboard-history@alexsaveau.dev"
+              "tailscale-status@maxgallup.github.com"
+              "claude-code-usage@haletran.com"
+            ];
+          };
+          "org/gnome/shell/extensions/caffeine" = {
+            show-indicator = true;
+          };
+          "org/gnome/desktop/interface" = {
+            color-scheme = "prefer-dark";
+            clock-show-seconds = true;
+          };
+          "org/gnome/shell/keybindings" = {
+            show-screenshot-ui = [ "<Super>space" ];
+          };
+        }
+        (lib.mkIf (config.features.ghostty.enable || config.features.alacritty.enable) {
+          "org/gnome/settings-daemon/plugins/media-keys" = {
+            custom-keybindings = [
+              "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
+            ];
+          };
+          "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0" = {
+            name = "Open Terminal";
+            binding = "<Super>Return";
+            command = if config.features.ghostty.enable then "ghostty" else "alacritty";
+          };
+        })
+      ];
     };
   };
 }

@@ -2,6 +2,8 @@
 {
   options.features = {
     desktop.enable = lib.mkEnableOption "Desktop environment (GNOME, audio, fonts)";
+    alacritty.enable = lib.mkEnableOption "Alacritty terminal emulator";
+    ghostty.enable = lib.mkEnableOption "Ghostty terminal emulator";
     development.enable = lib.mkEnableOption "Development tools (tmux, direnv, vscode, jetbrains, lazygit)";
     zed.enable = lib.mkEnableOption "Zed editor managed through Home Manager";
     docker.enable = lib.mkEnableOption "Docker container runtime";
@@ -20,7 +22,9 @@
 
   imports = [
     ./ai.nix
+    ./alacritty.nix
     ./desktop.nix
+    ./ghostty.nix
     ./development.nix
     ./zed.nix
     ./docker.nix

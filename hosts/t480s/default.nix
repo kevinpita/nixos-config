@@ -15,6 +15,7 @@
 
   features = {
     desktop.enable = true;
+    ghostty.enable = true;
     development.enable = true;
     zed.enable = true;
     docker.enable = true;
