@@ -35,6 +35,7 @@
     dmidecode
     fastfetch
     bottom
+    gdu
     i2c-tools
     lm_sensors
     pciutils
