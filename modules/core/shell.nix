@@ -25,7 +25,6 @@
         z = "zeditor";
 
         cat = "bat";
-        diff = "difft";
         htop = "btm";
         vi = "nvim";
         vim = "nvim";
