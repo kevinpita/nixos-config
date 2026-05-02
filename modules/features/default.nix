@@ -4,7 +4,8 @@
     desktop.enable = lib.mkEnableOption "Desktop environment (GNOME, audio, fonts)";
     alacritty.enable = lib.mkEnableOption "Alacritty terminal emulator";
     ghostty.enable = lib.mkEnableOption "Ghostty terminal emulator";
-    development.enable = lib.mkEnableOption "Development tools (tmux, direnv, vscode, jetbrains, lazygit)";
+    git.enable = lib.mkEnableOption "Git tools (gh, gh-dash, gh-enhance, lazygit, delta, sublime-merge)";
+    development.enable = lib.mkEnableOption "Development tools (tmux, direnv, vscode, jetbrains)";
     zed.enable = lib.mkEnableOption "Zed editor managed through Home Manager";
     docker.enable = lib.mkEnableOption "Docker container runtime";
     virtualization.enable = lib.mkEnableOption "Virtualization (libvirt, virt-manager)";
@@ -25,6 +26,7 @@
     ./alacritty.nix
     ./desktop.nix
     ./ghostty.nix
+    ./git.nix
     ./development.nix
     ./zed.nix
     ./docker.nix
