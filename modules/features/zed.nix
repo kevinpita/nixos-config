@@ -2,7 +2,6 @@
   config,
   lib,
   pkgs,
-  inputs,
   username,
   ...
 }:
@@ -13,7 +12,6 @@ lib.mkIf config.features.zed.enable {
   home-manager.users.${username} = {
     programs.zed-editor = {
       enable = true;
-      package = inputs.zed.packages.${pkgs.stdenv.hostPlatform.system}.default;
       extensions = [
         "catppuccin-icons"
         "dockerfile"

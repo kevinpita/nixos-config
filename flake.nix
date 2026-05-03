@@ -53,8 +53,6 @@
 
     gemini-cli-nix.url = "github:sadjow/gemini-cli-nix";
 
-    zed.url = "github:zed-industries/zed";
-
     # TODO: remove once helm-tui is merged into nixpkgs
     kevinpita-nixpkgs.url = "github:kevinpita/nixpkgs/helm-tui-init";
 
