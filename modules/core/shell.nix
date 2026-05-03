@@ -15,6 +15,11 @@
       enableZshIntegration = true;
     };
 
+    programs.yazi = {
+      enable = true;
+      enableZshIntegration = true;
+    };
+
     programs.zsh = {
       enable = true;
       enableCompletion = true;
