@@ -12,6 +12,7 @@ lib.mkIf config.features.zed.enable {
   home-manager.users.${username} = {
     programs.zed-editor = {
       enable = true;
+      package = pkgs.zed-editor-fhs;
       extensions = [
         "catppuccin-icons"
         "dockerfile"
@@ -36,6 +37,12 @@ lib.mkIf config.features.zed.enable {
       userSettings = {
         agent_servers = {
           claude-acp = {
+            type = "registry";
+          };
+          codex-acp = {
+            type = "registry";
+          };
+          gemini = {
             type = "registry";
           };
         };
