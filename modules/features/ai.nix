@@ -10,8 +10,12 @@ lib.mkIf config.features.ai.enable {
     codex
     claude-code
     gemini-cli
-    bubblewrap # codex dependency
+    pi-coding-agent
+
     rtk
+
+    bubblewrap # codex dependency
+    fd # pi dependency
   ];
 
   home-manager.users.${username} = {
