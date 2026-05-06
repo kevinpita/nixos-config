@@ -16,6 +16,7 @@
     ghostty.enable = true;
     git.enable = true;
     development.enable = true;
+    devops.enable = true;
     zed.enable = true;
     docker.enable = true;
     virtualization.enable = true;

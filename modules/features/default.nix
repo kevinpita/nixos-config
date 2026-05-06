@@ -6,6 +6,7 @@
     ghostty.enable = lib.mkEnableOption "Ghostty terminal emulator";
     git.enable = lib.mkEnableOption "Git tools (gh, gh-dash, gh-enhance, lazygit, delta, sublime-merge)";
     development.enable = lib.mkEnableOption "Development tools (tmux, direnv, vscode, jetbrains)";
+    devops.enable = lib.mkEnableOption "DevOps tools (wrkflw)";
     zed.enable = lib.mkEnableOption "Zed editor managed through Home Manager";
     docker.enable = lib.mkEnableOption "Docker container runtime";
     virtualization.enable = lib.mkEnableOption "Virtualization (libvirt, virt-manager)";
@@ -28,6 +29,7 @@
     ./ghostty.nix
     ./git.nix
     ./development.nix
+    ./devops.nix
     ./zed.nix
     ./docker.nix
     ./virtualization.nix
