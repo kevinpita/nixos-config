@@ -10,6 +10,7 @@ lib.mkIf config.features.ai.enable {
     codex
     claude-code
     gemini-cli
+    herdr
     pi-coding-agent
 
     rtk

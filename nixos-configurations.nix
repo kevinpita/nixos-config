@@ -19,6 +19,11 @@ let
     (_final: _prev: {
       inherit (inputs.kevinpita-nixpkgs.legacyPackages.${system}) helm-tui;
     })
+
+    # TODO: remove once herdr is merged into nixpkgs
+    (_final: _prev: {
+      inherit (inputs.kevinpita-herdr-nixpkgs.legacyPackages.${system}) herdr;
+    })
   ];
 
   pkgs = import inputs.nixpkgs {
