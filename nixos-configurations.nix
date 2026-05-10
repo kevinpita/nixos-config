@@ -20,9 +20,8 @@ let
       inherit (inputs.kevinpita-nixpkgs.legacyPackages.${system}) helm-tui;
     })
 
-    # TODO: remove once herdr is merged into nixpkgs
     (_final: _prev: {
-      inherit (inputs.kevinpita-herdr-nixpkgs.legacyPackages.${system}) herdr;
+      herdr = inputs.herdr-nix.packages.${system}.default;
     })
   ];
 

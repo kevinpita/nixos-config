@@ -56,8 +56,7 @@
     # TODO: remove once helm-tui is merged into nixpkgs
     kevinpita-nixpkgs.url = "github:kevinpita/nixpkgs/helm-tui-init";
 
-    # TODO: remove once herdr is merged into nixpkgs
-    kevinpita-herdr-nixpkgs.url = "github:kevinpita/nixpkgs/herdr-init";
+    herdr-nix.url = "github:kevinpita/herdr-nix";
 
   };
 
