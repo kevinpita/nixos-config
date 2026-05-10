@@ -22,6 +22,8 @@ lib.mkIf config.features.ai.enable {
   home-manager.users.${username} = {
     programs.zsh.shellAliases = {
       clauded = "claude --dangerously-skip-permissions";
+      hp = "herdr session attach peersyst";
+      hr = "herdr session attach reservame";
     };
   };
 }
