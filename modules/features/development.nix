@@ -129,9 +129,8 @@ lib.mkIf config.features.development.enable {
         nix-direnv.enable = true;
       };
 
-      vscode = {
+      vscodium = {
         enable = true;
-        package = pkgs.vscodium;
         profiles.default = {
           extensions = with pkgs.vscode-marketplace; [
             eliverlara.andromeda

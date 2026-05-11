@@ -23,10 +23,9 @@
         "sd_mod"
       ];
       kernelModules = [ ];
-      extraModulePackages = [ ];
     };
-    kernelModules = [ "kvm-amd" ];
     extraModulePackages = [ ];
+    kernelModules = [ "kvm-amd" ];
   };
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
