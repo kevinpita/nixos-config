@@ -55,6 +55,8 @@ let
 in
 {
   flake.nixosConfigurations = {
+    t14g6 = mkHost { hostname = "t14g6"; };
+
     t480s = mkHost { hostname = "t480s"; };
 
     m710q = mkHost { hostname = "m710q"; };
