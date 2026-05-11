@@ -22,8 +22,8 @@ lib.mkIf config.features.syncthing.enable {
     overrideFolders = true;
     settings = {
       devices = {
-        "Pixel 9 Pro" = {
-          id = "I5B22T5-HRH2QH2-KX2VJAN-EYCKD26-GS5HVRM-S2VCCES-ALQ22VV-B7JN4QC";
+        "Pixel 10 Pro" = {
+          id = "FV65C2K-IUTIX22-N7YONWB-CC3MQRK-PHJ44OZ-VHUWH3W-CO2B4M2-6EUBYA4";
           introducer = true;
         };
       };
@@ -31,7 +31,7 @@ lib.mkIf config.features.syncthing.enable {
         "afnt2-e5u36" = {
           label = "Keepass";
           path = "/home/${username}/keepass";
-          devices = [ "Pixel 9 Pro" ];
+          devices = [ "Pixel 10 Pro" ];
         };
       };
     };
