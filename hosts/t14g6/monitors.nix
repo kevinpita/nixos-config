@@ -1,0 +1,53 @@
+{
+  username,
+  ...
+}:
+{
+  home-manager.users.${username} = {
+    xdg.configFile."monitors.xml".force = true;
+    xdg.configFile."monitors.xml".text = ''
+      <monitors version="2">
+        <configuration>
+          <layoutmode>physical</layoutmode>
+          <logicalmonitor>
+            <x>0</x>
+            <y>0</y>
+            <scale>1</scale>
+            <monitor>
+              <monitorspec>
+                <connector>DP-8</connector>
+                <vendor>AUS</vendor>
+                <product>VG27A</product>
+                <serial>R5LMQS099715</serial>
+              </monitorspec>
+              <mode>
+                <width>2560</width>
+                <height>1440</height>
+                <rate>144.006</rate>
+              </mode>
+            </monitor>
+          </logicalmonitor>
+          <logicalmonitor>
+            <x>2560</x>
+            <y>0</y>
+            <scale>1</scale>
+            <primary>yes</primary>
+            <monitor>
+              <monitorspec>
+                <connector>DP-10</connector>
+                <vendor>AUS</vendor>
+                <product>VG27A</product>
+                <serial>R2LMQS086633</serial>
+              </monitorspec>
+              <mode>
+                <width>2560</width>
+                <height>1440</height>
+                <rate>144.006</rate>
+              </mode>
+            </monitor>
+          </logicalmonitor>
+        </configuration>
+      </monitors>
+    '';
+  };
+}

@@ -4,6 +4,7 @@
     ./disko-config.nix
     ./hardware-configuration.nix
 
+    ./monitors.nix
     ./syncthing.nix
     ./tlp.nix
   ];
