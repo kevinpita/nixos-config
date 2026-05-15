@@ -13,6 +13,7 @@
             <x>0</x>
             <y>0</y>
             <scale>1</scale>
+            <primary>yes</primary>
             <monitor>
               <monitorspec>
                 <connector>DP-8</connector>
@@ -31,7 +32,6 @@
             <x>2560</x>
             <y>0</y>
             <scale>1</scale>
-            <primary>yes</primary>
             <monitor>
               <monitorspec>
                 <connector>DP-10</connector>
