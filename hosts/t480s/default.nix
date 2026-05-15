@@ -19,7 +19,8 @@
     git.enable = true;
     development.enable = true;
     devops.enable = true;
-    zed.enable = true;
+    editors.zed.enable = true;
+    editors.vscode.enable = false;
     docker.enable = true;
     virtualization.enable = true;
     browsers.enable = true;

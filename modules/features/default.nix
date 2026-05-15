@@ -5,9 +5,12 @@
     alacritty.enable = lib.mkEnableOption "Alacritty terminal emulator";
     ghostty.enable = lib.mkEnableOption "Ghostty terminal emulator";
     git.enable = lib.mkEnableOption "Git tools (gh, gh-dash, gh-enhance, lazygit, delta, sublime-merge)";
-    development.enable = lib.mkEnableOption "Development tools (tmux, direnv, vscode, jetbrains)";
+    development.enable = lib.mkEnableOption "Development tools (tmux, direnv, jetbrains)";
     devops.enable = lib.mkEnableOption "DevOps tools (wrkflw)";
-    zed.enable = lib.mkEnableOption "Zed editor managed through Home Manager";
+    editors = {
+      zed.enable = lib.mkEnableOption "Zed editor managed through Home Manager";
+      vscode.enable = lib.mkEnableOption "VSCodium managed through Home Manager";
+    };
     docker.enable = lib.mkEnableOption "Docker container runtime";
     virtualization.enable = lib.mkEnableOption "Virtualization (libvirt, virt-manager)";
     browsers.enable = lib.mkEnableOption "Web browsers (Brave, Chromium, Firefox)";
@@ -30,7 +33,8 @@
     ./git.nix
     ./development.nix
     ./devops.nix
-    ./zed.nix
+    ./editors/zed.nix
+    ./editors/vscode.nix
     ./docker.nix
     ./virtualization.nix
     ./browsers.nix
