@@ -5,7 +5,7 @@
   username,
   ...
 }:
-lib.mkIf config.features.virtualization.enable {
+lib.mkIf config.features.virtualization.virt-manager.enable {
   virtualisation.libvirtd = {
     enable = true;
     qemu = {
@@ -16,7 +16,10 @@ lib.mkIf config.features.virtualization.enable {
     onBoot = "ignore";
     onShutdown = "shutdown";
   };
+  virtualisation.spiceUSBRedirection.enable = true;
+
   programs.dconf.enable = true;
+  programs.virt-manager.enable = true;
 
   users.users.${username}.extraGroups = [
     "libvirtd"
@@ -38,7 +41,6 @@ lib.mkIf config.features.virtualization.enable {
 
   home-manager.users.${username} = {
     home.packages = with pkgs; [
-      virt-manager
       virt-viewer
     ];
 

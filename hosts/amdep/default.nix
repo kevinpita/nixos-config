@@ -20,7 +20,6 @@
     editors.zed.enable = true;
     editors.vscode.enable = false;
     docker.enable = true;
-    virtualization.enable = true;
     browsers.enable = true;
     multimedia.enable = true;
     communication.enable = true;

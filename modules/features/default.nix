@@ -12,7 +12,9 @@
       vscode.enable = lib.mkEnableOption "VSCodium managed through Home Manager";
     };
     docker.enable = lib.mkEnableOption "Docker container runtime";
-    virtualization.enable = lib.mkEnableOption "Virtualization (libvirt, virt-manager)";
+    virtualization = {
+      virt-manager.enable = lib.mkEnableOption "Virt-manager virtualization (libvirt, QEMU/KVM)";
+    };
     browsers.enable = lib.mkEnableOption "Web browsers (Brave, Chromium, Firefox)";
     multimedia.enable = lib.mkEnableOption "Multimedia applications (VLC, ffmpeg, Tidal)";
     communication.enable = lib.mkEnableOption "Communication apps (Telegram, Legcord)";
