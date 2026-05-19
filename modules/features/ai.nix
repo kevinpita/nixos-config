@@ -20,6 +20,30 @@ lib.mkIf config.features.ai.enable {
   ];
 
   home-manager.users.${username} = {
+    xdg.configFile."herdr/config.toml" = {
+      force = true;
+      text = ''
+        onboarding = false
+
+        [theme]
+        name = "dracula"
+
+        [ui]
+        show_agent_labels_on_pane_borders = true
+        agent_panel_scope = "all"
+
+        [[keys.command]]
+        key = "g"
+        type = "pane"
+        command = "lazygit"
+
+        [[keys.command]]
+        key = "z"
+        type = "shell"
+        command = "z ."
+      '';
+    };
+
     programs.zsh.shellAliases = {
       clauded = "claude --dangerously-skip-permissions";
       hp = "herdr session attach peersyst";
