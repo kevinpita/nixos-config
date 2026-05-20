@@ -16,7 +16,7 @@
             <primary>yes</primary>
             <monitor>
               <monitorspec>
-                <connector>DP-8</connector>
+                <connector>HDMI-1</connector>
                 <vendor>AUS</vendor>
                 <product>VG27A</product>
                 <serial>R5LMQS099715</serial>
@@ -34,7 +34,7 @@
             <scale>1</scale>
             <monitor>
               <monitorspec>
-                <connector>DP-10</connector>
+                <connector>DP-12</connector>
                 <vendor>AUS</vendor>
                 <product>VG27A</product>
                 <serial>R2LMQS086633</serial>
