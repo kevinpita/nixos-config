@@ -33,14 +33,9 @@ lib.mkIf config.features.ai.enable {
         agent_panel_scope = "all"
 
         [[keys.command]]
-        key = "g"
+        key = "prefix+g"
         type = "pane"
         command = "lazygit"
-
-        [[keys.command]]
-        key = "z"
-        type = "shell"
-        command = "z ."
       '';
     };
 
