@@ -30,5 +30,6 @@
     ai.enable = true;
     tailscale.enable = true;
     sops-admin.enable = true;
+    work.enable = true;
   };
 }

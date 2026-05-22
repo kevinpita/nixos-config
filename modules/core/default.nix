@@ -7,6 +7,5 @@
     ./zsh
     ./programs.nix
     ./secrets.nix
-    ./work.nix
   ];
 }

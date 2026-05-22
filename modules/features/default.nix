@@ -26,6 +26,7 @@
     kubernetes.enable = lib.mkEnableOption "Kubernetes tools (kubectl, helm, k9s, kubectx)";
     aws.enable = lib.mkEnableOption "AWS tools (awscli2, aws-iam-authenticator)";
     ai.enable = lib.mkEnableOption "AI tools (claude-code, codex, gemini-cli, rtk)";
+    work.enable = lib.mkEnableOption "Work environment (peersyst ssh/aws/kube secrets and git config)";
   };
 
   imports = [
@@ -50,5 +51,6 @@
     ./auto-update.nix
     ./kubernetes.nix
     ./aws.nix
+    ./work.nix
   ];
 }
