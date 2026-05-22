@@ -18,6 +18,7 @@
       virt-manager.enable = lib.mkEnableOption "Virt-manager virtualization (libvirt, QEMU/KVM)";
     };
     kubernetes.enable = lib.mkEnableOption "Kubernetes tools (kubectl, helm, k9s, kubectx)";
+    k3s.enable = lib.mkEnableOption "Single-node k3s server";
     aws.enable = lib.mkEnableOption "AWS tools (awscli2, aws-iam-authenticator)";
 
     syncthing.enable = lib.mkEnableOption "Syncthing file synchronization";
@@ -46,7 +47,7 @@
     ./cloud/docker.nix
     ./cloud/virtualization.nix
     ./cloud/kubernetes.nix
-    ./cloud/cluster.nix
+    ./cloud/k3s.nix
     ./cloud/aws.nix
 
     ./net/syncthing.nix

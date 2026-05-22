@@ -13,5 +13,8 @@
     tailscale.enable = true;
     syncthing.enable = true;
     auto-update.enable = false;
+
+    kubernetes.enable = true;
+    k3s.enable = true;
   };
 }
