@@ -6,7 +6,9 @@
 }:
 lib.mkIf config.features.ghostty.enable {
   home-manager.users.${username} = {
-    programs.zsh.shellAliases.ghostty-terminfo = "ghostty +copy-terminfo ssh";
+    programs.zsh.initContent = ''
+      copyterm() { infocmp -x xterm-ghostty | ssh "$1" -- tic -x -; }
+    '';
 
     programs.ghostty = {
       enable = true;
