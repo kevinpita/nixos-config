@@ -5,7 +5,7 @@
   username,
   ...
 }:
-lib.mkIf config.features.editors.zed.enable {
+lib.mkIf config.features.zed.enable {
   # Enable nix-ld for dynamically linked language servers that Zed downloads
   programs.nix-ld.enable = true;
 

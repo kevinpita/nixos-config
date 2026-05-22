@@ -18,9 +18,7 @@
     ghostty.enable = true;
     git.enable = true;
     development.enable = true;
-    devops.enable = true;
-    editors.zed.enable = true;
-    editors.vscode.enable = false;
+    zed.enable = true;
     docker.enable = true;
     browsers.enable = true;
     multimedia.enable = true;

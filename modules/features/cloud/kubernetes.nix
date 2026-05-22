@@ -5,30 +5,10 @@
   username,
   ...
 }:
-let
-  helm = pkgs.buildGoModule rec {
-    pname = "helm";
-    version = "3.20.0";
-    src = pkgs.fetchFromGitHub {
-      owner = "helm";
-      repo = "helm";
-      rev = "v${version}";
-      hash = "sha256-rJ05qhw8Ebo4EiqZudNe5ETuuzfbJPpy0dZfP7rE2hE=";
-    };
-    vendorHash = "sha256-dIDSdN7rJ1qkJj2M47OEQDQ+88OYfCpZkmicvNcq/us=";
-    doCheck = false;
-    subPackages = [ "cmd/helm" ];
-    ldflags = [
-      "-s"
-      "-w"
-      "-X helm.sh/helm/v3/internal/version.version=v${version}"
-    ];
-  };
-in
 lib.mkIf config.features.kubernetes.enable {
   environment.systemPackages = [
     pkgs.kubectl
-    helm
+    pkgs.kubernetes-helm
     pkgs.kubectx
     pkgs.k9s
     pkgs.helm-tui
