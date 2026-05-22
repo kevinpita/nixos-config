@@ -8,8 +8,6 @@
     ./syncthing.nix
   ];
 
-  bootloader.mode = "bios";
-
   features = {
     docker.enable = true;
     ssh-server.enable = true;
