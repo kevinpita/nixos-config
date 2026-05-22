@@ -9,7 +9,7 @@
 
   features = {
     docker.enable = true;
-    ssh-server.enable = true;
+    tailscale.enable = true;
     syncthing.enable = true;
   };
 }

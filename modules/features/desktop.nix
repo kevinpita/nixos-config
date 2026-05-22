@@ -7,6 +7,7 @@
 }:
 lib.mkIf config.features.desktop.enable {
   services = {
+    gnome.gcr-ssh-agent.enable = false;
     desktopManager.gnome.enable = true;
     displayManager.gdm = {
       enable = true;

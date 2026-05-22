@@ -6,6 +6,8 @@
 {
   services.fwupd.enable = true;
 
+  programs.ssh.startAgent = true;
+
   programs.nh = {
     enable = true;
     clean = {

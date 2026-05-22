@@ -28,5 +28,7 @@
     kubernetes.enable = true;
     aws.enable = true;
     ai.enable = true;
+    tailscale.enable = true;
+    sops-admin.enable = true;
   };
 }

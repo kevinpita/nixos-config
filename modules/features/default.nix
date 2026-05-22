@@ -19,7 +19,8 @@
     multimedia.enable = lib.mkEnableOption "Multimedia applications (VLC, ffmpeg, Tidal)";
     communication.enable = lib.mkEnableOption "Communication apps (Telegram, Legcord)";
     syncthing.enable = lib.mkEnableOption "Syncthing file synchronization";
-    ssh-server.enable = lib.mkEnableOption "SSH server for remote access";
+    tailscale.enable = lib.mkEnableOption "Tailscale VPN with Tailscale SSH";
+    sops-admin.enable = lib.mkEnableOption "Deploy admin age key for sops editing";
     printing-3d.enable = lib.mkEnableOption "3D printing tools (Prusa Slicer, Super Slicer)";
     auto-update.enable = lib.mkEnableOption "Automatic updates via comin";
     kubernetes.enable = lib.mkEnableOption "Kubernetes tools (kubectl, helm, k9s, kubectx)";
@@ -43,7 +44,8 @@
     ./multimedia.nix
     ./communication.nix
     ./syncthing.nix
-    ./ssh-server.nix
+    ./tailscale.nix
+    ./sops-admin.nix
     ./printing-3d.nix
     ./auto-update.nix
     ./kubernetes.nix
