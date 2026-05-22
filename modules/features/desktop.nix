@@ -9,10 +9,7 @@ lib.mkIf config.features.desktop.enable {
   services = {
     gnome.gcr-ssh-agent.enable = false;
     desktopManager.gnome.enable = true;
-    displayManager.gdm = {
-      enable = true;
-      wayland = true;
-    };
+    displayManager.gdm.enable = true;
     udev.packages = with pkgs; [ gnome-settings-daemon ];
 
     xserver = {
