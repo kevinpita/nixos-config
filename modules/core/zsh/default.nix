@@ -67,7 +67,7 @@
         fi
 
         [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
-        [[ -f ~/.wt.zsh ]] && source ~/.wt.zsh
+        for f in ~/.zsh/completions/*.zsh(N); do source "$f"; done
         [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
 
         gith() {
@@ -108,7 +108,7 @@
     };
 
     home.file.".p10k.zsh".source = ./p10k.zsh;
-    home.file.".wt.zsh".source = ./wt.zsh;
+    home.file.".zsh/completions".source = ./completions;
 
     # Modern ls replacement
     programs.lsd = {

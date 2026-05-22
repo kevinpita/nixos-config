@@ -4,7 +4,7 @@
     ./networking.nix
     ./nix-settings.nix
     ./users.nix
-    ./shell.nix
+    ./zsh
     ./programs.nix
     ./secrets.nix
     ./work.nix
