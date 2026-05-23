@@ -2,9 +2,13 @@
   config,
   lib,
   pkgs,
+  inputs,
   username,
   ...
 }:
+let
+  hasSecrets = inputs ? nixos-secrets;
+in
 lib.mkIf config.features.kubernetes.enable {
   environment.systemPackages = [
     pkgs.kubectl
@@ -14,7 +18,37 @@ lib.mkIf config.features.kubernetes.enable {
     pkgs.kubie
   ];
 
+  sops.secrets = lib.mkIf hasSecrets {
+    "hulk-kubeconfig" = {
+      sopsFile = "${inputs.nixos-secrets}/secrets/hulk-kubeconfig.enc";
+      format = "json";
+      key = "data";
+      owner = username;
+      path = "/home/${username}/.kube/config_hulk";
+      mode = "0600";
+    };
+  };
+
+  systemd.tmpfiles.rules = lib.mkIf hasSecrets [
+    "d /home/${username}/.kube 0700 ${username} users -"
+  ];
+
   home-manager.users.${username} = {
+    home.file.".kube/kubie.yaml".text = ''
+      configs:
+        include:
+          - "~/.kube/config"
+          - "~/.kube/config_*"
+          - "~/.kube/*.yml"
+          - "~/.kube/*.yaml"
+          - "~/.kube/configs/*.yml"
+          - "~/.kube/configs/*.yaml"
+          - "~/.kube/kubie/*.yml"
+          - "~/.kube/kubie/*.yaml"
+        exclude:
+          - "~/.kube/kubie.yaml"
+    '';
+
     programs.zsh = {
       shellAliases = {
         k = "kubectl";
