@@ -25,7 +25,6 @@
     tailscale.enable = lib.mkEnableOption "Tailscale VPN with Tailscale SSH";
 
     sops-admin.enable = lib.mkEnableOption "Deploy admin age key for sops editing";
-    auto-update.enable = lib.mkEnableOption "Automatic updates via comin";
 
     printing-3d.enable = lib.mkEnableOption "3D printing tools (Prusa Slicer, Super Slicer)";
     work.enable = lib.mkEnableOption "Work environment (peersyst ssh/aws/kube secrets and git config)";
@@ -54,7 +53,6 @@
     ./net/tailscale.nix
 
     ./system/sops-admin.nix
-    ./system/auto-update.nix
 
     ./misc/printing-3d.nix
     ./misc/work.nix

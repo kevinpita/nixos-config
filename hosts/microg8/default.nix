@@ -15,6 +15,5 @@
     docker.enable = true;
     tailscale.enable = true;
     syncthing.enable = true;
-    auto-update.enable = true;
   };
 }

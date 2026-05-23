@@ -37,7 +37,7 @@ Flakes-based NixOS configuration for 5 hosts using a three-tier module system: *
 1. `hosts/<hostname>/` (hardware, disko, host overrides)
 1. `modules/core/` (always-on: boot, networking, users, programs, nix-settings, secrets, zsh)
 1. `modules/features/` (conditionally enabled via `features.<name>.enable`)
-1. Flake input modules (home-manager, disko, sops-nix, comin, nvim-config)
+1. Flake input modules (home-manager, disko, sops-nix, nvim-config)
 
 `specialArgs` passes `inputs`, `username` ("kevin", hardcoded in `nixos-configurations.nix`), and `hostname` to every module. Home Manager is integrated into system config via `modules/core/users.nix`, which forwards `config.features` down to HM through `extraSpecialArgs`. So feature flags are visible from both NixOS and Home Manager modules.
 
@@ -59,7 +59,7 @@ Some core modules expose typed options instead of feature flags (`modules/core/b
 | ------- | ------------------- | ------------------------------------------- |
 | amdep | Workstation | Full desktop, dual-boot |
 | hulk | Server | k3s single-node, kubernetes tools |
-| microg8 | Server | BIOS boot, comin auto-update, drive monitor |
+| microg8 | Server | BIOS boot, drive monitor |
 | t14g6 | Laptop | Full desktop, TLP |
 | t480s | ThinkPad laptop | Full desktop, TLP, dual-boot, nixos-hardware module |
 

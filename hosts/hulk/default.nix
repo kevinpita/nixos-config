@@ -9,7 +9,6 @@
   ];
 
   features = {
-    auto-update.enable = false;
     docker.enable = true;
     syncthing.enable = true;
     tailscale.enable = true;

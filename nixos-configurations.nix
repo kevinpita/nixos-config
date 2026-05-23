@@ -31,7 +31,6 @@ let
   };
 
   commonModules = [
-    inputs.comin.nixosModules.comin
     inputs.disko.nixosModules.disko
     inputs.home-manager.nixosModules.home-manager
     inputs.nvim-config.nixosModules.neovim
