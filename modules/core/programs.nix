@@ -46,6 +46,8 @@
     age
     sops
 
+    ghostty.terminfo
+
     # Nix helpers (for nh)
     nix-output-monitor
     nvd
