@@ -57,7 +57,6 @@ in
   flake.nixosConfigurations = {
     amdep = mkHost { hostname = "amdep"; };
     hulk = mkHost { hostname = "hulk"; };
-    m710q = mkHost { hostname = "m710q"; };
     microg8 = mkHost { hostname = "microg8"; };
     t14g6 = mkHost { hostname = "t14g6"; };
     t480s = mkHost { hostname = "t480s"; };
