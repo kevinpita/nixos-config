@@ -5,66 +5,79 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Build and Development Commands
 
 ```bash
-# Apply configuration changes (uses nh)
+# Apply configuration changes (uses nh, configured to point at ~/nixos-config)
 nh os switch ~/nixos-config
 
 # Update flake.lock dependencies
 nix flake update
 
-# Check formatting and linting
-nix flake check
+# Update a single input
+nix flake update <input-name>
 
-# Format all files
+# Check formatting and evaluate all hosts (matches CI)
+nix flake check --all-systems
+
+# Format all files via treefmt (nixfmt, deadnix, statix, yamlfmt, mdformat)
 nix fmt
 
-# Deploy to a new machine via nixos-anywhere
+# Deploy to a new machine
 nix run github:nix-community/nixos-anywhere -- --flake ~/nixos-config#<hostname> root@<ip>
 ```
 
-## Architecture Overview
+See `README.md` for the full deploy/reinstall flow with sops age keys and `--extra-files`.
 
-Flakes-based NixOS configuration managing 4 hosts (1 laptop, 1 workstation, 2 servers) with a three-tier module system: core (always applied), features (opt-in per host), and host-specific overrides.
+## Architecture
 
-### Module Composition Flow
+Flakes-based NixOS configuration for 5 hosts using a three-tier module system: **core** (always applied), **features** (opt-in per host), and **host-specific overrides**.
+
+### Module Composition
 
 `nixos-configurations.nix` is the orchestration center. The `mkHost` factory builds each host by composing:
 
-1. `hosts/<hostname>/` — hardware config, disko partitioning, host-specific overrides
-1. `modules/core/` — always-on system config (boot, networking, users, shell, programs, nix-settings, secrets)
-1. `modules/features/` — conditionally enabled via `features.<name>.enable`
-1. Flake input modules (home-manager, disko, sops-nix, comin)
+1. `hosts/<hostname>/` (hardware, disko, host overrides)
+1. `modules/core/` (always-on: boot, networking, users, programs, nix-settings, secrets, zsh)
+1. `modules/features/` (conditionally enabled via `features.<name>.enable`)
+1. Flake input modules (home-manager, disko, sops-nix, comin, nvim-config)
 
-`specialArgs` passes `inputs`, `username` ("kevin", hardcoded), and `hostname` to all modules. Home Manager is integrated directly into system config via `modules/core/users.nix`, which also forwards `features` config down via `extraSpecialArgs`.
+`specialArgs` passes `inputs`, `username` ("kevin", hardcoded in `nixos-configurations.nix`), and `hostname` to every module. Home Manager is integrated into system config via `modules/core/users.nix`, which forwards `config.features` down to HM through `extraSpecialArgs`. So feature flags are visible from both NixOS and Home Manager modules.
 
-### Key Configuration Patterns
+`pkgs` is constructed once in `nixos-configurations.nix` with the overlay set (vscode extensions, claude-code, codex, gemini, helm-tui pin, herdr) and `allowUnfree = true`, then shared across all hosts.
 
-**Feature flags**: Hosts enable functionality via `features.<name>.enable = true` in their `default.nix`. Options defined in `modules/features/default.nix`, each feature module wraps its config in `lib.mkIf config.features.<name>.enable`.
+### Feature flag pattern
 
-**Custom options**: Some core modules define options (e.g., `bootloader.mode` bios/uefi) using `lib.mkOption` with `lib.mkIf` for conditional logic.
+Options are declared in `modules/features/default.nix` with `lib.mkEnableOption`, organized into subdirs (`cloud/`, `dev/`, `ui/`, `net/`, `system/`, `misc/`). Each feature file wraps its config in `lib.mkIf config.features.<name>.enable`. Hosts opt in by setting `features.<name>.enable = true` in their `default.nix`.
 
-**Host structure**: Each host's `default.nix` imports hardware-configuration.nix, disko-config.nix, and optional host-specific files (custom networking, drive monitoring, syncthing overrides), then enables desired features.
+When adding a new feature: declare the option in `modules/features/default.nix`, add the import there, and gate the entire module body with `lib.mkIf`.
 
-### Secrets Architecture
+### Custom options
 
-Secrets are managed via sops-nix with age encryption. The secrets live in a separate private repo (`nixos-secrets`) pulled as a non-flake input. `modules/core/secrets.nix` configures:
-
-- Per-host secrets from `secrets/<hostname>.yaml`
-- Shared secrets from `secrets/common.yaml` (user password)
-- SSH auth and signing keys deployed to `~/.ssh/`
-- Age key at `/var/lib/sops-nix/key.txt` (shipped during deploy via `--extra-files`)
-
-The secrets input is optional — `inputs ? nixos-secrets` check allows the config to compile without it.
+Some core modules expose typed options instead of feature flags (`modules/core/boot.nix` defines `bootloader.mode` enum bios/uefi, `kernelPackages`, `uefiOSProber`). Hosts override these directly in their `default.nix` (e.g., `bootloader.mode = "bios"` on microg8, `uefiOSProber = true` on dual-boot hosts).
 
 ### Hosts
 
-| Host | Type | GUI | Features |
-|------|------|-----|----------|
-| t480s | ThinkPad laptop | GNOME | desktop, development, virtualization, browsers, multimedia, communication, syncthing, printing-3d |
-| amdep | Workstation | GNOME | desktop, development, virtualization, browsers, multimedia, communication, syncthing |
-| m710q | Server | No | ssh-server, syncthing |
-| microg8 | Server | No | ssh-server, syncthing, auto-update (comin) |
+| Host    | Type                | Notes                                       |
+| ------- | ------------------- | ------------------------------------------- |
+| amdep   | Workstation         | Full desktop, dual-boot                     |
+| hulk    | Server              | k3s single-node, kubernetes tools           |
+| microg8 | Server              | BIOS boot, comin auto-update, drive monitor |
+| t14g6   | Laptop              | Full desktop, TLP                           |
+| t480s   | ThinkPad laptop     | Full desktop, TLP, dual-boot, nixos-hardware module |
 
-## Code Style
+### Secrets (sops-nix + age)
 
-- Formatting enforced by treefmt (nixfmt, deadnix, statix, yamlfmt, mdformat)
-- CI runs `nix flake check --all-systems` on all branches/PRs
+Secrets live in a separate private repo (`nixos-secrets`) pulled as a non-flake input. `modules/core/secrets.nix`:
+
+- Per-host secrets from `secrets/<hostname>.yaml`
+- Shared `user-password` from `secrets/common.yaml`
+- SSH auth + signing keys deployed to `~/.ssh/`
+- Age key at `/var/lib/sops-nix/key.txt` (shipped via `nixos-anywhere --extra-files` on first deploy)
+
+The `inputs ? nixos-secrets` guard lets the config evaluate without the private repo. CI exploits this by passing a dummy `--override-input nixos-secrets path:./ci-dummy-input` (and same for `nixos-work`). Keep new sops integrations behind the same guard.
+
+The `work.nix` feature follows the same pattern: it imports `nixos-work` as a non-flake input and applies its returned config only when both the input is present and `features.work.enable` is set.
+
+## Conventions
+
+- Conventional commits, no commit body/description.
+- No em dashes anywhere (use commas/parentheses), no `→` (use `->`).
+- treefmt enforces format on CI (`nix flake check --all-systems` runs on every push/PR via `.github/workflows/nix-config-check.yml`).
