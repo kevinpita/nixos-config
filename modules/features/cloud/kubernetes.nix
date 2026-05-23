@@ -16,6 +16,7 @@ lib.mkIf config.features.kubernetes.enable {
     pkgs.k9s
     pkgs.helm-tui
     pkgs.kubie
+    pkgs.argocd
   ];
 
   sops.secrets = lib.mkIf hasSecrets {
