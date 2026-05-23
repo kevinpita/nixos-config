@@ -9,23 +9,23 @@
     ./tlp.nix
   ];
   features = {
+    ai.enable = true;
+    aws.enable = true;
+    browsers.enable = true;
+    communication.enable = true;
     desktop.enable = true;
+    development.enable = true;
+    docker.enable = true;
     ghostty.enable = true;
     git.enable = true;
-    development.enable = true;
-    zed.enable = true;
-    docker.enable = true;
-    virtualization.virt-manager.enable = true;
-    browsers.enable = true;
-    multimedia.enable = true;
-    communication.enable = true;
-    syncthing.enable = true;
-    printing-3d.enable = true;
     kubernetes.enable = true;
-    aws.enable = true;
-    ai.enable = true;
-    tailscale.enable = true;
+    multimedia.enable = true;
+    printing-3d.enable = true;
     sops-admin.enable = true;
+    syncthing.enable = true;
+    tailscale.enable = true;
+    virtualization.virt-manager.enable = true;
     work.enable = true;
+    zed.enable = true;
   };
 }

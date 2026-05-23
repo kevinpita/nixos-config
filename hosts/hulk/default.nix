@@ -9,12 +9,12 @@
   ];
 
   features = {
-    docker.enable = true;
-    tailscale.enable = true;
-    syncthing.enable = true;
     auto-update.enable = false;
+    docker.enable = true;
+    syncthing.enable = true;
+    tailscale.enable = true;
 
-    kubernetes.enable = true;
     k3s.enable = true;
+    kubernetes.enable = true;
   };
 }
