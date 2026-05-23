@@ -55,13 +55,13 @@ Some core modules expose typed options instead of feature flags (`modules/core/b
 
 ### Hosts
 
-| Host    | Type                | Notes                                       |
+| Host | Type | Notes |
 | ------- | ------------------- | ------------------------------------------- |
-| amdep   | Workstation         | Full desktop, dual-boot                     |
-| hulk    | Server              | k3s single-node, kubernetes tools           |
-| microg8 | Server              | BIOS boot, comin auto-update, drive monitor |
-| t14g6   | Laptop              | Full desktop, TLP                           |
-| t480s   | ThinkPad laptop     | Full desktop, TLP, dual-boot, nixos-hardware module |
+| amdep | Workstation | Full desktop, dual-boot |
+| hulk | Server | k3s single-node, kubernetes tools |
+| microg8 | Server | BIOS boot, comin auto-update, drive monitor |
+| t14g6 | Laptop | Full desktop, TLP |
+| t480s | ThinkPad laptop | Full desktop, TLP, dual-boot, nixos-hardware module |
 
 ### Secrets (sops-nix + age)
 
