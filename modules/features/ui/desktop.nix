@@ -74,6 +74,10 @@ lib.mkIf config.features.desktop.enable {
           "org/gnome/shell/keybindings" = {
             show-screenshot-ui = [ "<Super>space" ];
           };
+          "org/gnome/desktop/wm/keybindings" = {
+            switch-input-source = [ ];
+            switch-input-source-backward = [ ];
+          };
         }
         (lib.mkIf (config.features.ghostty.enable || config.features.alacritty.enable) {
           "org/gnome/settings-daemon/plugins/media-keys" = {
