@@ -11,7 +11,7 @@
     git.enable = lib.mkEnableOption "Git tools (gh, gh-dash, gh-enhance, lazygit, delta, sublime-merge)";
     development.enable = lib.mkEnableOption "Development tools (tmux, direnv, jetbrains)";
     zed.enable = lib.mkEnableOption "Zed editor managed through Home Manager";
-    ai.enable = lib.mkEnableOption "AI tools (claude-code, codex, gemini-cli, rtk)";
+    ai.enable = lib.mkEnableOption "AI tools (claude-code, codex, antigravity-cli, rtk)";
 
     docker.enable = lib.mkEnableOption "Docker container runtime";
     virtualization = {

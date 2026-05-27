@@ -13,7 +13,7 @@ let
 
     inputs.codex-cli-nix.overlays.default
 
-    inputs.gemini-cli-nix.overlays.default
+    inputs.antigravity-nix.overlays.default
 
     # TODO: remove once helm-tui is merged into nixpkgs
     (_final: _prev: {

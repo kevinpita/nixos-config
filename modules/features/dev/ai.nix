@@ -9,7 +9,7 @@ lib.mkIf config.features.ai.enable {
   environment.systemPackages = with pkgs; [
     codex
     claude-code
-    gemini-cli
+    google-antigravity-cli
     herdr
     pi-coding-agent
 

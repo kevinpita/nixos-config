@@ -1,9 +1,28 @@
 {
   "nodes": {
-    "claude-code": {
+    "antigravity-nix": {
       "inputs": {
         "flake-utils": "flake-utils",
         "nixpkgs": "nixpkgs"
+      },
+      "locked": {
+        "lastModified": 1779870233,
+        "narHash": "sha256-JFJh7b3iZupBaXmso9FwEI5mlwQYZsRP9B5PGcvRUSg=",
+        "owner": "jacopone",
+        "repo": "antigravity-nix",
+        "rev": "aeade212c9201d922eba3ad7a84805b64df26d39",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jacopone",
+        "repo": "antigravity-nix",
+        "type": "github"
+      }
+    },
+    "claude-code": {
+      "inputs": {
+        "flake-utils": "flake-utils_2",
+        "nixpkgs": "nixpkgs_2"
       },
       "locked": {
         "lastModified": 1779845892,
@@ -21,8 +40,8 @@
     },
     "codex-cli-nix": {
       "inputs": {
-        "flake-utils": "flake-utils_2",
-        "nixpkgs": "nixpkgs_2"
+        "flake-utils": "flake-utils_3",
+        "nixpkgs": "nixpkgs_3"
       },
       "locked": {
         "lastModified": 1779824545,
@@ -145,25 +164,6 @@
       "original": {
         "owner": "numtide",
         "repo": "flake-utils",
-        "type": "github"
-      }
-    },
-    "gemini-cli-nix": {
-      "inputs": {
-        "flake-utils": "flake-utils_3",
-        "nixpkgs": "nixpkgs_3"
-      },
-      "locked": {
-        "lastModified": 1779412199,
-        "narHash": "sha256-dHrZC53nBMbDjF5v4gwSO0WfZ96ETYJN6y/KznHK4hY=",
-        "owner": "sadjow",
-        "repo": "gemini-cli-nix",
-        "rev": "c4b613a919003322b5ed5dacfc55b37e1db7b5c6",
-        "type": "github"
-      },
-      "original": {
-        "owner": "sadjow",
-        "repo": "gemini-cli-nix",
         "type": "github"
       }
     },
@@ -307,16 +307,16 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1779694939,
-        "narHash": "sha256-Ly4j75O8ICaSQx3uxPnwk2x7PMF0XQvn5r0c3yBA7FI=",
+        "lastModified": 1778869304,
+        "narHash": "sha256-30sZNZoA1cqF5JNO9fVX+wgiQYjB7HJqqJ4ztCDeBZE=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "f9d8b65950353691ab56561e7c73d2e1063d810b",
+        "rev": "d233902339c02a9c334e7e593de68855ad26c4cb",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
-        "ref": "nixpkgs-unstable",
+        "ref": "nixos-unstable",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -354,11 +354,11 @@
     },
     "nixpkgs_3": {
       "locked": {
-        "lastModified": 1779259093,
-        "narHash": "sha256-7DKWmH23hL2eYdkxCKeqj2i+yljTKuU+3Nk1UPHOnxc=",
+        "lastModified": 1779694939,
+        "narHash": "sha256-Ly4j75O8ICaSQx3uxPnwk2x7PMF0XQvn5r0c3yBA7FI=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "d99b013d5d1931ad77fe3912ed218170dec5d9a4",
+        "rev": "f9d8b65950353691ab56561e7c73d2e1063d810b",
         "type": "github"
       },
       "original": {
@@ -505,11 +505,11 @@
     },
     "root": {
       "inputs": {
+        "antigravity-nix": "antigravity-nix",
         "claude-code": "claude-code",
         "codex-cli-nix": "codex-cli-nix",
         "disko": "disko",
         "flake-parts": "flake-parts",
-        "gemini-cli-nix": "gemini-cli-nix",
         "herdr-nix": "herdr-nix",
         "home-manager": "home-manager",
         "kevinpita-nixpkgs": "kevinpita-nixpkgs",
