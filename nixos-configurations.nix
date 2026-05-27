@@ -13,6 +13,10 @@ let
 
     inputs.codex-cli-nix.overlays.default
 
+    (_final: _prev: {
+      inherit (inputs.codex-desktop-linux.packages.${system}) codex-desktop;
+    })
+
     inputs.antigravity-nix.overlays.default
 
     # TODO: remove once helm-tui is merged into nixpkgs

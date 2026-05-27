@@ -46,6 +46,8 @@
 
     codex-cli-nix.url = "github:sadjow/codex-cli-nix";
 
+    codex-desktop-linux.url = "github:ilysenko/codex-desktop-linux";
+
     antigravity-nix.url = "github:jacopone/antigravity-nix";
 
     # TODO: remove once helm-tui is merged into nixpkgs

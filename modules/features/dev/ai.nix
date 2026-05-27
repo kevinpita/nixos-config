@@ -6,18 +6,23 @@
   ...
 }:
 lib.mkIf config.features.ai.enable {
-  environment.systemPackages = with pkgs; [
-    codex
-    claude-code
-    google-antigravity-cli
-    herdr
-    pi-coding-agent
+  environment.systemPackages =
+    with pkgs;
+    [
+      codex
+      claude-code
+      google-antigravity-cli
+      herdr
+      pi-coding-agent
 
-    rtk
+      rtk
 
-    bubblewrap # codex dependency
-    fd # pi dependency
-  ];
+      bubblewrap # codex dependency
+      fd # pi dependency
+    ]
+    ++ lib.optionals config.features.desktop.enable [
+      codex-desktop
+    ];
 
   home-manager.users.${username} = {
     xdg.configFile."herdr/config.toml" = {
