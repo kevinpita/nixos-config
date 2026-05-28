@@ -37,6 +37,9 @@ lib.mkIf config.features.ai.enable {
         show_agent_labels_on_pane_borders = true
         agent_panel_scope = "all"
 
+        [keys]
+        goto = ""
+
         [[keys.command]]
         key = "prefix+g"
         type = "pane"
