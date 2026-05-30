@@ -1,4 +1,4 @@
-{ ... }:
+{ inputs, ... }:
 {
   imports = [
     ./disko-config.nix
@@ -7,6 +7,7 @@
     ./monitors.nix
     ./syncthing.nix
     ./tlp.nix
+    inputs.nixos-hardware.nixosModules.lenovo-thinkpad-t14-amd-gen6
   ];
   features = {
     ai.enable = true;
