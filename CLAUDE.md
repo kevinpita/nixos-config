@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AGENTS.md / CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides agent guidance for this repository. `AGENTS.md` is a symlink to this file, so edit `CLAUDE.md` as the source of truth.
 
 ## Build and Development Commands
 
@@ -17,7 +17,7 @@ nix flake update <input-name>
 # Check formatting and evaluate all hosts with real private inputs
 nix flake check --all-systems
 
-# Reproduce public CI with dummy private inputs
+# Reproduce public CI with dummy private inputs (matches GitHub Actions)
 nix flake check --all-systems --show-trace \
   --override-input nixos-secrets path:./ci-dummy-input \
   --override-input nixos-work path:./ci-dummy-input
@@ -46,7 +46,7 @@ Flakes-based NixOS configuration for 5 hosts using a three-tier module system: *
 
 `specialArgs` passes `inputs`, `username` ("kevin", hardcoded in `nixos-configurations.nix`), and `hostname` to every module. Home Manager is integrated into system config via `modules/core/users.nix`, which forwards `config.features` down to HM through `extraSpecialArgs`. So feature flags are visible from both NixOS and Home Manager modules.
 
-`pkgs` is constructed once in `nixos-configurations.nix` with the overlay set (vscode extensions, claude-code, codex, gemini, helm-tui pin, herdr) and `allowUnfree = true`, then shared across all hosts.
+`pkgs` is constructed once in `nixos-configurations.nix` with the overlay set (VS Code extensions, claude-code, codex, codex-desktop, antigravity, helm-tui pin, herdr) and `allowUnfree = true`, then shared across all hosts.
 
 ### Feature flag pattern
 
@@ -65,8 +65,12 @@ Some core modules expose typed options instead of feature flags (`modules/core/b
 | amdep | Workstation | Full desktop, dual-boot |
 | hulk | Server | k3s single-node, kubernetes tools |
 | microg8 | Server | BIOS boot, drive monitor |
-| t14g6 | Laptop | Full desktop, TLP |
+| t14g6 | ThinkPad laptop | Full desktop, TLP, nixos-hardware module |
 | t480s | ThinkPad laptop | Full desktop, TLP, dual-boot, nixos-hardware module |
+
+### k3s
+
+`modules/features/cloud/k3s.nix` enables a single-node k3s server when `features.k3s.enable = true`. The kubeconfig is written with mode `600`, and the Kubernetes API port `6443` is opened only on the `tailscale0` firewall interface. `hulk` is the current k3s host.
 
 ### Secrets (sops-nix + age)
 
@@ -84,5 +88,5 @@ The `work.nix` feature imports `nixos-work` as a non-flake input and applies its
 ## Conventions
 
 - Conventional commits, no commit body/description.
-- No em dashes anywhere (use commas/parentheses), no `→` (use `->`).
-- treefmt enforces format on CI (`nix flake check --all-systems` runs on every push/PR via `.github/workflows/nix-config-check.yml`).
+- No em dashes anywhere (use commas/parentheses), no Unicode right arrow symbol (use `->`).
+- treefmt enforces format on CI through `nix flake check --all-systems` with dummy private inputs in `.github/workflows/nix-config-check.yml`.
