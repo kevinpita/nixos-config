@@ -6,10 +6,10 @@
   ...
 }:
 let
-  hasSecrets = inputs ? nixos-secrets;
-  secretsPath = if hasSecrets then "${inputs.nixos-secrets}/secrets" else null;
+  secretsPath = if inputs ? nixos-secrets then "${inputs.nixos-secrets}/secrets" else null;
+  hasRealSecrets = secretsPath != null && builtins.pathExists "${secretsPath}/personal.yaml";
 in
-lib.mkIf config.features.sops-admin.enable {
+lib.mkIf (config.features.sops-admin.enable && hasRealSecrets) {
   sops.secrets."age-secret" = {
     sopsFile = "${secretsPath}/personal.yaml";
     owner = username;

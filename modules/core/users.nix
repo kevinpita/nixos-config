@@ -1,17 +1,24 @@
 {
   inputs,
+  lib,
   pkgs,
   username,
   hostname,
   config,
   ...
 }:
+let
+  hasRealSecrets =
+    inputs ? nixos-secrets && builtins.pathExists "${inputs.nixos-secrets}/secrets/common.yaml";
+in
 {
   users.users.${username} = {
-    hashedPasswordFile = config.sops.secrets."user-password".path;
     useDefaultShell = true;
     isNormalUser = true;
     extraGroups = [ "wheel" ];
+  }
+  // lib.optionalAttrs hasRealSecrets {
+    hashedPasswordFile = config.sops.secrets."user-password".path;
   };
 
   home-manager = {

@@ -14,8 +14,13 @@ nix flake update
 # Update a single input
 nix flake update <input-name>
 
-# Check formatting and evaluate all hosts (matches CI)
+# Check formatting and evaluate all hosts with real private inputs
 nix flake check --all-systems
+
+# Reproduce public CI with dummy private inputs
+nix flake check --all-systems --show-trace \
+  --override-input nixos-secrets path:./ci-dummy-input \
+  --override-input nixos-work path:./ci-dummy-input
 
 # Format all files via treefmt (nixfmt, deadnix, statix, yamlfmt, mdformat)
 nix fmt
@@ -72,9 +77,9 @@ Secrets live in a separate private repo (`nixos-secrets`) pulled as a non-flake 
 - SSH auth + signing keys deployed to `~/.ssh/`
 - Age key at `/var/lib/sops-nix/key.txt` (shipped via `nixos-anywhere --extra-files` on first deploy)
 
-The `inputs ? nixos-secrets` guard lets the config evaluate without the private repo. CI exploits this by passing a dummy `--override-input nixos-secrets path:./ci-dummy-input` (and same for `nixos-work`). Keep new sops integrations behind the same guard.
+The private inputs are always declared in `flake.nix`. Public CI evaluates by overriding them with the committed dummy input at `ci-dummy-input`. Secret modules check for real secret files with `builtins.pathExists` before declaring `sops.secrets`, so dummy mode does not point sops at fake paths. Keep new sops integrations behind the same real-file check.
 
-The `work.nix` feature follows the same pattern: it imports `nixos-work` as a non-flake input and applies its returned config only when both the input is present and `features.work.enable` is set.
+The `work.nix` feature imports `nixos-work` as a non-flake input and applies its returned config only when both the input is present and `features.work.enable` is set. The dummy CI input returns an empty module for this path.
 
 ## Conventions
 

@@ -7,7 +7,9 @@
   ...
 }:
 let
-  hasSecrets = inputs ? nixos-secrets;
+  hulkKubeconfigFile =
+    if inputs ? nixos-secrets then "${inputs.nixos-secrets}/secrets/hulk-kubeconfig.enc" else null;
+  hasHulkKubeconfig = hulkKubeconfigFile != null && builtins.pathExists hulkKubeconfigFile;
 in
 lib.mkIf config.features.kubernetes.enable {
   environment.systemPackages = [
@@ -19,9 +21,9 @@ lib.mkIf config.features.kubernetes.enable {
     pkgs.argocd
   ];
 
-  sops.secrets = lib.mkIf hasSecrets {
+  sops.secrets = lib.mkIf hasHulkKubeconfig {
     "hulk-kubeconfig" = {
-      sopsFile = "${inputs.nixos-secrets}/secrets/hulk-kubeconfig.enc";
+      sopsFile = hulkKubeconfigFile;
       format = "json";
       key = "data";
       owner = username;
@@ -30,7 +32,7 @@ lib.mkIf config.features.kubernetes.enable {
     };
   };
 
-  systemd.tmpfiles.rules = lib.mkIf hasSecrets [
+  systemd.tmpfiles.rules = lib.mkIf hasHulkKubeconfig [
     "d /home/${username}/.kube 0700 ${username} users -"
   ];
 

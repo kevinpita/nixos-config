@@ -14,9 +14,8 @@ jobs:
           nix_path: nixpkgs=channel:nixos-unstable
           extra_nix_config: |
             experimental-features = nix-command flakes
-      - name: Create dummy private inputs
-        run: |
-          mkdir -p ci-dummy-input
-          echo '{ ... }: { }' > ci-dummy-input/default.nix
       - name: Check Nix flake inputs
-        run: nix flake check --all-systems --show-trace --override-input nixos-secrets path:./ci-dummy-input --override-input nixos-work path:./ci-dummy-input
+        run: |
+          nix flake check --all-systems --show-trace \
+            --override-input nixos-secrets path:./ci-dummy-input \
+            --override-input nixos-work path:./ci-dummy-input
