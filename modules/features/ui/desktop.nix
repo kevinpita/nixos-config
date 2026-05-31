@@ -44,11 +44,6 @@ lib.mkIf config.features.desktop.enable {
     alsa.support32Bit = true;
     pulse.enable = true;
     jack.enable = true;
-    wireplumber.extraConfig."10-disable-bt-headset-autoswitch" = {
-      "wireplumber.settings" = {
-        "bluetooth.autoswitch-to-headset-profile" = false;
-      };
-    };
   };
 
   home-manager.users.${username} = {
