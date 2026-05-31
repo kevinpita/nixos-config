@@ -35,6 +35,7 @@ in
     };
     users.${username} = {
       home = {
+        enableNixpkgsReleaseCheck = false;
         username = "${username}";
         homeDirectory = "/home/${username}";
         stateVersion = "26.05";
