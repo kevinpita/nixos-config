@@ -8,11 +8,11 @@ lib.mkIf config.features.k3s.enable {
     enable = true;
     role = "server";
     extraFlags = toString [
-      "--write-kubeconfig-mode 644"
+      "--write-kubeconfig-mode 600"
       "--node-name ${config.networking.hostName}"
       "--tls-san ${config.networking.hostName}"
     ];
   };
 
-  networking.firewall.allowedTCPPorts = [ 6443 ];
+  networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ 6443 ];
 }
