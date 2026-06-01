@@ -44,6 +44,9 @@ lib.mkIf config.features.ai.enable {
         key = "prefix+g"
         type = "pane"
         command = "lazygit"
+
+        [ui.sound]
+        enabled = false
       '';
     };
 
