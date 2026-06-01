@@ -69,7 +69,7 @@ lib.mkIf config.features.zed.enable {
         buffer_font_size = 18;
         terminal = {
           env = {
-            TERM = "alacritty";
+            TERM = "xterm-256color";
           };
           font_family = "JetBrainsMono Nerd Font Mono";
           font_size = 16;

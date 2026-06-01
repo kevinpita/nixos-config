@@ -4,7 +4,6 @@
     desktop.enable = lib.mkEnableOption "Graphical base (audio, fonts, input)";
     gnome.enable = lib.mkEnableOption "GNOME desktop environment";
     hyprland.enable = lib.mkEnableOption "Hyprland Wayland compositor";
-    alacritty.enable = lib.mkEnableOption "Alacritty terminal emulator";
     ghostty.enable = lib.mkEnableOption "Ghostty terminal emulator";
     browsers.enable = lib.mkEnableOption "Web browsers (Brave, Chromium, Firefox)";
     multimedia.enable = lib.mkEnableOption "Multimedia applications (VLC, ffmpeg, Tidal)";
@@ -36,7 +35,6 @@
     ./ui/desktop.nix
     ./ui/gnome
     ./ui/hyprland
-    ./ui/alacritty.nix
     ./ui/ghostty.nix
     ./ui/browsers.nix
     ./ui/multimedia.nix
