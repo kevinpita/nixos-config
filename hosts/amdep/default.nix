@@ -21,6 +21,7 @@
     docker.enable = true;
     ghostty.enable = true;
     git.enable = true;
+    gnome.enable = true;
     kubernetes.enable = true;
     multimedia.enable = true;
     printing-3d.enable = true;

@@ -1,7 +1,8 @@
 { lib, ... }:
 {
   options.features = {
-    desktop.enable = lib.mkEnableOption "Desktop environment (GNOME, audio, fonts)";
+    desktop.enable = lib.mkEnableOption "Graphical base (audio, fonts, input)";
+    gnome.enable = lib.mkEnableOption "GNOME desktop environment";
     alacritty.enable = lib.mkEnableOption "Alacritty terminal emulator";
     ghostty.enable = lib.mkEnableOption "Ghostty terminal emulator";
     browsers.enable = lib.mkEnableOption "Web browsers (Brave, Chromium, Firefox)";
@@ -32,6 +33,7 @@
 
   imports = [
     ./ui/desktop.nix
+    ./ui/gnome.nix
     ./ui/alacritty.nix
     ./ui/ghostty.nix
     ./ui/browsers.nix
