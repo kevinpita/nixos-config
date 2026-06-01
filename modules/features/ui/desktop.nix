@@ -9,6 +9,7 @@ lib.mkIf config.features.desktop.enable {
   security.rtkit.enable = true;
 
   services = {
+    xserver.xkb.layout = "es";
     libinput.enable = true;
     pipewire = {
       enable = true;

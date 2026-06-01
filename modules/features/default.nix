@@ -33,7 +33,7 @@
 
   imports = [
     ./ui/desktop.nix
-    ./ui/gnome.nix
+    ./ui/gnome
     ./ui/alacritty.nix
     ./ui/ghostty.nix
     ./ui/browsers.nix
