@@ -9,6 +9,7 @@
   ];
 
   features = {
+    ai.enable = true;
     docker.enable = true;
     syncthing.enable = true;
     tailscale.enable = true;
