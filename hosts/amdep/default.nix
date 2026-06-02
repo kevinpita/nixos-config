@@ -5,7 +5,6 @@
     ./hardware-configuration.nix
 
     ./monitors.nix
-    ./hyprland.nix
     ./syncthing.nix
   ];
 
@@ -22,7 +21,7 @@
     docker.enable = true;
     ghostty.enable = true;
     git.enable = true;
-    hyprland.enable = true;
+    gnome.enable = true;
     kubernetes.enable = true;
     multimedia.enable = true;
     printing-3d.enable = true;
