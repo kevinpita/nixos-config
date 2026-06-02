@@ -13,10 +13,16 @@ lib.mkIf config.features.git.enable {
   ];
 
   home-manager.users.${username} = {
-    home.packages = with pkgs; [
-      delta
-      sublime-merge
-    ];
+    home.packages =
+      (with pkgs; [
+        delta
+      ])
+      ++ lib.optionals config.features.desktop.enable (
+        with pkgs;
+        [
+          sublime-merge
+        ]
+      );
 
     programs.lazygit = {
       enable = true;
