@@ -7,6 +7,7 @@
 }:
 lib.mkIf config.features.development.enable {
   environment.systemPackages = with pkgs; [
+    gnumake
     go
     gotest
     python3
