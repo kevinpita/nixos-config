@@ -8,7 +8,10 @@
   users.defaultUserShell = pkgs.zsh;
 
   home-manager.users.${username} = {
-    home.packages = with pkgs; [ zsh-powerlevel10k ];
+    home.packages = with pkgs; [
+      zsh-powerlevel10k
+      ncdu
+    ];
 
     programs.atuin = {
       enable = true;
@@ -19,6 +22,13 @@
       enable = true;
       enableZshIntegration = true;
       settings.mgr.show_hidden = true;
+      keymap.mgr.prepend_keymap = [
+        {
+          on = "u";
+          run = "shell 'ncdu' --block";
+          desc = "Disk usage (ncdu)";
+        }
+      ];
     };
 
     programs.zsh = {
