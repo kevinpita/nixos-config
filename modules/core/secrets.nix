@@ -8,6 +8,11 @@
 let
   secretsPath = if inputs ? nixos-secrets then "${inputs.nixos-secrets}/secrets" else null;
   hasRealSecrets = secretsPath != null && builtins.pathExists "${secretsPath}/common.yaml";
+  sshConfigHosts = [
+    "amdep"
+    "t14g6"
+    "t480s"
+  ];
 in
 {
   config = {
@@ -43,6 +48,14 @@ in
           owner = username;
           path = "/home/${username}/.ssh/id_ed25519_sign.pub";
           mode = "0644";
+        };
+      }
+      // lib.optionalAttrs (builtins.elem hostname sshConfigHosts) {
+        "ssh-config" = {
+          sopsFile = "${secretsPath}/sshconfig.yaml";
+          owner = username;
+          path = "/home/${username}/.ssh/config";
+          mode = "0600";
         };
       };
     };
