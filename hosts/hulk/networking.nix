@@ -3,10 +3,10 @@ _: {
   networking.interfaces.eno1 = {
     ipv4.addresses = [
       {
-        address = "192.168.0.3";
+        address = "192.168.1.7";
         prefixLength = 24;
       }
     ];
   };
-  networking.defaultGateway = "192.168.0.1";
+  networking.defaultGateway = "192.168.1.1";
 }
