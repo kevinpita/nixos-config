@@ -16,7 +16,8 @@
 
     docker.enable = lib.mkEnableOption "Docker container runtime";
     virtualization = {
-      virt-manager.enable = lib.mkEnableOption "Virt-manager virtualization (libvirt, QEMU/KVM)";
+      vm.enable = lib.mkEnableOption "Libvirt/QEMU/KVM (virt-manager GUI on desktop hosts)";
+      incus.enable = lib.mkEnableOption "Incus containers/VMs for distro test boxes";
     };
     kubernetes.enable = lib.mkEnableOption "Kubernetes tools (kubectl, helm, k9s, kubectx)";
     k3s.enable = lib.mkEnableOption "Single-node k3s server";
@@ -46,10 +47,12 @@
     ./dev/ai.nix
 
     ./cloud/docker.nix
-    ./cloud/virtualization.nix
     ./cloud/kubernetes.nix
     ./cloud/k3s.nix
     ./cloud/aws.nix
+
+    ./virtualization/vm.nix
+    ./virtualization/incus.nix
 
     ./net/syncthing.nix
     ./net/tailscale.nix

@@ -26,7 +26,8 @@
     sops-admin.enable = true;
     syncthing.enable = true;
     tailscale.enable = true;
-    virtualization.virt-manager.enable = true;
+    virtualization.incus.enable = true;
+    virtualization.vm.enable = true;
     work.enable = true;
     zed.enable = true;
   };
