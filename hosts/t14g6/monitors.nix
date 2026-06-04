@@ -8,18 +8,18 @@
     xdg.configFile."monitors.xml".text = ''
       <monitors version="2">
         <configuration>
-          <layoutmode>physical</layoutmode>
+          <layoutmode>logical</layoutmode>
           <logicalmonitor>
-            <x>0</x>
-            <y>0</y>
+            <x>1440</x>
+            <y>629</y>
             <scale>1</scale>
             <primary>yes</primary>
             <monitor>
               <monitorspec>
-                <connector>HDMI-1</connector>
+                <connector>DP-10</connector>
                 <vendor>AUS</vendor>
                 <product>VG27A</product>
-                <serial>R5LMQS099715</serial>
+                <serial>M5LMQS167257</serial>
               </monitorspec>
               <mode>
                 <width>2560</width>
@@ -29,20 +29,24 @@
             </monitor>
           </logicalmonitor>
           <logicalmonitor>
-            <x>2560</x>
+            <x>0</x>
             <y>0</y>
             <scale>1</scale>
+            <transform>
+              <rotation>left</rotation>
+              <flipped>no</flipped>
+            </transform>
             <monitor>
               <monitorspec>
-                <connector>DP-12</connector>
+                <connector>DP-8</connector>
                 <vendor>AUS</vendor>
                 <product>VG27A</product>
-                <serial>R2LMQS086633</serial>
+                <serial>M5LMQS167247</serial>
               </monitorspec>
               <mode>
                 <width>2560</width>
                 <height>1440</height>
-                <rate>144.006</rate>
+                <rate>59.951</rate>
               </mode>
             </monitor>
           </logicalmonitor>
