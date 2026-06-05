@@ -11,12 +11,12 @@
           <layoutmode>logical</layoutmode>
           <logicalmonitor>
             <x>1440</x>
-            <y>629</y>
+            <y>636</y>
             <scale>1</scale>
             <primary>yes</primary>
             <monitor>
               <monitorspec>
-                <connector>DP-10</connector>
+                <connector>HDMI-1</connector>
                 <vendor>AUS</vendor>
                 <product>VG27A</product>
                 <serial>M5LMQS167257</serial>
@@ -38,7 +38,7 @@
             </transform>
             <monitor>
               <monitorspec>
-                <connector>DP-8</connector>
+                <connector>DP-11</connector>
                 <vendor>AUS</vendor>
                 <product>VG27A</product>
                 <serial>M5LMQS167247</serial>
@@ -46,7 +46,7 @@
               <mode>
                 <width>2560</width>
                 <height>1440</height>
-                <rate>59.951</rate>
+                <rate>144.006</rate>
               </mode>
             </monitor>
           </logicalmonitor>
