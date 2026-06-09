@@ -10,6 +10,7 @@ lib.mkIf config.features.printing-3d.enable {
     home.packages = with pkgs; [
       prusa-slicer
       super-slicer-beta
+      orca-slicer
     ];
   };
 }
