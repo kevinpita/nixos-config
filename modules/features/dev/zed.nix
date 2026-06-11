@@ -25,6 +25,7 @@ lib.mkIf config.features.zed.enable {
         "nix"
         "proto"
         "rainbow-csv"
+        "solidity"
         "terraform"
         "toml"
       ];
