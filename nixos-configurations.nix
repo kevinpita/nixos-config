@@ -27,6 +27,10 @@ let
     (_final: _prev: {
       herdr = inputs.herdr-nix.packages.${system}.default;
     })
+
+    (_final: _prev: {
+      kli = inputs.kli-nix.packages.${system}.default;
+    })
   ];
 
   pkgs = import inputs.nixpkgs {

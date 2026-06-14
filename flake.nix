@@ -1,4 +1,11 @@
 {
+  nixConfig = {
+    extra-substituters = [ "https://kevinpita.cachix.org" ];
+    extra-trusted-public-keys = [
+      "kevinpita.cachix.org-1:Cu9UtCDSfDq3/WDnI7N1N/LzAh90SPS+1R+nWao/hz0="
+    ];
+  };
+
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
@@ -54,6 +61,8 @@
     kevinpita-nixpkgs.url = "github:kevinpita/nixpkgs/helm-tui-init";
 
     herdr-nix.url = "github:kevinpita/herdr-nix";
+
+    kli-nix.url = "github:kevinpita/kli-nix";
 
   };
 

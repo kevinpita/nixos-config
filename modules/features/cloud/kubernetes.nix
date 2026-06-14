@@ -17,6 +17,7 @@ lib.mkIf config.features.kubernetes.enable {
     pkgs.kubernetes-helm
     pkgs.k9s
     pkgs.helm-tui
+    pkgs.kli
     pkgs.kubie
     pkgs.argocd
   ];
