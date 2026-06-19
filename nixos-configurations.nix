@@ -29,7 +29,7 @@ let
     })
 
     (_final: _prev: {
-      kli = inputs.kli-nix.packages.${system}.default;
+      ku = inputs.ku-nix.packages.${system}.default;
     })
   ];
 

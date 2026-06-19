@@ -62,7 +62,7 @@
 
     herdr-nix.url = "github:kevinpita/herdr-nix";
 
-    kli-nix.url = "github:kevinpita/kli-nix";
+    ku-nix.url = "github:kevinpita/ku-nix";
 
   };
 
