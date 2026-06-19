@@ -61,6 +61,11 @@
 
     herdr-nix.url = "github:kevinpita/herdr-nix";
 
+    hunk = {
+      url = "github:modem-dev/hunk";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     ku-nix.url = "github:kevinpita/ku-nix";
 
   };

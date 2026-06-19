@@ -9,7 +9,7 @@ lib.mkIf config.features.git.enable {
   environment.systemPackages = with pkgs; [
     gh
     gh-dash
-    gh-enhance
+    hunk
   ];
 
   home-manager.users.${username} = {
