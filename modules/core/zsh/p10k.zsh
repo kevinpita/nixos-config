@@ -86,6 +86,7 @@
     google_app_cred         # google application credentials (https://cloud.google.com/docs/authentication/production)
     toolbox                 # toolbox name (https://github.com/containers/toolbox)
     context                 # user@hostname
+    gh_user                 # active GitHub CLI account
     nordvpn                 # nordvpn connection status, linux only (https://nordvpn.com/)
     ranger                  # ranger shell (https://github.com/ranger/ranger)
     nnn                     # nnn shell (https://github.com/jarun/nnn)
@@ -966,6 +967,20 @@
   # typeset -g POWERLEVEL9K_CONTEXT_VISUAL_IDENTIFIER_EXPANSION='⭐'
   # Custom prefix.
   typeset -g POWERLEVEL9K_CONTEXT_PREFIX='%246Fwith '
+
+  # GitHub CLI account color.
+  typeset -g POWERLEVEL9K_GH_USER_FOREGROUND=66
+
+  function prompt_gh_user() {
+    emulate -L zsh
+    (( $+commands[gh] )) || return
+
+    local login
+    login=$(command gh auth status --active --hostname github.com --json hosts --jq '.hosts["github.com"][] | select(.active) | .login' 2>/dev/null) || return
+    [[ -n $login ]] || return
+
+    p10k segment -f $POWERLEVEL9K_GH_USER_FOREGROUND -t "gh ${login//\%/%%}"
+  }
 
   ###[ virtualenv: python virtual environment (https://docs.python.org/3/library/venv.html) ]###
   # Python virtual environment color.
