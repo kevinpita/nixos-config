@@ -9,7 +9,7 @@
     multimedia.enable = lib.mkEnableOption "Multimedia applications (VLC, ffmpeg, Tidal)";
     communication.enable = lib.mkEnableOption "Communication apps (Telegram, Legcord)";
 
-    git.enable = lib.mkEnableOption "Git tools (gh, gh-dash, hunk, lazygit, delta, sublime-merge on graphical hosts)";
+    git.enable = lib.mkEnableOption "Git tools (gh, gh-dash, lazygit, delta, plus hunk and sublime-merge on graphical hosts)";
     development.enable = lib.mkEnableOption "Development tools (direnv, jetbrains on graphical hosts)";
     zed.enable = lib.mkEnableOption "Zed editor managed through Home Manager";
     ai.enable = lib.mkEnableOption "AI tools (claude-code, codex, antigravity-cli, rtk, pi)";

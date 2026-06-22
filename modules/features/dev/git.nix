@@ -6,11 +6,15 @@
   ...
 }:
 lib.mkIf config.features.git.enable {
-  environment.systemPackages = with pkgs; [
-    gh
-    gh-dash
-    hunk
-  ];
+  environment.systemPackages =
+    with pkgs;
+    [
+      gh
+      gh-dash
+    ]
+    ++ lib.optionals config.features.desktop.enable [
+      hunk
+    ];
 
   home-manager.users.${username} = {
     home.packages =
