@@ -3,7 +3,7 @@
     disk = {
       main = {
         type = "disk";
-        device = "/dev/sdc";
+        device = "/dev/disk/by-id/ata-CT500MX500SSD1_2048E4D32FF5";
         content = {
           type = "gpt";
           partitions = {
@@ -50,7 +50,7 @@
       };
       data_a = {
         type = "disk";
-        device = "/dev/sda";
+        device = "/dev/disk/by-id/ata-MB0500GCEHE_WMAYP7745634";
         content = {
           type = "gpt";
           partitions = {
@@ -63,7 +63,7 @@
       };
       data_b = {
         type = "disk";
-        device = "/dev/sdb";
+        device = "/dev/disk/by-id/ata-MB0500GCEHE_WMAYP5249710";
         content = {
           type = "gpt";
           partitions = {

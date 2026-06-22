@@ -12,8 +12,11 @@
   bootloader.mode = "bios";
 
   features = {
+    ai.enable = true;
+    development.enable = true;
     docker.enable = true;
-    tailscale.enable = true;
+    git.enable = true;
     syncthing.enable = true;
+    tailscale.enable = true;
   };
 }
