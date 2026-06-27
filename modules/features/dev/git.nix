@@ -5,6 +5,41 @@
   username,
   ...
 }:
+let
+  hunkReview = pkgs.writeShellApplication {
+    name = "hr";
+    runtimeInputs = [ pkgs.hunk ];
+    text = ''
+            case "''${1-}" in
+              -h|--help|help)
+                cat <<'EOF'
+      Usage:
+        hr              review uncommitted working tree changes
+        hr <target>     review current changes against a branch, tag, or commit
+        hr --staged     review staged changes
+
+      Examples:
+        hr
+        hr main
+        hr origin/main -- modules/features/dev
+
+      AI workflow:
+        1. Open hr in your terminal.
+        2. Leave comments in Hunk.
+        3. Ask the agent: "Use Hunk for this repo, read my user comments, and respond inline."
+
+      Agent commands:
+        hunk session comment list --repo . --type user --json
+        hunk session review --repo . --include-notes --json
+      EOF
+                exit 0
+                ;;
+            esac
+
+            exec hunk diff --watch --agent-notes "$@"
+    '';
+  };
+in
 lib.mkIf config.features.git.enable {
   environment.systemPackages =
     with pkgs;
@@ -14,6 +49,7 @@ lib.mkIf config.features.git.enable {
     ]
     ++ lib.optionals config.features.desktop.enable [
       hunk
+      hunkReview
     ];
 
   home-manager.users.${username} = {
