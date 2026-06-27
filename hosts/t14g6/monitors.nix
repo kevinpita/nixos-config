@@ -76,8 +76,8 @@ let
         last_apply="$now"
         echo "Applying t14g6 monitor layout: left=$left_connector right=$right_connector"
         gnome-monitor-config set \
-          -L -x 0 -y 0 -s 1 -t left -m 2560x1440@144.006 -M "$left_connector" \
-          -L -x 1440 -y 635 -s 1 -t normal -p -m 2560x1440@144.006 -M "$right_connector" \
+          -L -x 0 -y 0 -s 1 -t left -M "$left_connector" -m 2560x1440@144.006 \
+          -L -x 1440 -y 635 -s 1 -t normal -p -M "$right_connector" -m 2560x1440@144.006 \
           --logical-layout-mode
       }
 
