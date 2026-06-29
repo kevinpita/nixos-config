@@ -68,6 +68,7 @@ let
             codex_tab_json="$(herdr tab create --workspace "$(current_workspace_id)" --cwd "$(current_cwd)" --label codex --no-focus)"
             zsh_tab_json="$(herdr tab create --workspace "$(current_workspace_id)" --cwd "$(current_cwd)" --label zsh --no-focus)"
             lazygit_tab_json="$(herdr tab create --workspace "$(current_workspace_id)" --cwd "$(current_cwd)" --label lazygit --no-focus)"
+            yazi_tab_json="$(herdr tab create --workspace "$(current_workspace_id)" --cwd "$(current_cwd)" --label yazi --no-focus)"
 
             codex_tab_id="$(printf '%s' "$codex_tab_json" | jq -r '.result.tab.tab_id')"
             codex_pane_id="$(printf '%s' "$codex_tab_json" | jq -r '.result.root_pane.pane_id')"
@@ -75,11 +76,14 @@ let
             zsh_pane_id="$(printf '%s' "$zsh_tab_json" | jq -r '.result.root_pane.pane_id')"
             lazygit_tab_id="$(printf '%s' "$lazygit_tab_json" | jq -r '.result.tab.tab_id')"
             lazygit_pane_id="$(printf '%s' "$lazygit_tab_json" | jq -r '.result.root_pane.pane_id')"
+            yazi_tab_id="$(printf '%s' "$yazi_tab_json" | jq -r '.result.tab.tab_id')"
+            yazi_pane_id="$(printf '%s' "$yazi_tab_json" | jq -r '.result.root_pane.pane_id')"
 
             run_in_tab "$claude_tab_id" "$claude_pane_id" claude claude
             run_in_tab "$codex_tab_id" "$codex_pane_id" codex codex
             run_in_tab "$zsh_tab_id" "$zsh_pane_id" zsh clear
             run_in_tab "$lazygit_tab_id" "$lazygit_pane_id" lazygit lazygit
+            run_in_tab "$yazi_tab_id" "$yazi_pane_id" yazi yazi
     '';
   };
 in
