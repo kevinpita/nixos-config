@@ -1,4 +1,5 @@
 {
+  lib,
   pkgs,
   username,
   ...
@@ -71,50 +72,63 @@
           file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
         }
       ];
-      initContent = ''
-        if [[ -r "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh" ]]; then
-          source "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh"
-        fi
-
-        [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
-        for f in ~/.zsh/completions/*.zsh(N); do source "$f"; done
-        [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
-
-        gith() {
-          printf "\033[1mgit aliases:\033[0m\n"
-          printf "  \033[33mmost\033[0m    most changed files in the last year\n"
-          printf "  \033[33mwho\033[0m     top contributors by commit count\n"
-          printf "  \033[33mbug\033[0m     files most associated with bug fixes\n"
-          printf "  \033[33mcom\033[0m     commit activity by month\n"
-          printf "  \033[33mhotfix\033[0m  hotfix/revert commits from the last year\n"
-        }
-
-        copy() { command cat "$1" | wl-copy; }
-
-        go() {
-          if [[ "$1" == "test" ]]; then
-            shift; command gotest "$@"
-          else
-            command go "$@"
+      initContent = lib.mkMerge [
+        (lib.mkBefore ''
+          if [[ -r "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh" ]]; then
+            source "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh"
           fi
-        }
+        '')
+        ''
+          [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
 
-        browser() {
-          case "$1" in
-            chrome) echo chrome > ~/.cache/browser-mode ;;
-            brave)  echo brave  > ~/.cache/browser-mode ;;
-            auto)   rm -f ~/.cache/browser-mode ;;
-            status|"")
-              if [[ -r ~/.cache/browser-mode ]]; then
-                echo "mode: $(cat ~/.cache/browser-mode)"
-              else
-                echo "mode: auto"
-              fi
-              ;;
-            *) echo "usage: browser [chrome|brave|auto|status]" ;;
-          esac
-        }
-      '';
+          if (( $+commands[gh] )); then
+            gh() {
+              command gh "$@"
+              local status=$?
+              (( $+functions[p10k_refresh_gh_user] )) && p10k_refresh_gh_user
+              return $status
+            }
+          fi
+
+          for f in ~/.zsh/completions/*.zsh(N); do source "$f"; done
+          [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
+
+          gith() {
+            printf "\033[1mgit aliases:\033[0m\n"
+            printf "  \033[33mmost\033[0m    most changed files in the last year\n"
+            printf "  \033[33mwho\033[0m     top contributors by commit count\n"
+            printf "  \033[33mbug\033[0m     files most associated with bug fixes\n"
+            printf "  \033[33mcom\033[0m     commit activity by month\n"
+            printf "  \033[33mhotfix\033[0m  hotfix/revert commits from the last year\n"
+          }
+
+          copy() { command cat "$1" | wl-copy; }
+
+          go() {
+            if [[ "$1" == "test" ]]; then
+              shift; command gotest "$@"
+            else
+              command go "$@"
+            fi
+          }
+
+          browser() {
+            case "$1" in
+              chrome) echo chrome > ~/.cache/browser-mode ;;
+              brave)  echo brave  > ~/.cache/browser-mode ;;
+              auto)   rm -f ~/.cache/browser-mode ;;
+              status|"")
+                if [[ -r ~/.cache/browser-mode ]]; then
+                  echo "mode: $(cat ~/.cache/browser-mode)"
+                else
+                  echo "mode: auto"
+                fi
+                ;;
+              *) echo "usage: browser [chrome|brave|auto|status]" ;;
+            esac
+          }
+        ''
+      ];
     };
 
     home.file.".p10k.zsh".source = ./p10k.zsh;

@@ -100,7 +100,6 @@
     # vpn_ip                # virtual private network indicator
     # load                  # CPU load
     disk_usage            # disk usage
-    ram                   # free RAM
     # swap                  # used swap
     todo                    # todo items (https://github.com/todotxt/todo.txt-cli)
     timewarrior             # timewarrior tracking status (https://timewarrior.net/)
@@ -110,7 +109,7 @@
     time                    # current time
     # =========================[ Line #2 ]=========================
     newline                 # \n
-    ip                    # ip address and bandwidth usage for a specified network interface
+    cached_ip             # cached local IP address
     public_ip             # public IP address
     # proxy                 # system-wide http/https/ftp proxy
     battery               # internal battery
@@ -796,17 +795,33 @@
   typeset -g POWERLEVEL9K_DISK_USAGE_CRITICAL_LEVEL=95
   # If set to true, hide disk usage when below $POWERLEVEL9K_DISK_USAGE_WARNING_LEVEL percent.
   typeset -g POWERLEVEL9K_DISK_USAGE_ONLY_WARNING=false
+  # Refresh custom disk usage at most once per minute.
+  typeset -gi P10K_DISK_USAGE_CACHE_SECONDS=60
   # Show available disk space in GB instead of usage percentage.
   function prompt_disk_usage() {
-    local avail_gb
-    avail_gb=$(df -BG / 2>/dev/null | awk 'NR==2 {gsub(/G/,"",$4); print $4}')
-    [[ -n $avail_gb ]] || return
-    local usage_pct
-    usage_pct=$(df / 2>/dev/null | awk 'NR==2 {gsub(/%/,"",$5); print $5}')
-    local fg=35
-    (( usage_pct >= 90 )) && fg=220
-    (( usage_pct >= 95 )) && fg=160
-    p10k segment -f $fg -t "${avail_gb}GB free"
+    emulate -L zsh
+
+    local now=$SECONDS
+    if (( ! ${+P10K_DISK_USAGE_CACHE_TS} || now - P10K_DISK_USAGE_CACHE_TS >= P10K_DISK_USAGE_CACHE_SECONDS )); then
+      local disk_stats
+      disk_stats=$(df -BG / 2>/dev/null | awk 'NR==2 {gsub(/G/,"",$4); gsub(/%/,"",$5); print $4, $5}')
+      [[ -n $disk_stats ]] || return
+
+      local -a parts
+      parts=(${=disk_stats})
+      local avail_gb=${parts[1]}
+      local usage_pct=${parts[2]}
+      local fg=35
+      (( usage_pct >= 90 )) && fg=220
+      (( usage_pct >= 95 )) && fg=160
+
+      typeset -g P10K_DISK_USAGE_CACHE_TEXT="${avail_gb}GB free"
+      typeset -gi P10K_DISK_USAGE_CACHE_FG=$fg
+      typeset -gi P10K_DISK_USAGE_CACHE_TS=$now
+    fi
+
+    [[ -n ${P10K_DISK_USAGE_CACHE_TEXT-} ]] || return
+    p10k segment -f $P10K_DISK_USAGE_CACHE_FG -t "$P10K_DISK_USAGE_CACHE_TEXT"
   }
   # Custom icon.
   # typeset -g POWERLEVEL9K_DISK_USAGE_VISUAL_IDENTIFIER_EXPANSION='⭐'
@@ -971,15 +986,25 @@
   # GitHub CLI account color.
   typeset -g POWERLEVEL9K_GH_USER_FOREGROUND=66
 
-  function prompt_gh_user() {
+  function p10k_refresh_gh_user() {
     emulate -L zsh
-    (( $+commands[gh] )) || return
+    if (( ! $+commands[gh] )); then
+      typeset -g P10K_GH_USER_LOGIN=
+      return
+    fi
 
     local login
-    login=$(command gh auth status --active --hostname github.com --json hosts --jq '.hosts["github.com"][] | select(.active) | .login' 2>/dev/null) || return
-    [[ -n $login ]] || return
+    login=$(command gh auth status --active --hostname github.com --json hosts --jq '.hosts["github.com"][] | select(.active) | .login' 2>/dev/null) || login=
+    typeset -g P10K_GH_USER_LOGIN=$login
+  }
 
-    p10k segment -f $POWERLEVEL9K_GH_USER_FOREGROUND -t "gh ${login//\%/%%}"
+  p10k_refresh_gh_user
+
+  function prompt_gh_user() {
+    emulate -L zsh
+    [[ -n ${P10K_GH_USER_LOGIN-} ]] || return
+
+    p10k segment -f $POWERLEVEL9K_GH_USER_FOREGROUND -t "gh ${P10K_GH_USER_LOGIN//\%/%%}"
   }
 
   ###[ virtualenv: python virtual environment (https://docs.python.org/3/library/venv.html) ]###
@@ -1604,6 +1629,8 @@
   ###############################[ public_ip: public IP address ]###############################
   # Public IP color.
   typeset -g POWERLEVEL9K_PUBLIC_IP_FOREGROUND=94
+  # Powerlevel10k refreshes public IP asynchronously. Keep that cache at five minutes.
+  typeset -g POWERLEVEL9K_PUBLIC_IP_TIMEOUT=300
   # Custom icon.
   # typeset -g POWERLEVEL9K_PUBLIC_IP_VISUAL_IDENTIFIER_EXPANSION='⭐'
 
@@ -1642,6 +1669,22 @@
   # Show information for the first network interface whose name matches this regular expression.
   # Run `ifconfig` or `ip -4 a show` to see the names of all network interfaces.
   typeset -g POWERLEVEL9K_IP_INTERFACE='[ew].*'
+  # Refresh custom local IP at most once per minute.
+  typeset -gi P10K_IP_CACHE_SECONDS=60
+  function prompt_cached_ip() {
+    emulate -L zsh
+
+    local now=$SECONDS
+    if (( ! ${+P10K_IP_CACHE_TS} || now - P10K_IP_CACHE_TS >= P10K_IP_CACHE_SECONDS )); then
+      local ip_addr
+      ip_addr=$(command ip -4 -o addr show scope global up 2>/dev/null | awk '$2 ~ /^[ew]/ {split($4,a,"/"); print a[1]; exit}')
+      typeset -g P10K_IP_CACHE_TEXT=${ip_addr##*.*.}
+      typeset -gi P10K_IP_CACHE_TS=$now
+    fi
+
+    [[ -n ${P10K_IP_CACHE_TEXT-} ]] || return
+    p10k segment -f $POWERLEVEL9K_IP_FOREGROUND -t "$P10K_IP_CACHE_TEXT"
+  }
   # Custom icon.
   # typeset -g POWERLEVEL9K_IP_VISUAL_IDENTIFIER_EXPANSION='⭐'
 
