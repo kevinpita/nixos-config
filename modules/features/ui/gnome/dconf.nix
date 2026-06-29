@@ -16,7 +16,7 @@ lib.mkIf config.features.gnome.enable {
               "caffeine@patapon.info"
               "clipboard-history@alexsaveau.dev"
               "tailscale-status@maxgallup.github.com"
-              "claude-code-usage@haletran.com"
+              "claude-usage@dvdstelt.github.io"
               "codex-usage@kevinpita.dev"
             ];
           };
