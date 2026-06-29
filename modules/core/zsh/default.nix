@@ -46,7 +46,7 @@
         vi = "nvim";
         vim = "nvim";
         neofetch = "fastfetch";
-        zip = "zip -r";
+        zip = "zip -r -x \"*/node_modules/*\" -x \"*/.direnv/*\"";
 
         gittime = ''git commit --amend --date="$(date -Iseconds)" --no-edit'';
         switch = "nh os switch ~/nixos-config";
