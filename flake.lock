@@ -88,11 +88,11 @@
         "nixpkgs": "nixpkgs_4"
       },
       "locked": {
-        "lastModified": 1782745476,
-        "narHash": "sha256-dF+sUsOcSJoY1xwjHXaGcicXxrSGt701EOMbe/v3IEs=",
+        "lastModified": 1782760680,
+        "narHash": "sha256-9gpvDA+6D4PGEI3uU8c2wi6tDJ3hLOEW9f5C2G9Tyds=",
         "owner": "ilysenko",
         "repo": "codex-desktop-linux",
-        "rev": "fd69d5b6f14bce46681f50dbbdc3f003fd489f69",
+        "rev": "d6282e7a80b2fc8ee8308a99d8650b05c1a481fe",
         "type": "github"
       },
       "original": {
@@ -291,11 +291,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1782702263,
-        "narHash": "sha256-8/MG4Su7PhnynrmsVO61IeAfrK7GuUEu+E+gwbhy1QQ=",
+        "lastModified": 1782749631,
+        "narHash": "sha256-slFTUgDy0KTPA4LBAmC/9SngDq8GCPdX+ZR0yQHHN1E=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "789a35fbdeb3c46b260096daa0b321c11be527ea",
+        "rev": "5d72a29fc36ac21adae6ae35568fe5ee6700850f",
         "type": "github"
       },
       "original": {
