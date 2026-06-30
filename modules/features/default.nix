@@ -2,6 +2,7 @@
 {
   options.features = {
     desktop.enable = lib.mkEnableOption "Graphical base (audio, fonts, input)";
+    dictation.enable = lib.mkEnableOption "Local desktop dictation";
     gnome.enable = lib.mkEnableOption "GNOME desktop environment";
     hyprland.enable = lib.mkEnableOption "Hyprland Wayland compositor";
     ghostty.enable = lib.mkEnableOption "Ghostty terminal emulator";
@@ -34,6 +35,7 @@
 
   imports = [
     ./ui/desktop.nix
+    ./ui/dictation.nix
     ./ui/gnome
     ./ui/hyprland
     ./ui/ghostty.nix

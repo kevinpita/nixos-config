@@ -24,6 +24,7 @@
     browsers.enable = true;
     communication.enable = true;
     desktop.enable = true;
+    dictation.enable = true;
     development.enable = true;
     docker.enable = true;
     ghostty.enable = true;

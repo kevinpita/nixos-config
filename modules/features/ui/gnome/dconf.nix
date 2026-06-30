@@ -36,7 +36,8 @@ lib.mkIf config.features.gnome.enable {
           };
           "org/gnome/settings-daemon/plugins/media-keys".custom-keybindings =
             lib.optional config.features.ghostty.enable "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
-            ++ [ "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/" ];
+            ++ [ "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/" ]
+            ++ lib.optional config.features.dictation.enable "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/";
           "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1" = {
             name = "Emoji Picker";
             binding = "<Super>period";
@@ -48,6 +49,13 @@ lib.mkIf config.features.gnome.enable {
             name = "Open Terminal";
             binding = "<Super>Return";
             command = "ghostty";
+          };
+        })
+        (lib.mkIf config.features.dictation.enable {
+          "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2" = {
+            name = "Dictation";
+            binding = "<Control><Alt>space";
+            command = "/etc/profiles/per-user/${username}/bin/dictate-toggle";
           };
         })
       ];
