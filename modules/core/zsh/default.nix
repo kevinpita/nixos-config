@@ -46,7 +46,6 @@
         vi = "nvim";
         vim = "nvim";
         neofetch = "fastfetch";
-        zip = "zip -r -x \"*/node_modules/*\" -x \"*/.direnv/*\"";
 
         gittime = ''git commit --amend --date="$(date -Iseconds)" --no-edit'';
         switch = "nh os switch ~/nixos-config";
@@ -103,6 +102,8 @@
           }
 
           copy() { command cat "$1" | wl-copy; }
+
+          zip() { command zip -r "$@" -x "*/node_modules/*" -x "*/.direnv/*"; }
 
           go() {
             if [[ "$1" == "test" ]]; then
