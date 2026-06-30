@@ -124,7 +124,7 @@ in
     programs.zsh.shellAliases = {
       hn = "herdr session attach";
       hp = "herdr session attach peersyst";
-      pherdr = "herdr --remote pfium";
+      pherdr = "herdr --remote pfium --remote-keybindings server";
     };
   };
 }
