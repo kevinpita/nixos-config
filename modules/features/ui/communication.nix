@@ -8,7 +8,6 @@
 lib.mkIf config.features.communication.enable {
   home-manager.users.${username} = {
     home.packages = with pkgs; [
-      legcord
       telegram-desktop
       (symlinkJoin {
         name = "slack";
