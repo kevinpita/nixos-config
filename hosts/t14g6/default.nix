@@ -18,6 +18,13 @@
     ACTION=="add", SUBSYSTEM=="thunderbolt", ATTR{authorized}=="0", ATTR{authorized}="1"
   '';
 
+  # Prefer an enrolled FIDO2/YubiKey for unlocking LUKS, then fall back to the
+  # normal passphrase if no token is present after 5 seconds.
+  boot.initrd.luks.devices.crypted.crypttabExtraOpts = [
+    "fido2-device=auto"
+    "token-timeout=5s"
+  ];
+
   features = {
     ai.enable = true;
     aws.enable = true;
