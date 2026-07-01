@@ -61,6 +61,11 @@
 
     herdr-nix.url = "github:kevinpita/herdr-nix";
 
+    pi-flake = {
+      url = "github:ChauDucToan/pi-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     hunk = {
       url = "github:modem-dev/hunk";
       inputs.nixpkgs.follows = "nixpkgs";
