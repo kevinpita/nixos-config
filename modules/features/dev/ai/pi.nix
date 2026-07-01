@@ -55,6 +55,7 @@ in
             "npm:@juicesharp/rpiv-ask-user-question"
             "npm:@juicesharp/rpiv-todo"
             "npm:@ayulab/pi-rewind"
+            "npm:@quintinshaw/pi-dynamic-workflows"
           ];
         };
       };
