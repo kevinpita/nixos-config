@@ -41,6 +41,15 @@ in
     };
 
     home-manager.users.${username}.home.file = {
+      # Pi prefers ~/.pi/agent/bin/fd for @ file autocomplete.
+      # Wrap fd so gitignored files show up, while dependency trees stay hidden.
+      ".pi/agent/bin/fd".source = pkgs.writeShellScript "pi-fd" ''
+        exec ${lib.getExe pkgs.fd} \
+          --no-ignore-vcs \
+          --exclude node_modules \
+          "$@"
+      '';
+
       ".pi/agent/settings.json" = {
         force = true;
         text = builtins.toJSON {
