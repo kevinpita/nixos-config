@@ -61,6 +61,8 @@ in
           packages = [
             "npm:pi-web-access"
             "npm:pi-subagents"
+            "npm:pi-intercom"
+            "npm:pi-prompt-template-model"
             "npm:@juicesharp/rpiv-ask-user-question"
             "npm:@juicesharp/rpiv-todo"
             "npm:@ayulab/pi-rewind"
