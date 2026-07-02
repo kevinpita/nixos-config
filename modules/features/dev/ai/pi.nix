@@ -55,6 +55,9 @@ in
           "$@"
       '';
 
+      ".pi/agent/extensions/fast-mode-powerline/index.ts".source =
+        ./pi/extensions/fast-mode-powerline/index.ts;
+
       ".pi/agent/settings.json" = {
         force = true;
         text = builtins.toJSON {
@@ -71,7 +74,7 @@ in
 
             "npm:@quintinshaw/pi-dynamic-workflows"
 
-            "npm:pi-openai-fast-mode"
+            "npm:pi-powerline-footer"
 
             "npm:pi-subagents"
             "npm:pi-intercom"
@@ -79,6 +82,17 @@ in
 
             "npm:pi-web-access"
           ];
+          powerline = {
+            preset = "default";
+            customItems = [
+              {
+                id = "fast";
+                statusKey = "pi-openai-fast-mode";
+                position = "right";
+                color = "warning";
+              }
+            ];
+          };
         };
       };
 
