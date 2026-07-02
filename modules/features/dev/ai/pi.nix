@@ -64,14 +64,20 @@ in
           defaultThinkingLevel = "xhigh";
           enableInstallTelemetry = false;
           packages = [
-            "npm:pi-web-access"
+            "npm:@ayulab/pi-rewind"
+
+            "npm:@juicesharp/rpiv-ask-user-question"
+            "npm:@juicesharp/rpiv-todo"
+
+            "npm:@quintinshaw/pi-dynamic-workflows"
+
+            "npm:pi-openai-fast-mode"
+
             "npm:pi-subagents"
             "npm:pi-intercom"
             "npm:pi-prompt-template-model"
-            "npm:@juicesharp/rpiv-ask-user-question"
-            "npm:@juicesharp/rpiv-todo"
-            "npm:@ayulab/pi-rewind"
-            "npm:@quintinshaw/pi-dynamic-workflows"
+
+            "npm:pi-web-access"
           ];
         };
       };
