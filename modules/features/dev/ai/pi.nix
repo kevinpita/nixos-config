@@ -47,6 +47,11 @@ in
         exec ${lib.getExe pkgs.fd} \
           --no-ignore-vcs \
           --exclude node_modules \
+          --exclude dist \
+          --exclude .claude \
+          --exclude .agents \
+          --exclude .codex \
+          --exclude .turbo \
           "$@"
       '';
 
