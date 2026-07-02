@@ -19,13 +19,16 @@ let
 
     inputs.antigravity-nix.overlays.default
 
-    # TODO: remove once helm-tui is merged into nixpkgs
     (_final: _prev: {
       inherit (inputs.kevinpita-nixpkgs.legacyPackages.${system}) helm-tui;
     })
 
     (_final: _prev: {
       herdr = inputs.herdr-nix.packages.${system}.default;
+    })
+
+    (_final: _prev: {
+      orca = inputs.orca-nix.packages.${system}.default;
     })
 
     (_final: _prev: {

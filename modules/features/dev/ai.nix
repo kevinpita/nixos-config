@@ -14,6 +14,7 @@
         codex
         claude-code
         google-antigravity-cli
+        orca
         rtk
 
         bubblewrap # codex dependency

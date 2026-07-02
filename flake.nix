@@ -61,6 +61,11 @@
 
     herdr-nix.url = "github:kevinpita/herdr-nix";
 
+    orca-nix = {
+      url = "github:kevinpita/orca-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     pi-flake = {
       url = "github:ChauDucToan/pi-flake";
       inputs.nixpkgs.follows = "nixpkgs";
