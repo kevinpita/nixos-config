@@ -42,7 +42,7 @@
         z = "zeditor";
 
         cat = "bat";
-        htop = "btm";
+        htop = "btop";
         vi = "nvim";
         vim = "nvim";
         neofetch = "fastfetch";
