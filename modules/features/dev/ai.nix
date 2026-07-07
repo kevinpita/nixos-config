@@ -14,13 +14,13 @@
         codex
         claude-code
         google-antigravity-cli
-        orca
         rtk
 
         bubblewrap # codex dependency
       ]
       ++ lib.optionals config.features.desktop.enable [
         codex-desktop
+        orca-app
       ];
   };
 }

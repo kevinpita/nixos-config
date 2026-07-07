@@ -28,7 +28,7 @@ let
     })
 
     (_final: _prev: {
-      orca = inputs.orca-nix.packages.${system}.default;
+      orca-app = inputs.orca-nix.packages.${system}.default;
     })
 
     (_final: _prev: {
