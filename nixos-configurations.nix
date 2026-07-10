@@ -38,6 +38,18 @@ let
     (_final: _prev: {
       ku = inputs.ku-nix.packages.${system}.default;
     })
+
+    (
+      final: _prev:
+      let
+        ghidraMcp = final.callPackage ./packages/ghidra-mcp { };
+      in
+      {
+        ghidra-mcp = ghidraMcp;
+        ghidra-mcp-bridge = ghidraMcp.bridge;
+        ghidra-mcp-extension = ghidraMcp.extension;
+      }
+    )
   ];
 
   pkgs = import inputs.nixpkgs {

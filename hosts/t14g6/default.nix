@@ -40,6 +40,7 @@
     kubernetes.enable = true;
     multimedia.enable = true;
     printing-3d.enable = true;
+    reverse-engineering.enable = true;
     sops-admin.enable = true;
     syncthing.enable = true;
     tailscale.enable = true;

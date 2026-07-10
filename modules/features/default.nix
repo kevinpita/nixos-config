@@ -12,6 +12,7 @@
 
     git.enable = lib.mkEnableOption "Git tools (gh, gh-dash, lazygit, delta, plus hunk and sublime-merge on graphical hosts)";
     development.enable = lib.mkEnableOption "Development tools (direnv, jetbrains on graphical hosts)";
+    reverse-engineering.enable = lib.mkEnableOption "Reverse engineering tools (Ghidra with GhidraMCP)";
     zed.enable = lib.mkEnableOption "Zed editor managed through Home Manager";
     ai.enable = lib.mkEnableOption "AI tools (claude-code, codex, antigravity-cli, rtk, pi, plus desktop apps on graphical hosts)";
 
@@ -45,6 +46,7 @@
 
     ./dev/git.nix
     ./dev/development.nix
+    ./dev/reverse-engineering.nix
     ./dev/zed.nix
     ./dev/ai.nix
 
