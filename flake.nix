@@ -61,6 +61,8 @@
 
     herdr-nix.url = "github:kevinpita/herdr-nix";
 
+    whisp-nix.url = "github:kevinpita/whisp-nix";
+
     orca-nix = {
       url = "github:kevinpita/orca-nix";
       inputs.nixpkgs.follows = "nixpkgs";
