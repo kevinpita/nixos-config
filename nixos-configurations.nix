@@ -32,10 +32,6 @@ let
     })
 
     (_final: _prev: {
-      hunk = inputs.hunk.packages.${system}.hunk;
-    })
-
-    (_final: _prev: {
       ku = inputs.ku-nix.packages.${system}.default;
     })
 
