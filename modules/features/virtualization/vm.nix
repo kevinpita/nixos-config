@@ -14,10 +14,17 @@ lib.mkIf config.features.virtualization.vm.enable (
           package = pkgs.qemu_kvm;
           runAsRoot = true;
           swtpm.enable = true;
+          # virtiofs shared folders: libvirt needs the virtiofsd binary.
+          vhostUserPackages = [ pkgs.virtiofsd ];
         };
         onBoot = "ignore";
         onShutdown = "shutdown";
       };
+
+      # With the nftables firewall backend (enabled alongside incus), libvirt's
+      # NAT bridge is untrusted by default, so guest DHCP/DNS and outbound
+      # traffic on virbr0 get dropped. Trust the bridge like we do for incusbr0.
+      networking.firewall.trustedInterfaces = [ "virbr0" ];
 
       users.users.${username}.extraGroups = [
         "libvirtd"
