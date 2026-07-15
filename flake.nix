@@ -79,24 +79,5 @@
 
   };
 
-  outputs =
-    inputs@{ flake-parts, ... }:
-    flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = [ "x86_64-linux" ];
-
-      imports = [ ./nixos-configurations.nix ];
-
-      perSystem =
-        { pkgs, ... }:
-        let
-          treefmtEval = inputs.treefmt-nix.lib.evalModule pkgs ./treefmt.nix;
-        in
-        {
-          formatter = treefmtEval.config.build.wrapper;
-
-          checks = {
-            formatting = treefmtEval.config.build.check inputs.self;
-          };
-        };
-    };
+  outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./modules);
 }

@@ -60,6 +60,8 @@ let
   hostModules = lib.filterAttrs (name: _: lib.hasPrefix "hosts/" name) config.flake.modules.nixos;
 in
 {
+  imports = [ inputs.flake-parts.flakeModules.modules ];
+
   flake.nixosConfigurations = lib.mapAttrs' (
     name: module:
     let
