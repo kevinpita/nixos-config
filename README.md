@@ -30,7 +30,7 @@ nh os switch ~/nixos-config
 
 ## Hosts
 
-Hosts are declared in `nixos-configurations.nix`. Add a host there before deploying it with `--flake ~/nixos-config#<hostname>`.
+Hosts are defined as `modules/hosts/<hostname>.nix` aspects and auto-discovered. Deploy with `--flake ~/nixos-config#<hostname>`.
 
 | Host | Type | Notes |
 | ------- | ------------------- | ------------------------------------------- |
@@ -46,7 +46,7 @@ Secrets (SSH keys, user password) need the host's age key to decrypt. Ship the k
 
 ### New host or first install
 
-First add `hosts/<hostname>`, wire it in `nixos-configurations.nix`, and add the matching secret files. Then run the install from the deploying machine:
+First add `modules/hosts/<hostname>.nix` (aspect module) and raw files under `hosts/<hostname>/`, then add the matching secret files. Then run the install from the deploying machine:
 
 1. Generate an age key for the new host:
    ```bash
