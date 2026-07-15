@@ -38,8 +38,16 @@
     };
 
   flake.modules.nixos."roles/desktop" =
-    { pkgs, username, ... }:
     {
+      config,
+      lib,
+      pkgs,
+      username,
+      ...
+    }:
+    # GUI additions belong to hosts that also import the vm aspect; libvirtd
+    # is enabled exactly by that aspect, so it carries the old desktop+vm gate.
+    lib.mkIf config.virtualisation.libvirtd.enable {
       virtualisation.spiceUSBRedirection.enable = true;
 
       programs.dconf.enable = true;
