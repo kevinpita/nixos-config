@@ -104,7 +104,7 @@ Secrets repo: `git@github.com:kevinpita/nixos-secrets.git` -> `~/nixos-secrets`
 
 Admin key and host age keys are backed up in KeePass. Restore admin key to `~/.config/sops/age/keys.txt` (chmod 600).
 
-On hosts with `features.sops-admin.enable = true`, the admin age key is managed by sops at `~/.config/sops/age/keys.txt` after the system has enough secret access to switch successfully.
+On hosts whose role imports the sops-admin aspect, the admin age key is managed by sops at `~/.config/sops/age/keys.txt` after the system has enough secret access to switch successfully.
 
 ## Post-install checklist
 
@@ -115,6 +115,6 @@ Everything works on first boot (SSH keys, user password) since the age key was s
    git clone git@github.com:kevinpita/nixos-config.git ~/nixos-config
    git clone git@github.com:kevinpita/nixos-secrets.git ~/nixos-secrets
    ```
-1. Restore admin key to `~/.config/sops/age/keys.txt` from KeePass if this host does not manage it through `features.sops-admin.enable`
+1. Restore admin key to `~/.config/sops/age/keys.txt` from KeePass if this host does not import the sops-admin aspect
 1. Syncthing: `http://localhost:8384`, accept devices and set up KeePass folder
 1. Run `nh os switch ~/nixos-config` to apply any pending changes
