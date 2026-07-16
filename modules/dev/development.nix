@@ -1,6 +1,7 @@
 {
   flake.modules.nixos.development =
     {
+      lib,
       pkgs,
       username,
       ...
@@ -26,9 +27,20 @@
         programs = {
           direnv = {
             enable = true;
-            enableZshIntegration = true;
+            enableZshIntegration = false;
             nix-direnv.enable = true;
           };
+
+          # Export the initial environment before Powerlevel10k's instant prompt,
+          # then install the directory-change hook immediately afterward.
+          zsh.initContent = lib.mkMerge [
+            (lib.mkOrder 490 ''
+              emulate zsh -c "$(${lib.getExe pkgs.direnv} export zsh)"
+            '')
+            (lib.mkOrder 505 ''
+              emulate zsh -c "$(${lib.getExe pkgs.direnv} hook zsh)"
+            '')
+          ];
         };
       };
     };
