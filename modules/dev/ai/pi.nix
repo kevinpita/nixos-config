@@ -42,6 +42,9 @@
         };
 
         environment = {
+          # pi-hypa installs its bundled Hypa CLI shim here.
+          localBinInPath = true;
+
           systemPackages = with pkgs; [
             fd # pi file picker dependency
           ];
