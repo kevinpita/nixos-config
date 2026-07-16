@@ -44,7 +44,8 @@
               "org/gnome/settings-daemon/plugins/media-keys".custom-keybindings =
                 lib.optional ghosttyEnabled "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
                 ++ [ "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/" ]
-                ++ lib.optional dictationEnabled "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/";
+                ++ lib.optional dictationEnabled "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/"
+                ++ lib.optional ghosttyEnabled "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3/";
               "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1" = {
                 name = "Emoji Picker";
                 binding = "<Super>period";
@@ -56,6 +57,11 @@
                 name = "Open Terminal";
                 binding = "<Super>Return";
                 command = "ghostty";
+              };
+              "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3" = {
+                name = "Open Pfium Herdr";
+                binding = "F13";
+                command = "ghostty -e herdr --remote pfium --remote-keybindings server";
               };
             })
             (lib.mkIf dictationEnabled {

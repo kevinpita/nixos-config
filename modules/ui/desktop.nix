@@ -8,6 +8,11 @@
     {
       security.rtkit.enable = true;
 
+      hardware.keyboard.qmk = {
+        enable = true;
+        keychronSupport = true;
+      };
+
       services = {
         xserver.xkb.layout = "es";
         libinput.enable = true;
