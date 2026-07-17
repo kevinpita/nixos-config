@@ -90,6 +90,8 @@
                 "npm:pi-plugin-manager"
                 "npm:pi-subagents"
                 "npm:pi-lens"
+                # Pi runs under Bun, and pi-fff declares its Bun SDK as an optional peer.
+                "npm:@ff-labs/fff-bun"
                 "npm:@ff-labs/pi-fff"
                 "npm:@ayulab/pi-rewind"
                 "npm:pi-btw"
