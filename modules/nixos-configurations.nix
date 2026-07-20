@@ -32,10 +32,6 @@ let
     })
 
     (_final: _prev: {
-      orca-app = inputs.orca-nix.packages.${system}.default;
-    })
-
-    (_final: _prev: {
       ku = inputs.ku-nix.packages.${system}.default;
     })
 

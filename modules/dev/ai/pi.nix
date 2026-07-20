@@ -56,6 +56,10 @@
         };
 
         home-manager.users.${username}.home.file = {
+          ".hypa/config.json".text = builtins.toJSON {
+            exclude_commands = [ "herdr" ];
+          };
+
           ".pi/settings.json" = {
             force = true;
             text = builtins.toJSON {
@@ -75,6 +79,7 @@
               defaultModel = "gpt-5.6-sol";
               defaultThinkingLevel = "xhigh";
               enableInstallTelemetry = false;
+              enableSkillCommands = true;
               theme = "dark";
               compaction = {
                 enabled = true;
@@ -85,6 +90,10 @@
                 "npm:@juicesharp/rpiv-ask-user-question"
                 "npm:@juicesharp/rpiv-todo"
                 "npm:pi-intercom"
+                {
+                  source = "npm:@ogulcancelik/pi-herdr";
+                  skills = [ ];
+                }
                 "npm:pi-prompt-template-model"
                 "npm:pi-web-access"
                 "npm:pi-plugin-manager"

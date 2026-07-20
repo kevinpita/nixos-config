@@ -15,9 +15,6 @@
   flake.modules.nixos."roles/desktop" =
     { pkgs, ... }:
     {
-      environment.systemPackages = with pkgs; [
-        codex-desktop
-        orca-app
-      ];
+      environment.systemPackages = with pkgs; [ codex-desktop ];
     };
 }
