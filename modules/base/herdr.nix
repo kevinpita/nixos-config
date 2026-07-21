@@ -110,8 +110,19 @@
 
             [[keys.command]]
             key = "prefix+g"
-            type = "pane"
+            type = "popup"
             command = "lazygit"
+            description = "open lazygit"
+            width = "80%"
+            height = "80%"
+
+            [[keys.command]]
+            key = "prefix+y"
+            type = "popup"
+            command = "yazi"
+            description = "open yazi"
+            width = "80%"
+            height = "80%"
 
             [[keys.command]]
             key = "prefix+o"
