@@ -35,9 +35,6 @@
         };
 
         environment = {
-          # pi-hypa installs its bundled Hypa CLI shim here.
-          localBinInPath = true;
-
           systemPackages = with pkgs; [
             fd # pi file picker dependency
           ];
@@ -49,10 +46,6 @@
         };
 
         home-manager.users.${username}.home.file = {
-          ".hypa/config.json".text = builtins.toJSON {
-            exclude_commands = [ "herdr" ];
-          };
-
           ".pi/settings.json" = {
             force = true;
             text = builtins.toJSON {
@@ -63,6 +56,15 @@
           ".pi/agent/extensions/auto-session-name.ts".source = ./pi/extensions/auto-session-name.ts;
           ".pi/agent/extensions/file-picker.ts".source = ./pi/extensions/file-picker.ts;
           ".pi/agent/extensions/herdr-agent-state.ts".source = ./pi/extensions/herdr-agent-state.ts;
+
+          ".pi/agent/openai-server-compaction.json".text = builtins.toJSON {
+            enabled = true;
+            includeAzure = false;
+            thresholdRatio = 0.7;
+            compactThreshold = 0;
+            usePreviousResponseId = true;
+            notify = false;
+          };
 
           ".pi/agent/settings.json" = {
             force = true;
@@ -75,21 +77,11 @@
               enableSkillCommands = true;
               theme = "dark";
               # Trigger at 90% of the active 272k Codex context window.
-              # The native compaction package handles session_before_compact.
+              # pi-openai-server-compaction handles session_before_compact.
               compaction = {
                 enabled = true;
                 reserveTokens = 27200;
                 keepRecentTokens = 20000;
-              };
-              openaiNativeCompaction = {
-                enabled = true;
-                debug = false;
-                logProviderPayloads = false;
-                logCompactResponses = false;
-                redactSensitiveData = true;
-                supportedProviders = [ "openai-codex" ];
-                supportedApis = [ "openai-codex-responses" ];
-                notifyOnLoad = false;
               };
               packages = [
                 "npm:@juicesharp/rpiv-ask-user-question"
@@ -103,6 +95,10 @@
                 "npm:pi-web-access"
                 "npm:pi-plugin-manager"
                 "npm:pi-subagents"
+                "npm:@vigolium/piolium"
+                "npm:@quintinshaw/pi-dynamic-workflows"
+                "npm:@mjasnikovs/pi-task"
+                "git:github.com/tunnckoCore/pi-gpt-fast-mode"
                 "npm:pi-lens"
                 # Pi runs under Bun, and pi-fff declares its Bun SDK as an optional peer.
                 "npm:@ff-labs/fff-bun"
@@ -113,8 +109,7 @@
                 "npm:pi-zentui"
                 "npm:@zigai/pi-prompt-history"
                 "npm:pi-readline-search"
-                "npm:@hypabolic/pi-hypa"
-                "git:github.com/unstableneutron/pi-openai-compaction@b087ebf12329a4da7bdd9376d3f7b28603cae2c1"
+                "git:github.com/algal/pi-openai-server-compaction"
               ];
               powerline = {
                 preset = "default";
