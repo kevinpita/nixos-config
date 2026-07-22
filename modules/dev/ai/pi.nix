@@ -74,6 +74,13 @@
               enableInstallTelemetry = false;
               enableSkillCommands = true;
               theme = "dark";
+              # Trigger at 90% of the active 272k Codex context window.
+              # The native compaction package handles session_before_compact.
+              compaction = {
+                enabled = true;
+                reserveTokens = 27200;
+                keepRecentTokens = 20000;
+              };
               openaiNativeCompaction = {
                 enabled = true;
                 debug = false;
