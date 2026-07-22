@@ -26,13 +26,6 @@
           extensions = [ ];
           models = {
             providers = {
-              openai-codex = {
-                modelOverrides = {
-                  "gpt-5.6-luna".contextWindow = 258000;
-                  "gpt-5.6-sol".contextWindow = 258000;
-                  "gpt-5.6-terra".contextWindow = 258000;
-                };
-              };
             };
           };
           keybindings = {
@@ -81,10 +74,15 @@
               enableInstallTelemetry = false;
               enableSkillCommands = true;
               theme = "dark";
-              compaction = {
+              openaiNativeCompaction = {
                 enabled = true;
-                reserveTokens = 8000;
-                keepRecentTokens = 20000;
+                debug = false;
+                logProviderPayloads = false;
+                logCompactResponses = false;
+                redactSensitiveData = true;
+                supportedProviders = [ "openai-codex" ];
+                supportedApis = [ "openai-codex-responses" ];
+                notifyOnLoad = false;
               };
               packages = [
                 "npm:@juicesharp/rpiv-ask-user-question"
@@ -109,6 +107,7 @@
                 "npm:@zigai/pi-prompt-history"
                 "npm:pi-readline-search"
                 "npm:@hypabolic/pi-hypa"
+                "git:github.com/unstableneutron/pi-openai-compaction@b087ebf12329a4da7bdd9376d3f7b28603cae2c1"
               ];
               powerline = {
                 preset = "default";
