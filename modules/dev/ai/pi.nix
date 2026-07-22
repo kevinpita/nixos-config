@@ -111,17 +111,6 @@
                 "npm:pi-readline-search"
                 "git:github.com/algal/pi-openai-server-compaction"
               ];
-              powerline = {
-                preset = "default";
-                customItems = [
-                  {
-                    id = "fast";
-                    statusKey = "pi-openai-fast-mode";
-                    position = "right";
-                    color = "warning";
-                  }
-                ];
-              };
             };
           };
 
