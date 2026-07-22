@@ -104,7 +104,7 @@
                 "npm:@ff-labs/pi-fff"
                 "npm:@ayulab/pi-rewind"
                 "npm:pi-btw"
-                "npm:@narumitw/pi-codex-usage"
+                "npm:@narumitw/pi-usage"
                 "npm:pi-zentui"
                 "npm:@zigai/pi-prompt-history"
                 "npm:pi-readline-search"
