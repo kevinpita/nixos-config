@@ -14,6 +14,9 @@
       imports = [ inputs.pi-flake.nixosModules.default ];
 
       config = {
+        # Pi bundles a generic dynamically linked executable.
+        programs.nix-ld.enable = true;
+
         services.pi-coding-agent = {
           enable = true;
           users = [ username ];
