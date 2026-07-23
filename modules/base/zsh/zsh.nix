@@ -48,6 +48,7 @@
             vi = "nvim";
             vim = "nvim";
             neofetch = "fastfetch";
+            sshl = ''awk 'tolower($1) == "host" { for (i = 2; i <= NF; i++) if ($i !~ /[*?!]/) print $i }' ~/.ssh/config'';
 
             gittime = ''git commit --amend --date="$(date -Iseconds)" --no-edit'';
             switch = "nh os switch ~/nixos-config";
