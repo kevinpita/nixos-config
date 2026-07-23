@@ -650,11 +650,11 @@
         "wrappers": "wrappers"
       },
       "locked": {
-        "lastModified": 1784848061,
-        "narHash": "sha256-wdgRwC4oIMQkWIT0z2Mlyj2/+oLXZdZCBJwuoMuqQpg=",
+        "lastModified": 1784850557,
+        "narHash": "sha256-dn0IJjRL57RX8jtZIVvPaZL5Ena1G32TcWq2q5lNCvs=",
         "owner": "kevinpita",
         "repo": "nixos-nvim",
-        "rev": "34247495daa9f7f7ea40bd833a3087f44112f9b1",
+        "rev": "6dafa664a85476d57b3379b65bcb3b132e81b7da",
         "type": "github"
       },
       "original": {
