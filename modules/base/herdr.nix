@@ -137,6 +137,7 @@
           hn = "herdr session attach";
           hp = "herdr session attach peersyst";
           pherdr = "herdr --remote pfium --remote-keybindings server";
+          minidesk = "herdr --remote minidesk --remote-keybindings server";
         };
       };
     };
