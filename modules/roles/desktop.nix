@@ -1,12 +1,11 @@
 { config, ... }:
 {
-  flake.modules.nixos."roles/desktop".imports = with config.flake.modules.nixos; [
+  flake.modules.nixos.desktop.imports = with config.flake.modules.nixos; [
     base
     ai
     aws
     browsers
     communication
-    desktop
     development
     docker
     ghostty
@@ -18,6 +17,7 @@
     sops-admin
     syncthing
     tailscale
+    ui
     work
     zed
   ];

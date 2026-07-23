@@ -12,7 +12,7 @@
       ];
     };
 
-  flake.modules.nixos."roles/desktop" =
+  flake.modules.nixos.desktop =
     { pkgs, ... }:
     {
       environment.systemPackages = with pkgs; [ codex-desktop ];

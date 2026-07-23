@@ -1,6 +1,6 @@
 { config, ... }:
 {
-  flake.modules.nixos."roles/server".imports = with config.flake.modules.nixos; [
+  flake.modules.nixos.server.imports = with config.flake.modules.nixos; [
     base
     ai
     development

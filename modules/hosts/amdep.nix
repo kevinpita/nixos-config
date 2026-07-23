@@ -8,7 +8,7 @@
       ../../hosts/amdep/monitors.nix
       ../../hosts/amdep/syncthing.nix
 
-      config.flake.modules.nixos."roles/desktop"
+      config.flake.modules.nixos.desktop
       config.flake.modules.nixos.vm
     ];
 

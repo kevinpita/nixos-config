@@ -9,7 +9,7 @@
 
       ../../hosts/microg8/syncthing.nix
 
-      config.flake.modules.nixos."roles/server"
+      config.flake.modules.nixos.server
     ];
 
     bootloader.mode = "bios";

@@ -37,7 +37,7 @@
       ];
     };
 
-  flake.modules.nixos."roles/desktop" =
+  flake.modules.nixos.desktop =
     {
       config,
       lib,

@@ -44,7 +44,7 @@ files define named modules under `flake.modules.nixos.<name>`; several files
 can contribute slices to the same name (all of `modules/base/` merges into
 `base`). Hosts are aspects too: `modules/hosts/<name>.nix` defines
 `flake.modules.nixos."hosts/<name>"` importing a role bundle
-(`roles/desktop` or `roles/server`) plus per-host aspects and the raw NixOS
+(`desktop` or `server`) plus per-host aspects and the raw NixOS
 files from `hosts/<name>/` (hardware, disko, host fragments; these are plain
 NixOS modules kept outside `modules/` on purpose).
 `modules/nixos-configurations.nix` builds `flake.nixosConfigurations` from

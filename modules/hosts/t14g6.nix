@@ -10,7 +10,7 @@
       ../../hosts/t14g6/tlp.nix
       inputs.nixos-hardware.nixosModules.lenovo-thinkpad-t14-amd-gen6
 
-      config.flake.modules.nixos."roles/desktop"
+      config.flake.modules.nixos.desktop
       config.flake.modules.nixos.dictation
       config.flake.modules.nixos.incus
       config.flake.modules.nixos.reverse-engineering

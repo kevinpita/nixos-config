@@ -8,7 +8,7 @@
 
       ../../hosts/hulk/syncthing.nix
 
-      config.flake.modules.nixos."roles/server"
+      config.flake.modules.nixos.server
       config.flake.modules.nixos.k3s
       config.flake.modules.nixos.kubernetes
     ];

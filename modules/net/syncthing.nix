@@ -27,7 +27,7 @@
       };
     };
 
-  flake.modules.nixos."roles/desktop" =
+  flake.modules.nixos.desktop =
     {
       lib,
       pkgs,

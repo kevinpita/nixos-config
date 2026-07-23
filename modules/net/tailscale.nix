@@ -30,11 +30,11 @@
       };
     };
 
-  flake.modules.nixos."roles/desktop" = {
+  flake.modules.nixos.desktop = {
     services.tailscale.useRoutingFeatures = "client";
   };
 
-  flake.modules.nixos."roles/server" =
+  flake.modules.nixos.server =
     { lib, ... }:
     {
       services.tailscale = {

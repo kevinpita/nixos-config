@@ -45,7 +45,7 @@
       };
     };
 
-  flake.modules.nixos."roles/desktop" =
+  flake.modules.nixos.desktop =
     { pkgs, username, ... }:
     {
       home-manager.users.${username}.home.packages = with pkgs; [
