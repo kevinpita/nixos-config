@@ -5,5 +5,6 @@
     ../../hosts/minidesk/hardware-configuration.nix
 
     config.flake.modules.nixos."roles/server"
+    config.flake.modules.nixos.work
   ];
 }

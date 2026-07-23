@@ -37,8 +37,8 @@ Hosts are defined as `modules/hosts/<hostname>.nix` aspects and auto-discovered.
 | amdep | Workstation | Full desktop, dual-boot |
 | hulk | Server | k3s single-node, Kubernetes tools |
 | microg8 | Server | BIOS boot, drive monitor |
+| minidesk | Server | Work configuration |
 | t14g6 | ThinkPad laptop | Full desktop, TLP, nixos-hardware module |
-| t480s | ThinkPad laptop | Full desktop, TLP, dual-boot, nixos-hardware module |
 
 ## Deploy with nixos-anywhere
 
@@ -49,24 +49,34 @@ Secrets (SSH keys, user password) need the host's age key to decrypt. Ship the k
 First add `modules/hosts/<hostname>.nix` (aspect module) and raw files under `hosts/<hostname>/`, then add the matching secret files. Then run the install from the deploying machine:
 
 1. Generate an age key for the new host:
+
    ```bash
    mkdir -p /tmp/extra-files/var/lib/sops-nix
    age-keygen -o /tmp/extra-files/var/lib/sops-nix/key.txt
    chmod 600 /tmp/extra-files/var/lib/sops-nix/key.txt
    age-keygen -y /tmp/extra-files/var/lib/sops-nix/key.txt
    ```
+
 1. Add the public key + creation rule to `~/nixos-secrets/.sops.yaml`
+
 1. Create secrets file: `sops secrets/<hostname>.yaml`
+
 1. Re-encrypt common secrets: `sops updatekeys secrets/common.yaml`
+
 1. Push nixos-secrets, then `nix flake update nixos-secrets` in nixos-config, push
+
 1. Boot target from [NixOS Minimal ISO](https://nixos.org/download/), set root password (`passwd`), get IP (`ip a`)
+
 1. Deploy:
+
    ```bash
    nix run github:nix-community/nixos-anywhere -- \
      --extra-files /tmp/extra-files \
      --flake ~/nixos-config#<hostname> root@<ip>
    ```
+
 1. Save the key (`/tmp/extra-files/var/lib/sops-nix/key.txt`) to KeePass for future reinstalls
+
 1. Clean up: `rm -rf /tmp/extra-files`
 
 ### Reinstalling an existing declared host
@@ -74,17 +84,21 @@ First add `modules/hosts/<hostname>.nix` (aspect module) and raw files under `ho
 All from the deploying machine. No sops changes needed, same key, same encryption.
 
 1. Get the host's age key from KeePass:
+
    ```bash
    mkdir -p /tmp/extra-files/var/lib/sops-nix
    vim /tmp/extra-files/var/lib/sops-nix/key.txt
    chmod 600 /tmp/extra-files/var/lib/sops-nix/key.txt
    ```
+
 1. Boot target, deploy:
+
    ```bash
    nix run github:nix-community/nixos-anywhere -- \
      --extra-files /tmp/extra-files \
      --flake ~/nixos-config#<hostname> root@<ip>
    ```
+
 1. Clean up: `rm -rf /tmp/extra-files`
 
 ### Generating hardware-configuration.nix
@@ -111,10 +125,14 @@ On hosts whose role imports the sops-admin aspect, the admin age key is managed 
 Everything works on first boot (SSH keys, user password) since the age key was shipped during deploy.
 
 1. Clone repos:
+
    ```bash
    git clone git@github.com:kevinpita/nixos-config.git ~/nixos-config
    git clone git@github.com:kevinpita/nixos-secrets.git ~/nixos-secrets
    ```
+
 1. Restore admin key to `~/.config/sops/age/keys.txt` from KeePass if this host does not import the sops-admin aspect
+
 1. Syncthing: `http://localhost:8384`, accept devices and set up KeePass folder
+
 1. Run `nh os switch ~/nixos-config` to apply any pending changes

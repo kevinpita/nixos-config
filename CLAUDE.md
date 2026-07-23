@@ -79,8 +79,8 @@ on microg8, `uefiOSProber = true` on dual-boot hosts).
 | amdep | Workstation | Full desktop, dual-boot |
 | hulk | Server | k3s single-node, kubernetes tools |
 | microg8 | Server | BIOS boot, drive monitor |
+| minidesk | Server | Work configuration |
 | t14g6 | ThinkPad laptop | Full desktop, TLP, nixos-hardware module |
-| t480s | ThinkPad laptop | Full desktop, TLP, dual-boot, nixos-hardware module |
 
 ### k3s
 
