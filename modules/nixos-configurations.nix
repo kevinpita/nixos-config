@@ -23,6 +23,12 @@ let
 
     inputs.whisp-nix.overlays.default
 
+    (_final: prev: {
+      rtk = prev.rtk.overrideAttrs (oldAttrs: {
+        patches = (oldAttrs.patches or [ ]) ++ [ ../packages/rtk/fix-test-dead-code.patch ];
+      });
+    })
+
     (_final: _prev: {
       inherit (inputs.kevinpita-nixpkgs.legacyPackages.${system}) helm-tui;
     })
