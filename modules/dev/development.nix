@@ -14,6 +14,7 @@
         python3
 
         lazydocker
+        lazyrsync
         lazysql
         mqttui
       ];

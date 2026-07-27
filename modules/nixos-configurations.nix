@@ -35,6 +35,8 @@ let
       ku = inputs.ku-nix.packages.${system}.default;
     })
 
+    inputs.lazyrsync-nix.overlays.default
+
     (
       final: _prev:
       let
