@@ -100,7 +100,6 @@
                 "npm:pi-web-access"
                 "npm:pi-subagents"
                 "npm:@vigolium/piolium"
-                "npm:@mjasnikovs/pi-task"
                 "git:github.com/tunnckoCore/pi-gpt-fast-mode"
                 "npm:pi-lens"
                 # Pi runs under Bun, and pi-fff declares its Bun SDK as an optional peer.
