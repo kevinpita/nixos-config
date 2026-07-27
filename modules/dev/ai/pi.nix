@@ -98,22 +98,16 @@
                 }
                 "npm:pi-prompt-template-model"
                 "npm:pi-web-access"
-                "npm:pi-plugin-manager"
                 "npm:pi-subagents"
                 "npm:@vigolium/piolium"
-                "npm:@quintinshaw/pi-dynamic-workflows"
                 "npm:@mjasnikovs/pi-task"
                 "git:github.com/tunnckoCore/pi-gpt-fast-mode"
                 "npm:pi-lens"
                 # Pi runs under Bun, and pi-fff declares its Bun SDK as an optional peer.
                 "npm:@ff-labs/fff-bun"
                 "npm:@ff-labs/pi-fff"
-                "npm:@ayulab/pi-rewind"
-                "npm:pi-btw"
                 "npm:@narumitw/pi-usage"
                 "npm:pi-zentui"
-                "npm:@zigai/pi-prompt-history"
-                "npm:pi-readline-search"
                 "git:github.com/algal/pi-openai-server-compaction"
               ];
             };
