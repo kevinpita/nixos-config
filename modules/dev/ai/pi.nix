@@ -9,6 +9,12 @@
     let
       system = pkgs.stdenv.hostPlatform.system;
       piPackage = inputs.pi-flake.packages.${system}.pi-coding-agent;
+      piAudit = pkgs.writeShellApplication {
+        name = "pi-audit";
+        text = ''
+          exec ${piPackage}/bin/pi -e npm:@vigolium/piolium "$@"
+        '';
+      };
     in
     {
       imports = [ inputs.pi-flake.nixosModules.default ];
@@ -40,6 +46,7 @@
         environment = {
           systemPackages = with pkgs; [
             fd # pi file picker dependency
+            piAudit
           ];
 
           sessionVariables = {
@@ -99,7 +106,6 @@
                 "npm:pi-prompt-template-model"
                 "npm:pi-web-access"
                 "npm:pi-subagents"
-                "npm:@vigolium/piolium"
                 "git:github.com/tunnckoCore/pi-gpt-fast-mode"
                 "npm:pi-lens"
                 # Pi runs under Bun, and pi-fff declares its Bun SDK as an optional peer.
