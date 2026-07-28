@@ -23,6 +23,7 @@
       environment.variables.EDITOR = "nvim";
 
       environment.systemPackages = with pkgs; [
+        bast
         bat
         fzf
         ripgrep

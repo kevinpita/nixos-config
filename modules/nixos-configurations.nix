@@ -32,6 +32,10 @@ let
     })
 
     (_final: _prev: {
+      bast = inputs.bast-nix.packages.${system}.default;
+    })
+
+    (_final: _prev: {
       ku = inputs.ku-nix.packages.${system}.default;
     })
 

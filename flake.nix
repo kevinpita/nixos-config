@@ -63,6 +63,8 @@
 
     herdr-nix.url = "github:kevinpita/herdr-nix";
 
+    bast-nix.url = "github:kevinpita/bast-nix";
+
     whisp-nix.url = "github:kevinpita/whisp-nix";
 
     pi-flake = {
