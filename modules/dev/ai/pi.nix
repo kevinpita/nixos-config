@@ -113,6 +113,7 @@
                 "npm:@ff-labs/pi-fff"
                 "npm:@narumitw/pi-usage"
                 "npm:pi-zentui"
+                "npm:pi-simplify"
                 "git:github.com/algal/pi-openai-server-compaction"
               ];
             };
