@@ -137,7 +137,45 @@
           hn = "herdr session attach";
           hp = "herdr session attach peersyst";
           pherdr = "herdr --remote pfium --remote-keybindings server";
-          minidesk = "herdr --remote minidesk-herdr --remote-keybindings server";
+        };
+      };
+    };
+
+  flake.modules.nixos.desktop =
+    {
+      pkgs,
+      username,
+      ...
+    }:
+    let
+      minideskHerdr = pkgs.writeShellApplication {
+        name = "herdr-minidesk";
+        runtimeInputs = [
+          pkgs.herdr
+          pkgs.systemd
+        ];
+        text = ''
+          systemctl --user start herdr-minidesk-audio-tunnel.service
+          exec herdr --remote minidesk --remote-keybindings server "$@"
+        '';
+      };
+    in
+    {
+      home-manager.users.${username} = {
+        home.packages = [ minideskHerdr ];
+
+        programs.zsh.shellAliases.minidesk = "herdr-minidesk";
+
+        systemd.user.services.herdr-minidesk-audio-tunnel = {
+          Unit = {
+            Description = "Shared PulseAudio tunnel to minidesk";
+            StartLimitIntervalSec = 0;
+          };
+          Service = {
+            ExecStart = "${pkgs.openssh}/bin/ssh -S none -NT -o BatchMode=yes -o ConnectTimeout=10 -o ExitOnForwardFailure=yes -o ServerAliveInterval=15 -o ServerAliveCountMax=4 -R 127.0.0.1:47130:%t/pulse/native minidesk";
+            Restart = "always";
+            RestartSec = 5;
+          };
         };
       };
     };
