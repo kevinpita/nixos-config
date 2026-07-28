@@ -1,6 +1,8 @@
 {
   flake.modules.nixos.dictation =
     {
+      config,
+      lib,
       pkgs,
       username,
       ...
@@ -30,6 +32,10 @@
         text = ''
           set -euo pipefail
           umask 077
+
+          ${lib.optionalString (config.dictation.pulseServer != null) ''
+            export PULSE_SERVER=${lib.escapeShellArg config.dictation.pulseServer}
+          ''}
 
           model="''${DICTATE_MODEL:-${whisperSmallEn}}"
           threads="''${DICTATE_THREADS:-8}"
@@ -420,7 +426,13 @@
       };
     in
     {
-      home-manager.users.${username}.home = {
+      options.dictation.pulseServer = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        description = "PulseAudio server used by the dictation recorder.";
+      };
+
+      config.home-manager.users.${username}.home = {
         packages = [
           dictateToggle
         ];
