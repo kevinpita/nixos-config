@@ -90,7 +90,10 @@
       };
     in
     {
-      environment.systemPackages = [ pkgs.herdr ];
+      environment.systemPackages = [
+        pkgs.bun
+        pkgs.herdr
+      ];
 
       home-manager.users.${username} = {
         xdg.configFile."herdr/config.toml" = {

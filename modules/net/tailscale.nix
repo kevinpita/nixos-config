@@ -4,6 +4,7 @@
       config,
       lib,
       inputs,
+      username,
       ...
     }:
     let
@@ -24,6 +25,7 @@
           "--ssh"
           "--accept-routes"
         ];
+        extraSetFlags = [ "--operator=${username}" ];
       }
       // lib.optionalAttrs hasRealSecrets {
         authKeyFile = config.sops.secrets."tailscale-key".path;
