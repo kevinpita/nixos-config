@@ -88,6 +88,7 @@
               defaultThinkingLevel = "xhigh";
               enableInstallTelemetry = false;
               enableSkillCommands = true;
+              skills = [ "${pkgs.herdr}/share/herdr/skills" ];
               theme = "dark";
               # Trigger at 90% of the active 272k Codex context window.
               # pi-openai-server-compaction handles session_before_compact.

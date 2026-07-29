@@ -319,11 +319,11 @@
         "nixpkgs": "nixpkgs_6"
       },
       "locked": {
-        "lastModified": 1784665083,
-        "narHash": "sha256-oBusq58BIwQ0kZ2HxEiWsWqFKUHbsHJX8XgiDpCGfJ0=",
+        "lastModified": 1785317198,
+        "narHash": "sha256-IfNqSO4lfCU34areKn6Bf/u7ZVi3ri8zGgPjxt+bYp4=",
         "owner": "kevinpita",
         "repo": "herdr-nix",
-        "rev": "ed19a94987efdeaf6d42df9d197b91ccbff5e4c0",
+        "rev": "c3e23f32630db52fe43cbd9cff635feda0301d0b",
         "type": "github"
       },
       "original": {
