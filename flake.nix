@@ -78,6 +78,11 @@
       url = "github:kevinpita/lazyrsync-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    tuicr-nix = {
+      url = "github:kevinpita/tuicr-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./modules);

@@ -17,6 +17,7 @@
         lazyrsync
         lazysql
         mqttui
+        tuicr
       ];
 
       home-manager.users.${username} = {

@@ -41,6 +41,8 @@ let
 
     inputs.lazyrsync-nix.overlays.default
 
+    inputs.tuicr-nix.overlays.default
+
     (
       final: _prev:
       let
