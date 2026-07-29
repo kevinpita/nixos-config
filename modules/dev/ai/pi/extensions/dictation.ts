@@ -27,6 +27,7 @@ type BackendStatus = {
 };
 
 type DictationState = {
+	ownerId: string;
 	phase: Phase;
 	startedAtMs?: number;
 	statusTimer?: ReturnType<typeof setInterval>;
@@ -161,10 +162,14 @@ async function startRecording(
 	state.activeOperation = operation;
 	let result;
 	try {
-		result = await pi.exec("dictate-toggle", ["start", "--quiet"], {
-			signal: operation.signal,
-			timeout: START_TIMEOUT_MS,
-		});
+		result = await pi.exec(
+			"dictate-toggle",
+			["start", "--quiet", "--owner", state.ownerId],
+			{
+				signal: operation.signal,
+				timeout: START_TIMEOUT_MS,
+			},
+		);
 	} catch (error: unknown) {
 		if (state.closed) return;
 		showIdle(state, ctx);
@@ -297,13 +302,18 @@ async function toggleDictation(
 
 async function cancelBackendRecording(
 	pi: ExtensionAPI,
+	ownerId: string,
 	attemptsRemaining = 5,
 ): Promise<void> {
 	let result;
 	try {
-		result = await pi.exec("dictate-toggle", ["cancel", "--quiet"], {
-			timeout: CANCEL_TIMEOUT_MS,
-		});
+		result = await pi.exec(
+			"dictate-toggle",
+			["cancel", "--quiet", "--owner", ownerId],
+			{
+				timeout: CANCEL_TIMEOUT_MS,
+			},
+		);
 	} catch {
 		return;
 	}
@@ -317,11 +327,12 @@ async function cancelBackendRecording(
 	}
 
 	await new Promise((resolve) => setTimeout(resolve, 100));
-	await cancelBackendRecording(pi, attemptsRemaining - 1);
+	await cancelBackendRecording(pi, ownerId, attemptsRemaining - 1);
 }
 
 export default function (pi: ExtensionAPI): void {
 	const state: DictationState = {
+		ownerId: `pi-${process.pid}`,
 		phase: "idle",
 		togglePending: false,
 		closed: false,
@@ -348,7 +359,7 @@ export default function (pi: ExtensionAPI): void {
 		ctx.ui.setStatus(STATUS_ID, undefined);
 
 		if (event.reason === "quit") {
-			await cancelBackendRecording(pi);
+			await cancelBackendRecording(pi, state.ownerId);
 		}
 	});
 

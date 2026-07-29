@@ -43,6 +43,7 @@
           action="''${1:-toggle}"
           destination="clipboard"
           notifications=1
+          owner_id=""
           clear_phase_on_exit=0
           cleanup_recording_on_exit=0
           active_child_pid=""
@@ -55,7 +56,7 @@
             toggle | start | stop | cancel | status)
               ;;
             *)
-              printf 'Usage: dictate-toggle [toggle|start|stop|cancel|status] [--stdout] [--quiet]\n' >&2
+              printf 'Usage: dictate-toggle [toggle|start|stop|cancel|status] [--stdout] [--quiet] [--owner ID]\n' >&2
               exit 2
               ;;
           esac
@@ -67,6 +68,14 @@
                 ;;
               --quiet)
                 notifications=0
+                ;;
+              --owner)
+                [ "$#" -ge 2 ] || {
+                  printf 'Missing value for --owner\n' >&2
+                  exit 2
+                }
+                owner_id="$2"
+                shift
                 ;;
               *)
                 printf 'Unknown option: %s\n' "$1" >&2
@@ -88,6 +97,7 @@
           cache_dir="$cache_root/dictate"
           pid_file="$runtime_dir/record.pid"
           pid_identity_file="$runtime_dir/record.start-time"
+          owner_file="$runtime_dir/record.owner"
           started_file="$runtime_dir/started-at"
           phase_file="$runtime_dir/phase"
           lock_file="$runtime_dir/operation.lock"
@@ -108,7 +118,7 @@
               rm -f "$phase_file"
             fi
             if [ "$cleanup_recording_on_exit" -eq 1 ]; then
-              rm -f "$pid_file" "$pid_identity_file" "$started_file" "$phase_file" "$audio_file"
+              rm -f "$pid_file" "$pid_identity_file" "$owner_file" "$started_file" "$phase_file" "$audio_file"
             fi
           }
           trap cleanup_runtime_on_exit EXIT
@@ -167,7 +177,7 @@
             if [ -f "$pid_file" ]; then
               log_msg "Removed stale recorder state: pid=$current"
             fi
-            rm -f "$pid_file" "$pid_identity_file" "$started_file"
+            rm -f "$pid_file" "$pid_identity_file" "$owner_file" "$started_file"
             if [ "$(cat "$phase_file" 2>/dev/null || true)" = "recording" ]; then
               rm -f "$phase_file"
             fi
@@ -231,7 +241,7 @@
               fail "A recording is already active (PID $pid)."
             fi
 
-            rm -f "$pid_file" "$pid_identity_file" "$started_file" "$phase_file"
+            rm -f "$pid_file" "$pid_identity_file" "$owner_file" "$started_file" "$phase_file"
             rm -f "$audio_file" "$raw_text" "$output_base.json" "$output_base.vtt" "$output_base.srt" "$output_base.lrc" "$output_base.csv"
             log_msg "Starting recording: source=$audio_source file=$audio_file"
             cleanup_recording_on_exit=1
@@ -259,6 +269,9 @@
 
             printf '%s\n' "$expected_start_time" > "$pid_identity_file"
             printf '%s\n' "$pid" > "$pid_file"
+            if [ -n "$owner_id" ]; then
+              printf '%s\n' "$owner_id" > "$owner_file"
+            fi
             printf '%s\n' "$(date +%s)" > "$started_file"
             printf 'recording\n' > "$phase_file"
             sleep 0.4
@@ -282,7 +295,7 @@
             log_msg "Stopping recording pid=$pid"
             stop_recorder "$pid" "$expected_start_time"
 
-            rm -f "$pid_file" "$pid_identity_file" "$started_file"
+            rm -f "$pid_file" "$pid_identity_file" "$owner_file" "$started_file"
             printf 'transcribing\n' > "$phase_file"
             clear_phase_on_exit=1
             [ -s "$audio_file" ] || fail "Recording did not produce audio."
@@ -291,13 +304,18 @@
           }
 
           cancel_recording() {
+            recording_owner="$(cat "$owner_file" 2>/dev/null || true)"
+            if [ -n "$owner_id" ] && [ "$recording_owner" != "$owner_id" ]; then
+              return
+            fi
+
             if pid="$(current_pid)"; then
               expected_start_time="$(cat "$pid_identity_file")"
               log_msg "Cancelling recording pid=$pid"
               stop_recorder "$pid" "$expected_start_time"
             fi
 
-            rm -f "$pid_file" "$pid_identity_file" "$started_file" "$phase_file" "$audio_file" "$raw_text"
+            rm -f "$pid_file" "$pid_identity_file" "$owner_file" "$started_file" "$phase_file" "$audio_file" "$raw_text"
           }
 
           recording_started_at() {

@@ -1,3 +1,7 @@
+declare const process: {
+	readonly pid: number;
+};
+
 type DictationThemeColor = "error" | "warning";
 
 type DictationTheme = {
