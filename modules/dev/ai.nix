@@ -4,7 +4,6 @@
     {
       environment.systemPackages = with pkgs; [
         codex
-        claude-code
         google-antigravity-cli
         rtk
 
