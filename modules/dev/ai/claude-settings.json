@@ -1,0 +1,58 @@
+{
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "permissions": {
+    "allow": [
+      "Bash(go test:*)",
+      "Bash(make lint:*)"
+    ],
+    "deny": [
+      "Bash(git push *)"
+    ],
+    "defaultMode": "auto"
+  },
+  "model": "claude-fable-5[1m]",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/kevin/.claude/hooks/rtk-rewrite.sh"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/home/kevin/.claude/hooks/herdr-agent-state.sh' session",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "input=$(cat); cwd=$(echo \"$input\" | jq -r '.workspace.current_dir'); model=$(echo \"$input\" | jq -r '.model.display_name'); remaining=$(echo \"$input\" | jq -r '.context_window.remaining_percentage // empty'); dir=\"${cwd/#$HOME/~}\"; printf '\\033[36m%s\\033[0m' \"$dir\"; if git -C \"$cwd\" rev-parse --git-dir >/dev/null 2>&1; then branch=$(git -C \"$cwd\" rev-parse --abbrev-ref HEAD 2>/dev/null); if [ -n \"$branch\" ]; then if ! git -C \"$cwd\" -c core.useBuiltinFSMonitor=false diff --quiet 2>/dev/null || ! git -C \"$cwd\" -c core.useBuiltinFSMonitor=false diff --cached --quiet 2>/dev/null; then printf ' \\033[90m•\\033[0m \\033[33m[%s *]\\033[0m' \"$branch\"; else printf ' \\033[90m•\\033[0m \\033[32m[%s]\\033[0m' \"$branch\"; fi; fi; fi; printf ' \\033[90m•\\033[0m \\033[35m%s\\033[0m' \"$model\"; [ -n \"$remaining\" ] && printf ' \\033[90m•\\033[0m \\033[34m%s%% ctx\\033[0m' \"$remaining\""
+  },
+  "enabledPlugins": {
+    "gopls-lsp@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true
+  },
+  "effortLevel": "xhigh",
+  "tui": "fullscreen",
+  "skipDangerousModePermissionPrompt": true,
+  "skipWorkflowUsageWarning": true,
+  "editorMode": "normal",
+  "preferredNotifChannel": "terminal_bell",
+  "remoteControlAtStartup": false,
+  "skipAutoPermissionPrompt": true
+}
