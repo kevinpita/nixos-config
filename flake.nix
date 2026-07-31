@@ -61,6 +61,8 @@
 
     kevinpita-nixpkgs.url = "github:kevinpita/nixpkgs/helm-tui-init";
 
+    jetbrains-hotfix.url = "github:NixOS/nixpkgs/pull/546636/head";
+
     herdr-nix.url = "github:kevinpita/herdr-nix";
 
     bast-nix.url = "github:kevinpita/bast-nix";

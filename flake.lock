@@ -388,6 +388,22 @@
         "type": "github"
       }
     },
+    "jetbrains-hotfix": {
+      "locked": {
+        "lastModified": 1785314904,
+        "narHash": "sha256-D7u29L6oWGfPxmUegFxUSUdc0FdjfcjBRZLUZtdIdPM=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "eadd6f50ffdfa3dca52328e43068ec13d63fdfa3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "pull/546636/head",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "kevinpita-nixpkgs": {
       "locked": {
         "lastModified": 1775657499,
@@ -838,6 +854,7 @@
         "herdr-nix": "herdr-nix",
         "home-manager": "home-manager",
         "import-tree": "import-tree",
+        "jetbrains-hotfix": "jetbrains-hotfix",
         "kevinpita-nixpkgs": "kevinpita-nixpkgs",
         "ku-nix": "ku-nix",
         "lazyrsync-nix": "lazyrsync-nix",
