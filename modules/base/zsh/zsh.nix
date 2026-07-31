@@ -81,6 +81,8 @@
               fi
             '')
             ''
+              export BAST_NO_TELEMETRY=1
+
               [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
 
               if (( $+commands[gh] )); then
