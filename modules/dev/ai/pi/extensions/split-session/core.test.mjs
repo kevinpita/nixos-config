@@ -4,7 +4,9 @@ import {
 	buildAgentName,
 	buildPiForkArgs,
 	buildSplitLabel,
+	expandSplitPrompt,
 	MAX_SPLIT_SESSIONS,
+	parseSplitArgs,
 	parseSplitCount,
 } from "./core.ts";
 
@@ -19,10 +21,26 @@ test("rejects malformed and out-of-range split counts", () => {
 	}
 });
 
+test("parses an optional prompt after the split count", () => {
+	assert.deepEqual(parseSplitArgs("3"), { count: 3 });
+	assert.deepEqual(parseSplitArgs(" 3   explain me point $i "), {
+		count: 3,
+		prompt: "explain me point $i",
+	});
+});
+
+test("expands every split index placeholder", () => {
+	assert.equal(expandSplitPrompt("point $i of $i", 4), "point 4 of 4");
+	assert.equal(expandSplitPrompt("same prompt", 4), "same prompt");
+});
+
 test("builds bounded tab labels from the parent session name", () => {
 	assert.equal(buildSplitLabel("Fix MPT ledger", 2, 5), "Fix MPT ledger 2/5");
 	assert.equal(buildSplitLabel(undefined, 3, 5), "split 3/5");
-	assert.equal(buildSplitLabel("line one\nline two", 4, 5), "line one line two 4/5");
+	assert.equal(
+		buildSplitLabel("line one\nline two", 4, 5),
+		"line one line two 4/5",
+	);
 	assert.ok(buildSplitLabel("x".repeat(100), 5, 5).length <= 64);
 });
 
@@ -44,4 +62,8 @@ test("builds Pi arguments that fork instead of sharing a session file", () => {
 		"--name",
 		"split 2/5",
 	]);
+	assert.deepEqual(
+		buildPiForkArgs("/tmp/parent.jsonl", "split 2/5", "explain point 2"),
+		["--fork", "/tmp/parent.jsonl", "--name", "split 2/5", "explain point 2"],
+	);
 });

@@ -7,7 +7,7 @@ const MAX_AGENT_NAME_LENGTH = 32;
 export function parseSplitCount(raw: string): number {
 	const value = raw.trim();
 	if (!/^\d+$/.test(value)) {
-		throw new Error("Usage: /split <total-sessions>");
+		throw new Error("Usage: /split <total-sessions> [prompt]");
 	}
 
 	const count = Number.parseInt(value, 10);
@@ -18,6 +18,23 @@ export function parseSplitCount(raw: string): number {
 	}
 
 	return count;
+}
+
+export function parseSplitArgs(raw: string): {
+	readonly count: number;
+	readonly prompt?: string;
+} {
+	const value = raw.trim();
+	const separator = value.search(/\s/);
+	const count = parseSplitCount(
+		separator === -1 ? value : value.slice(0, separator),
+	);
+	const prompt = separator === -1 ? "" : value.slice(separator).trim();
+	return prompt ? { count, prompt } : { count };
+}
+
+export function expandSplitPrompt(prompt: string, index: number): string {
+	return prompt.replaceAll("$i", String(index));
 }
 
 function normalizeLabel(value: string | undefined): string {
@@ -54,6 +71,12 @@ export function buildAgentName(
 	return name.slice(0, MAX_AGENT_NAME_LENGTH).replace(/-+$/g, "");
 }
 
-export function buildPiForkArgs(sessionFile: string, label: string): string[] {
-	return ["--fork", sessionFile, "--name", label];
+export function buildPiForkArgs(
+	sessionFile: string,
+	label: string,
+	prompt?: string,
+): string[] {
+	const args = ["--fork", sessionFile, "--name", label];
+	if (prompt) args.push(prompt);
+	return args;
 }

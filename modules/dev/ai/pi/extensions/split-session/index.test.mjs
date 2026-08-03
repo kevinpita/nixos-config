@@ -7,6 +7,7 @@ function harness() {
 	const calls = [];
 	const notifications = [];
 	const statuses = [];
+	const messages = [];
 	let tabNumber = 0;
 	let waited = false;
 
@@ -16,6 +17,9 @@ function harness() {
 		},
 		getSessionName() {
 			return "Parent session";
+		},
+		sendUserMessage(content) {
+			messages.push(content);
 		},
 		async exec(command, args) {
 			calls.push({ command, args });
@@ -79,6 +83,7 @@ function harness() {
 		calls,
 		commands,
 		ctx,
+		messages,
 		notifications,
 		statuses,
 		wasWaited: () => waited,
@@ -102,18 +107,27 @@ test("registers /split and opens N minus one forked Pi tabs", async () => {
 	for (const { args } of agentCalls) {
 		const separator = args.indexOf("--");
 		const piArgs = args.slice(separator + 1);
-		assert.deepEqual(piArgs.slice(0, 2), [
-			"--fork",
-			"/sessions/parent.jsonl",
-		]);
+		assert.deepEqual(piArgs.slice(0, 2), ["--fork", "/sessions/parent.jsonl"]);
 		assert.equal(piArgs.includes("--session"), false);
 	}
 	assert.notEqual(agentCalls[0].args[2], agentCalls[1].args[2]);
+	assert.deepEqual(state.messages, []);
 	assert.match(state.notifications.at(-1).message, /Created 2 forked Pi tabs/);
 	assert.deepEqual(state.statuses.at(-1), {
 		key: "split-session",
 		text: undefined,
 	});
+});
+
+test("runs an indexed prompt in the current and forked sessions", async () => {
+	const state = harness();
+
+	await state.commands.get("split").handler("3 explain me point $i", state.ctx);
+
+	const agentCalls = state.calls.filter(({ args }) => args[0] === "agent");
+	const prompts = agentCalls.map(({ args }) => args.at(-1));
+	assert.deepEqual(prompts, ["explain me point 2", "explain me point 3"]);
+	assert.deepEqual(state.messages, ["explain me point 1"]);
 });
 
 test("rejects invalid counts before calling Herdr", async () => {

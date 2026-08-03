@@ -2,7 +2,8 @@ import {
 	buildAgentName,
 	buildPiForkArgs,
 	buildSplitLabel,
-	parseSplitCount,
+	expandSplitPrompt,
+	parseSplitArgs,
 } from "./core.ts";
 
 const AGENT_START_TIMEOUT_MS = 60_000;
@@ -36,6 +37,7 @@ type ExtensionAPI = {
 		options?: { readonly timeout?: number },
 	): Promise<PiExecResult>;
 	getSessionName(): string | undefined;
+	sendUserMessage(content: string): void;
 	registerCommand(
 		name: string,
 		options: {
@@ -155,6 +157,7 @@ async function startPi(
 	pi: ExtensionAPI,
 	created: CreatedTab,
 	sessionFile: string,
+	prompt?: string,
 ): Promise<void> {
 	await runHerdr(
 		pi,
@@ -169,7 +172,7 @@ async function startPi(
 			"--timeout",
 			String(AGENT_START_TIMEOUT_MS),
 			"--",
-			...buildPiForkArgs(sessionFile, created.label),
+			...buildPiForkArgs(sessionFile, created.label, prompt),
 		],
 		AGENT_START_TIMEOUT_MS + EXEC_TIMEOUT_PADDING_MS,
 	);
@@ -179,13 +182,16 @@ async function splitSession(
 	pi: ExtensionAPI,
 	ctx: ExtensionCommandContext,
 	count: number,
+	prompt: string | undefined,
 	sequence: number,
 ): Promise<void> {
 	await ctx.waitForIdle();
 
 	const sessionFile = ctx.sessionManager.getSessionFile();
 	if (!sessionFile) {
-		throw new Error("The current Pi session is not persisted and cannot be forked");
+		throw new Error(
+			"The current Pi session is not persisted and cannot be forked",
+		);
 	}
 
 	const current = await runHerdr<{ pane: HerdrPane }>(
@@ -199,6 +205,7 @@ async function splitSession(
 	const requested = count - 1;
 	const created: CreatedTab[] = [];
 	const failures: string[] = [];
+	let started = 0;
 
 	ctx.ui.setStatus("split-session", `Starting ${requested} Pi tabs`);
 	try {
@@ -225,7 +232,16 @@ async function splitSession(
 		}
 
 		const starts = await Promise.allSettled(
-			created.map((tab) => startPi(pi, tab, sessionFile)),
+			created.map((tab) =>
+				startPi(
+					pi,
+					tab,
+					sessionFile,
+					prompt === undefined
+						? undefined
+						: expandSplitPrompt(prompt, tab.index),
+				),
+			),
 		);
 		starts.forEach((result, index) => {
 			if (result.status === "rejected") {
@@ -236,21 +252,24 @@ async function splitSession(
 			}
 		});
 
-		const started = starts.filter((result) => result.status === "fulfilled").length;
+		started = starts.filter((result) => result.status === "fulfilled").length;
 		if (failures.length > 0) {
 			ctx.ui.notify(
 				`Split started ${started}/${requested} Pi tabs. ${failures.join("; ")}`,
 				"error",
 			);
-			return;
+		} else {
+			ctx.ui.notify(
+				`Created ${started} forked Pi tabs in ${ctx.cwd}. All tabs share this working directory.`,
+				"warning",
+			);
 		}
-
-		ctx.ui.notify(
-			`Created ${started} forked Pi tabs in ${ctx.cwd}. All tabs share this working directory.`,
-			"warning",
-		);
 	} finally {
 		ctx.ui.setStatus("split-session", undefined);
+	}
+
+	if (prompt !== undefined && started > 0) {
+		pi.sendUserMessage(expandSplitPrompt(prompt, 1));
 	}
 }
 
@@ -258,11 +277,11 @@ export default function (pi: ExtensionAPI): void {
 	let sequence = 0;
 
 	pi.registerCommand("split", {
-		description: "Open N total Herdr tabs with forked Pi sessions",
+		description: "Open N total forked Pi sessions and optionally run a prompt",
 		handler: async (args, ctx) => {
-			let count: number;
+			let request: ReturnType<typeof parseSplitArgs>;
 			try {
-				count = parseSplitCount(args);
+				request = parseSplitArgs(args);
 			} catch (error) {
 				ctx.ui.notify(failureMessage(error), "error");
 				return;
@@ -270,7 +289,7 @@ export default function (pi: ExtensionAPI): void {
 
 			sequence += 1;
 			try {
-				await splitSession(pi, ctx, count, sequence);
+				await splitSession(pi, ctx, request.count, request.prompt, sequence);
 			} catch (error) {
 				ctx.ui.setStatus("split-session", undefined);
 				ctx.ui.notify(
