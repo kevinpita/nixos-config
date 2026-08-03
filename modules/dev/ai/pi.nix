@@ -69,6 +69,7 @@
           ".pi/agent/extensions/file-picker.ts".source = ./pi/extensions/file-picker.ts;
           ".pi/agent/extensions/global-prompt-history".source = ./pi/extensions/global-prompt-history;
           ".pi/agent/extensions/herdr-agent-state.ts".source = ./pi/extensions/herdr-agent-state.ts;
+          ".pi/agent/extensions/split-session".source = ./pi/extensions/split-session;
 
           ".pi/agent/settings.json" = {
             force = true;
