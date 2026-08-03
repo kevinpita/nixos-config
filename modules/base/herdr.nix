@@ -1,11 +1,19 @@
 {
   flake.modules.nixos.base =
     {
+      inputs,
       pkgs,
       username,
       ...
     }:
     let
+      herdrWorktrunk = pkgs.fetchFromGitHub {
+        owner = "devashish2203";
+        repo = "herdr-worktrunk";
+        rev = "a3107ca566bafcd463bc138007a0c01051970784";
+        hash = "sha256-+G4EzlQisIr8SQ1NwDfzV/27iOiC3r/2nkxjcV/aU/k=";
+      };
+
       openDevLayout = pkgs.writeShellApplication {
         name = "herdr-open-dev-layout";
         runtimeInputs = [
@@ -111,6 +119,12 @@
             goto = ""
 
             [[keys.command]]
+            key = "prefix+shift+g"
+            type = "plugin_action"
+            command = "worktrunk.open-current"
+            description = "create or open repo-local worktree"
+
+            [[keys.command]]
             key = "prefix+g"
             type = "popup"
             command = "lazygit"
@@ -135,6 +149,31 @@
             enabled = false
           '';
         };
+
+        home.activation.installHerdrWorktrunk =
+          inputs.home-manager.lib.hm.dag.entryAfter [ "writeBoundary" ]
+            ''
+              if [[ -z "''${DRY_RUN_CMD:-}" ]]; then
+                plugin_json="$(${pkgs.herdr}/bin/herdr plugin list --plugin worktrunk --json 2>/dev/null || true)"
+                plugin_root="$(printf '%s' "$plugin_json" | ${pkgs.jq}/bin/jq -r '.result.plugins[0].plugin_root // empty' 2>/dev/null || true)"
+
+                if [[ "$plugin_root" != "${herdrWorktrunk}" ]]; then
+                  if [[ -n "$plugin_root" ]]; then
+                    plugin_kind="$(printf '%s' "$plugin_json" | ${pkgs.jq}/bin/jq -r '.result.plugins[0].source.kind // empty')"
+
+                    if [[ "$plugin_kind" == "local" ]]; then
+                      ${pkgs.herdr}/bin/herdr plugin unlink worktrunk >/dev/null
+                    else
+                      ${pkgs.herdr}/bin/herdr plugin uninstall worktrunk >/dev/null
+                    fi
+                  fi
+
+                  ${pkgs.herdr}/bin/herdr plugin link "${herdrWorktrunk}" >/dev/null
+                fi
+
+                ${pkgs.herdr}/bin/herdr server reload-config >/dev/null 2>&1 || true
+              fi
+            '';
 
         programs.zsh.shellAliases = {
           hn = "herdr session attach";

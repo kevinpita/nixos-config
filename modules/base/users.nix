@@ -55,6 +55,7 @@
 
           programs.git = {
             enable = true;
+            ignores = [ ".worktrees/" ];
             signing = {
               key = "~/.ssh/id_ed25519_sign.pub";
               signByDefault = true;
@@ -76,6 +77,13 @@
               tag.gpgsign = true;
               pull.rebase = true;
             };
+          };
+
+          xdg.configFile."worktrunk/config.toml" = {
+            force = true;
+            text = ''
+              worktree-path = "{{ repo_path }}/.worktrees/{{ branch | sanitize }}"
+            '';
           };
         };
       };
