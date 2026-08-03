@@ -47,7 +47,7 @@
       };
     };
 
-  flake.modules.nixos.desktop =
+  flake.modules.nixos.workstation =
     { pkgs, username, ... }:
     {
       home-manager.users.${username}.home.packages = with pkgs; [

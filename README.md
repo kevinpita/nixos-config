@@ -28,6 +28,46 @@ Apply the current host with:
 nh os switch ~/nixos-config
 ```
 
+## Hyprland VM
+
+The `hyprland-vm` host uses the shared workstation configuration with Hyprland
+instead of GNOME. It runs through the NixOS QEMU VM backend with KVM and VirGL,
+so rebuilding or exiting it does not switch the host system.
+
+Build and start it from the host with the GTK UI:
+
+```bash
+cd ~/nixos-config
+just vm
+```
+
+The recipe evaluates the current working tree, builds the latest VM, and opens
+it with KVM and VirGL acceleration. It preserves the guest disk between runs.
+If `just` is not installed in the current host generation yet, bootstrap the
+first run with `nix run nixpkgs#just -- vm`; `just` is now included in the base
+system packages.
+
+Edit the normal checkout, exit Hyprland with `Super+Shift+E`, then run `just vm`
+again. The recipe refuses to start a second VM while the first owns the disk.
+The guest disk persists at
+`~/.local/state/hyprland-vm/hyprland-vm.qcow2`. The guest auto-logs in as
+`kevin`, uses `nixos` as its non-secret test password, and has passwordless
+`sudo`. Host, work, Tailscale, Kubernetes, and SSH secrets are not deployed.
+Syncthing and Tailscale are disabled in the guest.
+
+To discard all guest state, rebuild, and start clean:
+
+```bash
+just vm-reset
+```
+
+This destructive recipe also refuses to remove the disk while the VM is
+running.
+
+The VM defaults to 4 vCPUs, 8 GiB RAM, and a 40 GiB sparse disk. Its main
+shortcuts are `Super+Return` for Ghostty, `Super+D` for the launcher,
+`Super+Space` for an area screenshot, and `Super+Shift+E` to exit.
+
 ## Hosts
 
 Hosts are defined as `modules/hosts/<hostname>.nix` aspects and auto-discovered. Deploy with `--flake ~/nixos-config#<hostname>`.
@@ -39,6 +79,7 @@ Hosts are defined as `modules/hosts/<hostname>.nix` aspects and auto-discovered.
 | microg8 | Server | BIOS boot, drive monitor |
 | minidesk | Server | Work configuration |
 | t14g6 | ThinkPad laptop | Full desktop, TLP, nixos-hardware module |
+| hyprland-vm | QEMU/KVM guest | Hyprland migration test environment |
 
 ## Deploy with nixos-anywhere
 

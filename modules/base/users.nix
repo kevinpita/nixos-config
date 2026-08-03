@@ -11,7 +11,9 @@
     }:
     let
       hasRealSecrets =
-        inputs ? nixos-secrets && builtins.pathExists "${inputs.nixos-secrets}/secrets/common.yaml";
+        config.hostSecrets.enable
+        && inputs ? nixos-secrets
+        && builtins.pathExists "${inputs.nixos-secrets}/secrets/common.yaml";
     in
     {
       users.users.${username} = {

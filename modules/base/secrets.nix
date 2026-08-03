@@ -1,6 +1,7 @@
 {
   flake.modules.nixos.base =
     {
+      config,
       inputs,
       hostname,
       lib,
@@ -17,7 +18,13 @@
       ];
     in
     {
-      config = {
+      options.hostSecrets.enable = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = "Deploy this host's sops secrets.";
+      };
+
+      config = lib.mkIf config.hostSecrets.enable {
         sops = {
           age.keyFile = "/var/lib/sops-nix/key.txt";
 

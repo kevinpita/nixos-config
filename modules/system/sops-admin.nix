@@ -1,6 +1,7 @@
 {
   flake.modules.nixos.sops-admin =
     {
+      config,
       lib,
       inputs,
       username,
@@ -8,7 +9,10 @@
     }:
     let
       secretsPath = if inputs ? nixos-secrets then "${inputs.nixos-secrets}/secrets" else null;
-      hasRealSecrets = secretsPath != null && builtins.pathExists "${secretsPath}/personal.yaml";
+      hasRealSecrets =
+        config.hostSecrets.enable
+        && secretsPath != null
+        && builtins.pathExists "${secretsPath}/personal.yaml";
     in
     lib.mkIf hasRealSecrets {
       sops.secrets."age-secret" = {

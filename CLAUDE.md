@@ -8,6 +8,12 @@ This file provides agent guidance for this repository. `AGENTS.md` is a symlink 
 # Apply configuration changes (uses nh, configured to point at ~/nixos-config)
 nh os switch ~/nixos-config
 
+# Build and open the persistent Hyprland KVM test VM
+just vm
+
+# Delete the guest disk, rebuild, and open a fresh Hyprland VM
+just vm-reset
+
 # Update flake.lock dependencies
 nix flake update
 
@@ -33,7 +39,7 @@ See `README.md` for the full deploy/reinstall flow with sops age keys and `--ext
 
 ## Architecture
 
-Flakes-based NixOS configuration for 5 hosts using the Dendritic pattern: every
+Flakes-based NixOS configuration for 6 hosts using the Dendritic pattern: every
 file under `modules/` is a flake-parts module, auto-imported by import-tree.
 There are no manual import lists.
 
@@ -43,10 +49,12 @@ There are no manual import lists.
 files define named modules under `flake.modules.nixos.<name>`; several files
 can contribute slices to the same name (all of `modules/base/` merges into
 `base`). Hosts are aspects too: `modules/hosts/<name>.nix` defines
-`flake.modules.nixos."hosts/<name>"` importing a role bundle
-(`desktop` or `server`) plus per-host aspects and the raw NixOS
-files from `hosts/<name>/` (hardware, disko, host fragments; these are plain
-NixOS modules kept outside `modules/` on purpose).
+`flake.modules.nixos."hosts/<name>"` importing a role bundle (`desktop`,
+`hyprland-desktop`, or `server`) plus per-host aspects and, for physical
+machines, the raw NixOS files from `hosts/<name>/` (hardware, disko, host
+fragments; these are plain NixOS modules kept outside `modules/` on purpose).
+The `workstation` aspect contains desktop-environment-independent configuration;
+`desktop` adds GNOME and `hyprland-desktop` adds Hyprland.
 `modules/nixos-configurations.nix` builds `flake.nixosConfigurations` from
 every `hosts/*` aspect, constructs the shared `pkgs` (overlays,
 `allowUnfree`) once for all hosts, and passes `specialArgs` (`inputs`,
@@ -62,15 +70,17 @@ defining `flake.modules.nixos.<name>`, then add the name to a role bundle in
 `modules/roles/` or to specific hosts in `modules/hosts/<host>.nix`.
 Cross-cutting config lives in the aspect file that owns it and contributes
 fragments to other module names (e.g. `modules/net/tailscale.nix` also adds
-desktop and server variants to the roles). Files or directories prefixed
+workstation and server variants to the roles). Files or directories prefixed
 with `_` are ignored by import-tree.
 
 ### Custom options
 
 Some base slices expose typed options (`modules/base/boot.nix` defines
-`bootloader.mode` enum bios/uefi, `kernelPackages`, `uefiOSProber`). Hosts
-override these in `modules/hosts/<host>.nix` (e.g. `bootloader.mode = "bios"`
-on microg8, `uefiOSProber = true` on dual-boot hosts).
+`bootloader.mode` enum bios/uefi, `kernelPackages`, `uefiOSProber`, and
+`modules/base/secrets.nix` defines `hostSecrets.enable`). Hosts override these
+in `modules/hosts/<host>.nix` (e.g. `bootloader.mode = "bios"` on microg8,
+`uefiOSProber = true` on dual-boot hosts, and secrets are disabled in the test
+VM).
 
 ### Hosts
 
@@ -81,6 +91,7 @@ on microg8, `uefiOSProber = true` on dual-boot hosts).
 | microg8 | Server | BIOS boot, drive monitor |
 | minidesk | Server | Work configuration |
 | t14g6 | ThinkPad laptop | Full desktop, TLP, nixos-hardware module |
+| hyprland-vm | QEMU/KVM guest | Hyprland migration test environment |
 
 ### k3s
 

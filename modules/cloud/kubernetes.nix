@@ -1,6 +1,7 @@
 {
   flake.modules.nixos.kubernetes =
     {
+      config,
       lib,
       pkgs,
       inputs,
@@ -10,7 +11,8 @@
     let
       hulkKubeconfigFile =
         if inputs ? nixos-secrets then "${inputs.nixos-secrets}/secrets/hulk-kubeconfig.enc" else null;
-      hasHulkKubeconfig = hulkKubeconfigFile != null && builtins.pathExists hulkKubeconfigFile;
+      hasHulkKubeconfig =
+        config.hostSecrets.enable && hulkKubeconfigFile != null && builtins.pathExists hulkKubeconfigFile;
     in
     {
       environment.systemPackages = [

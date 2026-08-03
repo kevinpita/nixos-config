@@ -11,7 +11,7 @@
       ];
     };
 
-  flake.modules.nixos.desktop =
+  flake.modules.nixos.workstation =
     { pkgs, ... }:
     {
       environment.systemPackages = with pkgs; [ codex-desktop ];

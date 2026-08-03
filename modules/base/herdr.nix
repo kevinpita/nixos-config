@@ -183,7 +183,7 @@
       };
     };
 
-  flake.modules.nixos.desktop =
+  flake.modules.nixos.workstation =
     {
       pkgs,
       username,

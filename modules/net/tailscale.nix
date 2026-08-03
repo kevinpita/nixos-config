@@ -9,7 +9,10 @@
     }:
     let
       secretsPath = if inputs ? nixos-secrets then "${inputs.nixos-secrets}/secrets" else null;
-      hasRealSecrets = secretsPath != null && builtins.pathExists "${secretsPath}/common.yaml";
+      hasRealSecrets =
+        config.hostSecrets.enable
+        && secretsPath != null
+        && builtins.pathExists "${secretsPath}/common.yaml";
     in
     {
       sops.secrets = lib.mkIf hasRealSecrets {
@@ -32,7 +35,7 @@
       };
     };
 
-  flake.modules.nixos.desktop = {
+  flake.modules.nixos.workstation = {
     services.tailscale.useRoutingFeatures = "client";
   };
 

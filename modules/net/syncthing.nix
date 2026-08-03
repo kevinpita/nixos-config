@@ -27,7 +27,7 @@
       };
     };
 
-  flake.modules.nixos.desktop =
+  flake.modules.nixos.gnome =
     {
       lib,
       pkgs,

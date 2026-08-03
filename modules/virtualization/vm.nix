@@ -37,7 +37,7 @@
       ];
     };
 
-  flake.modules.nixos.desktop =
+  flake.modules.nixos.workstation =
     {
       config,
       lib,
@@ -45,8 +45,8 @@
       username,
       ...
     }:
-    # GUI additions belong to hosts that also import the vm aspect; libvirtd
-    # is enabled exactly by that aspect, so it carries the old desktop+vm gate.
+    # GUI additions belong to workstation hosts that also import the vm aspect.
+    # Libvirtd is enabled exactly by that aspect, so it remains the feature gate.
     lib.mkIf config.virtualisation.libvirtd.enable {
       virtualisation.spiceUSBRedirection.enable = true;
 

@@ -31,6 +31,7 @@
 
         curl
         jq
+        just
         yq-go
         wget
         lz4

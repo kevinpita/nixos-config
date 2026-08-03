@@ -1,6 +1,7 @@
 {
   flake.modules.nixos.work =
     {
+      config,
       lib,
       inputs,
       username,
@@ -11,6 +12,6 @@
       workConfig = if hasWork then (import "${inputs.nixos-work}") { inherit username; } else { };
     in
     {
-      config = lib.mkIf hasWork workConfig;
+      config = lib.mkIf (hasWork && config.hostSecrets.enable) workConfig;
     };
 }
