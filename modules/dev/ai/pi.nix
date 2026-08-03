@@ -116,6 +116,7 @@
                 "npm:@narumitw/pi-usage"
                 "npm:pi-zentui"
                 "npm:pi-simplify"
+                "npm:@quintinshaw/pi-dynamic-workflows"
                 "git:github.com/algal/pi-openai-server-compaction"
               ];
             };
