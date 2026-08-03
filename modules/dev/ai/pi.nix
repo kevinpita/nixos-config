@@ -100,6 +100,7 @@
                 "npm:@narumitw/pi-usage"
                 "npm:pi-zentui"
                 "npm:pi-simplify"
+                "npm:@rezamonangg/pi-code-preview"
                 "npm:@quintinshaw/pi-dynamic-workflows"
               ];
             };
