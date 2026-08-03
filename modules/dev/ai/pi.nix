@@ -70,15 +70,6 @@
           ".pi/agent/extensions/global-prompt-history".source = ./pi/extensions/global-prompt-history;
           ".pi/agent/extensions/herdr-agent-state.ts".source = ./pi/extensions/herdr-agent-state.ts;
 
-          ".pi/agent/openai-server-compaction.json".text = builtins.toJSON {
-            enabled = true;
-            includeAzure = false;
-            thresholdRatio = 0.7;
-            compactThreshold = 0;
-            usePreviousResponseId = true;
-            notify = false;
-          };
-
           ".pi/agent/settings.json" = {
             force = true;
             text = builtins.toJSON {
@@ -90,13 +81,6 @@
               enableSkillCommands = true;
               skills = [ "${pkgs.herdr}/share/herdr/skills" ];
               theme = "dark";
-              # Trigger at 90% of the active 272k Codex context window.
-              # pi-openai-server-compaction handles session_before_compact.
-              compaction = {
-                enabled = true;
-                reserveTokens = 27200;
-                keepRecentTokens = 20000;
-              };
               packages = [
                 "npm:@juicesharp/rpiv-ask-user-question"
                 "npm:@juicesharp/rpiv-todo"
@@ -117,7 +101,6 @@
                 "npm:pi-zentui"
                 "npm:pi-simplify"
                 "npm:@quintinshaw/pi-dynamic-workflows"
-                "git:github.com/algal/pi-openai-server-compaction"
               ];
             };
           };
