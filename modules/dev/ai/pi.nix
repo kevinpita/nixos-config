@@ -103,6 +103,7 @@
                 "npm:@narumitw/pi-usage"
                 "npm:pi-zentui"
                 "npm:pi-simplify"
+                "npm:pi-claude-code-tui"
                 "npm:@quintinshaw/pi-dynamic-workflows"
               ];
             };
