@@ -56,6 +56,8 @@
         };
 
         home-manager.users.${username}.home.file = {
+          ".pi/agent/AGENTS.md".source = ./pi/AGENTS.md;
+
           ".pi/settings.json" = {
             force = true;
             text = builtins.toJSON {
