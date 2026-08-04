@@ -104,6 +104,7 @@
                 "npm:pi-zentui"
                 "npm:pi-simplify"
                 "npm:pi-claude-code-tui"
+                "npm:pi-colours"
                 "npm:@quintinshaw/pi-dynamic-workflows"
               ];
             };
