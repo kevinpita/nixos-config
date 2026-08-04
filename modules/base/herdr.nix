@@ -32,6 +32,20 @@
           herdr pane run "$pane_id" pi
         '';
       };
+
+      openPrWorkspaces = pkgs.writeShellApplication {
+        name = "herdr-open-pr-workspaces";
+        runtimeInputs = [
+          pkgs.coreutils
+          pkgs.gh
+          pkgs.git
+          pkgs.herdr
+          pkgs.jq
+          pkgs.util-linux
+          pkgs.worktrunk
+        ];
+        text = builtins.readFile ./herdr-open-pr-workspaces.sh;
+      };
     in
     {
       environment.systemPackages = [
@@ -75,6 +89,12 @@
             type = "shell"
             command = "${openPiTab}/bin/herdr-open-pi-tab"
             description = "open Pi in a new tab"
+
+            [[keys.command]]
+            key = "prefix+alt+p"
+            type = "shell"
+            command = "${openPrWorkspaces}/bin/herdr-open-pr-workspaces"
+            description = "open one worktree workspace per GitHub PR"
 
             [ui.sound]
             enabled = false
