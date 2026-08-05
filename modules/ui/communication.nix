@@ -20,10 +20,6 @@
             '';
           })
 
-          bruno
-          keepassxc
-          qbittorrent
-          arduino-ide
         ];
       };
     };

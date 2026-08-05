@@ -9,11 +9,13 @@
       communication
       development
       docker
+      file-sharing
       ghostty
       git
       kubernetes
       multimedia
       printing-3d
+      security
       sops-admin
       syncthing
       tailscale
