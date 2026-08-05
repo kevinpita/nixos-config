@@ -39,6 +39,7 @@
           pkgs.coreutils
           pkgs.gh
           pkgs.git
+          pkgs.gum
           pkgs.herdr
           pkgs.jq
           pkgs.util-linux
@@ -92,9 +93,11 @@
 
             [[keys.command]]
             key = "prefix+alt+p"
-            type = "shell"
+            type = "popup"
             command = "${openPrWorkspaces}/bin/herdr-open-pr-workspaces"
-            description = "open one worktree workspace per GitHub PR"
+            description = "choose and open GitHub PR workspaces"
+            width = "65%"
+            height = "65%"
 
             [ui.sound]
             enabled = false
