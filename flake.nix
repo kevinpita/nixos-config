@@ -65,6 +65,11 @@
 
     herdr-nix.url = "github:kevinpita/herdr-nix";
 
+    gh-stack = {
+      url = "github:github/gh-stack";
+      flake = false;
+    };
+
     bast-nix.url = "github:kevinpita/bast-nix";
 
     whisp-nix.url = "github:kevinpita/whisp-nix";

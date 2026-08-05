@@ -82,7 +82,6 @@
               defaultThinkingLevel = "xhigh";
               enableInstallTelemetry = false;
               enableSkillCommands = true;
-              skills = [ "${pkgs.herdr}/share/herdr/skills" ];
               theme = "dark";
               packages = [
                 "npm:@juicesharp/rpiv-ask-user-question"
@@ -110,7 +109,6 @@
             };
           };
 
-          ".pi/agent/skills".source = ./pi/skills;
           ".pi/agent/prompts".source = ./pi/prompts;
           ".pi/agent/themes".source = ./pi/themes;
         };
