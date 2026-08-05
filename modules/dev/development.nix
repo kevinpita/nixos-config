@@ -22,7 +22,6 @@
 
       home-manager.users.${username} = {
         home.packages = with pkgs; [
-          arduino-ide
           nixd
           nixfmt
         ];
@@ -52,6 +51,7 @@
     { pkgs, username, ... }:
     {
       home-manager.users.${username}.home.packages = with pkgs; [
+        arduino-ide
         jetbrains.datagrip
         jetbrains.goland
         jetbrains.idea
