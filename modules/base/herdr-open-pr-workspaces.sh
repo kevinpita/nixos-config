@@ -257,31 +257,55 @@ if [[ "$pr_count" -eq 0 ]]; then
 	exit 0
 fi
 
-if ! menu_choice="$(
+if ! type_choice="$(
 	gum choose \
-		--header "Open PR workspaces" \
-		--height 8 \
+		--header "Select PR type" \
+		--height 7 \
 		"All open PRs" \
 		"Ready to review" \
-		"Draft PRs" \
+		"Draft PRs"
+)"; then
+	exit 0
+fi
+
+case "$type_choice" in
+"All open PRs")
+	matching_prs="$(jq 'sort_by(.number)' <<<"$pr_json")"
+	;;
+"Ready to review")
+	matching_prs="$(jq 'map(select(.isDraft == false)) | sort_by(.number)' <<<"$pr_json")"
+	;;
+"Draft PRs")
+	matching_prs="$(jq 'map(select(.isDraft == true)) | sort_by(.number)' <<<"$pr_json")"
+	;;
+*)
+	exit 0
+	;;
+esac
+
+matching_count="$(jq 'length' <<<"$matching_prs")"
+if [[ "$matching_count" -eq 0 ]]; then
+	notify "PR workspaces" "The selected group has no open pull requests." "done"
+	exit 0
+fi
+
+if ! range_choice="$(
+	gum choose \
+		--header "Select PR range" \
+		--height 6 \
+		"All matching PRs" \
 		"Start at a PR"
 )"; then
 	exit 0
 fi
 
-case "$menu_choice" in
-"All open PRs")
-	selected_prs="$(jq 'sort_by(.number)' <<<"$pr_json")"
-	;;
-"Ready to review")
-	selected_prs="$(jq 'map(select(.isDraft == false)) | sort_by(.number)' <<<"$pr_json")"
-	;;
-"Draft PRs")
-	selected_prs="$(jq 'map(select(.isDraft == true)) | sort_by(.number)' <<<"$pr_json")"
+case "$range_choice" in
+"All matching PRs")
+	selected_prs="$matching_prs"
 	;;
 "Start at a PR")
 	if ! selected_line="$(
-		jq -r 'sort_by(.number)[] | "#\(.number)\t\(.title)"' <<<"$pr_json" |
+		jq -r '.[] | "#\(.number)\t\(.title)"' <<<"$matching_prs" |
 			gum filter \
 				--header "Select the first PR" \
 				--placeholder "Type a PR number or title" \
@@ -294,7 +318,7 @@ case "$menu_choice" in
 	fi
 	start_number="${selected_line%%$'\t'*}"
 	start_number="${start_number#\#}"
-	selected_prs="$(jq --argjson start "$start_number" 'sort_by(.number) | map(select(.number >= $start))' <<<"$pr_json")"
+	selected_prs="$(jq --argjson start "$start_number" 'map(select(.number >= $start))' <<<"$matching_prs")"
 	;;
 *)
 	exit 0
@@ -302,10 +326,6 @@ case "$menu_choice" in
 esac
 
 selected_count="$(jq 'length' <<<"$selected_prs")"
-if [[ "$selected_count" -eq 0 ]]; then
-	notify "PR workspaces" "The selected group has no open pull requests." "done"
-	exit 0
-fi
 
 initial_worktrees="$(herdr worktree list --cwd "$repo_root" 2>>"$log_file" || true)"
 source_workspace_id="$(jq -r '.result.source.source_workspace_id // empty' <<<"$initial_worktrees" 2>/dev/null || true)"
