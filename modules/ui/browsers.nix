@@ -86,6 +86,8 @@
       };
     in
     {
+      programs.firefox.enable = true;
+
       home-manager.users.${username} = {
         home.packages = with pkgs; [
           brave

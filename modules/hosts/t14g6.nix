@@ -5,6 +5,7 @@
       ../../hosts/t14g6/disko-config.nix
       ../../hosts/t14g6/hardware-configuration.nix
 
+      ../../hosts/t14g6/dni.nix
       ../../hosts/t14g6/monitors.nix
       ../../hosts/t14g6/syncthing.nix
       ../../hosts/t14g6/tlp.nix
