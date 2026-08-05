@@ -68,6 +68,8 @@
           ".pi/agent/extensions/auto-session-name.ts".source = ./pi/extensions/auto-session-name.ts;
           ".pi/agent/extensions/copy-code/index.ts".source = ./pi/extensions/copy-code/index.ts;
           ".pi/agent/extensions/copy-code/parser.ts".source = ./pi/extensions/copy-code/parser.ts;
+          ".pi/agent/extensions/continue-after-compaction.ts".source =
+            ./pi/extensions/continue-after-compaction.ts;
           ".pi/agent/extensions/file-picker.ts".source = ./pi/extensions/file-picker.ts;
           ".pi/agent/extensions/global-prompt-history".source = ./pi/extensions/global-prompt-history;
           ".pi/agent/extensions/herdr-agent-state.ts".source = ./pi/extensions/herdr-agent-state.ts;
