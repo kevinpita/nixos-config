@@ -21,8 +21,8 @@
           settings = {
             git = {
               overrideGpg = true;
-              pagers = [
-                { pager = "delta --dark --paging=never"; }
+              diffRenderers = [
+                { command = "delta --dark --paging=never"; }
               ];
             };
             customCommands = [
