@@ -7,9 +7,46 @@
   flake.modules.nixos."hosts/hyprland-vm" =
     {
       lib,
+      pkgs,
       username,
       ...
     }:
+    let
+      displayAutoresize = pkgs.writeShellApplication {
+        name = "hyprland-vm-display-autoresize";
+        runtimeInputs = with pkgs; [
+          hyprland
+          systemd
+        ];
+        text = ''
+          pending_pid=""
+
+          cleanup() {
+            if [[ -n "$pending_pid" ]]; then
+              kill "$pending_pid" 2>/dev/null || true
+            fi
+          }
+          trap cleanup EXIT
+
+          apply_preferred_mode() {
+            sleep 0.2
+            hyprctl keyword monitor ",preferred,auto,1" >/dev/null
+          }
+
+          while read -r source _ action _; do
+            if [[ "$source" != "UDEV" || "$action" != "change" ]]; then
+              continue
+            fi
+
+            if [[ -n "$pending_pid" ]]; then
+              kill "$pending_pid" 2>/dev/null || true
+            fi
+            apply_preferred_mode &
+            pending_pid=$!
+          done < <(udevadm monitor --udev --subsystem-match=drm)
+        '';
+      };
+    in
     {
       imports = [ config.flake.modules.nixos."hyprland-desktop" ];
 
@@ -24,6 +61,22 @@
 
       security.sudo.wheelNeedsPassword = false;
       users.users.${username}.initialPassword = "nixos";
+
+      home-manager.users.${username}.systemd.user.services.hyprland-vm-display-autoresize = {
+        Unit = {
+          Description = "Resize the Hyprland display with the QEMU window";
+          After = [ "hyprland-session.target" ];
+          PartOf = [ "hyprland-session.target" ];
+        };
+
+        Service = {
+          ExecStart = lib.getExe displayAutoresize;
+          Restart = "always";
+          RestartSec = 1;
+        };
+
+        Install.WantedBy = [ "hyprland-session.target" ];
+      };
 
       # Keep the regular host evaluation valid. The VM variant overrides this
       # with its persistent qcow2 root filesystem.
@@ -41,8 +94,8 @@
             forceAccel = true;
             options = [
               "-vga none"
-              "-device virtio-vga-gl"
-              "-display gtk,gl=on"
+              "-device virtio-vga-gl,edid=on"
+              "-display gtk,gl=on,zoom-to-fit=on,grab-on-hover=on"
             ];
           };
         };
