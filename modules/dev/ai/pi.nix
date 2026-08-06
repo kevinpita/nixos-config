@@ -85,6 +85,7 @@
               enableInstallTelemetry = false;
               enableSkillCommands = true;
               theme = "dark";
+              tuiMode = "fullscreen";
               packages = [
                 "npm:@juicesharp/rpiv-ask-user-question"
                 "npm:@juicesharp/rpiv-todo"
