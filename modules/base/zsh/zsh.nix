@@ -88,9 +88,9 @@
               if (( $+commands[gh] )); then
                 gh() {
                   command gh "$@"
-                  local status=$?
+                  local gh_status=$?
                   (( $+functions[p10k_refresh_gh_user] )) && p10k_refresh_gh_user
-                  return $status
+                  return $gh_status
                 }
               fi
 
