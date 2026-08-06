@@ -96,7 +96,7 @@
                 "npm:pi-prompt-template-model"
                 "npm:pi-web-access"
                 "npm:pi-subagents"
-                "git:github.com/kevinpita/pi-gpt-fast-mode@0acb65c8872636386b0d404a7d8f8af33f91dc17"
+                "git:github.com/kevinpita/pi-gpt-fast-mode@0a5384befbc26a03469213c537af09c7312afae1"
                 "npm:pi-lens"
                 # Pi runs under Bun, and pi-fff declares its Bun SDK as an optional peer.
                 "npm:@ff-labs/fff-bun"
