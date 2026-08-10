@@ -84,6 +84,7 @@
               defaultThinkingLevel = "xhigh";
               enableInstallTelemetry = false;
               enableSkillCommands = true;
+              "pi-gpt-fast-mode" = true;
               theme = "dark";
               tuiMode = "fullscreen";
               packages = [
@@ -97,7 +98,7 @@
                 "npm:pi-prompt-template-model"
                 "npm:pi-web-access"
                 "npm:pi-subagents"
-                "git:github.com/kevinpita/pi-gpt-fast-mode@0a5384befbc26a03469213c537af09c7312afae1"
+                "git:github.com/kevinpita/pi-gpt-fast-mode@6a67a9ceba52f9da5f89d5bc98111b419df20022"
                 "npm:pi-lens"
                 # Pi runs under Bun, and pi-fff declares its Bun SDK as an optional peer.
                 "npm:@ff-labs/fff-bun"
