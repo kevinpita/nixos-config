@@ -8,11 +8,6 @@ let
   username = "kevin";
   system = "x86_64-linux";
 
-  jetbrainsPkgs = import inputs.jetbrains-hotfix {
-    inherit system;
-    config.allowUnfree = true;
-  };
-
   overlays = [
     inputs.nix-vscode-extensions.overlays.default
 
@@ -24,16 +19,10 @@ let
       inherit (inputs.codex-desktop-linux.packages.${system}) codex-desktop;
     })
 
-    inputs.antigravity-nix.overlays.default
-
     inputs.whisp-nix.overlays.default
 
     (_final: _prev: {
       inherit (inputs.kevinpita-nixpkgs.legacyPackages.${system}) helm-tui;
-    })
-
-    (_final: _prev: {
-      inherit (jetbrainsPkgs) jetbrains;
     })
 
     (_final: _prev: {

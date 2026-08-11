@@ -64,13 +64,7 @@
 
     codex-cli-nix.url = "github:sadjow/codex-cli-nix";
 
-    codex-desktop-linux.url = "github:ilysenko/codex-desktop-linux";
-
-    antigravity-nix.url = "github:jacopone/antigravity-nix";
-
     kevinpita-nixpkgs.url = "github:kevinpita/nixpkgs/helm-tui-init";
-
-    jetbrains-hotfix.url = "github:NixOS/nixpkgs/pull/546636/head";
 
     herdr-nix.url = "github:kevinpita/herdr-nix";
 
