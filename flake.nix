@@ -78,7 +78,7 @@
     whisp-nix.url = "github:kevinpita/whisp-nix";
 
     pi-flake = {
-      url = "github:kevinpita/pi-flake";
+      url = "github:ChauDucToan/pi-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
