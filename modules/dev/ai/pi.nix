@@ -56,6 +56,17 @@
         };
 
         home-manager.users.${username}.home.file = {
+          ".pi-lens/config.json" = {
+            force = true;
+            text = builtins.toJSON {
+              ignore = [
+                "**/*.md"
+                "**/*.mdx"
+                "**/*.markdown"
+              ];
+            };
+          };
+
           ".pi/agent/AGENTS.md".source = ./pi/AGENTS.md;
 
           ".pi/settings.json" = {
