@@ -45,7 +45,8 @@
 
         environment = {
           systemPackages = with pkgs; [
-            fd # pi file picker dependency
+            fd # Pi file picker dependency
+            nodejs # Pi package runtime dependency
             piAudit
           ];
 
