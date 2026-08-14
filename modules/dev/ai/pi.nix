@@ -33,13 +33,18 @@
           };
           # Keep Pi package registration in settings.json below because that file is Nix-managed.
           extensions = [ ];
-          models = {
-            providers = {
+          agentFiles = {
+            models.value = {
+              providers = {
+              };
             };
-          };
-          keybindings = {
-            "tui.editor.cursorRight" = [ "right" ];
-            "app.session.rename" = [ ];
+            keybindings = {
+              mutable = false;
+              value = {
+                "tui.editor.cursorRight" = [ "right" ];
+                "app.session.rename" = [ ];
+              };
+            };
           };
         };
 
