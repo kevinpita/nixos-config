@@ -70,6 +70,18 @@
 
           ".pi/agent/AGENTS.md".source = ./pi/AGENTS.md;
 
+          ".pi/agent/pstack.json" = {
+            force = true;
+            text = builtins.toJSON {
+              defaultOn = true;
+              models = {
+                analysis = "openai-codex/gpt-5.6-sol:xhigh";
+                implementation = "openai-codex/gpt-5.6-sol:xhigh";
+                review = [ "openai-codex/gpt-5.6-sol:xhigh" ];
+              };
+            };
+          };
+
           ".pi/settings.json" = {
             force = true;
             text = builtins.toJSON {
@@ -111,6 +123,7 @@
                 "npm:pi-prompt-template-model"
                 "npm:pi-web-access"
                 "npm:pi-subagents"
+                "npm:@kevinpita/pi-pstack"
                 "git:github.com/kevinpita/pi-gpt-fast-mode@6a67a9ceba52f9da5f89d5bc98111b419df20022"
                 "npm:pi-lens"
                 # Pi runs under Bun, and pi-fff declares its Bun SDK as an optional peer.
