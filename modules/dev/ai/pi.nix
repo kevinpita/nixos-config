@@ -114,7 +114,7 @@
               defaultThinkingLevel = "xhigh";
               enableInstallTelemetry = false;
               enableSkillCommands = true;
-              "pi-gpt-fast-mode" = true;
+              "pi-gpt-fast-mode" = false;
               theme = "dark";
               tuiMode = "fullscreen";
               packages = [
