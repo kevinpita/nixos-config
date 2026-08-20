@@ -8,13 +8,14 @@
       ...
     }:
     let
+      sessionCommand = "${lib.getExe config.programs.uwsm.package} start -e -D Hyprland hyprland.desktop";
       tuigreetCommand = lib.escapeShellArgs [
         (lib.getExe pkgs.tuigreet)
         "--time"
         "--remember"
         "--asterisks"
         "--cmd"
-        "${lib.getExe config.programs.uwsm.package} start -e -D Hyprland hyprland.desktop"
+        sessionCommand
       ];
     in
     {
@@ -26,7 +27,13 @@
       services.greetd = {
         enable = true;
         useTextGreeter = true;
-        settings.default_session.command = tuigreetCommand;
+        settings = {
+          default_session.command = tuigreetCommand;
+          initial_session = {
+            command = sessionCommand;
+            user = username;
+          };
+        };
       };
 
       home-manager.users.${username} =
