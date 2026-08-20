@@ -534,11 +534,11 @@
         "nixpkgs": "nixpkgs_7"
       },
       "locked": {
-        "lastModified": 1787103818,
-        "narHash": "sha256-ATm0WHSBL4ZiKAzCXNn3EDZPXISAxJBzQk3NQaqnT0o=",
+        "lastModified": 1787189790,
+        "narHash": "sha256-nxn1PrNDZ45AzoiZse3Uu+X5UH+Uj95wuWTzggC5V+k=",
         "owner": "nix-community",
         "repo": "nix-vscode-extensions",
-        "rev": "3180d2a35f4373f6931455cd5f49e6ae42977c90",
+        "rev": "81ab2acb9f2f2312c4fba3ad21923c173ad20693",
         "type": "github"
       },
       "original": {
@@ -586,11 +586,11 @@
     "nixos-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1787183096,
-        "narHash": "sha256-t/es4SDKmIgMY4vSKEZEin48AgZKAcXADoSxWg263A8=",
+        "lastModified": 1787191853,
+        "narHash": "sha256-AHTkQQux50TVlJioAixws2PflCqvYn6d9YBekQgGtgg=",
         "ref": "refs/heads/main",
-        "rev": "95e1f31ea7a3352afd83341acc87ba144c415211",
-        "revCount": 24,
+        "rev": "47e6b79a40c5c1dec02c4680f588989d46327a5e",
+        "revCount": 26,
         "type": "git",
         "url": "ssh://git@github.com/kevinpita/nixos-secrets"
       },
@@ -602,11 +602,11 @@
     "nixos-work": {
       "flake": false,
       "locked": {
-        "lastModified": 1787188852,
-        "narHash": "sha256-UpSseOXZLZr6J5rdySRZHpGEwE9ZPkgjwXQ4xmmMOmU=",
+        "lastModified": 1787192162,
+        "narHash": "sha256-GwfcWwWOV81nuAZpwot7tN204bTHF7MFG2XpgWFI3GA=",
         "ref": "refs/heads/main",
-        "rev": "9fd0b1c3011d1960db10feb9a3283deaaa06b7e8",
-        "revCount": 16,
+        "rev": "153b36237830ca61191f5a8a26b78063dff5daf0",
+        "revCount": 17,
         "type": "git",
         "url": "ssh://git@github.com/kevinpita/nixos-work"
       },
