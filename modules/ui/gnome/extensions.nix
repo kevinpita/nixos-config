@@ -1,15 +1,12 @@
 {
   flake.modules.nixos.gnome =
     {
-      config,
       lib,
       pkgs,
       username,
       ...
     }:
     let
-      gsconnectPhoneIPv4 = "100.65.1.47";
-
       codexUsageExtension = pkgs.gnomeExtensions.buildShellExtension {
         uuid = "codex-usage@kevinpita.dev";
         name = "Codex Usage";
@@ -106,51 +103,11 @@
       '';
     in
     {
-      # Tailscale's default netfilter mode accepts tailscale0 before the NixOS
-      # firewall. Keep its managed chains, but let NixOS enforce the phone-only rule.
-      services.tailscale = {
-        extraUpFlags = lib.mkAfter [ "--netfilter-mode=nodivert" ];
-        extraSetFlags = lib.mkAfter [ "--netfilter-mode=nodivert" ];
-      };
-
-      networking = lib.mkMerge [
-        (lib.mkIf config.networking.nftables.enable {
-          # Filter before the main NixOS firewall so trusted VM/container bridges
-          # cannot bypass the GSConnect restriction.
-          nftables.tables."gsconnect-filter" = {
-            family = "inet";
-            content = ''
-              chain input {
-                type filter hook input priority -10; policy accept;
-
-                iifname "tailscale0" ip saddr ${gsconnectPhoneIPv4} tcp dport 1714-1764 accept
-                iifname "tailscale0" ip saddr ${gsconnectPhoneIPv4} udp dport 1714-1764 accept
-                tcp dport 1714-1764 drop
-                udp dport 1714-1764 drop
-              }
-            '';
-          };
-          firewall.extraInputRules = ''
-            iifname "tailscale0" accept comment "Preserve Tailscale inbound traffic"
-          '';
-        })
-        (lib.mkIf (!config.networking.nftables.enable) {
-          firewall.extraCommands = ''
-            ip46tables -I nixos-fw 1 -p tcp --dport 1714:1764 -j DROP
-            ip46tables -I nixos-fw 1 -p udp --dport 1714:1764 -j DROP
-            iptables -w -I nixos-fw 1 -i tailscale0 -s ${gsconnectPhoneIPv4}/32 -p tcp --dport 1714:1764 -j nixos-fw-accept
-            iptables -w -I nixos-fw 1 -i tailscale0 -s ${gsconnectPhoneIPv4}/32 -p udp --dport 1714:1764 -j nixos-fw-accept
-            ip46tables -A nixos-fw -i tailscale0 -j nixos-fw-accept
-          '';
-        })
-      ];
-
       home-manager.users.${username} = {
         home.packages = with pkgs; [
           gnome-pomodoro
           gnomeExtensions.caffeine
           gnomeExtensions.clipboard-history
-          gnomeExtensions.gsconnect
           gnomeExtensions.tailscale-status
           claudeUsageExtension
           codexUsageExtension

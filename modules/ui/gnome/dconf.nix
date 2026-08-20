@@ -22,7 +22,6 @@
                 enabled-extensions = [
                   "caffeine@patapon.info"
                   "clipboard-history@alexsaveau.dev"
-                  "gsconnect@andyholmes.github.io"
                   "tailscale-status@maxgallup.github.com"
                   "claude-usage@dvdstelt.github.io"
                   "codex-usage@kevinpita.dev"
