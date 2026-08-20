@@ -28,10 +28,5 @@
       workstation
       gnome
     ];
-
-    "hyprland-desktop".imports = with config.flake.modules.nixos; [
-      workstation
-      hyprland
-    ];
   };
 }

@@ -1,19 +1,10 @@
 {
   flake.modules.nixos.kubernetes =
     {
-      config,
-      lib,
       pkgs,
-      inputs,
       username,
       ...
     }:
-    let
-      hulkKubeconfigFile =
-        if inputs ? nixos-secrets then "${inputs.nixos-secrets}/secrets/hulk-kubeconfig.enc" else null;
-      hasHulkKubeconfig =
-        config.hostSecrets.enable && hulkKubeconfigFile != null && builtins.pathExists hulkKubeconfigFile;
-    in
     {
       environment.systemPackages = [
         pkgs.kubectl
@@ -23,21 +14,6 @@
         pkgs.ku
         pkgs.kubie
         pkgs.argocd
-      ];
-
-      sops.secrets = lib.mkIf hasHulkKubeconfig {
-        "hulk-kubeconfig" = {
-          sopsFile = hulkKubeconfigFile;
-          format = "json";
-          key = "data";
-          owner = username;
-          path = "/home/${username}/.kube/config_hulk";
-          mode = "0600";
-        };
-      };
-
-      systemd.tmpfiles.rules = lib.mkIf hasHulkKubeconfig [
-        "d /home/${username}/.kube 0700 ${username} users -"
       ];
 
       home-manager.users.${username} = {

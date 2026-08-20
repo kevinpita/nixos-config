@@ -8,12 +8,6 @@ This file provides agent guidance for this repository. `AGENTS.md` is a symlink 
 # Apply configuration changes (uses nh, configured to point at ~/nixos-config)
 nh os switch ~/nixos-config
 
-# Build and open the persistent Hyprland KVM test VM
-just vm
-
-# Delete the guest disk, rebuild, and open a fresh Hyprland VM
-just vm-reset
-
 # Update flake.lock dependencies
 nix flake update
 
@@ -49,12 +43,12 @@ There are no manual import lists.
 files define named modules under `flake.modules.nixos.<name>`; several files
 can contribute slices to the same name (all of `modules/base/` merges into
 `base`). Hosts are aspects too: `modules/hosts/<name>.nix` defines
-`flake.modules.nixos."hosts/<name>"` importing a role bundle (`desktop`,
-`hyprland-desktop`, or `server`) plus per-host aspects and, for physical
+`flake.modules.nixos."hosts/<name>"` importing a role bundle (`desktop` or
+`server`) plus per-host aspects and, for physical
 machines, the raw NixOS files from `hosts/<name>/` (hardware, disko, host
 fragments; these are plain NixOS modules kept outside `modules/` on purpose).
 The `workstation` aspect contains desktop-environment-independent configuration;
-`desktop` adds GNOME and `hyprland-desktop` adds Hyprland.
+`desktop` adds GNOME.
 `modules/nixos-configurations.nix` builds `flake.nixosConfigurations` from
 every `hosts/*` aspect, constructs the shared `pkgs` (overlays,
 `allowUnfree`) once for all hosts, and passes `specialArgs` (`inputs`,
@@ -78,24 +72,15 @@ with `_` are ignored by import-tree.
 Some base slices expose typed options (`modules/base/boot.nix` defines
 `bootloader.mode` enum bios/uefi, `kernelPackages`, `uefiOSProber`, and
 `modules/base/secrets.nix` defines `hostSecrets.enable`). Hosts override these
-in `modules/hosts/<host>.nix` (e.g. `bootloader.mode = "bios"` on microg8,
-`uefiOSProber = true` on dual-boot hosts, and secrets are disabled in the test
-VM).
+in `modules/hosts/<host>.nix` (e.g. `uefiOSProber = true` on dual-boot hosts).
 
 ### Hosts
 
 | Host | Type | Notes |
 | ------- | ------------------- | ------------------------------------------- |
 | amdep | Workstation | Full desktop, dual-boot |
-| hulk | Server | k3s single-node, kubernetes tools |
-| microg8 | Server | BIOS boot, drive monitor |
 | minidesk | Server | Work configuration |
 | t14g6 | ThinkPad laptop | Full desktop, TLP, nixos-hardware module |
-| hyprland-vm | QEMU/KVM guest | Hyprland migration test environment |
-
-### k3s
-
-`modules/cloud/k3s.nix` defines the `k3s` aspect: a single-node k3s server whose kubeconfig is written with mode `600`, and the Kubernetes API port `6443` is opened only on the `tailscale0` firewall interface. `modules/hosts/hulk.nix` imports the aspect; `hulk` is the current k3s host.
 
 ### Secrets (sops-nix + age)
 
