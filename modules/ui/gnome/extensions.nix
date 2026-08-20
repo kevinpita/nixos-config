@@ -1,7 +1,6 @@
 {
   flake.modules.nixos.gnome =
     {
-      lib,
       pkgs,
       username,
       ...
@@ -28,90 +27,14 @@
         sha256 = "sha256-S47pxAS0T8bu4PWSCrklzRa45hkZfo6KzecpwQ7+lJg=";
         metadata = "ewogICJfZ2VuZXJhdGVkIjogIkdlbmVyYXRlZCBieSBTd2VldFRvb3RoLCBkbyBub3QgZWRpdCIsCiAgImRlc2NyaXB0aW9uIjogIlNob3dzIHlvdXIgQ2xhdWRlIHN1YnNjcmlwdGlvbiB0aWVyIGFuZCBsaXZlIHVzYWdlIGxpbWl0cyAoNS1ob3VyIGFuZCA3LWRheSB3aW5kb3dzKSBpbiB0aGUgdG9wIGJhci4gUmVhZHMgeW91ciBleGlzdGluZyBDbGF1ZGUgQ29kZSBjcmVkZW50aWFsczsgbm8gZXh0cmEgbG9naW4gcmVxdWlyZWQuIiwKICAiZG9uYXRpb25zIjogewogICAgInBheXBhbCI6ICJkdmRzdGVsdCIKICB9LAogICJuYW1lIjogIkNsYXVkZSBDb2RlIFVzYWdlIE1vbml0b3IiLAogICJzZXR0aW5ncy1zY2hlbWEiOiAib3JnLmdub21lLnNoZWxsLmV4dGVuc2lvbnMuY2xhdWRlLXVzYWdlIiwKICAic2hlbGwtdmVyc2lvbiI6IFsKICAgICI0OCIsCiAgICAiNDkiLAogICAgIjUwIgogIF0sCiAgInVybCI6ICJodHRwczovL2dpdGh1Yi5jb20vZHZkc3RlbHQvQ2xhdWRlQ29kZVVzYWdlIiwKICAidXVpZCI6ICJjbGF1ZGUtdXNhZ2VAZHZkc3RlbHQuZ2l0aHViLmlvIiwKICAidmVyc2lvbiI6IDcsCiAgInZlcnNpb24tbmFtZSI6ICIxLjEuMSIKfQ==";
       };
-
-      wofiEmojiStyle = pkgs.writeText "wofi-emoji.css" ''
-        * {
-          font-family: "JetBrainsMono Nerd Font", "Noto Color Emoji", monospace;
-          font-size: 15px;
-        }
-
-        window {
-          background-color: rgba(36, 36, 36, 0.95);
-          border: 1px solid #1b1b1b;
-          border-radius: 14px;
-          color: #ffffff;
-        }
-
-        #outer-box {
-          margin: 10px;
-        }
-
-        #input {
-          margin-bottom: 10px;
-          padding: 10px 14px;
-          border: none;
-          border-radius: 10px;
-          background-color: #2f2f2f;
-          color: #ffffff;
-        }
-
-        #input image {
-          color: #9a9a9a;
-        }
-
-        #scroll,
-        #inner-box {
-          margin: 0;
-        }
-
-        #entry {
-          padding: 9px 12px;
-          border-radius: 10px;
-        }
-
-        #text {
-          color: #e3e3e3;
-        }
-
-        #entry:selected {
-          background-color: #3584e4;
-        }
-
-        #entry:selected #text {
-          color: #ffffff;
-        }
-      '';
-
-      emojiPicker = pkgs.writeShellScriptBin "emoji-picker" ''
-        set -eu
-
-        export PATH="${
-          lib.makeBinPath [
-            pkgs.wofi
-            pkgs.wl-clipboard
-            pkgs.wtype
-            pkgs.curl
-            pkgs.coreutils
-            pkgs.gnused
-            pkgs.gnugrep
-          ]
-        }:$PATH"
-        export BEMOJI_PICKER_CMD="wofi --dmenu --insensitive --prompt emoji --width 480 --height 520 --normal-window --style ${wofiEmojiStyle}"
-        emoji="$(${pkgs.bemoji}/bin/bemoji -e -n "$@")"
-        printf '%s' "$emoji" | wl-copy
-        wtype -M ctrl v -m ctrl
-      '';
     in
     {
       home-manager.users.${username} = {
         home.packages = with pkgs; [
-          gnome-pomodoro
           gnomeExtensions.caffeine
-          gnomeExtensions.clipboard-history
           gnomeExtensions.tailscale-status
           claudeUsageExtension
           codexUsageExtension
-          emojiPicker
         ];
       };
     };
