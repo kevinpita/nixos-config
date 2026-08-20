@@ -7,6 +7,6 @@
     config.flake.modules.nixos.server
     config.flake.modules.nixos.herdr-remote-host
     config.flake.modules.nixos.incus
-    config.flake.modules.nixos.work
+    config.flake.modules.nixos.work-github
   ];
 }

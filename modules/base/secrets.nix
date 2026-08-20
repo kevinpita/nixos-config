@@ -13,7 +13,6 @@
       hasRealSecrets = secretsPath != null && builtins.pathExists "${secretsPath}/common.yaml";
       sshConfigHosts = [
         "amdep"
-        "minidesk"
         "t14g6"
       ];
     in

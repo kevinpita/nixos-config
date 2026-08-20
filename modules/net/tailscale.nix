@@ -1,26 +1,10 @@
 {
   flake.modules.nixos.tailscale =
     {
-      config,
-      lib,
-      inputs,
       username,
       ...
     }:
-    let
-      secretsPath = if inputs ? nixos-secrets then "${inputs.nixos-secrets}/secrets" else null;
-      hasRealSecrets =
-        config.hostSecrets.enable
-        && secretsPath != null
-        && builtins.pathExists "${secretsPath}/common.yaml";
-    in
     {
-      sops.secrets = lib.mkIf hasRealSecrets {
-        "tailscale-key" = {
-          sopsFile = "${secretsPath}/common.yaml";
-        };
-      };
-
       services.tailscale = {
         enable = true;
         openFirewall = true;
@@ -29,9 +13,6 @@
           "--accept-routes"
         ];
         extraSetFlags = [ "--operator=${username}" ];
-      }
-      // lib.optionalAttrs hasRealSecrets {
-        authKeyFile = config.sops.secrets."tailscale-key".path;
       };
     };
 

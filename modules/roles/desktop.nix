@@ -20,7 +20,7 @@
       syncthing
       tailscale
       ui
-      work
+      work-cloud
       zed
     ];
 
