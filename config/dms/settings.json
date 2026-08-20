@@ -16,6 +16,8 @@
   "controlCenterShowAudioPercent": false,
   "controlCenterShowBatteryIcon": false,
   "controlCenterShowBrightnessIcon": false,
+  "loginctlLockIntegration": true,
+  "lockBeforeSuspend": true,
   "acLockTimeout": 600,
   "acMonitorTimeout": 900,
   "acSuspendTimeout": 0,
