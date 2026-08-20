@@ -21,5 +21,6 @@
     {
       work-github = mkWork "github";
       work-cloud = mkWork "cloud";
+      work-servers = mkWork "servers";
     };
 }

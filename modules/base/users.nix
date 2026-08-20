@@ -50,6 +50,27 @@
             git.enable = true;
           };
 
+          programs.ssh = {
+            enable = true;
+            enableDefaultConfig = false;
+            includes = [ "config.d/*.conf" ];
+            settings = {
+              "github.com" = {
+                IdentityFile = "~/.ssh/id_ed25519";
+                IdentitiesOnly = true;
+              };
+              "pfium" = {
+                HostName = "fium";
+                User = "kpitapeersyst";
+              };
+              "minidesk-herdr" = {
+                HostName = "minidesk";
+                RemoteForward = "127.0.0.1:47130 /run/user/%i/pulse/native";
+                ExitOnForwardFailure = true;
+              };
+            };
+          };
+
           home.packages = with pkgs; [
             git-filter-repo
             worktrunk

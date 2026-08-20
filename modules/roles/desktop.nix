@@ -16,11 +16,11 @@
       multimedia
       printing-3d
       security
-      sops-admin
       syncthing
       tailscale
       ui
       work-cloud
+      work-servers
       zed
     ];
 
