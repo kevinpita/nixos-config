@@ -87,6 +87,14 @@
             };
           };
 
+          ".config/rpiv-todo/config.json" = {
+            force = true;
+            text = builtins.toJSON {
+              # Heading, three unfinished tasks, and overflow summary.
+              maxWidgetLines = 5;
+            };
+          };
+
           ".pi/settings.json" = {
             force = true;
             text = builtins.toJSON {
