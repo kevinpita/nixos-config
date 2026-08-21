@@ -220,7 +220,6 @@ mkdir -p "$state_dir"
 log_file="$state_dir/pr-workspaces.log"
 printf '\n[%s] Repository: %s\n' "$(date --iso-8601=seconds)" "$repo_root" >>"$log_file"
 
-remote=""
 if git -C "$repo_root" remote get-url origin >/dev/null 2>&1; then
 	remote="origin"
 else
@@ -358,19 +357,20 @@ while IFS=$'\t' read -r number url; do
 		exit 0
 	fi
 
-	if ! jq -e '
-    type == "object"
-    and (.workspaceId | type == "string")
-    and (.outcome == "created" or .outcome == "reused" or .outcome == "failed")
-    and (.failureCount | type == "number")
-  ' >/dev/null 2>&1 <"$worker_result_file"; then
+	if ! worker_fields="$(jq -re '
+    select(
+      type == "object"
+      and (.workspaceId | type == "string")
+      and (.outcome == "created" or .outcome == "reused" or .outcome == "failed")
+      and (.failureCount | type == "number")
+    )
+    | [.workspaceId, .outcome, .failureCount] | @tsv
+  ' <"$worker_result_file" 2>/dev/null)"; then
 		failed_count=$((failed_count + 1))
 		continue
 	fi
 
-	workspace_id="$(jq -r '.workspaceId' <"$worker_result_file")"
-	outcome="$(jq -r '.outcome' <"$worker_result_file")"
-	operation_failures="$(jq -r '.failureCount' <"$worker_result_file")"
+	IFS=$'\t' read -r workspace_id outcome operation_failures <<<"$worker_fields"
 	failed_count=$((failed_count + operation_failures))
 
 	case "$outcome" in

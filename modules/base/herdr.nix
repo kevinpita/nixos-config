@@ -23,9 +23,10 @@
         text = ''
           set -eu
 
-          current_json="$(herdr pane current)"
-          workspace_id="$(printf '%s' "$current_json" | jq -r '.result.pane.workspace_id')"
-          cwd="$(printf '%s' "$current_json" | jq -r '.result.pane.foreground_cwd // .result.pane.cwd')"
+          IFS=$'\t' read -r workspace_id cwd < <(
+            herdr pane current |
+              jq -r '[.result.pane.workspace_id, (.result.pane.foreground_cwd // .result.pane.cwd)] | @tsv'
+          )
 
           tab_json="$(herdr tab create --workspace "$workspace_id" --cwd "$cwd" --label pi --focus)"
           pane_id="$(printf '%s' "$tab_json" | jq -r '.result.root_pane.pane_id')"
