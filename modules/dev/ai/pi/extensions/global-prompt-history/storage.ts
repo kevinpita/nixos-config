@@ -184,21 +184,23 @@ export async function listIgnoredSessions(
 		);
 	}
 
-	const sessions: IgnoredSession[] = [];
-	for (const name of names) {
-		if (!name.endsWith(".json")) continue;
-		const markerPath = join(directory, name);
-		let parsed: unknown;
-		try {
-			parsed = JSON.parse(await readFile(markerPath, "utf8"));
-		} catch {
-			throw new Error(`Invalid ignored-session marker: ${markerPath}`);
-		}
-		if (!isIgnoredSession(parsed)) {
-			throw new Error(`Invalid ignored-session marker: ${markerPath}`);
-		}
-		sessions.push(parsed);
-	}
+	const sessions = await Promise.all(
+		names
+			.filter((name) => name.endsWith(".json"))
+			.map(async (name) => {
+				const markerPath = join(directory, name);
+				let parsed: unknown;
+				try {
+					parsed = JSON.parse(await readFile(markerPath, "utf8"));
+				} catch {
+					throw new Error(`Invalid ignored-session marker: ${markerPath}`);
+				}
+				if (!isIgnoredSession(parsed)) {
+					throw new Error(`Invalid ignored-session marker: ${markerPath}`);
+				}
+				return parsed;
+			}),
+	);
 
 	return sessions.sort((left, right) =>
 		right.ignoredAt.localeCompare(left.ignoredAt),

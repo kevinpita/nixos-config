@@ -176,28 +176,26 @@ function cacheLimit(config: HistoryConfig): number {
 
 async function readMetadataBatches(
 	paths: readonly string[],
-	start: number,
 	output: SessionFileMetadata[],
 ): Promise<number> {
-	if (start >= paths.length) return 0;
-	const batch = paths.slice(start, start + LOAD_CONCURRENCY * 4);
-	const results = await Promise.all(
-		batch.map(async (path) => {
-			try {
-				return await readSessionFileMetadata(path);
-			} catch {
-				return undefined;
-			}
-		}),
-	);
 	let failed = 0;
-	for (const result of results) {
-		if (result) output.push(result);
-		else failed += 1;
+	for (let start = 0; start < paths.length; start += LOAD_CONCURRENCY * 4) {
+		const batch = paths.slice(start, start + LOAD_CONCURRENCY * 4);
+		const results = await Promise.all(
+			batch.map(async (path) => {
+				try {
+					return await readSessionFileMetadata(path);
+				} catch {
+					return undefined;
+				}
+			}),
+		);
+		for (const result of results) {
+			if (result) output.push(result);
+			else failed += 1;
+		}
 	}
-	return (
-		failed + (await readMetadataBatches(paths, start + batch.length, output))
-	);
+	return failed;
 }
 
 async function discoverSessionMetadata(
@@ -207,7 +205,7 @@ async function discoverSessionMetadata(
 	const activePath = ctx.sessionManager.getSessionFile();
 	if (activePath && !paths.includes(activePath)) paths.push(activePath);
 	const sessions: SessionFileMetadata[] = [];
-	const failed = await readMetadataBatches(paths, 0, sessions);
+	const failed = await readMetadataBatches(paths, sessions);
 	return { sessions, failed };
 }
 
@@ -283,43 +281,42 @@ function createPromptIndexer(): {
 
 	async function collectSessionBatches(
 		sessions: readonly SessionFileMetadata[],
-		start: number,
 		config: HistoryConfig,
 		collection: SessionCollection,
 	): Promise<void> {
-		if (start >= sessions.length) return;
-		const batch = sessions.slice(start, start + LOAD_CONCURRENCY);
-		const results = await Promise.all(
-			batch.map(async (session) => {
-				try {
-					return await loadSession(session, config);
-				} catch {
-					return undefined;
+		for (let start = 0; start < sessions.length; start += LOAD_CONCURRENCY) {
+			const batch = sessions.slice(start, start + LOAD_CONCURRENCY);
+			const results = await Promise.all(
+				batch.map(async (session) => {
+					try {
+						return await loadSession(session, config);
+					} catch {
+						return undefined;
+					}
+				}),
+			);
+			for (const result of results) {
+				if (!result) {
+					collection.malformedSessions += 1;
+					continue;
 				}
-			}),
-		);
-		for (const result of results) {
-			if (!result) {
-				collection.malformedSessions += 1;
-				continue;
+				if (result.malformedLines > 0) collection.malformedSessions += 1;
+				collection.skippedOversizedPrompts += result.skippedOversizedPrompts;
+				collection.droppedPrompts += result.droppedPrompts;
+				collection.records.push(...result.prompts);
 			}
-			if (result.malformedLines > 0) collection.malformedSessions += 1;
-			collection.skippedOversizedPrompts += result.skippedOversizedPrompts;
-			collection.droppedPrompts += result.droppedPrompts;
-			collection.records.push(...result.prompts);
+			// Trimming copies and sorts the whole accumulation, so only do it
+			// once the slack fills up; buildFresh applies the exact bounds at
+			// the end regardless.
+			if (collection.records.length > config.maxPrompts * 4) {
+				const candidates = trimPromptRecords(collection.records, {
+					maxPrompts: config.maxPrompts * 2,
+					maxBytes: config.maxBytes * 2,
+				});
+				collection.records = candidates.records;
+				collection.droppedPrompts += candidates.droppedPrompts;
+			}
 		}
-		const candidates = trimPromptRecords(collection.records, {
-			maxPrompts: config.maxPrompts * 2,
-			maxBytes: config.maxBytes * 2,
-		});
-		collection.records = candidates.records;
-		collection.droppedPrompts += candidates.droppedPrompts;
-		return collectSessionBatches(
-			sessions,
-			start + batch.length,
-			config,
-			collection,
-		);
 	}
 
 	function applyExclusions(
@@ -373,7 +370,7 @@ function createPromptIndexer(): {
 			skippedOversizedPrompts: 0,
 			droppedPrompts: 0,
 		};
-		await collectSessionBatches(sessions, 0, config, collection);
+		await collectSessionBatches(sessions, config, collection);
 
 		const active = activeSessionDescriptor(ctx, discovered.sessions);
 		if (
@@ -488,6 +485,9 @@ function pickerRow(
 
 class HistoryPicker {
 	private readonly input = new Input();
+	// Cache the normalized search text per prompt: rebuilding it means three
+	// regex passes over every prompt on every keystroke.
+	private readonly searchTextCache = new Map<SearchablePrompt, string>();
 	private filtered: SearchablePrompt[];
 	private selectedIndex = 0;
 	private focusedState = false;
@@ -672,10 +672,19 @@ class HistoryPicker {
 		this.input.invalidate();
 	}
 
+	private readonly promptSearchText = (prompt: SearchablePrompt): string => {
+		let text = this.searchTextCache.get(prompt);
+		if (text === undefined) {
+			text = searchablePromptText(prompt);
+			this.searchTextCache.set(prompt, text);
+		}
+		return text;
+	};
+
 	private filterPrompts(): SearchablePrompt[] {
 		const query = this.input.getValue().trim();
 		return query
-			? fuzzyFilter(this.prompts, query, searchablePromptText)
+			? fuzzyFilter(this.prompts, query, this.promptSearchText)
 			: this.prompts;
 	}
 

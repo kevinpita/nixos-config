@@ -244,20 +244,17 @@ async function streamSessionLines(
 	const buffer = new Uint8Array(READ_CHUNK_BYTES);
 	const state: LineStreamState = { remainder: "", droppingLongLine: false };
 
-	async function readNextChunk(): Promise<void> {
-		const { bytesRead } = await handle.read(buffer, 0, buffer.length, null);
-		if (bytesRead === 0) return;
-		consumeDecodedText(
-			decoder.decode(buffer.subarray(0, bytesRead), { stream: true }),
-			state,
-			maxLineCharacters,
-			accumulator,
-		);
-		return readNextChunk();
-	}
-
 	try {
-		await readNextChunk();
+		while (true) {
+			const { bytesRead } = await handle.read(buffer, 0, buffer.length, null);
+			if (bytesRead === 0) break;
+			consumeDecodedText(
+				decoder.decode(buffer.subarray(0, bytesRead), { stream: true }),
+				state,
+				maxLineCharacters,
+				accumulator,
+			);
+		}
 		consumeDecodedText(decoder.decode(), state, maxLineCharacters, accumulator);
 		if (state.droppingLongLine) accumulator.addMalformedLine();
 		else if (state.remainder) accumulator.addLine(state.remainder);

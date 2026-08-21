@@ -64,10 +64,8 @@ type UserMessageLike = {
 	readonly timestamp?: unknown;
 };
 
-const textEncoder = new TextEncoder();
-
 export function utf8Bytes(text: string): number {
-	return textEncoder.encode(text).byteLength;
+	return Buffer.byteLength(text, "utf8");
 }
 
 export function textFromUserContent(content: unknown): string | undefined {
@@ -227,17 +225,14 @@ export function parseHistorySessionContent(
 	};
 }
 
-export function trimPromptRecords(
-	records: readonly PromptRecord[],
+function boundRecords<T extends { readonly textBytes: number }>(
+	records: readonly T[],
 	bounds: HistoryBounds,
-): BoundedPromptRecords {
-	const sorted = [...records].sort(
-		(left, right) => right.timestampMs - left.timestampMs,
-	);
-	const retained: PromptRecord[] = [];
+): { records: T[]; promptBytes: number; droppedPrompts: number } {
+	const retained: T[] = [];
 	let promptBytes = 0;
 	let droppedPrompts = 0;
-	for (const record of sorted) {
+	for (const record of records) {
 		if (
 			retained.length >= bounds.maxPrompts ||
 			promptBytes + record.textBytes > bounds.maxBytes
@@ -249,6 +244,16 @@ export function trimPromptRecords(
 		promptBytes += record.textBytes;
 	}
 	return { records: retained, promptBytes, droppedPrompts };
+}
+
+export function trimPromptRecords(
+	records: readonly PromptRecord[],
+	bounds: HistoryBounds,
+): BoundedPromptRecords {
+	const sorted = [...records].sort(
+		(left, right) => right.timestampMs - left.timestampMs,
+	);
+	return boundRecords(sorted, bounds);
 }
 
 export function collapseExactPrompts(
@@ -287,22 +292,10 @@ export function applyHistoryBounds(
 	records: readonly SearchablePrompt[],
 	bounds: HistoryBounds,
 ): BoundedHistory {
-	const prompts: SearchablePrompt[] = [];
-	let promptBytes = 0;
-	let droppedPrompts = 0;
-
-	for (const record of records) {
-		if (
-			prompts.length >= bounds.maxPrompts ||
-			promptBytes + record.textBytes > bounds.maxBytes
-		) {
-			droppedPrompts += 1;
-			continue;
-		}
-		prompts.push(record);
-		promptBytes += record.textBytes;
-	}
-
+	const { records: prompts, promptBytes, droppedPrompts } = boundRecords(
+		records,
+		bounds,
+	);
 	return { prompts, promptBytes, droppedPrompts };
 }
 
