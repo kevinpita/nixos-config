@@ -8,6 +8,8 @@ let
   username = "kevin";
   system = "x86_64-linux";
 
+  defaultPackageOverlay = name: input: _final: _prev: { ${name} = input.packages.${system}.default; };
+
   overlays = [
     inputs.nix-vscode-extensions.overlays.default
 
@@ -15,27 +17,17 @@ let
 
     inputs.codex-cli-nix.overlays.default
 
-    (_final: _prev: {
-      inherit (inputs.codex-desktop-linux.packages.${system}) codex-desktop;
-    })
-
     inputs.whisp-nix.overlays.default
 
     (_final: _prev: {
       inherit (inputs.kevinpita-nixpkgs.legacyPackages.${system}) helm-tui;
     })
 
-    (_final: _prev: {
-      herdr = inputs.herdr-nix.packages.${system}.default;
-    })
+    (defaultPackageOverlay "herdr" inputs.herdr-nix)
 
-    (_final: _prev: {
-      bast = inputs.bast-nix.packages.${system}.default;
-    })
+    (defaultPackageOverlay "bast" inputs.bast-nix)
 
-    (_final: _prev: {
-      ku = inputs.ku-nix.packages.${system}.default;
-    })
+    (defaultPackageOverlay "ku" inputs.ku-nix)
 
     inputs.lazyrsync-nix.overlays.default
 
@@ -47,7 +39,6 @@ let
         ghidraMcp = final.callPackage ../packages/ghidra-mcp { };
       in
       {
-        ghidra-mcp = ghidraMcp;
         ghidra-mcp-bridge = ghidraMcp.bridge;
         ghidra-mcp-extension = ghidraMcp.extension;
       }
