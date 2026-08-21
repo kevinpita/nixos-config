@@ -17,7 +17,5 @@
           "1.0.0.1"
         ];
       };
-
-      services.tailscale.enable = true;
     };
 }
