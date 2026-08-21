@@ -13,6 +13,6 @@
     ];
 
     # Dual-boot support
-    uefiOSProber = true;
+    boot.loader.grub.useOSProber = true;
   };
 }
