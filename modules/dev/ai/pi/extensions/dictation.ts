@@ -338,15 +338,18 @@ export default function (pi: ExtensionAPI): void {
 		closed: false,
 	};
 
-	pi.on("session_start", async (_event, ctx) => {
+	pi.on("session_start", (_event, ctx) => {
 		state.closed = false;
 		if (ctx.mode !== "tui") return;
 
-		const backend = await readBackendStatus(pi);
-		if (state.closed) return;
-		if (backend.recording) {
-			showRecording(state, ctx, backend.startedAtMs);
-		}
+		// Only detects the rare recording-already-in-flight case, so don't
+		// block session start on the status subprocess.
+		void readBackendStatus(pi).then((backend) => {
+			if (state.closed) return;
+			if (backend.recording) {
+				showRecording(state, ctx, backend.startedAtMs);
+			}
+		});
 	});
 
 	pi.on("session_shutdown", async (event, ctx) => {
