@@ -1,6 +1,4 @@
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
-import { readdir } from "node:fs/promises"; // pi-lens-ignore: find-import-file-without-extension
-import { relative, resolve } from "node:path";
 import type {
 	ExtensionAPI,
 	ExtensionContext,
@@ -26,7 +24,7 @@ type PickerResult = {
 const MAX_FILES = 50_000;
 const MAX_RESULTS = 200;
 const VISIBLE_RESULTS = 10;
-const IGNORED_DIRECTORIES = new Set([
+const IGNORED_DIRECTORIES = [
 	".git",
 	".hg",
 	".svn",
@@ -38,55 +36,23 @@ const IGNORED_DIRECTORIES = new Set([
 	".turbo",
 	"target",
 	"vendor",
-]);
-
-const RG_GLOBS = [
-	"!**/.git/**",
-	"!**/.hg/**",
-	"!**/.svn/**",
-	"!**/node_modules/**",
-	"!**/dist/**",
-	"!**/build/**",
-	"!**/coverage/**",
-	"!**/.next/**",
-	"!**/.turbo/**",
-	"!**/target/**",
-	"!**/vendor/**",
 ];
+
+const RG_GLOBS = IGNORED_DIRECTORIES.map((name) => `!**/${name}/**`);
+
+const pathCollator = new Intl.Collator();
 
 function normalizePath(path: string): string {
 	return path.replace(/^\.\//, "").replaceAll("\\", "/");
 }
 
-async function walkFiles(cwd: string): Promise<string[]> {
-	const files: string[] = [];
-
-	async function walk(directory: string): Promise<void> {
-		if (files.length >= MAX_FILES) return;
-
-		let entries;
-		try {
-			entries = await readdir(directory, { withFileTypes: true });
-		} catch {
-			return;
-		}
-
-		for (const entry of entries) {
-			if (files.length >= MAX_FILES) return;
-			if (entry.isSymbolicLink()) continue;
-			if (entry.isDirectory() && IGNORED_DIRECTORIES.has(entry.name)) continue;
-
-			const fullPath = resolve(directory, entry.name);
-			if (entry.isDirectory()) {
-				await walk(fullPath);
-			} else if (entry.isFile()) {
-				files.push(normalizePath(relative(cwd, fullPath)));
-			}
-		}
-	}
-
-	await walk(cwd);
-	return files.sort((a, b) => a.localeCompare(b));
+function parseFileList(stdout: string): string[] {
+	return stdout
+		.split("\n")
+		.map((path) => normalizePath(path.trim()))
+		.filter(Boolean)
+		.slice(0, MAX_FILES)
+		.sort(pathCollator.compare);
 }
 
 async function listProjectFiles(
@@ -97,14 +63,7 @@ async function listProjectFiles(
 	for (const glob of RG_GLOBS) rgArgs.push("--glob", glob);
 
 	const rg = await pi.exec("rg", rgArgs, { cwd, timeout: 10_000 });
-	if (rg.code === 0) {
-		return rg.stdout
-			.split("\n")
-			.map((path) => normalizePath(path.trim()))
-			.filter(Boolean)
-			.slice(0, MAX_FILES)
-			.sort((a, b) => a.localeCompare(b));
-	}
+	if (rg.code === 0) return parseFileList(rg.stdout);
 
 	const git = await pi.exec(
 		"git",
@@ -114,16 +73,9 @@ async function listProjectFiles(
 			timeout: 10_000,
 		},
 	);
-	if (git.code === 0) {
-		return git.stdout
-			.split("\n")
-			.map((path) => normalizePath(path.trim()))
-			.filter(Boolean)
-			.slice(0, MAX_FILES)
-			.sort((a, b) => a.localeCompare(b));
-	}
+	if (git.code === 0) return parseFileList(git.stdout);
 
-	return walkFiles(cwd);
+	return [];
 }
 
 function parseRipgrepMatch(rawLine: string): PickerResult | undefined {
@@ -170,7 +122,7 @@ function ripgrepArgs(query: string): string[] {
 	return args;
 }
 
-const RipgrepSearch = class {
+class RipgrepSearch {
 	readonly completion: Promise<PickerResult[]>;
 
 	private readonly child: ChildProcessWithoutNullStreams;
@@ -287,7 +239,7 @@ const RipgrepSearch = class {
 			this.stderr.trim() || `ripgrep exited with code ${code ?? "unknown"}`;
 		this.rejectSearch(new Error(message));
 	}
-};
+}
 
 type PickerRenderState = {
 	mode: PickerMode;
@@ -434,7 +386,7 @@ function renderPicker(
 	return lines;
 }
 
-const FilePicker = class implements Focusable {
+class FilePicker implements Focusable {
 	private readonly input = new Input();
 	private readonly files: string[];
 	private readonly theme: Theme;
@@ -630,7 +582,7 @@ const FilePicker = class implements Focusable {
 	dispose(): void {
 		this.cancelContentSearch();
 	}
-};
+}
 
 async function openPicker(
 	pi: ExtensionAPI,
