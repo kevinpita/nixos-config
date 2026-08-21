@@ -41,7 +41,6 @@
           syntaxHighlighting.enable = true;
           shellAliases = {
             open = "xdg-open";
-            z = "zeditor";
 
             cat = "bat";
             htop = "btop";
