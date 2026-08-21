@@ -11,11 +11,10 @@
           ...
         }:
         let
-          hasWork = inputs ? nixos-work;
-          workConfig = if hasWork then (import "${inputs.nixos-work}") { inherit username; } else { };
+          workConfig = (import "${inputs.nixos-work}") { inherit username; };
         in
         {
-          config = lib.mkIf (hasWork && config.hostSecrets.enable) (workConfig.${attr} or { });
+          config = lib.mkIf config.hostSecrets.available (workConfig.${attr} or { });
         };
     in
     {

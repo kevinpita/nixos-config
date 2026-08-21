@@ -9,19 +9,13 @@
       config,
       ...
     }:
-    let
-      hasRealSecrets =
-        config.hostSecrets.enable
-        && inputs ? nixos-secrets
-        && builtins.pathExists "${inputs.nixos-secrets}/secrets/common.yaml";
-    in
     {
       users.users.${username} = {
         useDefaultShell = true;
         isNormalUser = true;
         extraGroups = [ "wheel" ];
       }
-      // lib.optionalAttrs hasRealSecrets {
+      // lib.optionalAttrs config.hostSecrets.available {
         hashedPasswordFile = config.sops.secrets."user-password".path;
       };
 
