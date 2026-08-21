@@ -6,7 +6,6 @@
       ../../hosts/amdep/hardware-configuration.nix
 
       ../../hosts/amdep/monitors.nix
-      ../../hosts/amdep/syncthing.nix
 
       config.flake.modules.nixos.desktop
       config.flake.modules.nixos.dictation

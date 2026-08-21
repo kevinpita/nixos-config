@@ -27,6 +27,14 @@
       };
     };
 
+  # Both workstations additionally sync the Keepass folder with the work machine.
+  flake.modules.nixos.workstation = {
+    services.syncthing.settings = {
+      devices."fium".id = "5MDWJ5N-EAY3RLI-BOKWRPA-SOVNZTM-FQRAPYW-CAH37PY-3ZP65ES-JKUXJQR";
+      folders."afnt2-e5u36".devices = [ "fium" ];
+    };
+  };
+
   flake.modules.nixos.gnome =
     {
       lib,

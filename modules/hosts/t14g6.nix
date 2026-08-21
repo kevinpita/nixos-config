@@ -6,7 +6,6 @@
       ../../hosts/t14g6/hardware-configuration.nix
 
       ../../hosts/t14g6/dni.nix
-      ../../hosts/t14g6/syncthing.nix
       ../../hosts/t14g6/tlp.nix
       inputs.nixos-hardware.nixosModules.lenovo-thinkpad-t14-amd-gen6
 
