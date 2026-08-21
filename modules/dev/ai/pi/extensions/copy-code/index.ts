@@ -251,6 +251,9 @@ class CodePreview implements PreviewComponent {
 		}
 	}
 
+	private highlightedCacheKey?: string;
+	private highlightedCache?: string[];
+
 	private highlight(lines: string[]): string[] {
 		try {
 			const highlighted = highlightCode(
@@ -281,12 +284,19 @@ class CodePreview implements PreviewComponent {
 			this.lines.length,
 			this.verticalOffset + PREVIEW_VISIBLE_LINES,
 		);
-		const visibleLines = this.lines
-			.slice(this.verticalOffset, lastLine)
-			.map((line) =>
-				sliceByColumns(line, this.horizontalOffset, this.codeWidth),
-			);
-		const highlightedLines = this.highlight(visibleLines);
+		// The TUI re-renders on every redraw (status updates, timers, resizes);
+		// only re-highlight when the visible window actually changed.
+		const highlightKey = `${this.verticalOffset}:${this.horizontalOffset}:${this.codeWidth}`;
+		if (this.highlightedCacheKey !== highlightKey || !this.highlightedCache) {
+			const visibleLines = this.lines
+				.slice(this.verticalOffset, lastLine)
+				.map((line) =>
+					sliceByColumns(line, this.horizontalOffset, this.codeWidth),
+				);
+			this.highlightedCache = this.highlight(visibleLines);
+			this.highlightedCacheKey = highlightKey;
+		}
+		const highlightedLines = this.highlightedCache;
 		const border = (text: string) => this.theme.fg("border", text);
 		const row = (content: string) =>
 			`${border("│")}${truncateToWidth(content, innerWidth, "", true)}${border("│")}`;
