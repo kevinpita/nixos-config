@@ -33,7 +33,7 @@ See `README.md` for the full deploy/reinstall flow with sops age keys and `--ext
 
 ## Architecture
 
-Flakes-based NixOS configuration for 6 hosts using the Dendritic pattern: every
+Flakes-based NixOS configuration for 4 hosts using the Dendritic pattern: every
 file under `modules/` is a flake-parts module, auto-imported by import-tree.
 There are no manual import lists.
 
@@ -69,10 +69,12 @@ with `_` are ignored by import-tree.
 
 ### Custom options
 
-Some base slices expose typed options (`modules/base/boot.nix` defines
-`bootloader.mode` enum bios/uefi, `kernelPackages`, `uefiOSProber`, and
-`modules/base/secrets.nix` defines `hostSecrets.enable`). Hosts override these
-in `modules/hosts/<host>.nix` (e.g. `uefiOSProber = true` on dual-boot hosts).
+A few aspects expose typed options: `modules/base/secrets.nix` defines the
+read-only `hostSecrets.available` (whether real sops secrets are present, false
+under the CI dummy input) and `modules/ui/dictation.nix` defines
+`dictation.pulseServer`. Per-host tweaks otherwise use plain NixOS options in
+`modules/hosts/<host>.nix` (e.g. `boot.loader.grub.useOSProber = true` on
+dual-boot hosts).
 
 ### Hosts
 
@@ -92,7 +94,7 @@ Secrets live in a separate private repo (`nixos-secrets`) pulled as a non-flake 
 - Age key at `/var/lib/sops-nix/key.txt` (shipped via `nixos-anywhere --extra-files` on first deploy)
 - The admin age key that decrypts every file is not deployed by nix. It lives in ProtonPass and is placed at `~/.config/sops/age/keys.txt` only while editing secrets.
 
-The private inputs are always declared in `flake.nix`. Public CI evaluates by overriding them with the committed dummy input at `ci-dummy-input`. Secret modules check for real secret files with `builtins.pathExists` before declaring `sops.secrets`, so dummy mode does not point sops at fake paths. Keep new sops integrations behind the same real-file check.
+The private inputs are always declared in `flake.nix`. Public CI evaluates by overriding them with the committed dummy input at `ci-dummy-input`. Secret modules check for real secret files with `builtins.pathExists` before declaring `sops.secrets`, so dummy mode does not point sops at fake paths. Gate new sops integrations on `config.hostSecrets.available`, which wraps that real-file check.
 
 `modules/misc/work.nix` imports `nixos-work` as a non-flake input. That input returns three modules rather than one, and the file wraps each as its own aspect via `mkWork`, applying `workConfig.<attr> or { }` so the dummy CI input (`_: { }`) still evaluates:
 
