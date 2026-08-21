@@ -34,10 +34,6 @@
           # Keep Pi package registration in settings.json below because that file is Nix-managed.
           extensions = [ ];
           agentFiles = {
-            models.value = {
-              providers = {
-              };
-            };
             keybindings = {
               mutable = false;
               value = {
