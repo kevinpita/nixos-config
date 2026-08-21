@@ -124,7 +124,7 @@
               enableSkillCommands = true;
               "pi-gpt-fast-mode" = false;
               theme = "dark";
-              tuiMode = "fullscreen";
+              tuiMode = "regular";
               packages = [
                 "npm:@juicesharp/rpiv-ask-user-question"
                 "npm:@juicesharp/rpiv-todo"
