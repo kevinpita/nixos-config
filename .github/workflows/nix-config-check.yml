@@ -1,9 +1,12 @@
 name: "NixOS Configuration Check"
 on:
   push:
-    branches: ['**']
+    branches: [main]
   pull_request:
     branches: ['**']
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   style-checks:
     runs-on: ubuntu-latest
