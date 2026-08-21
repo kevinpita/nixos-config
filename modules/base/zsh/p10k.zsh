@@ -987,6 +987,7 @@
 
   function p10k_refresh_gh_user() {
     emulate -L zsh
+    local cache_file=${XDG_CACHE_HOME:-$HOME/.cache}/p10k-gh-user
     if (( ! $+commands[gh] )); then
       typeset -g P10K_GH_USER_LOGIN=
       return
@@ -995,9 +996,16 @@
     local login
     login=$(command gh auth status --active --hostname github.com --json hosts --jq '.hosts["github.com"][] | select(.active) | .login' 2>/dev/null) || login=
     typeset -g P10K_GH_USER_LOGIN=$login
+    print -r -- "$login" >| "$cache_file" 2>/dev/null
   }
 
-  p10k_refresh_gh_user
+  # Read the cached login at startup; the gh wrapper refreshes it after
+  # `gh auth ...`, so shells never pay for a network round trip here.
+  if [[ -r ${XDG_CACHE_HOME:-$HOME/.cache}/p10k-gh-user ]]; then
+    typeset -g P10K_GH_USER_LOGIN=$(<${XDG_CACHE_HOME:-$HOME/.cache}/p10k-gh-user)
+  else
+    p10k_refresh_gh_user
+  fi
 
   function prompt_gh_user() {
     emulate -L zsh

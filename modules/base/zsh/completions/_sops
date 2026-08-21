@@ -1,3 +1,5 @@
+#compdef sops
+
 _sops_complete() {
   local -a opts
   local cur=${words[-1]}
@@ -13,4 +15,5 @@ _sops_complete() {
     _files
   fi
 }
-compdef _sops_complete sops
+
+_sops_complete "$@"

@@ -12,7 +12,6 @@
 
       home-manager.users.${username} = {
         home.packages = with pkgs; [
-          zsh-powerlevel10k
           ncdu
         ];
 
@@ -74,6 +73,11 @@
             }
           ];
           initContent = lib.mkMerge [
+            # Autoloadable completion functions (_kubie, _sops); must be in
+            # fpath before compinit runs.
+            (lib.mkOrder 400 ''
+              fpath+=(~/.zsh/completions)
+            '')
             (lib.mkBefore ''
               if [[ -r "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh" ]]; then
                 source "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh"
@@ -88,7 +92,9 @@
                 gh() {
                   command gh "$@"
                   local gh_status=$?
-                  (( $+functions[p10k_refresh_gh_user] )) && p10k_refresh_gh_user
+                  if [[ "$1" == "auth" ]]; then
+                    (( $+functions[p10k_refresh_gh_user] )) && p10k_refresh_gh_user
+                  fi
                   return $gh_status
                 }
               fi
