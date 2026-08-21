@@ -183,7 +183,7 @@ export function formatGitReference(reference: GitReference): string {
 	return `PR '#${reference.number} (${escapeSingleQuotes(reference.url)})'`;
 }
 
-export function gitReferenceSearchText(reference: GitReference): string {
+function gitReferenceSearchText(reference: GitReference): string {
 	if (reference.kind === "branch") {
 		return [
 			reference.name,
@@ -210,9 +210,23 @@ export function gitReferenceSearchText(reference: GitReference): string {
 		.join(" ");
 }
 
-function fuzzyScore(text: string, query: string): number | undefined {
-	const normalizedText = text.toLowerCase();
-	const normalizedQuery = query.toLowerCase();
+// References are parsed once and then filtered on every keystroke, so cache
+// their lowercased search text by object identity.
+const searchTextCache = new WeakMap<GitReference, string>();
+
+function lowerSearchText(reference: GitReference): string {
+	let text = searchTextCache.get(reference);
+	if (text === undefined) {
+		text = gitReferenceSearchText(reference).toLowerCase();
+		searchTextCache.set(reference, text);
+	}
+	return text;
+}
+
+function fuzzyScore(
+	normalizedText: string,
+	normalizedQuery: string,
+): number | undefined {
 	const directIndex = normalizedText.indexOf(normalizedQuery);
 	if (directIndex >= 0) return directIndex;
 
@@ -235,11 +249,12 @@ export function filterGitReferences<T extends GitReference>(
 	const normalizedQuery = query.trim();
 	if (!normalizedQuery) return references.slice(0, limit);
 
+	const loweredQuery = normalizedQuery.toLowerCase();
 	return references
 		.map((reference, index) => ({
 			reference,
 			index,
-			score: fuzzyScore(gitReferenceSearchText(reference), normalizedQuery),
+			score: fuzzyScore(lowerSearchText(reference), loweredQuery),
 		}))
 		.filter(
 			(item): item is { reference: T; index: number; score: number } =>

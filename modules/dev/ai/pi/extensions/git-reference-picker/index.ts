@@ -222,13 +222,13 @@ function createAutocompleteProvider(
 				return current.getSuggestions(lines, cursorLine, cursorCol, options);
 			}
 
-			let references: GitReference[];
+			let references: readonly GitReference[];
 			if (token.mode === "branches") {
-				references = [...store.getBranches()];
+				references = store.getBranches();
 			} else if (token.mode === "pullRequests") {
 				await store.loadPullRequests();
 				if (options.signal.aborted) return null;
-				references = [...(store.getPullRequests() ?? [])];
+				references = store.getPullRequests() ?? [];
 			} else {
 				void store.loadPullRequests();
 				references = [
@@ -640,18 +640,18 @@ async function openPicker(
 export default function gitReferencePickerExtension(pi: ExtensionAPI): void {
 	let store: GitReferenceStore | undefined;
 
-	const getStore = async (
-		ctx: ExtensionContext,
-	): Promise<GitReferenceStore> => {
+	const ensureStore = (ctx: ExtensionContext): GitReferenceStore => {
 		if (!store || store.cwd !== ctx.cwd) {
 			store = new GitReferenceStore(pi, ctx.cwd);
 		}
-		await store.loadBranches();
 		return store;
 	};
 
-	pi.on("session_start", async (_event, ctx) => {
-		const sessionStore = await getStore(ctx);
+	pi.on("session_start", (_event, ctx) => {
+		// Register the provider right away and load branches in the background;
+		// getSuggestions falls back to the wrapped provider until the load lands.
+		const sessionStore = ensureStore(ctx);
+		void sessionStore.loadBranches();
 		if (ctx.mode === "tui") {
 			ctx.ui.addAutocompleteProvider((current) =>
 				createAutocompleteProvider(current, sessionStore),
@@ -661,6 +661,6 @@ export default function gitReferencePickerExtension(pi: ExtensionAPI): void {
 
 	pi.registerCommand("git-ref", {
 		description: "Insert a Git branch or GitHub pull-request reference",
-		handler: async (args, ctx) => openPicker(await getStore(ctx), ctx, args),
+		handler: async (args, ctx) => openPicker(ensureStore(ctx), ctx, args),
 	});
 }
