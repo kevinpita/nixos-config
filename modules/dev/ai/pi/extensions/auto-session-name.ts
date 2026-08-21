@@ -30,7 +30,7 @@ type HerdrPaneResponse = {
 	};
 };
 
-export function normalizeGeneratedName(output: string): string | undefined {
+function normalizeGeneratedName(output: string): string | undefined {
 	const firstLine = output.trim().split(/\r?\n/, 1)[0]?.trim() ?? "";
 	const name = firstLine
 		.replace(/^["'`]+|["'`]+$/g, "")
@@ -183,45 +183,30 @@ async function processNextPrompt(pi: ExtensionAPI, state: NamingState): Promise<
 	const request = new AbortController();
 	state.activeRequest = request;
 	try {
-		const name = await generateNameSafely(next, request.signal);
-		if (!canApplyName(pi, state, name, request.signal)) {
+		let name: string | undefined;
+		try {
+			name = await generateSessionName(next.prompt, next.ctx, request.signal);
+		} catch {
+			name = undefined;
+		}
+
+		if (!name || state.closed || request.signal.aborted || pi.getSessionName()) {
 			return;
 		}
 
 		pi.setSessionName(name);
 		state.pendingPrompts.length = 0;
-		await renameTabSafely(pi, name, request.signal);
+		try {
+			await renameHerdrTab(pi, name, request.signal);
+		} catch {
+			// Session naming remains useful when Herdr is absent or unavailable.
+		}
 	} finally {
 		if (state.activeRequest === request) {
 			state.activeRequest = undefined;
 		}
 		state.running = false;
 		void processNextPrompt(pi, state);
-	}
-}
-
-async function generateNameSafely(next: PendingPrompt, signal: AbortSignal): Promise<string | undefined> {
-	try {
-		return await generateSessionName(next.prompt, next.ctx, signal);
-	} catch {
-		return undefined;
-	}
-}
-
-function canApplyName(
-	pi: ExtensionAPI,
-	state: NamingState,
-	name: string | undefined,
-	signal: AbortSignal,
-): name is string {
-	return Boolean(name) && !state.closed && !signal.aborted && !pi.getSessionName();
-}
-
-async function renameTabSafely(pi: ExtensionAPI, name: string, signal: AbortSignal): Promise<void> {
-	try {
-		await renameHerdrTab(pi, name, signal);
-	} catch {
-		// Session naming remains useful when Herdr is absent or unavailable.
 	}
 }
 
