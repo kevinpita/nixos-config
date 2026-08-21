@@ -79,13 +79,24 @@ test("publishes pace and warns once when the verdict changes to chill", async (t
 	};
 	codexPaceExtension(pi);
 
-	await handlers.get("session_start")({}, ctx);
+	// Handlers fire refreshes without blocking, so flush the event loop before
+	// asserting on their effects.
+	const settle = async () => {
+		for (let i = 0; i < 20; i++) {
+			await new Promise((resolve) => setImmediate(resolve));
+		}
+	};
+
+	handlers.get("session_start")({}, ctx);
+	await settle();
 	assert.equal(statuses.at(-1), "STEADY · today 4% · ~5d");
 	assert.equal(notifications.length, 0);
 
 	usedPercent = 50;
-	await handlers.get("model_select")({}, ctx);
-	await handlers.get("model_select")({}, ctx);
+	handlers.get("model_select")({}, ctx);
+	await settle();
+	handlers.get("model_select")({}, ctx);
+	await settle();
 	assert.equal(statuses.at(-1), "CHILL · today 50% · ~3d");
 	assert.equal(notifications.length, 1);
 	assert.equal(notifications[0].level, "warning");
@@ -100,10 +111,11 @@ test("publishes pace and warns once when the verdict changes to chill", async (t
 	);
 
 	ctx.model.baseUrl = "https://proxy.example.test/v1";
-	await handlers.get("model_select")({}, ctx);
+	handlers.get("model_select")({}, ctx);
+	await settle();
 	assert.equal(requests.length, 6);
 	assert.equal(statuses.at(-1), undefined);
 
-	await handlers.get("session_shutdown")({}, ctx);
+	handlers.get("session_shutdown")({}, ctx);
 	assert.equal(statuses.at(-1), undefined);
 });

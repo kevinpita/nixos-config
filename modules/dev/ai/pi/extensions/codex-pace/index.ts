@@ -80,22 +80,31 @@ export default function codexPaceExtension(pi: ExtensionAPI): void {
 		generation: 0,
 		lastFetchAt: 0,
 	};
-	pi.on("session_start", async (_event, ctx) => {
+	// The status bar is filled in asynchronously via ctx.ui.setStatus, so no
+	// handler needs to block on the ChatGPT usage requests.
+	pi.on("session_start", (_event, ctx) => {
 		startSession(state);
-		await refresh(state, ctx, true);
+		void refresh(state, ctx, true);
 	});
-	pi.on("session_tree", async (_event, ctx) => {
-		await refresh(state, ctx, true);
+	pi.on("session_tree", (_event, ctx) => {
+		void refresh(state, ctx, true);
 	});
-	pi.on("model_select", async (_event, ctx) => {
-		await refresh(state, ctx, true);
+	pi.on("model_select", (_event, ctx) => {
+		void refresh(state, ctx, true);
 	});
-	pi.on("turn_end", async (_event, ctx) => {
-		await refresh(state, ctx, false);
+	pi.on("turn_end", (_event, ctx) => {
+		void refresh(state, ctx, false);
 	});
 	pi.on("session_shutdown", (_event, ctx) => {
 		stopSession(state, ctx);
 	});
+}
+
+function cancelInFlight(state: RuntimeState): void {
+	state.generation += 1;
+	state.requestController?.abort();
+	state.requestController = undefined;
+	clearRefreshTimer(state);
 }
 
 function startSession(state: RuntimeState): void {
@@ -103,18 +112,12 @@ function startSession(state: RuntimeState): void {
 	state.lastFetchAt = 0;
 	state.todayBaseline = undefined;
 	state.lastVerdict = undefined;
-	state.generation += 1;
-	state.requestController?.abort();
-	state.requestController = undefined;
-	clearRefreshTimer(state);
+	cancelInFlight(state);
 }
 
 function stopSession(state: RuntimeState, ctx: ExtensionContext): void {
 	state.sessionActive = false;
-	state.generation += 1;
-	state.requestController?.abort();
-	state.requestController = undefined;
-	clearRefreshTimer(state);
+	cancelInFlight(state);
 	safeSetStatus(ctx, undefined);
 }
 
@@ -216,10 +219,7 @@ function shouldRetry(
 }
 
 function deactivatePace(state: RuntimeState, ctx: ExtensionContext): void {
-	state.generation += 1;
-	state.requestController?.abort();
-	state.requestController = undefined;
-	clearRefreshTimer(state);
+	cancelInFlight(state);
 	safeSetStatus(ctx, undefined);
 }
 
@@ -298,7 +298,7 @@ async function fetchJson(
 		throw new Error("Codex usage response was too large.");
 	}
 	const text = await response.text();
-	if (new TextEncoder().encode(text).byteLength > MAX_RESPONSE_BYTES) {
+	if (Buffer.byteLength(text, "utf8") > MAX_RESPONSE_BYTES) {
 		throw new Error("Codex usage response was too large.");
 	}
 	try {

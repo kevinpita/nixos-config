@@ -11,7 +11,7 @@ export type DailyUsage = {
 	readonly usedPercent: number;
 };
 
-export type WorkSchedule = {
+type WorkSchedule = {
 	readonly weekdays: readonly number[];
 	readonly startHour: number;
 	readonly endHour: number;
@@ -28,7 +28,6 @@ export type PaceSnapshot = {
 	readonly nowMs: number;
 	readonly quota: CodexQuotaWindow;
 	readonly dailyUsage: readonly DailyUsage[];
-	readonly schedule?: WorkSchedule;
 	readonly todayBaseline?: TodayBaseline;
 };
 
@@ -43,7 +42,7 @@ export type PaceAssessment = {
 	readonly scheduledWorkdays?: number;
 };
 
-export const DEFAULT_WORK_SCHEDULE: WorkSchedule = {
+const DEFAULT_WORK_SCHEDULE: WorkSchedule = {
 	weekdays: [1, 2, 3, 4, 5],
 	startHour: 9,
 	endHour: 18,
@@ -121,7 +120,7 @@ export function createTodayBaseline(snapshot: PaceSnapshot): TodayBaseline {
 }
 
 export function assessCodexPace(snapshot: PaceSnapshot): PaceAssessment {
-	const schedule = snapshot.schedule ?? DEFAULT_WORK_SCHEDULE;
+	const schedule = DEFAULT_WORK_SCHEDULE;
 	const date = localDateKey(snapshot.nowMs);
 	const remainingPercent = 100 - clampPercent(snapshot.quota.usedPercent);
 	const remoteToday = usageForDate(snapshot.dailyUsage, date);
