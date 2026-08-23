@@ -1,117 +1,78 @@
-# AGENTS.md / CLAUDE.md
+# NixOS Configuration Guide
 
-This file provides agent guidance for this repository. `AGENTS.md` is a symlink to this file, so edit `CLAUDE.md` as the source of truth.
+## Identify the Host
 
-## Build and Development Commands
+Run `hostname` before you make a host-specific change. If the request does not name a host, use the command output. If the request names a host, use that host.
+
+Use `modules/hosts/<hostname>.nix` as the host entry point. Raw hardware, disk, and host fragments are in `hosts/<hostname>/`.
+
+## Work with Dendritic Modules
+
+`import-tree` automatically loads Nix files under `modules/`. Do not add manual imports to `flake.nix`.
+
+An aspect is a named NixOS module under `flake.modules.nixos`. Multiple files can contribute settings to the same aspect.
+
+### Add
+
+Put the file in the correct category under `modules/`. Add settings to an existing aspect, or define a new aspect:
+
+```nix
+{
+  flake.modules.nixos.example =
+    { ... }:
+    {
+      # NixOS options
+    };
+}
+```
+
+### Attach
+
+Attach a new aspect by adding `config.flake.modules.nixos.example` to an `imports` list:
+
+- `workstation.imports` in `modules/roles/desktop.nix`: all workstation hosts
+- `desktop.imports` in `modules/roles/desktop.nix`: all desktop hosts
+- `server` imports in `modules/roles/server.nix`: all server hosts
+- `modules/hosts/<hostname>.nix`: one host only
+
+Do not add an import when the file adds settings to an aspect that is already imported. Flake-parts merges all files that define the same aspect.
+
+### Modify
+
+Search for the aspect name before you edit it. Change the file that owns the setting. One aspect can have contributors in many files. For example:
 
 ```bash
-# Apply configuration changes (uses nh, configured to point at ~/nixos-config)
-nh os switch ~/nixos-config
+rg 'tailscale' modules
+```
 
-# Update flake.lock dependencies
-nix flake update
+### Delete
 
-# Update a single input
-nix flake update <input-name>
+Search for the aspect name in `modules/`. Remove its imports and references, then delete its definition. If the file contributes to other aspects, keep the file and remove only the target contribution.
 
-# Check formatting and evaluate all hosts with real private inputs
+## Format, Validate, and Apply
+
+Format the repository:
+
+```bash
+nix fmt
+```
+
+Validate formatting and all hosts with the real private inputs:
+
+```bash
 nix flake check --all-systems
+```
 
-# Reproduce public CI with dummy private inputs (matches GitHub Actions)
+Use the dummy inputs only to reproduce public CI:
+
+```bash
 nix flake check --all-systems --show-trace \
   --override-input nixos-secrets path:./ci-dummy-input \
   --override-input nixos-work path:./ci-dummy-input
-
-# Format all files via treefmt (nixfmt, deadnix, statix, yamlfmt, mdformat)
-nix fmt
-
-# Deploy to a new machine
-nix run github:nix-community/nixos-anywhere -- --flake ~/nixos-config#<hostname> root@<ip>
 ```
 
-See `README.md` for the full deploy/reinstall flow with sops age keys and `--extra-files`.
+Apply the configuration only when the user asks for it. Run this command on the target host:
 
-## Architecture
-
-Flakes-based NixOS configuration for 4 hosts using the Dendritic pattern: every
-file under `modules/` is a flake-parts module, auto-imported by import-tree.
-There are no manual import lists.
-
-### Module Composition
-
-`flake.nix` is one line of outputs: `mkFlake (import-tree ./modules)`. Aspect
-files define named modules under `flake.modules.nixos.<name>`; several files
-can contribute slices to the same name (all of `modules/base/` merges into
-`base`). Hosts are aspects too: `modules/hosts/<name>.nix` defines
-`flake.modules.nixos."hosts/<name>"` importing a role bundle (`desktop` or
-`server`) plus per-host aspects and, for physical
-machines, the raw NixOS files from `hosts/<name>/` (hardware, disko, host
-fragments; these are plain NixOS modules kept outside `modules/` on purpose).
-The `workstation` aspect contains desktop-environment-independent configuration;
-`desktop` adds GNOME.
-`modules/nixos-configurations.nix` builds `flake.nixosConfigurations` from
-every `hosts/*` aspect, constructs the shared `pkgs` (overlays,
-`allowUnfree`) once for all hosts, and passes `specialArgs` (`inputs`,
-`username` ("kevin"), `hostname`). It also imports
-`inputs.flake-parts.flakeModules.modules`, the opt-in flake-parts extra that
-provides the `flake.modules` option. Home Manager stays integrated through
-`modules/base/users.nix`.
-
-### Aspect pattern
-
-To add a new aspect: create one file under the fitting `modules/` category
-defining `flake.modules.nixos.<name>`, then add the name to a role bundle in
-`modules/roles/` or to specific hosts in `modules/hosts/<host>.nix`.
-Cross-cutting config lives in the aspect file that owns it and contributes
-fragments to other module names (e.g. `modules/net/tailscale.nix` also adds
-workstation and server variants to the roles). Files or directories prefixed
-with `_` are ignored by import-tree.
-
-### Custom options
-
-A few aspects expose typed options: `modules/base/secrets.nix` defines the
-read-only `hostSecrets.available` (whether real sops secrets are present, false
-under the CI dummy input) and `modules/ui/dictation.nix` defines
-`dictation.pulseServer`. Per-host tweaks otherwise use plain NixOS options in
-`modules/hosts/<host>.nix` (e.g. `boot.loader.grub.useOSProber = true` on
-dual-boot hosts).
-
-### Hosts
-
-| Host | Type | Notes |
-| ------- | ------------------- | ------------------------------------------- |
-| amdep | Workstation | Full desktop, dual-boot |
-| minidesk | Server | Work configuration |
-| t14g6 | ThinkPad laptop | Full desktop, TLP, nixos-hardware module |
-
-### Secrets (sops-nix + age)
-
-Secrets live in a separate private repo (`nixos-secrets`) pulled as a non-flake input. `modules/base/secrets.nix`:
-
-- Per-host secrets from `secrets/<hostname>.yaml`
-- Shared `user-password` from `secrets/common.yaml`
-- SSH auth + signing keys deployed to `~/.ssh/`
-- Age key at `/var/lib/sops-nix/key.txt` (shipped via `nixos-anywhere --extra-files` on first deploy)
-- The admin age key that decrypts every file is not deployed by nix. It lives in ProtonPass and is placed at `~/.config/sops/age/keys.txt` only while editing secrets.
-
-The private inputs are always declared in `flake.nix`. Public CI evaluates by overriding them with the committed dummy input at `ci-dummy-input`. Secret modules check for real secret files with `builtins.pathExists` before declaring `sops.secrets`, so dummy mode does not point sops at fake paths. Gate new sops integrations on `config.hostSecrets.available`, which wraps that real-file check.
-
-`modules/misc/work.nix` imports `nixos-work` as a non-flake input. That input returns three modules rather than one, and the file wraps each as its own aspect via `mkWork`, applying `workConfig.<attr> or { }` so the dummy CI input (`_: { }`) still evaluates:
-
-| Aspect | Hosts | Contents |
-| -------------- | ------------- | ----------------------------------------------- |
-| `work-github` | minidesk | peersyst github auth + signing keys, git include |
-| `work-cloud` | workstations | `~/.aws/config`, `~/.kube/config_work` |
-| `work-servers` | workstations | YubiKey sk handles, `~/.ssh/config.d/work.conf` |
-
-`nixos-work/.sops.yaml` restricts each secrets file to the matching hosts, so the isolation holds even if the module graph is wired wrong.
-
-### SSH config
-
-`~/.ssh/config` is generated by home-manager in `modules/base/users.nix` and holds only non-secret blocks (`github.com` pinned to the personal key, `minidesk-herdr`). It emits `Include config.d/*.conf` ahead of every match block. The peersyst hosts arrive as `~/.ssh/config.d/work.conf`, deployed by `work-servers` on workstations only. Every block sets `IdentitiesOnly yes` so ssh never offers a key outside its trust domain.
-
-## Conventions
-
-- Conventional commits, no commit body/description.
-- No em dashes anywhere (use commas/parentheses), no Unicode right arrow symbol (use `->`).
-- treefmt enforces format on CI through `nix flake check --all-systems` with dummy private inputs in `.github/workflows/nix-config-check.yml`.
+```bash
+nh os switch ~/nixos-config
+```
