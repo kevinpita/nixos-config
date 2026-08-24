@@ -1,9 +1,7 @@
-{ config, inputs, ... }:
+{ config, ... }:
 {
   flake.modules.nixos = {
     workstation.imports = with config.flake.modules.nixos; [
-      inputs.nixos-pi.nixosModules.default
-
       base
       ai
       aws
