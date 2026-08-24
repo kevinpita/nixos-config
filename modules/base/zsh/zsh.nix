@@ -49,7 +49,9 @@
             sshl = ''awk 'tolower($1) == "host" { for (i = 2; i <= NF; i++) if ($i !~ /[*?!]/) print $i }' ~/.ssh/config'';
 
             gittime = ''git commit --amend --date="$(date -Iseconds)" --no-edit'';
-            switch = "nh os switch ~/nixos-config";
+            build = "just --justfile ~/nixos-config/justfile build";
+            check = "just --justfile ~/nixos-config/justfile check";
+            switch = "just --justfile ~/nixos-config/justfile switch";
             update = "cd ~/nixos-config && nix flake update";
 
             update-git = ''

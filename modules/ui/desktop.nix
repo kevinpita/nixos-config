@@ -14,7 +14,10 @@
       };
 
       services = {
-        xserver.xkb.layout = "es";
+        xserver.xkb = {
+          layout = "es";
+          variant = "deadtilde";
+        };
         libinput.enable = true;
         pipewire = {
           enable = true;

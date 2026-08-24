@@ -77,9 +77,16 @@
 
     whisp-nix.url = "github:kevinpita/whisp-nix";
 
-    pi-flake = {
-      url = "github:ChauDucToan/pi-flake";
+    nixos-pi = {
+      url = "github:kevinpita/nixos-pi";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
+
+    nixos-hyprland = {
+      url = "github:kevinpita/nixos-hyprland";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
     };
 
     ku-nix.url = "github:kevinpita/ku-nix";

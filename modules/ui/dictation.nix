@@ -2,6 +2,7 @@
   flake.modules.nixos.dictation =
     {
       config,
+      inputs,
       lib,
       pkgs,
       username,
@@ -444,18 +445,17 @@
       };
     in
     {
+      imports = [ inputs.nixos-pi.nixosModules.dictationExtension ];
+
       options.dictation.pulseServer = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = null;
         description = "PulseAudio server used by the dictation recorder.";
       };
 
-      config.home-manager.users.${username}.home = {
-        packages = [
-          dictateToggle
-        ];
-        file.".pi/agent/extensions/dictation.ts".source = ../dev/ai/pi/extensions/dictation.ts;
-      };
+      config.home-manager.users.${username}.home.packages = [
+        dictateToggle
+      ];
     };
 
   # Dictation owns its GNOME keybinding; this fragment merges into the gnome

@@ -5,13 +5,14 @@
       ../../hosts/t14g6/disko-config.nix
       ../../hosts/t14g6/hardware-configuration.nix
 
-      ../../hosts/t14g6/tlp.nix
+      ../../hosts/t14g6/laptop.nix
       inputs.nixos-hardware.nixosModules.lenovo-thinkpad-t14-amd-gen6
 
       config.flake.modules.nixos.workstation
       config.flake.modules.nixos.dictation
       config.flake.modules.nixos.dni
-      config.flake.modules.nixos.hyprland
+      inputs.nixos-hyprland.nixosModules.default
+      inputs.nixos-hyprland.nixosModules.thinkpadBattery
       config.flake.modules.nixos.incus
       config.flake.modules.nixos.reverse-engineering
       config.flake.modules.nixos.vm

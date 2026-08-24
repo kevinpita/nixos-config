@@ -375,27 +375,6 @@
         "type": "github"
       }
     },
-    "home-manager_3": {
-      "inputs": {
-        "nixpkgs": [
-          "pi-flake",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1783436070,
-        "narHash": "sha256-F80z1JoiJgZyTT5D+3siLOVzqmCEphLR7t0Ym/I2CLI=",
-        "owner": "nix-community",
-        "repo": "home-manager",
-        "rev": "f09af49406ffad37acb6538d3207189a1a1e0b7e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-community",
-        "repo": "home-manager",
-        "type": "github"
-      }
-    },
     "import-tree": {
       "locked": {
         "lastModified": 1784254960,
@@ -580,6 +559,53 @@
       "original": {
         "owner": "kevinpita",
         "repo": "nixos-hardware",
+        "type": "github"
+      }
+    },
+    "nixos-hyprland": {
+      "inputs": {
+        "home-manager": [
+          "home-manager"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1787531261,
+        "narHash": "sha256-qx7fJGmtdpL1cMPVQaqf7BZ15EeossxTzcjwetobnRg=",
+        "owner": "kevinpita",
+        "repo": "nixos-hyprland",
+        "rev": "410c0d325b74e0a9e303f5409111ac9944b6a955",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kevinpita",
+        "repo": "nixos-hyprland",
+        "type": "github"
+      }
+    },
+    "nixos-pi": {
+      "inputs": {
+        "home-manager": [
+          "home-manager"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "pi-flake": "pi-flake"
+      },
+      "locked": {
+        "lastModified": 1787522389,
+        "narHash": "sha256-tz1FOD2uNDRcISHLHzzQWbcOoCWHUYKUVKgnqOBxfFg=",
+        "owner": "kevinpita",
+        "repo": "nixos-pi",
+        "rev": "6d7b0bcf105bfec644f5d99512f626edc3aa72f8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kevinpita",
+        "repo": "nixos-pi",
         "type": "github"
       }
     },
@@ -844,8 +870,12 @@
     },
     "pi-flake": {
       "inputs": {
-        "home-manager": "home-manager_3",
+        "home-manager": [
+          "nixos-pi",
+          "home-manager"
+        ],
         "nixpkgs": [
+          "nixos-pi",
           "nixpkgs"
         ]
       },
@@ -913,11 +943,12 @@
         "nix-vscode-extensions": "nix-vscode-extensions",
         "nixos-grub-themes": "nixos-grub-themes",
         "nixos-hardware": "nixos-hardware",
+        "nixos-hyprland": "nixos-hyprland",
+        "nixos-pi": "nixos-pi",
         "nixos-secrets": "nixos-secrets",
         "nixos-work": "nixos-work",
         "nixpkgs": "nixpkgs_10",
         "nvim-config": "nvim-config",
-        "pi-flake": "pi-flake",
         "sops-nix": "sops-nix",
         "treefmt-nix": "treefmt-nix_2",
         "tuicr-nix": "tuicr-nix",
