@@ -11,8 +11,6 @@ let
   defaultPackageOverlay = name: input: _final: _prev: { ${name} = input.packages.${system}.default; };
 
   overlays = [
-    inputs.nix-vscode-extensions.overlays.default
-
     inputs.claude-code.overlays.default
 
     inputs.codex-cli-nix.overlays.default

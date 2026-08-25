@@ -32,8 +32,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nix-vscode-extensions.url = "github:nix-community/nix-vscode-extensions";
-
     nixos-hardware.url = "github:kevinpita/nixos-hardware";
 
     nixos-grub-themes.url = "github:jeslie0/nixos-grub-themes";
