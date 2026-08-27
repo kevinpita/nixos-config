@@ -536,11 +536,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787560899,
-        "narHash": "sha256-BX/+Y39EM4HE3YXIpaZfdsSEHTkq0iC5FmCKu6SdVGo=",
+        "lastModified": 1787825269,
+        "narHash": "sha256-mPPHlB4K5W4QsA5Wk1Qd9UnoZJyC73yyszEvr6qg6gw=",
         "owner": "kevinpita",
         "repo": "nixos-hyprland",
-        "rev": "7f7aaca1253faf6a15888cd56c20b02674760a92",
+        "rev": "3e5fed2b15b5d4887e6d22bfbfeee5344ba676ed",
         "type": "github"
       },
       "original": {

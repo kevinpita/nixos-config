@@ -1,5 +1,3 @@
-require("dms.outputs")
-
 local mainMonitor = "desc:ASUSTek COMPUTER INC VG27A M5LMQS167257"
 local secondaryMonitor = "desc:ASUSTek COMPUTER INC VG27A M5LMQS167247"
 
