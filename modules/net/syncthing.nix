@@ -34,20 +34,4 @@
       folders."afnt2-e5u36".devices = [ "fium" ];
     };
   };
-
-  flake.modules.nixos.gnome =
-    {
-      lib,
-      pkgs,
-      username,
-      ...
-    }:
-    {
-      home-manager.users.${username} = {
-        home.packages = [ pkgs.gnomeExtensions.syncthing-indicator ];
-        dconf.settings."org/gnome/shell".enabled-extensions = lib.mkAfter [
-          "syncthing@gnome.2nv2u.com"
-        ];
-      };
-    };
 }

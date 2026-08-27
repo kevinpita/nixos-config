@@ -284,24 +284,6 @@
         "type": "github"
       }
     },
-    "flake-utils_7": {
-      "inputs": {
-        "systems": "systems_8"
-      },
-      "locked": {
-        "lastModified": 1731533236,
-        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "type": "github"
-      }
-    },
     "gh-stack": {
       "flake": false,
       "locked": {
@@ -670,22 +652,6 @@
         "type": "github"
       }
     },
-    "nixpkgs_11": {
-      "locked": {
-        "lastModified": 1787172299,
-        "narHash": "sha256-PShzS87awOlE5XWkxUGBd/58/F+AtE2ZMgFffKj4r8s=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "07e1d92cdc0ed416cfa11ff3ca40d17e61cfba7a",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "ref": "nixpkgs-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "nixpkgs_2": {
       "locked": {
         "lastModified": 1787364730,
@@ -916,8 +882,7 @@
         "nvim-config": "nvim-config",
         "sops-nix": "sops-nix",
         "treefmt-nix": "treefmt-nix_2",
-        "tuicr-nix": "tuicr-nix",
-        "whisp-nix": "whisp-nix"
+        "tuicr-nix": "tuicr-nix"
       }
     },
     "sops-nix": {
@@ -1045,21 +1010,6 @@
         "type": "github"
       }
     },
-    "systems_8": {
-      "locked": {
-        "lastModified": 1681028828,
-        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
-        "owner": "nix-systems",
-        "repo": "default",
-        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-systems",
-        "repo": "default",
-        "type": "github"
-      }
-    },
     "treefmt-nix": {
       "inputs": {
         "nixpkgs": [
@@ -1118,25 +1068,6 @@
       "original": {
         "owner": "kevinpita",
         "repo": "tuicr-nix",
-        "type": "github"
-      }
-    },
-    "whisp-nix": {
-      "inputs": {
-        "flake-utils": "flake-utils_7",
-        "nixpkgs": "nixpkgs_11"
-      },
-      "locked": {
-        "lastModified": 1787235895,
-        "narHash": "sha256-wZ+0+IZP6aVv3UXbNq+uct8hr50P2JxOHHnaR5SzcOw=",
-        "owner": "kevinpita",
-        "repo": "whisp-nix",
-        "rev": "6d573a80baa95f57a7a302316f8222631d75f9f7",
-        "type": "github"
-      },
-      "original": {
-        "owner": "kevinpita",
-        "repo": "whisp-nix",
         "type": "github"
       }
     },

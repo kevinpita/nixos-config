@@ -73,8 +73,6 @@
 
     bast-nix.url = "github:kevinpita/bast-nix";
 
-    whisp-nix.url = "github:kevinpita/whisp-nix";
-
     nixos-pi = {
       url = "github:kevinpita/nixos-pi";
       inputs.nixpkgs.follows = "nixpkgs";

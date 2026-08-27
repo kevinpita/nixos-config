@@ -457,21 +457,4 @@
         dictateToggle
       ];
     };
-
-  # Dictation owns its GNOME keybinding; this fragment merges into the gnome
-  # aspect the same way modules/net/syncthing.nix contributes its indicator.
-  flake.modules.nixos.gnome =
-    { lib, username, ... }:
-    {
-      home-manager.users.${username}.dconf.settings = {
-        "org/gnome/settings-daemon/plugins/media-keys".custom-keybindings = lib.mkAfter [
-          "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/"
-        ];
-        "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2" = {
-          name = "Dictation";
-          binding = "<Control><Alt>space";
-          command = "/etc/profiles/per-user/${username}/bin/dictate-toggle";
-        };
-      };
-    };
 }

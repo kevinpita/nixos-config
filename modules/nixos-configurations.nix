@@ -15,8 +15,6 @@ let
 
     inputs.codex-cli-nix.overlays.default
 
-    inputs.whisp-nix.overlays.default
-
     (_final: _prev: {
       inherit (inputs.kevinpita-nixpkgs.legacyPackages.${system}) helm-tui;
     })
