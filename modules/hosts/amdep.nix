@@ -11,6 +11,8 @@
         config.flake.modules.nixos.vm
       ];
 
+      hardware.bluetooth.enable = true;
+
       programs.nixos-hyprland.hostConfig = "/home/${username}/nixos-config/hosts/amdep/hyprland.lua";
 
       # Dual-boot support
