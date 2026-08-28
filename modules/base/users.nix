@@ -57,11 +57,6 @@
                 HostName = "fium";
                 User = "kpitapeersyst";
               };
-              "minidesk-herdr" = {
-                HostName = "minidesk";
-                RemoteForward = "127.0.0.1:47130 /run/user/%i/pulse/native";
-                ExitOnForwardFailure = true;
-              };
             };
           };
 

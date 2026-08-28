@@ -153,7 +153,8 @@
         ];
         text = ''
           systemctl --user start herdr-minidesk-audio-tunnel.service
-          exec herdr --remote minidesk --remote-keybindings server "$@"
+          trap 'systemctl --user stop herdr-minidesk-audio-tunnel.service' EXIT
+          herdr --remote minidesk --remote-keybindings server "$@"
         '';
       };
     in
