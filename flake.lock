@@ -117,6 +117,44 @@
         "type": "github"
       }
     },
+    "dank-qml-common": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1787616035,
+        "narHash": "sha256-L4SjLZuMLP1Z3CzhE3QNwRqaPMF3X4gRchhZAtAS3zM=",
+        "owner": "AvengeMedia",
+        "repo": "dank-qml-common",
+        "rev": "fa6df81f05e7e0e4acd82c46afdca45cb0ef98e6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "AvengeMedia",
+        "repo": "dank-qml-common",
+        "type": "github"
+      }
+    },
+    "dankcalendar": {
+      "inputs": {
+        "dank-qml-common": "dank-qml-common",
+        "nixpkgs": [
+          "nixos-hyprland",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1787664690,
+        "narHash": "sha256-o48GaID++VEgMe41lb+MJi/+6f6PqWOAFO8JTe4Rr+Y=",
+        "owner": "AvengeMedia",
+        "repo": "dankcalendar",
+        "rev": "29bf5558ffcb1460d703b70ab687fa3b66a5fb5a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "AvengeMedia",
+        "repo": "dankcalendar",
+        "type": "github"
+      }
+    },
     "disko": {
       "inputs": {
         "nixpkgs": [
@@ -512,6 +550,7 @@
     },
     "nixos-hyprland": {
       "inputs": {
+        "dankcalendar": "dankcalendar",
         "home-manager": [
           "home-manager"
         ],
@@ -520,11 +559,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787836404,
-        "narHash": "sha256-pmzIdtga2WmgTjEfQ4xpIHhoHm8bJ9SpopB8JWaqB0g=",
+        "lastModified": 1787922349,
+        "narHash": "sha256-zY4QuMRhNBUifTJO/ej1QWh3mUMnOJ+c25wPpLLoqaE=",
         "owner": "kevinpita",
         "repo": "nixos-hyprland",
-        "rev": "16b30bc1b197dfaffdfa87e984d8ceb8ec9ab690",
+        "rev": "e1ef41d42073b28667abf2b675936e4afdbca020",
         "type": "github"
       },
       "original": {
