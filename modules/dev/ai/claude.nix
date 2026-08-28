@@ -19,7 +19,6 @@
         };
         ".claude/hooks/herdr-agent-state.sh".source =
           "${herdrClaudeIntegration}/.claude/hooks/herdr-agent-state.sh";
-        ".claude/skills/herdr".source = "${pkgs.herdr}/share/herdr/skills/herdr";
       };
     };
 }
