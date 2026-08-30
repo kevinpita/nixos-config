@@ -559,11 +559,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1788126875,
-        "narHash": "sha256-zBpYiwF9Z9Kbc1wmsIw9TQm+TbP8+1vXgeGe/szMUv4=",
+        "lastModified": 1788130353,
+        "narHash": "sha256-qRiSD0++peEJaz03CQEAu9yvQREPPVt2MZcqOstZYwc=",
         "owner": "kevinpita",
         "repo": "nixos-hyprland",
-        "rev": "57389fac48b0a470a82ae50eb7d6a5504aaeefa0",
+        "rev": "7c97e0b41e6a489b91248ae8a7ee17aa2d0e4767",
         "type": "github"
       },
       "original": {
@@ -583,11 +583,11 @@
         "pi-flake": "pi-flake"
       },
       "locked": {
-        "lastModified": 1788124764,
-        "narHash": "sha256-JsaUzRD3JNLtrAbov3tXd0F0Y2kUC9HY1Ny8gSo48EA=",
+        "lastModified": 1788129837,
+        "narHash": "sha256-bTg4sAnC7bcgmrQlEaseKoOfXdsNx0/7XY5Lbf1AH+o=",
         "owner": "kevinpita",
         "repo": "nixos-pi",
-        "rev": "505b49d4cc4c18a3651d735094e44c3e7e9901c8",
+        "rev": "635498b4f1e8bbecff0f8e1a4a27107fb7dea3f6",
         "type": "github"
       },
       "original": {
