@@ -10,6 +10,6 @@ check:
 build:
   nh os build --no-write-lock-file --override-input nixos-pi "path:$HOME/nixos-pi" --override-input nixos-hyprland "path:$HOME/nixos-hyprland" "{{root}}"
 
-# Apply this host with the local Pi and Hyprland checkouts.
+# Apply this host with the locked flake inputs.
 switch:
-  nh os switch --no-write-lock-file --override-input nixos-pi "path:$HOME/nixos-pi" --override-input nixos-hyprland "path:$HOME/nixos-hyprland" "{{root}}"
+  nh os switch --no-write-lock-file "{{root}}"
