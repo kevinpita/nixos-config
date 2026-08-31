@@ -10,10 +10,10 @@
 
       config.flake.modules.nixos.desktop
       config.flake.modules.nixos.dni
-      inputs.nixos-hyprland.nixosModules.thinkpadBattery
+      inputs.nixos-hyprland.nixosModules.thinkpadLaptop
       config.flake.modules.nixos.incus
       config.flake.modules.nixos.reverse-engineering
-      config.flake.modules.nixos.vm
+      config.flake.modules.nixos.vmware
     ];
 
     # Allow typing the LUKS passphrase on a keyboard attached to the Thunderbolt

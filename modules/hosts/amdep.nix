@@ -8,7 +8,7 @@
         ../../hosts/amdep/hardware-configuration.nix
 
         config.flake.modules.nixos.desktop
-        config.flake.modules.nixos.vm
+        config.flake.modules.nixos.qemu
       ];
 
       hardware.bluetooth.enable = true;

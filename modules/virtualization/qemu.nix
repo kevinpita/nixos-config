@@ -1,5 +1,5 @@
 {
-  flake.modules.nixos.vm =
+  flake.modules.nixos.qemu =
     { pkgs, username, ... }:
     {
       virtualisation.libvirtd = {
@@ -45,7 +45,7 @@
       username,
       ...
     }:
-    # GUI additions belong to workstation hosts that also import the vm aspect.
+    # GUI additions belong to workstation hosts that also import the QEMU aspect.
     # Libvirtd is enabled exactly by that aspect, so it remains the feature gate.
     lib.mkIf config.virtualisation.libvirtd.enable {
       virtualisation.spiceUSBRedirection.enable = true;
