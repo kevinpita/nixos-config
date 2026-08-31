@@ -366,11 +366,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787797243,
-        "narHash": "sha256-8+Q7NOB7RPajRjA4pbCDLzqH+MTjnG9x6LUPLfL2joA=",
+        "lastModified": 1788146656,
+        "narHash": "sha256-XmJmvk9rytTb7dCotO/aqR+YysB8HOqnprlOdv+LAF4=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "99c9ec63390f1d8c14d95d9e8b17cc29cfbd4e11",
+        "rev": "82c265faf4e3161d6015db07c9b0f1ee36a9029b",
         "type": "github"
       },
       "original": {
@@ -583,11 +583,11 @@
         "pi-flake": "pi-flake"
       },
       "locked": {
-        "lastModified": 1788129837,
-        "narHash": "sha256-bTg4sAnC7bcgmrQlEaseKoOfXdsNx0/7XY5Lbf1AH+o=",
+        "lastModified": 1788160777,
+        "narHash": "sha256-/kBJmehSNNvM928XYizuyV2hGQENpXbPbTqIgRl5y/w=",
         "owner": "kevinpita",
         "repo": "nixos-pi",
-        "rev": "635498b4f1e8bbecff0f8e1a4a27107fb7dea3f6",
+        "rev": "939ae3d267f3c229fbf5e939420608962bf069f2",
         "type": "github"
       },
       "original": {
