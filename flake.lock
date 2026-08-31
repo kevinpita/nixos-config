@@ -583,11 +583,11 @@
         "pi-flake": "pi-flake"
       },
       "locked": {
-        "lastModified": 1788160777,
-        "narHash": "sha256-/kBJmehSNNvM928XYizuyV2hGQENpXbPbTqIgRl5y/w=",
+        "lastModified": 1788174806,
+        "narHash": "sha256-FG5sxLsM6X/GUOwfDeBDOlEN7YZuk+jeWMlT/Hu2ZPY=",
         "owner": "kevinpita",
         "repo": "nixos-pi",
-        "rev": "939ae3d267f3c229fbf5e939420608962bf069f2",
+        "rev": "a0f05bfd32a4349365cfa323e5803bac2c178684",
         "type": "github"
       },
       "original": {
