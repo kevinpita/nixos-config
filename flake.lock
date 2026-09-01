@@ -68,11 +68,11 @@
         "systems": "systems_2"
       },
       "locked": {
-        "lastModified": 1788206511,
-        "narHash": "sha256-73a93NrKnP1DsNzy2FrdOFKXSe5I9bG/B0ytQepXUBg=",
+        "lastModified": 1788285734,
+        "narHash": "sha256-/cwJ6Wa/hrurskanEPtwhW05ml1Lqzlh+Dd4fdApd5Y=",
         "owner": "sadjow",
         "repo": "claude-code-nix",
-        "rev": "648cf2ac8393d384cc4430d850dee4dd76f50d6c",
+        "rev": "6b3711f18290d449fb40d98db56af2ff92a7f045",
         "type": "github"
       },
       "original": {
@@ -381,11 +381,11 @@
     },
     "import-tree": {
       "locked": {
-        "lastModified": 1788210572,
-        "narHash": "sha256-iDArQutSbrjtMQLUIc32iSb6tFqjl6IJU3cA8p8isuM=",
+        "lastModified": 1788275959,
+        "narHash": "sha256-doeyg/EY8joBaZhELfVrSGjAm6pFtp2p0UgQv/Wwgh0=",
         "owner": "vic",
         "repo": "import-tree",
-        "rev": "8961e2418a12a71e08943c9f3d8cf6dbbc3cd172",
+        "rev": "e9177dd0d600162a6410ea6019c796cff7a636c3",
         "type": "github"
       },
       "original": {
@@ -615,11 +615,11 @@
     "nixos-work": {
       "flake": false,
       "locked": {
-        "lastModified": 1788219303,
-        "narHash": "sha256-Dt/1Ed1KG6BUv7uyZljiNb03/JK+Nj6l4Xq/7bzMuB4=",
+        "lastModified": 1788295994,
+        "narHash": "sha256-w7pFfqiHDrL/uDsaTPspR7NnDffkUc9yGNWklwAJOb0=",
         "ref": "refs/heads/main",
-        "rev": "1a65c6ae1f7f99c0b1f4ad68b84acb87bcce2d27",
-        "revCount": 20,
+        "rev": "aba4cd93e012e5a5283311ce7430d1a1eb3277b4",
+        "revCount": 21,
         "type": "git",
         "url": "ssh://git@github.com/kevinpita/nixos-work"
       },
