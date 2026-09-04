@@ -13,7 +13,10 @@
       users.users.${username} = {
         useDefaultShell = true;
         isNormalUser = true;
-        extraGroups = [ "wheel" ];
+        extraGroups = [
+          "networkmanager"
+          "wheel"
+        ];
       }
       // lib.optionalAttrs config.hostSecrets.available {
         hashedPasswordFile = config.sops.secrets."user-password".path;
