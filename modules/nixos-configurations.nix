@@ -28,22 +28,17 @@ let
     inputs.lazyrsync-nix.overlays.default
 
     inputs.tuicr-nix.overlays.default
-
-    (
-      final: _prev:
-      let
-        ghidraMcp = final.callPackage ../packages/ghidra-mcp { };
-      in
-      {
-        ghidra-mcp-bridge = ghidraMcp.bridge;
-        ghidra-mcp-extension = ghidraMcp.extension;
-      }
-    )
   ];
 
   pkgs = import inputs.nixpkgs {
     inherit system overlays;
     config.allowUnfree = true;
+  };
+
+  privateInputs = import ../lib/private-inputs.nix {
+    secrets = inputs.nixos-secrets;
+    work = inputs.nixos-work;
+    inherit username;
   };
 
   hostModules = lib.filterAttrs (name: _: lib.hasPrefix "hosts/" name) config.flake.modules.nixos;
@@ -68,6 +63,7 @@ in
         ];
         specialArgs = {
           inherit inputs username hostname;
+          inherit (privateInputs) ciMode workConfig;
         };
       }
     )

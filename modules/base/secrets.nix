@@ -5,27 +5,24 @@
       hostname,
       lib,
       username,
+      ciMode,
       ...
     }:
     let
       secretsPath = "${inputs.nixos-secrets}/secrets";
-      hasRealSecrets = builtins.pathExists "${secretsPath}/common.yaml";
+      hostFile = "${secretsPath}/${hostname}.yaml";
     in
     {
-      options.hostSecrets.available = lib.mkOption {
-        type = lib.types.bool;
-        readOnly = true;
-        default = hasRealSecrets;
-        description = "Real sops secrets are present (false under the CI dummy input).";
-      };
-
-      config.sops = {
+      sops = {
         age.keyFile = "/var/lib/sops-nix/key.txt";
-
         age.generateKey = true;
       }
-      // lib.optionalAttrs hasRealSecrets {
-        defaultSopsFile = "${secretsPath}/${hostname}.yaml";
+      // lib.optionalAttrs (!ciMode) {
+        defaultSopsFile =
+          if builtins.pathExists hostFile then
+            hostFile
+          else
+            throw "nixos-secrets is missing secrets/${hostname}.yaml.";
 
         secrets = {
           "user-password" = {

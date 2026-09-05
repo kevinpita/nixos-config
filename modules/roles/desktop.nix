@@ -8,7 +8,7 @@
       browsers
       communication
       development
-      docker
+      podman
       file-sharing
       ghostty
       git

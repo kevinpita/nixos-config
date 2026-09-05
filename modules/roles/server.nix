@@ -7,7 +7,7 @@
         base
         ai
         development
-        docker
+        podman
         git
         syncthing
         tailscale

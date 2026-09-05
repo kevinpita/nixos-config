@@ -8,7 +8,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  style-checks:
+  public-checks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,6 +19,6 @@ jobs:
             experimental-features = nix-command flakes
       - name: Check Nix flake inputs
         run: |
-          nix flake check --all-systems --show-trace \
+          nix flake check --all-systems --show-trace --no-write-lock-file \
             --override-input nixos-secrets path:./ci-dummy-input \
             --override-input nixos-work path:./ci-dummy-input

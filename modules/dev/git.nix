@@ -14,7 +14,47 @@
       home-manager.users.${username} = {
         home.packages = with pkgs; [
           delta
+          git-filter-repo
+          worktrunk
         ];
+
+        programs.difftastic = {
+          enable = true;
+          git.enable = true;
+        };
+
+        programs.git = {
+          enable = true;
+          ignores = [ ".worktrees/" ];
+          signing = {
+            key = "~/.ssh/id_ed25519_sign.pub";
+            signByDefault = true;
+            format = "ssh";
+          };
+          settings = {
+            alias = {
+              most = "!git log --format=format: --name-only --since=\"1 year ago\" | sort | uniq -c | sort -nr | head -20";
+              who = "shortlog -sn --no-merges";
+              bug = "!git log -i -E --grep=\"fix|bug|broken\" --name-only --format='' | sort | uniq -c | sort -nr | head -20";
+              com = "!git log --format='%ad' --date=format:'%Y-%m' | sort | uniq -c";
+              hotfix = "!git log --oneline --since=\"1 year ago\" | grep -iE 'revert|hotfix|emergency|rollback'";
+            };
+            user = {
+              name = "Kevin Pita";
+              email = "gitkevin@pm.me";
+            };
+            init.defaultBranch = "main";
+            tag.gpgsign = true;
+            pull.rebase = true;
+          };
+        };
+
+        xdg.configFile."worktrunk/config.toml" = {
+          force = true;
+          text = ''
+            worktree-path = "{{ repo_path }}/.worktrees/{{ branch | sanitize }}"
+          '';
+        };
 
         programs.lazygit = {
           enable = true;

@@ -1,32 +1,80 @@
 # NixOS Configuration
 
-## Check and format
+## Daily commands
 
-Use the real private inputs when working locally:
+Run these commands from `~/nixos-config`. Checks and builds do not activate the configuration.
+
+| Command | Inputs | Effect |
+| --- | --- | --- |
+| `nix fmt` | Locked | Format and lint repository files |
+| `just check` | Locked, real private inputs | Evaluate all hosts and run the checks |
+| `just check-public` | Locked, both private inputs replaced by dummy inputs | Reproduce public CI |
+| `just build` | Locked, real private inputs | Build the current host without activation |
+| `just switch` | Locked, real private inputs | Run `check`, then build and activate the current host |
+| `just check-local` | Local Pi and Hyprland checkouts; locked private inputs | Check sibling development changes |
+| `just build-local` | Local Pi and Hyprland checkouts; locked private inputs | Build sibling development changes without activation |
+| `just test-podman` | Locked | Run a rootless test container with temporary storage and no network |
+
+`check`, `build`, and `switch` use the same input revisions. The local variants do not change `flake.lock`. Publish tested sibling changes and update the lock before using `switch`.
+
+`just check` is the trusted check with real private inputs. Public CI cannot validate private work settings or secret files. Its dummy inputs contain an explicit `.nixos-config-ci` marker. Mixed real and dummy inputs are rejected. Missing real secret files or required work modules are errors.
+
+The checks cover formatting, host policy, private-input contracts, custom scripts, and the Pi SDK runtime. Host policy tests name the three existing machines; they do not force the same policies on a new host. Script package tests use `amdep` as the representative desktop. The checks do not boot every host or test microphones and desktop sessions.
+
+Run one focused check with build logs:
 
 ```bash
-nix flake check --all-systems
+nix build --no-link .#checks.x86_64-linux.scripts -L
 ```
 
-Use the committed dummy input to reproduce public CI:
+## Where to make changes
+
+```text
+flake.nix                         Inputs and import-tree entry point
+modules/nixos-configurations.nix Host discovery and shared package set
+modules/hosts/<hostname>.nix     Host hardware, role, and feature selection
+modules/roles/                  Shared feature groups
+modules/<category>/             Feature settings (aspects)
+hosts/<hostname>/               Raw hardware, disk, and host UI files
+lib/private-inputs.nix          Private-input validation
+modules/checks.nix              Check definitions
+tests/                          Behavior tests and public fixtures
+```
+
+`import-tree` loads Nix files under `modules/`. An aspect is a named NixOS module under `flake.modules.nixos`. Several files can contribute to the same aspect. A definition named `hosts/<hostname>` creates a host output automatically.
+
+To add a feature, put its settings in an aspect and attach it to a host or role. To extend an existing aspect, edit its owning file; do not add a second import. Keep raw helper modules outside `modules/` so import-tree does not load them as flake modules.
+
+Git settings belong to `modules/dev/git.nix`. Account and Home Manager setup belong to `modules/base/users.nix`. Host entry points select kernel policy. Existing hosts retain the latest kernel; a new host uses the nixpkgs default unless it selects another kernel. Only the dual-boot `amdep` host uses local time in its hardware clock. Keep `stateVersion` values unchanged during routine updates.
+
+## Related repositories
+
+| Repository | Local checkout needed for | Ownership |
+| --- | --- | --- |
+| `~/nixos-config` | Runtime configuration and maintenance | Hosts, roles, container tools, Claude settings |
+| `~/nixos-hyprland` | Desktop runtime; local checks and builds | Shared Hyprland and DMS settings |
+| `~/nixos-pi` | Local checks/builds and Pi development | Pi package, SDK, pinned subagents, extensions, skills |
+| `~/nixos-nvim` | Neovim development | Editor configuration |
+| `~/nixos-secrets` | Secret updates | Encrypted secrets and age recipients |
+| `~/nixos-work` | Private work configuration updates | `github`, `cloud`, and `servers` modules |
+
+Locked builds fetch the inputs they need. A local secrets or work checkout is not required for a locked build, but GitHub SSH access is required when those inputs are not cached.
+
+Hyprland loads Lua files from writable checkouts. DMS settings and Claude settings also use writable files. **A Nix generation rollback does not restore those files.** Record their revisions and review their Git changes separately. Do not assume that an old system generation contains an old desktop configuration.
+
+## Update inputs
+
+For a sibling change, run its own checks, publish it, then update only that input:
 
 ```bash
-nix flake check --all-systems --show-trace \
-  --override-input nixos-secrets path:./ci-dummy-input \
-  --override-input nixos-work path:./ci-dummy-input
+nix flake update nixos-pi
+just check
+just build
 ```
 
-Format with:
+Use `nix flake update` for a complete dependency update. Review the lock diff before applying it. Some package inputs intentionally use separate nixpkgs revisions; do not add `follows` without checking that package's compatibility.
 
-```bash
-nix fmt
-```
-
-Apply the current host with:
-
-```bash
-nh os switch ~/nixos-config
-```
+Pi and `pi-subagents` are packaged together in `nixos-pi`. Its runtime check prevents a return to the standalone package that lacks the SDK. Restart Pi after applying a runtime update.
 
 ## Hosts
 
@@ -40,7 +88,7 @@ Hosts are defined as `modules/hosts/<hostname>.nix` aspects and auto-discovered.
 
 ## Deploy with nixos-anywhere
 
-Secrets (SSH keys, user password) need the host's age key to decrypt. Ship the key during deploy with `--extra-files` so everything works on first boot. The directory structure inside the extra-files dir mirrors the root filesystem.
+Secrets (SSH keys, user password) need the host's age key to decrypt. Ship the key during deploy with `--extra-files` so the credentials are available on first boot. Desktop configuration also requires the checkouts in the post-install checklist. The directory structure inside the extra-files dir mirrors the root filesystem.
 
 ### New host or first install
 
@@ -118,17 +166,38 @@ Admin key and host age keys are backed up in KeePass. Restore admin key to `~/.c
 
 ## Post-install checklist
 
-Everything works on first boot (SSH keys, user password) since the age key was shipped during deploy.
+The shipped age key provides the SSH keys and user password. On a desktop, use a text console to create the required checkouts before starting the desktop session.
 
-1. Clone repos:
+1. Clone the host configuration:
 
    ```bash
    git clone git@github.com:kevinpita/nixos-config.git ~/nixos-config
-   git clone git@github.com:kevinpita/nixos-secrets.git ~/nixos-secrets
    ```
 
-1. Restore admin key to `~/.config/sops/age/keys.txt` from KeePass
+1. On desktop hosts, clone Hyprland and select the revision in the lock:
 
-1. Syncthing: `http://localhost:8384`, accept devices and set up KeePass folder
+   ```bash
+   git clone git@github.com:kevinpita/nixos-hyprland.git ~/nixos-hyprland
+   git -C ~/nixos-hyprland checkout --detach \
+     "$(jq -r '.nodes["nixos-hyprland"].locked.rev' ~/nixos-config/flake.lock)"
+   ```
 
-1. Run `nh os switch ~/nixos-config` to apply any pending changes
+   For later Hyprland development, create a branch from this revision. Review writable settings separately from Nix updates.
+
+1. If you need local development commands, clone the missing sibling checkouts:
+
+   ```bash
+   git clone git@github.com:kevinpita/nixos-pi.git ~/nixos-pi
+   # Headless hosts also need this checkout for check-local and build-local.
+   test -d ~/nixos-hyprland || git clone git@github.com:kevinpita/nixos-hyprland.git ~/nixos-hyprland
+   ```
+
+1. If you need to edit secrets, clone `nixos-secrets` and restore the admin key to `~/.config/sops/age/keys.txt` from KeePass. Set mode `0600`.
+
+1. Syncthing: open `http://localhost:8384` and check the declared KeePass folder. Change devices and folders in `modules/net/syncthing.nix`; the Nix configuration overrides GUI changes.
+
+1. Run `just check` from `~/nixos-config`. Run `just switch` only when you are ready to apply pending changes.
+
+## Containers
+
+All three hosts use rootless Podman. See [Container use and Docker migration](docs/containers.md) before applying this change to a host with Docker workloads. Docker images and volumes are not moved or deleted automatically.

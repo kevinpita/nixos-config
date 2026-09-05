@@ -14,9 +14,7 @@
             theme = inputs.nixos-grub-themes.packages.${pkgs.stdenv.hostPlatform.system}.nixos;
           };
         };
-        kernelPackages = pkgs.linuxPackages_latest;
       };
 
-      time.hardwareClockInLocalTime = true;
     };
 }

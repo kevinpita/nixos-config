@@ -1,7 +1,7 @@
 { config, ... }:
 {
   flake.modules.nixos."hosts/amdep" =
-    { username, ... }:
+    { username, pkgs, ... }:
     {
       imports = [
         ../../hosts/amdep/disko-config.nix
@@ -15,7 +15,10 @@
 
       programs.nixos-hyprland.hostConfig = "/home/${username}/nixos-config/hosts/amdep/hyprland.lua";
 
-      # Dual-boot support
+      boot.kernelPackages = pkgs.linuxPackages_latest;
+
+      # Windows uses local time in the hardware clock.
+      time.hardwareClockInLocalTime = true;
       boot.loader.grub.useOSProber = true;
     };
 }

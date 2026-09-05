@@ -1,6 +1,6 @@
 { config, inputs, ... }:
 {
-  flake.modules.nixos."hosts/t14g6" = {
+  flake.modules.nixos."hosts/t14g6" = { pkgs, ... }: {
     imports = [
       ../../hosts/t14g6/disko-config.nix
       ../../hosts/t14g6/hardware-configuration.nix
@@ -15,6 +15,8 @@
       config.flake.modules.nixos.reverse-engineering
       config.flake.modules.nixos.vmware
     ];
+
+    boot.kernelPackages = pkgs.linuxPackages_latest;
 
     # Allow typing the LUKS passphrase on a keyboard attached to the Thunderbolt
     # dock. Thunderbolt security is set to "user", and the initrd has no boltd, so

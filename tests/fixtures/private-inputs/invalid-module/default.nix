@@ -1,5 +1,5 @@
 _: {
-  github = { };
+  github = false;
   cloud = { };
   servers = { };
 }

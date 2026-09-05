@@ -4,17 +4,13 @@
       mkWork =
         attr:
         {
-          config,
+          ciMode,
           lib,
-          inputs,
-          username,
+          workConfig,
           ...
         }:
-        let
-          workConfig = (import "${inputs.nixos-work}") { inherit username; };
-        in
         {
-          config = lib.mkIf config.hostSecrets.available (workConfig.${attr} or { });
+          config = lib.mkIf (!ciMode) workConfig.${attr};
         };
     in
     {
