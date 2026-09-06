@@ -51,10 +51,6 @@
                 IdentityFile = "~/.ssh/id_ed25519";
                 IdentitiesOnly = true;
               };
-              "pfium" = {
-                HostName = "fium";
-                User = "kpitapeersyst";
-              };
             };
           };
 

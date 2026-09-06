@@ -129,12 +129,6 @@
                 ${pkgs.herdr}/bin/herdr server reload-config >/dev/null 2>&1 || true
               fi
             '';
-
-        programs.zsh.shellAliases = {
-          hn = "herdr session attach";
-          hp = "herdr session attach peersyst";
-          pherdr = "herdr --remote pfium --remote-keybindings server";
-        };
       };
     };
 }
