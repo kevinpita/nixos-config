@@ -138,6 +138,37 @@ All from the deploying machine. No sops changes needed, same key, same encryptio
 
 1. Clean up: `rm -rf /tmp/extra-files`
 
+### Register a headless server with Tailscale
+
+Server hosts can register on first boot with a one-use Tailscale auth key. No SOPS change is needed for this key. Use a non-ephemeral key. If device approval is enabled, use a pre-approved key. Tailnet policy must permit Tailscale SSH; exit-node approval is separate.
+
+Servers use `nixos-anywhere`. Before deployment, run these commands in Bash on the deploying machine. Add the key to the same extra-files directory as the host's age key:
+
+```bash
+install -d -m 700 /tmp/extra-files/var/lib/tailscale
+(read -rsp 'Tailscale auth key: ' key; echo
+ test -n "$key" || exit 1
+ umask 077
+ printf '%s' "$key" > /tmp/extra-files/var/lib/tailscale/bootstrap-auth-key)
+chmod 600 /tmp/extra-files/var/lib/tailscale/bootstrap-auth-key
+```
+
+Deploy with the prepared directory:
+
+```bash
+nix run github:nix-community/nixos-anywhere -- \
+  --extra-files /tmp/extra-files \
+  --flake ~/nixos-config#<hostname> root@<ip>
+```
+
+Replace `<hostname>` and `<ip>` with the target host name and installer IP address. Delete the local extra-files directory after successful deployment: `rm -rf /tmp/extra-files`.
+
+The file is on the installed disk, not in Git or the Nix store. On boot, the server uses it to register with Tailscale and enable Tailscale SSH. The service deletes the file only after Tailscale reports `Running`. Failed registration keeps the key and retries after 30 seconds. Each attempt has a 120-second timeout. The server needs working network access.
+
+Without the file, registration is skipped. An existing Tailscale identity continues to work. A new server without an identity remains inaccessible through Tailscale. If authentication is required later, provide a fresh key at `/var/lib/tailscale/bootstrap-auth-key` through the console and run `sudo systemctl restart tailscaled-autoconnect`.
+
+Inspect registration with `journalctl -u tailscaled-autoconnect`. This setup does not enable OpenSSH.
+
 ### Generating hardware-configuration.nix
 
 Use this when deploying to new hardware or if the existing hardware config is wrong. This does a full install, not just config generation.
