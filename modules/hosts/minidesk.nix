@@ -8,6 +8,7 @@
         ../../hosts/minidesk/hardware-configuration.nix
 
         config.flake.modules.nixos.aws
+        config.flake.modules.nixos.development
         config.flake.modules.nixos.incus
         config.flake.modules.nixos.kubernetes-client
         config.flake.modules.nixos.server
