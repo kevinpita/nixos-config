@@ -4,13 +4,13 @@
     imports = [
       ../../hosts/t14g6/disko-config.nix
       ../../hosts/t14g6/hardware-configuration.nix
-
       ../../hosts/t14g6/laptop.nix
+
       inputs.nixos-hardware.nixosModules.lenovo-thinkpad-t14-amd-gen6
+      inputs.nixos-hyprland.nixosModules.thinkpadLaptop
 
       config.flake.modules.nixos.desktop
       config.flake.modules.nixos.dni
-      inputs.nixos-hyprland.nixosModules.thinkpadLaptop
       config.flake.modules.nixos.incus
       config.flake.modules.nixos.reverse-engineering
       config.flake.modules.nixos.vmware

@@ -10,8 +10,6 @@
       programs.nix-ld.enable = true;
 
       home-manager.users.${username} = {
-        programs.zsh.shellAliases.z = "zeditor";
-
         programs.zed-editor = {
           enable = true;
           package = pkgs.zed-editor-fhs;
@@ -87,6 +85,8 @@
             vim_mode = true;
           };
         };
+
+        programs.zsh.shellAliases.z = "zeditor";
       };
     };
 }

@@ -8,7 +8,6 @@
     {
       home-manager.users.${username} = {
         home.packages = with pkgs; [
-          telegram-desktop
           (symlinkJoin {
             name = "slack";
             paths = [ slack ];
@@ -19,8 +18,13 @@
                 --add-flags "--enable-features=WaylandWindowDecorations,WebRTCPipeWireCapturer"
             '';
           })
-
+          telegram-desktop
         ];
+
+        xdg.mimeApps.defaultApplications = {
+          "x-scheme-handler/tg" = "org.telegram.desktop.desktop";
+          "x-scheme-handler/tonsite" = "org.telegram.desktop.desktop";
+        };
       };
     };
 }

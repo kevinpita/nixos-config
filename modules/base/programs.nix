@@ -1,60 +1,44 @@
 {
   flake.modules.nixos.base =
-    {
-      pkgs,
-      username,
-      ...
-    }:
+    { pkgs, ... }:
     {
       services.fwupd.enable = true;
 
       programs.ssh.startAgent = true;
 
-      programs.nh = {
-        enable = true;
-        clean = {
-          enable = true;
-          extraArgs = "--keep-since 15d --keep 10";
-        };
-        flake = "/home/${username}/nixos-config";
-      };
-
       wrappers.neovim.enable = true;
       environment.variables.EDITOR = "nvim";
 
       environment.systemPackages = with pkgs; [
-        bast
-        bat
-        fzf
-        ripgrep
-        tree
-
-        curl
-        jq
-        just
-        yq-go
-        wget
+        # Archives and compression
         lz4
         unzip
         zip
 
+        # Files and search
+        bast
+        bat
+        fzf
+        lazyrsync
+        ripgrep
+        tree
+
+        # Hardware and system monitoring
+        btop
         dmidecode
         fastfetch
-        btop
         gdu
         i2c-tools
         lm_sensors
         pciutils
+
+        # Scripting and structured data
+        jq
+        just
+        yq-go
+
+        # Terminals
         screen
-
-        age
-        sops
-
-        ghostty.terminfo
-
-        # Nix helpers (for nh)
-        nix-output-monitor
-        nvd
       ];
     };
 }

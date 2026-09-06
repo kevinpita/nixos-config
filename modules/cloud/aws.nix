@@ -3,8 +3,11 @@
     { pkgs, ... }:
     {
       environment.systemPackages = with pkgs; [
-        awscli2
+        # AWS clients and authentication
         aws-iam-authenticator
+        awscli2
+
+        # Infrastructure provisioning
         terraform
       ];
     };

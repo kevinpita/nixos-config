@@ -16,6 +16,9 @@
       home-manager.users.${username}.home.sessionVariables.DOCKER_HOST =
         "unix://\${XDG_RUNTIME_DIR}/podman/podman.sock";
 
-      environment.systemPackages = [ pkgs.podman-compose ];
+      environment.systemPackages = with pkgs; [
+        lazydocker
+        podman-compose
+      ];
     };
 }

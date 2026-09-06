@@ -4,11 +4,11 @@
     { username, ... }:
     {
       imports = with config.flake.modules.nixos; [
-        base
         ai
+        base
         development
-        podman
         git
+        podman
         tailscale
       ];
 

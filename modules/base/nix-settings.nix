@@ -1,5 +1,19 @@
 {
-  flake.modules.nixos.base = _: {
+  flake.modules.nixos.base = { pkgs, username, ... }: {
+    environment.systemPackages = with pkgs; [
+      nix-output-monitor
+      nvd
+    ];
+
+    programs.nh = {
+      enable = true;
+      clean = {
+        enable = true;
+        extraArgs = "--keep-since 15d --keep 10";
+      };
+      flake = "/home/${username}/nixos-config";
+    };
+
     nix = {
       settings = {
         auto-optimise-store = true;

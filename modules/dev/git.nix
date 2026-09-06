@@ -1,4 +1,8 @@
 {
+  flake.modules.nixos.development = { pkgs, ... }: {
+    environment.systemPackages = [ pkgs.tuicr ];
+  };
+
   flake.modules.nixos.git =
     {
       pkgs,

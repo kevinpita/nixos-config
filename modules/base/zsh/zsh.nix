@@ -20,6 +20,17 @@
           enableZshIntegration = true;
         };
 
+        programs.lsd = {
+          enable = true;
+          enableZshIntegration = true;
+          settings = {
+            date = "relative";
+            ignore-globs = [ ".git" ];
+            total-size = true;
+            sorting.dir-grouping = "first";
+          };
+        };
+
         programs.yazi = {
           enable = true;
           enableZshIntegration = true;
@@ -146,18 +157,6 @@
 
         home.file.".p10k.zsh".source = ./p10k.zsh;
         home.file.".zsh/completions".source = ./completions;
-
-        # Modern ls replacement
-        programs.lsd = {
-          enable = true;
-          enableZshIntegration = true;
-          settings = {
-            date = "relative";
-            ignore-globs = [ ".git" ];
-            total-size = true;
-            sorting.dir-grouping = "first";
-          };
-        };
       };
     };
 }

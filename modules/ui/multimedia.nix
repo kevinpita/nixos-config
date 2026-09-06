@@ -10,7 +10,6 @@
         home.packages = with pkgs; [
           ffmpeg
           obs-studio
-          obsidian
           sone # tidal
           vlc
         ];

@@ -4,6 +4,7 @@
       inputs,
       hostname,
       lib,
+      pkgs,
       username,
       ciMode,
       ...
@@ -13,6 +14,11 @@
       hostFile = "${secretsPath}/${hostname}.yaml";
     in
     {
+      environment.systemPackages = with pkgs; [
+        age
+        sops
+      ];
+
       sops = {
         age.keyFile = "/var/lib/sops-nix/key.txt";
         age.generateKey = true;

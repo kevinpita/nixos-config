@@ -17,8 +17,8 @@
         name = "browser-switcher";
         runtimeInputs = with pkgs; [
           brave
-          google-chrome
           coreutils
+          google-chrome
         ];
         text = ''
           brave_domains=(${lib.concatStringsSep " " (map (d: "\"${d}\"") braveOnlyDomains)})
@@ -90,12 +90,15 @@
 
       home-manager.users.${username} = {
         home.packages = with pkgs; [
+          # Browser selection
+          browserSwitcher
+          browserSwitcherDesktop
+
+          # Web browsers
           brave
           chromium
           firefox
           google-chrome
-          browserSwitcher
-          browserSwitcherDesktop
         ];
 
         xdg.mimeApps = {
@@ -106,9 +109,6 @@
             "x-scheme-handler/https" = "browser-switcher.desktop";
             "x-scheme-handler/about" = "browser-switcher.desktop";
             "x-scheme-handler/unknown" = "browser-switcher.desktop";
-            "x-scheme-handler/tg" = "org.telegram.desktop.desktop";
-            "x-scheme-handler/tonsite" = "org.telegram.desktop.desktop";
-            "x-scheme-handler/notion" = "notion-app-enhanced.desktop";
           };
         };
         xdg.configFile."mimeapps.list".force = true;

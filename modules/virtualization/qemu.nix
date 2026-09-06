@@ -26,13 +26,18 @@
       ];
 
       environment.systemPackages = with pkgs; [
-        qemu
-        OVMF
-        dnsmasq
-        vde2
-        bridge-utils
-        netcat-openbsd
+        # Guest images and inspection
         libguestfs
+
+        # Networking
+        bridge-utils
+        dnsmasq
+        netcat-openbsd
+        vde2
+
+        # Virtual machines, firmware, and TPM
+        OVMF
+        qemu
         swtpm
       ];
     };

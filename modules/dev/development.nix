@@ -8,21 +8,23 @@
     }:
     {
       environment.systemPackages = with pkgs; [
+        # Build tools and language runtimes
         gnumake
         go
         gotest
         python3
 
-        lazydocker
-        lazyrsync
+        # Database and messaging clients
         lazysql
         mqttui
-        tuicr
       ];
 
       home-manager.users.${username} = {
         home.packages = with pkgs; [
+          # Development environments
           devenv
+
+          # Nix language tools
           nixd
           nixfmt
         ];
@@ -52,8 +54,11 @@
     { pkgs, username, ... }:
     {
       home-manager.users.${username}.home.packages = with pkgs; [
-        arduino-ide
+        # Database clients
         jetbrains.datagrip
+
+        # Integrated development environments
+        arduino-ide
         jetbrains.goland
         jetbrains.idea
       ];

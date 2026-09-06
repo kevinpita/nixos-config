@@ -1,7 +1,12 @@
 {
   flake.modules.nixos.base =
-    { hostname, ... }:
+    { hostname, pkgs, ... }:
     {
+      environment.systemPackages = with pkgs; [
+        curl
+        wget
+      ];
+
       networking = {
         hostName = hostname;
         networkmanager = {

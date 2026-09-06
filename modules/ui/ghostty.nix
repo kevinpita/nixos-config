@@ -1,4 +1,8 @@
 {
+  flake.modules.nixos.base = { pkgs, ... }: {
+    environment.systemPackages = [ pkgs.ghostty.terminfo ];
+  };
+
   flake.modules.nixos.ghostty =
     {
       username,
@@ -6,10 +10,6 @@
     }:
     {
       home-manager.users.${username} = {
-        programs.zsh.initContent = ''
-          copyterm() { infocmp -x xterm-ghostty | ssh "$1" -- tic -x -; }
-        '';
-
         programs.ghostty = {
           enable = true;
           settings = {
@@ -22,6 +22,10 @@
             shell-integration-features = "cursor,sudo,title";
           };
         };
+
+        programs.zsh.initContent = ''
+          copyterm() { infocmp -x xterm-ghostty | ssh "$1" -- tic -x -; }
+        '';
       };
     };
 }
