@@ -9,7 +9,6 @@
         development
         podman
         git
-        syncthing
         tailscale
       ];
 

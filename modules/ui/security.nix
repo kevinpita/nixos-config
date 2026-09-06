@@ -6,9 +6,11 @@
       services.gnome.gnome-keyring.enable = true;
 
       home-manager.users.${username}.home.packages = with pkgs; [
-        keepassxc
-        yubikey-manager
+        # Password managers
         proton-pass
+
+        # Security keys
+        yubikey-manager
       ];
     };
 }

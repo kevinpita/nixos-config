@@ -16,7 +16,6 @@
       multimedia
       printing-3d
       security
-      syncthing
       tailscale
       ui
       work-cloud

@@ -185,8 +185,6 @@ The shipped age key provides the SSH keys and user password. On a desktop, use a
 
 1. If you need to edit secrets, clone `nixos-secrets` and restore the admin key to `~/.config/sops/age/keys.txt` from KeePass. Set mode `0600`.
 
-1. Syncthing: open `http://localhost:8384` and check the declared KeePass folder. Change devices and folders in `modules/net/syncthing.nix`; the Nix configuration overrides GUI changes.
-
 1. Run `just check` from `~/nixos-config`. Run `just switch` only when you are ready to apply pending changes.
 
 ## Containers
