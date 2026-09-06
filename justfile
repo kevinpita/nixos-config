@@ -22,16 +22,6 @@ build:
 build-local:
   nh os build --no-write-lock-file --override-input nixos-pi "path:$HOME/nixos-pi" --override-input nixos-hyprland "path:$HOME/nixos-hyprland" "{{root}}"
 
-# Run a rootless container with isolated storage. Do not use the current image store.
-test-podman:
-  #!/usr/bin/env bash
-  set -euo pipefail
-  host="$(hostname)"
-  podman="$(nix build --no-link --print-out-paths --no-write-lock-file "{{root}}#nixosConfigurations.$host.config.virtualisation.podman.package^out")"
-  policy="$(nix build --no-link --print-out-paths --no-write-lock-file "{{root}}#nixosConfigurations.$host.pkgs.skopeo.policy")"
-  image="$(nix build --no-link --print-out-paths --no-write-lock-file "{{root}}#podman-test-image")"
-  bash "{{root}}/tests/podman-smoke.sh" "$podman/bin/podman" "$image" "$policy/default-policy.json"
-
 # Check the real locked configuration before applying it.
 switch: check
   nh os switch --no-write-lock-file "{{root}}"

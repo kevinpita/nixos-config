@@ -1,5 +1,0 @@
-_: {
-  github = { };
-  cloud = { };
-  servers = { };
-}

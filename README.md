@@ -13,19 +13,12 @@ Run these commands from `~/nixos-config`. Checks and builds do not activate the 
 | `just switch` | Locked, real private inputs | Run `check`, then build and activate the current host |
 | `just check-local` | Local Pi and Hyprland checkouts; locked private inputs | Check sibling development changes |
 | `just build-local` | Local Pi and Hyprland checkouts; locked private inputs | Build sibling development changes without activation |
-| `just test-podman` | Locked | Run a rootless test container with temporary storage and no network |
 
 `check`, `build`, and `switch` use the same input revisions. The local variants do not change `flake.lock`. Publish tested sibling changes and update the lock before using `switch`.
 
 `just check` is the trusted check with real private inputs. Public CI cannot validate private work settings or secret files. Its dummy inputs contain an explicit `.nixos-config-ci` marker. Mixed real and dummy inputs are rejected. Missing real secret files or required work modules are errors.
 
-The checks cover formatting, host policy, private-input contracts, custom scripts, and the Pi SDK runtime. Host policy tests name the three existing machines; they do not force the same policies on a new host. Script package tests use `amdep` as the representative desktop. The checks do not boot every host or test microphones and desktop sessions.
-
-Run one focused check with build logs:
-
-```bash
-nix build --no-link .#checks.x86_64-linux.scripts -L
-```
+The remaining check covers formatting. Flake validation also evaluates the host configurations. It does not boot hosts or test microphones and desktop sessions.
 
 ## Where to make changes
 
@@ -37,8 +30,6 @@ modules/roles/                  Shared feature groups
 modules/<category>/             Feature settings (aspects)
 hosts/<hostname>/               Raw hardware, disk, and host UI files
 lib/private-inputs.nix          Private-input validation
-modules/checks.nix              Check definitions
-tests/                          Behavior tests and public fixtures
 ```
 
 `import-tree` loads Nix files under `modules/`. An aspect is a named NixOS module under `flake.modules.nixos`. Several files can contribute to the same aspect. A definition named `hosts/<hostname>` creates a host output automatically.

@@ -79,21 +79,3 @@ systemctl --user start podman.socket
 
 Do not enable the system socket or use `sudo podman` as a workaround. Those
 commands select a separate, root-owned container environment.
-
-## Test without switching
-
-From `~/nixos-config`:
-
-```bash
-just test-podman
-```
-
-This builds a small image from locked Nix packages. It runs that image as a
-rootless container with network access disabled. It uses temporary HOME,
-configuration, image storage, and runtime paths. It also checks the Docker API
-through a temporary user socket, then removes the test state. It does not use or
-reset the normal Docker or Podman image store.
-
-This test requires Linux user namespaces and the current user's subordinate
-UID/GID ranges. The normal flake checks verify the declared Podman configuration
-without needing container privileges inside the Nix build sandbox.
