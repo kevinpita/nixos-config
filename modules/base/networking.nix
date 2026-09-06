@@ -4,6 +4,8 @@
     {
       environment.systemPackages = with pkgs; [
         curl
+        ethtool
+        tcpdump
         wget
       ];
 

@@ -1,4 +1,8 @@
+# Remote sessions use the client's clipboard and microphone; transcription runs on the server.
 { config, ... }:
+let
+  audioPort = "47130";
+in
 {
   flake.modules.nixos.herdr-remote-host =
     { pkgs, ... }:
@@ -113,7 +117,42 @@
     {
       imports = [ config.flake.modules.nixos.dictation ];
 
-      dictation.pulseServer = "tcp:127.0.0.1:47130";
+      dictation.pulseServer = "tcp:127.0.0.1:${audioPort}";
       environment.systemPackages = [ remoteClipboard ];
+    };
+
+  flake.modules.nixos.workstation =
+    { pkgs, username, ... }:
+    let
+      remoteHerdr = pkgs.writeShellApplication {
+        name = "herdr-remote";
+        runtimeInputs = [
+          pkgs.herdr
+          pkgs.systemd
+        ];
+        text = builtins.readFile ./herdr-remote.sh;
+      };
+    in
+    {
+      home-manager.users.${username} = {
+        home.packages = [ remoteHerdr ];
+
+        programs.zsh.shellAliases = {
+          fium = "herdr-remote fium";
+          minidesk = "herdr-remote minidesk";
+        };
+
+        systemd.user.services."herdr-remote-audio-tunnel@" = {
+          Unit = {
+            Description = "Local microphone tunnel to %I";
+            StartLimitIntervalSec = 0;
+          };
+          Service = {
+            ExecStart = "${pkgs.openssh}/bin/ssh -S none -NT -o BatchMode=yes -o ConnectTimeout=10 -o ExitOnForwardFailure=yes -o ServerAliveInterval=15 -o ServerAliveCountMax=4 -R 127.0.0.1:${audioPort}:%t/pulse/native %I";
+            Restart = "always";
+            RestartSec = 5;
+          };
+        };
+      };
     };
 }

@@ -2,7 +2,6 @@
 {
   flake.modules.nixos = {
     workstation.imports = with config.flake.modules.nixos; [
-      ai
       aws
       base
       browsers
@@ -10,7 +9,6 @@
       development
       file-sharing
       ghostty
-      git
       kubernetes-client
       multimedia
       podman

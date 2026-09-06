@@ -1,7 +1,13 @@
+{ config, ... }:
 {
   flake.modules.nixos.base =
     { pkgs, ... }:
     {
+      imports = with config.flake.modules.nixos; [
+        ai
+        git
+      ];
+
       services.fwupd.enable = true;
 
       programs.ssh.startAgent = true;
@@ -30,7 +36,9 @@
         gdu
         i2c-tools
         lm_sensors
+        lsof
         pciutils
+        smartmontools
 
         # Scripting and structured data
         jq

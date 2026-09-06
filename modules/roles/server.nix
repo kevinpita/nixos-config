@@ -4,10 +4,10 @@
     { username, ... }:
     {
       imports = with config.flake.modules.nixos; [
-        ai
         base
-        development
-        git
+        herdr-remote-host
+        mosh
+        moshi
         podman
         tailscale
       ];
