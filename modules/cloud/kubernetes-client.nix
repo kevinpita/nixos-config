@@ -1,5 +1,5 @@
 {
-  flake.modules.nixos.kubernetes =
+  flake.modules.nixos.kubernetes-client =
     {
       pkgs,
       username,
@@ -7,13 +7,13 @@
     }:
     {
       environment.systemPackages = [
+        pkgs.argocd
+        pkgs.helm-tui
+        pkgs.k9s
+        pkgs.ku
         pkgs.kubectl
         pkgs.kubernetes-helm
-        pkgs.k9s
-        pkgs.helm-tui
-        pkgs.ku
         pkgs.kubie
-        pkgs.argocd
       ];
 
       home-manager.users.${username} = {

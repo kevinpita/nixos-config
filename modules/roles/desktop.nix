@@ -11,7 +11,7 @@
       file-sharing
       ghostty
       git
-      kubernetes
+      kubernetes-client
       multimedia
       podman
       printing-3d
