@@ -6,6 +6,7 @@
       imports = [
         ../../hosts/fium/disko-config.nix
         ../../hosts/fium/hardware-configuration.nix
+        config.flake.modules.nixos.hermes-vm
         config.flake.modules.nixos.kubernetes-client
         config.flake.modules.nixos.server
         config.flake.modules.nixos.selfhosted

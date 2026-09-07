@@ -2,23 +2,16 @@
 
 ## Daily commands
 
-Run these commands from `~/nixos-config`. Checks and builds do not activate the configuration.
+Run these commands from `~/nixos-config`. Builds do not activate the configuration.
 
 | Command | Inputs | Effect |
 | --- | --- | --- |
 | `nix fmt` | Locked | Format and lint repository files |
-| `just check` | Locked, real private inputs | Evaluate all hosts and run the checks |
-| `just check-public` | Locked, both private inputs replaced by dummy inputs | Reproduce public CI |
 | `just build` | Locked, real private inputs | Build the current host without activation |
-| `just switch` | Locked, real private inputs | Run `check`, then build and activate the current host |
-| `just check-local` | Local Pi and Hyprland checkouts; locked private inputs | Check sibling development changes |
+| `just switch` | Locked, real private inputs | Build and activate the current host |
 | `just build-local` | Local Pi and Hyprland checkouts; locked private inputs | Build sibling development changes without activation |
 
-`check`, `build`, and `switch` use the same input revisions. The local variants do not change `flake.lock`. Publish tested sibling changes and update the lock before using `switch`.
-
-`just check` is the trusted check with real private inputs. Public CI cannot validate private work settings or secret files. Its dummy inputs contain an explicit `.nixos-config-ci` marker. Mixed real and dummy inputs are rejected. Missing real secret files or required work modules are errors.
-
-The remaining check covers formatting. Flake validation also evaluates the host configurations. It does not boot hosts or test microphones and desktop sessions.
+`build` and `switch` use the same input revisions. `build-local` does not change `flake.lock`. Publish sibling changes and update the lock before using `switch`.
 
 ## Where to make changes
 
@@ -43,8 +36,8 @@ Git settings belong to `modules/dev/git.nix`. Account and Home Manager setup bel
 | Repository | Local checkout needed for | Ownership |
 | --- | --- | --- |
 | `~/nixos-config` | Runtime configuration and maintenance | Hosts, roles, container tools, Claude settings |
-| `~/nixos-hyprland` | Desktop runtime; local checks and builds | Shared Hyprland and DMS settings |
-| `~/nixos-pi` | Local checks/builds and Pi development | Pi package, SDK, pinned subagents, extensions, skills |
+| `~/nixos-hyprland` | Desktop runtime; local builds | Shared Hyprland and DMS settings |
+| `~/nixos-pi` | Local builds and Pi development | Pi package, SDK, pinned subagents, extensions, skills |
 | `~/nixos-nvim` | Neovim development | Editor configuration |
 | `~/nixos-secrets` | Secret updates | Encrypted secrets and age recipients |
 | `~/nixos-work` | Private work configuration updates | `github`, `cloud`, and `servers` modules |
@@ -55,17 +48,16 @@ Hyprland loads Lua files from writable checkouts. DMS settings and Claude settin
 
 ## Update inputs
 
-For a sibling change, run its own checks, publish it, then update only that input:
+For a sibling change, publish it, then update only that input:
 
 ```bash
 nix flake update nixos-pi
-just check
 just build
 ```
 
 Use `nix flake update` for a complete dependency update. Review the lock diff before applying it. Some package inputs intentionally use separate nixpkgs revisions; do not add `follows` without checking that package's compatibility.
 
-Pi and `pi-subagents` are packaged together in `nixos-pi`. Its runtime check prevents a return to the standalone package that lacks the SDK. Restart Pi after applying a runtime update.
+Pi and `pi-subagents` are packaged together in `nixos-pi`. Restart Pi after applying a runtime update.
 
 ## Hosts
 
@@ -74,7 +66,7 @@ Hosts are defined as `modules/hosts/<hostname>.nix` aspects and auto-discovered.
 | Host | Type | Notes |
 | ------- | ------------------- | ------------------------------------------- |
 | amdep | Workstation | Full desktop, dual-boot |
-| fium | Server | Self-hosted monitoring, ZFS storage |
+| fium | Server | Self-hosted monitoring, ZFS storage, [Hermes Debian VM](docs/hermes-vm.md) |
 | minidesk | Server | Work configuration |
 | t14g6 | ThinkPad laptop | Full desktop, TLP, nixos-hardware module |
 
@@ -211,17 +203,17 @@ The shipped age key provides the SSH keys and user password. On a desktop, use a
 
    ```bash
    git clone git@github.com:kevinpita/nixos-pi.git ~/nixos-pi
-   # Headless hosts also need this checkout for check-local and build-local.
+   # Headless hosts also need this checkout for build-local.
    test -d ~/nixos-hyprland || git clone git@github.com:kevinpita/nixos-hyprland.git ~/nixos-hyprland
    ```
 
 1. If you need to edit secrets, clone `nixos-secrets` and restore the admin key to `~/.config/sops/age/keys.txt` from KeePass. Set mode `0600`.
 
-1. Run `just check` from `~/nixos-config`. Run `just switch` only when you are ready to apply pending changes.
+1. Run `just switch` from `~/nixos-config` only when you are ready to apply pending changes.
 
 ## Self-hosted monitoring
 
-`fium` runs Grafana and Prometheus. All installed NixOS hosts provide node-exporter metrics over Tailscale. See [Self-hosted monitoring](docs/selfhosted.md) for access, credentials, additional targets, and deployment checks.
+`fium` runs Grafana and Prometheus. All installed NixOS hosts provide node-exporter metrics over Tailscale. See [Self-hosted monitoring](docs/selfhosted.md) for access, credentials, additional targets, and deployment.
 
 ## Containers
 

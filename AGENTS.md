@@ -61,26 +61,16 @@ rg 'tailscale' modules
 
 Search for the aspect name in `modules/`. Remove its imports and references, then delete its definition. If the file contributes to other aspects, keep the file and remove only the target contribution.
 
-## Format, Validate, and Apply
+## Tests and CI
+
+Keep the existing CI workflow and `ciMode` support. Add tests or new checks only when the user explicitly asks for them.
+
+## Format and Apply
 
 Format the repository:
 
 ```bash
 nix fmt
-```
-
-Validate formatting and all hosts with the real private inputs:
-
-```bash
-nix flake check --all-systems
-```
-
-Use the dummy inputs only to reproduce public CI:
-
-```bash
-nix flake check --all-systems --show-trace \
-  --override-input nixos-secrets path:./ci-dummy-input \
-  --override-input nixos-work path:./ci-dummy-input
 ```
 
 Apply the configuration only when the user asks for it. Run this command on the target host:

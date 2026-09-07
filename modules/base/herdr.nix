@@ -109,22 +109,13 @@
           inputs.home-manager.lib.hm.dag.entryAfter [ "writeBoundary" ]
             ''
               if [[ -z "''${DRY_RUN_CMD:-}" ]]; then
-                plugin_json="$(${pkgs.herdr}/bin/herdr plugin list --plugin worktrunk --json 2>/dev/null || true)"
-                plugin_root="$(printf '%s' "$plugin_json" | ${pkgs.jq}/bin/jq -r '.result.plugins[0].plugin_root // empty' 2>/dev/null || true)"
-
-                if [[ "$plugin_root" != "${herdrWorktrunk}" ]]; then
-                  if [[ -n "$plugin_root" ]]; then
-                    plugin_kind="$(printf '%s' "$plugin_json" | ${pkgs.jq}/bin/jq -r '.result.plugins[0].source.kind // empty')"
-
-                    if [[ "$plugin_kind" == "local" ]]; then
-                      ${pkgs.herdr}/bin/herdr plugin unlink worktrunk >/dev/null
-                    else
-                      ${pkgs.herdr}/bin/herdr plugin uninstall worktrunk >/dev/null
-                    fi
-                  fi
-
-                  ${pkgs.herdr}/bin/herdr plugin link "${herdrWorktrunk}" >/dev/null
-                fi
+                (
+                  # Register offline so an older running server cannot block activation.
+                  plugin_socket_dir="$(${pkgs.coreutils}/bin/mktemp -d)"
+                  trap '${pkgs.coreutils}/bin/rmdir "$plugin_socket_dir"' EXIT
+                  HERDR_SOCKET_PATH="$plugin_socket_dir/herdr.sock" \
+                    ${pkgs.herdr}/bin/herdr plugin link "${herdrWorktrunk}" >/dev/null
+                )
 
                 ${pkgs.herdr}/bin/herdr server reload-config >/dev/null 2>&1 || true
               fi

@@ -8,7 +8,6 @@
 | --- | --- |
 | `modules/selfhosted/metrics.nix` | The `selfhosted` aspect: Grafana, Prometheus, and target options |
 | `modules/selfhosted/alerting.nix` | Alert rules, local Alertmanager, and optional Telegram delivery |
-| `modules/checks/monitoring.nix`, `tests/monitoring-alerts.py` | Rule tests and Telegram delivery tests with a local test API |
 | `modules/selfhosted/node-exporter.nix` | The `node-exporter` aspect: host metrics and a Tailscale firewall rule |
 | `modules/selfhosted/zfs.nix` | ZFS exporter and scrub-date collection on monitored hosts with ZFS support |
 | `modules/selfhosted/storage.nix` | Physical disk collection and six-hour folder scans |
@@ -207,8 +206,6 @@ curl --fail -H 'Content-Type: application/json' \
 ```
 
 Expect the warning after approximately 30 seconds. The alert expires after two minutes. A recovery message follows at the next group update, approximately five minutes after the warning. Inspect failures with `journalctl -u alertmanager`. A successful API response means that Alertmanager accepted the alert; confirm receipt in Telegram.
-
-The `monitoring-alerts` flake check tests thresholds, hold times, offline-laptop behavior, both chat-ID signs, invalid IDs, routing, warning suppression, and recovery delivery. It runs the packaged Alertmanager against a local test Telegram API. It does not need real credentials and sends no real Telegram messages. Public CI configurations disable Telegram delivery when they use the dummy private inputs.
 
 ## Storage and checks
 
