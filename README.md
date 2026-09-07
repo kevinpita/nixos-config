@@ -74,6 +74,7 @@ Hosts are defined as `modules/hosts/<hostname>.nix` aspects and auto-discovered.
 | Host | Type | Notes |
 | ------- | ------------------- | ------------------------------------------- |
 | amdep | Workstation | Full desktop, dual-boot |
+| fium | Server | Self-hosted monitoring, ZFS storage |
 | minidesk | Server | Work configuration |
 | t14g6 | ThinkPad laptop | Full desktop, TLP, nixos-hardware module |
 
@@ -217,6 +218,10 @@ The shipped age key provides the SSH keys and user password. On a desktop, use a
 1. If you need to edit secrets, clone `nixos-secrets` and restore the admin key to `~/.config/sops/age/keys.txt` from KeePass. Set mode `0600`.
 
 1. Run `just check` from `~/nixos-config`. Run `just switch` only when you are ready to apply pending changes.
+
+## Self-hosted monitoring
+
+`fium` runs Grafana and Prometheus. All installed NixOS hosts provide node-exporter metrics over Tailscale. See [Self-hosted monitoring](docs/selfhosted.md) for access, credentials, additional targets, and deployment checks.
 
 ## Containers
 

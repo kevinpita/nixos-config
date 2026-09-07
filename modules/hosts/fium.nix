@@ -8,7 +8,13 @@
         ../../hosts/fium/hardware-configuration.nix
         config.flake.modules.nixos.kubernetes-client
         config.flake.modules.nixos.server
+        config.flake.modules.nixos.selfhosted
       ];
+
+      selfhosted.metrics = {
+        tailnetDomain = "tail235c8.ts.net";
+        extraNodeTargets = [ ];
+      };
 
       boot.loader = {
         efi.canTouchEfiVariables = lib.mkForce false;

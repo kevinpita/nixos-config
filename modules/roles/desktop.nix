@@ -11,6 +11,7 @@
       ghostty
       kubernetes-client
       multimedia
+      node-exporter
       podman
       printing-3d
       productivity
