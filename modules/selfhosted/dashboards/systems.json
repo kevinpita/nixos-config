@@ -637,7 +637,7 @@
     },
     {
       "id": 9,
-      "title": "Filesystem space used",
+      "title": "Mounted filesystem usage by disk",
       "type": "bargauge",
       "datasource": {
         "type": "prometheus",
@@ -649,7 +649,7 @@
         "w": 8,
         "h": 8
       },
-      "description": "Space unavailable to an unprivileged user, including reserved space. Each mount is separate; Btrfs subvolumes can share the same capacity.",
+      "description": "Each filesystem is counted once and mapped to its backing disk, including through encryption. Usage covers mounted single-disk filesystems and includes reserved space. Multi-disk filesystems and ZFS pools are not attributed to individual disks. Collection older than three minutes is hidden.",
       "fieldConfig": {
         "defaults": {
           "unit": "percent",
@@ -699,8 +699,8 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "100 * (1 - node_filesystem_avail_bytes{job=\"node\",instance=\"$instance\",fstype!~\"tmpfs|devtmpfs|ramfs|squashfs|overlay|nsfs\",device_error=\"\"} / node_filesystem_size_bytes{job=\"node\",instance=\"$instance\",fstype!~\"tmpfs|devtmpfs|ramfs|squashfs|overlay|nsfs\",device_error=\"\"})",
-          "legendFormat": "{{mountpoint}}",
+          "expr": "100 * (1 - node_disk_mounted_available_bytes{job=\"node\",instance=\"$instance\"} / (node_disk_mounted_size_bytes{job=\"node\",instance=\"$instance\"} > 0)) and on (instance) (time() - node_disk_collection_timestamp_seconds{job=\"node\",instance=\"$instance\"} < 180)",
+          "legendFormat": "{{device}} - {{model}}",
           "range": false,
           "instant": true,
           "editorMode": "code"
@@ -709,7 +709,7 @@
     },
     {
       "id": 10,
-      "title": "Filesystem space available",
+      "title": "Mounted space available by disk",
       "type": "bargauge",
       "datasource": {
         "type": "prometheus",
@@ -726,7 +726,8 @@
         "defaults": {
           "unit": "bytes",
           "color": {
-            "mode": "palette-classic"
+            "mode": "fixed",
+            "fixedColor": "blue"
           },
           "thresholds": {
             "mode": "absolute",
@@ -760,8 +761,8 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "node_filesystem_avail_bytes{job=\"node\",instance=\"$instance\",fstype!~\"tmpfs|devtmpfs|ramfs|squashfs|overlay|nsfs\",device_error=\"\"}",
-          "legendFormat": "{{mountpoint}}",
+          "expr": "node_disk_mounted_available_bytes{job=\"node\",instance=\"$instance\"} and on (instance) (time() - node_disk_collection_timestamp_seconds{job=\"node\",instance=\"$instance\"} < 180)",
+          "legendFormat": "{{device}} - {{model}}",
           "range": false,
           "instant": true,
           "editorMode": "code"
@@ -770,7 +771,7 @@
     },
     {
       "id": 11,
-      "title": "Filesystem size",
+      "title": "Physical disk size",
       "type": "bargauge",
       "datasource": {
         "type": "prometheus",
@@ -787,7 +788,8 @@
         "defaults": {
           "unit": "bytes",
           "color": {
-            "mode": "palette-classic"
+            "mode": "fixed",
+            "fixedColor": "blue"
           },
           "thresholds": {
             "mode": "absolute",
@@ -821,8 +823,8 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "node_filesystem_size_bytes{job=\"node\",instance=\"$instance\",fstype!~\"tmpfs|devtmpfs|ramfs|squashfs|overlay|nsfs\",device_error=\"\"}",
-          "legendFormat": "{{mountpoint}}",
+          "expr": "node_physical_disk_size_bytes{job=\"node\",instance=\"$instance\"} and on (instance) (time() - node_disk_collection_timestamp_seconds{job=\"node\",instance=\"$instance\"} < 180)",
+          "legendFormat": "{{device}} - {{model}}",
           "range": false,
           "instant": true,
           "editorMode": "code"
@@ -1116,6 +1118,175 @@
           "legendFormat": "{{device}}",
           "range": true,
           "instant": false,
+          "editorMode": "code"
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "title": "Largest system folders",
+      "type": "bargauge",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 44,
+        "w": 12,
+        "h": 12
+      },
+      "description": "Top 20 main system folders by allocated bytes from du -x. Refreshed every six hours. Virtual filesystems and ZFS data are excluded. Child mounts are not included in their parent's size. Btrfs shared extents are not deduplicated. Data older than eight hours is hidden.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "min": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "noValue": "No data",
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "showUnfilled": true
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sort_desc(topk(20, node_folder_allocated_bytes{job=\"node\",instance=\"$instance\",scope=\"system\"}) and on (instance) (time() - node_folder_collection_timestamp_seconds{job=\"node\",instance=\"$instance\"} < 28800))",
+          "legendFormat": "{{path}}",
+          "range": false,
+          "instant": true,
+          "editorMode": "code"
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "title": "Largest home folders",
+      "type": "bargauge",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 44,
+        "w": 12,
+        "h": 12
+      },
+      "description": "Top 20 immediate folders inside the configured user's home, including hidden folders. Sizes are du -x allocated bytes, not exclusive physical usage on Btrfs. Scans run every six hours; data older than eight hours is hidden.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "min": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "noValue": "No data",
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "showUnfilled": true
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sort_desc(topk(20, node_folder_allocated_bytes{job=\"node\",instance=\"$instance\",scope=\"home\"}) and on (instance) (time() - node_folder_collection_timestamp_seconds{job=\"node\",instance=\"$instance\"} < 28800))",
+          "legendFormat": "{{path}}",
+          "range": false,
+          "instant": true,
+          "editorMode": "code"
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "title": "Time since folder scan",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 56,
+        "w": 12,
+        "h": 4
+      },
+      "description": "Last successful scan. The first scan starts after two minutes plus up to ten minutes of delay. Later scans run every six hours. Inspect node-folder-metrics.service if this age keeps increasing.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "dtdurations",
+          "color": {
+            "mode": "thresholds"
+          },
+          "noValue": "No data",
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 25200
+              },
+              {
+                "color": "red",
+                "value": 28800
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "horizontal",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "time() - node_folder_collection_timestamp_seconds{job=\"node\",instance=\"$instance\"}",
+          "legendFormat": "Since last scan",
+          "range": false,
+          "instant": true,
           "editorMode": "code"
         }
       ]

@@ -8,7 +8,9 @@
 | --- | --- |
 | `modules/selfhosted/metrics.nix` | The `selfhosted` aspect: Grafana, Prometheus, and target options |
 | `modules/selfhosted/node-exporter.nix` | The `node-exporter` aspect: host metrics and a Tailscale firewall rule |
-| `modules/selfhosted/zfs.nix` | ZFS exporter on monitored hosts with ZFS support |
+| `modules/selfhosted/zfs.nix` | ZFS exporter and scrub-date collection on monitored hosts with ZFS support |
+| `modules/selfhosted/storage.nix` | Physical disk collection and six-hour folder scans |
+| `modules/selfhosted/storage-metrics.py` | Disk topology, filesystem deduplication, and folder rankings |
 | `modules/selfhosted/dashboards.nix` | Grafana dashboard provisioning |
 | `modules/selfhosted/dashboards/*.json` | Repository-managed Systems and ZFS dashboards |
 | `modules/hosts/fium.nix` | Monitoring host selection, tailnet domain, and extra targets |
@@ -63,16 +65,36 @@ Expect one series for each target. `1` means that the last collection succeeded.
 
 Grafana loads two dashboards into the **Monitoring** folder:
 
-- **[Systems](http://fium:3000/d/systems):** select a device. View exporter status, uptime, CPU usage, RAM, swap, filesystem capacity, network traffic, and disk I/O. External node-exporter endpoints also appear in the device list.
-- **[ZFS pools](http://fium:3000/d/zfs-pools):** select a device and one or more pools. View pool health, access mode, capacity, fragmentation, dataset I/O, dataset space, and ARC cache metrics.
+- **[Systems](http://fium:3000/d/systems):** select a device. View exporter status, uptime, CPU usage, RAM, swap, physical disks, ranked folder sizes, network traffic, and disk I/O. External node-exporter endpoints also appear in the device list. The disk-capacity and folder panels need the extra collectors from this repository.
+- **[ZFS pools](http://fium:3000/d/zfs-pools):** select a device and one or more pools. View pool health, last completed scrub dates, access mode, capacity, fragmentation, dataset I/O, dataset space, and ARC cache metrics.
 
 Edit the JSON files in `modules/selfhosted/dashboards/`, run the configuration checks, and apply on `fium` when ready. Grafana reads these files from the Nix store. UI edits cannot replace the repository version. Removing a file removes its provisioned dashboard after deployment. No dashboard download or manual import is needed.
 
 The ZFS exporter starts on monitored hosts with `boot.supportedFilesystems.zfs` enabled. Currently, only `fium` qualifies. It reads all imported pools, including `downloads` and `seagate3x4`; it does not change pool settings. Prometheus builds the ZFS target list from enabled exporters. Both exporter jobs attach the same `host` label to registered NixOS devices.
 
+### Physical disks and folders
+
+The Systems dashboard identifies disks with `lsblk`, including their models. It maps partitions and encrypted devices to their backing disks and counts each filesystem UUID once. Btrfs subvolumes and bind mounts no longer repeat the same capacity. A host with one disk has one disk-size entry. Virtual machines report the block disks visible to the guest.
+
+**Physical disk size** is the full device size. **Mounted filesystem usage by disk** and **Mounted space available by disk** cover mounted filesystems backed by a single disk. Unmounted partitions are not measured. Multi-disk filesystems and ZFS pools are not assigned to individual disks; use the ZFS dashboard for pool capacity. The collector runs each minute. Data older than three minutes is hidden.
+
+node-exporter uses read-only home protection rather than a hidden `/home` mount. This preserves the real filesystem statistics without allowing writes to home directories.
+
+**Largest system folders** ranks the main directories under `/`. **Largest home folders** ranks immediate directories inside the configured user's home, including hidden directories. Each panel shows up to 20 entries. Virtual filesystems and ZFS data are excluded. `du -x` does not cross into child mounts, so a parent's count does not include those mounts. Directory symlinks are not followed. The two panels can contain overlapping data; do not add their totals.
+
+Folder sizes are allocated bytes reported by `du`, not exclusive physical disk usage. Btrfs reflinks and snapshots can share extents, so folder sizes do not necessarily add up to disk usage. No Btrfs quotas are enabled or changed.
+
+Folder scans run every six hours at low CPU and I/O priority. They start after two minutes plus up to ten minutes of delay on boot and stop after one hour if unfinished. The service runs as root with read-only filesystem access so it can count private directories. It reads metadata, not file contents. Failed scans retain the previous snapshot. The dashboard shows the scan age and hides rankings older than eight hours. Folder names and sizes are visible to clients that can read the node-exporter endpoint.
+
+Metrics are written atomically under `/var/lib/node-disk-metrics` and `/var/lib/node-folder-metrics`. Inspect collection with `journalctl -u node-disk-metrics -u node-folder-metrics`. No additional network ports are opened.
+
+### ZFS details
+
 Pool capacity is raw storage. It differs from usable dataset space because of RAID-Z parity, reservations, and overhead. Dataset I/O panels show logical reads and writes, not physical disk traffic. ARC is the Adaptive Replacement Cache shared by all pools on a device; its panels do not follow the pool selector. Dataset space includes descendants, so do not add parent and child values together.
 
 Check the **ZFS exporter** and **Pool collection** status panels before using pool values. A reachable exporter can still fail to collect data or return cached properties during a slow collection. Missing metrics show **No data**, not a healthy state. Rate panels need multiple samples after startup. An idle ARC can have an undefined hit ratio.
+
+The **Last completed scrub** panel uses a read-only collector that runs each minute. It reads structured `zpool status` output and sends metrics through node-exporter. `/var/lib/zfs-scrub-metrics/last-scrubs.json` retains observed completion dates by pool GUID, including during later scrubs or resilvers. A reused pool name does not inherit another pool's date. If no completed scrub has been observed, the date is unknown. A cancelled scrub is not a completion. The panel hides data when collection is more than three minutes old. A completion date does not prove that the scrub found no errors.
 
 Per-disk ZFS error counts, scrub progress, and resilver progress are not included.
 

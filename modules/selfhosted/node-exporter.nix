@@ -1,6 +1,6 @@
 {
   flake.modules.nixos.node-exporter =
-    { config, ... }:
+    { config, lib, ... }:
     {
       assertions = [
         {
@@ -14,6 +14,8 @@
         openFirewall = false;
         enabledCollectors = [ "systemd" ];
       };
+
+      systemd.services.prometheus-node-exporter.serviceConfig.ProtectHome = lib.mkForce "read-only";
 
       networking.firewall.interfaces.${config.services.tailscale.interfaceName}.allowedTCPPorts = [
         config.services.prometheus.exporters.node.port

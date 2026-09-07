@@ -221,7 +221,7 @@
       "gridPos": {
         "x": 8,
         "y": 0,
-        "w": 8,
+        "w": 6,
         "h": 4
       },
       "description": "Pool health codes from zfs_exporter. Check collection status before using these values.",
@@ -312,9 +312,9 @@
         "uid": "prometheus"
       },
       "gridPos": {
-        "x": 16,
+        "x": 14,
         "y": 0,
-        "w": 8,
+        "w": 4,
         "h": 4
       },
       "description": "",
@@ -369,6 +369,61 @@
         {
           "refId": "A",
           "expr": "zfs_pool_readonly{job=\"zfs\",host=\"$host\",pool=~\"$pool\"}",
+          "legendFormat": "{{pool}}",
+          "range": false,
+          "instant": true,
+          "editorMode": "code"
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "title": "Last completed scrub",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 18,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "description": "Last observed completed scrub for each pool, retained during later scans. Unknown dates or collection older than three minutes show No data. Completion does not mean that the scrub found no errors.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "dateTimeAsIso",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "noValue": "No data",
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "vertical",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "text": {
+          "titleSize": 14,
+          "valueSize": 16
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "1000 * (node_zfs_pool_last_scrub_timestamp_seconds{job=\"node\",host=\"$host\",pool=~\"$pool\"} > 0) and on (host, instance) (time() - node_zfs_scrub_collection_timestamp_seconds{job=\"node\",host=\"$host\"} < 180)",
           "legendFormat": "{{pool}}",
           "range": false,
           "instant": true,
