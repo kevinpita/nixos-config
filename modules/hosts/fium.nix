@@ -14,6 +14,7 @@
       selfhosted.metrics = {
         tailnetDomain = "tail235c8.ts.net";
         extraNodeTargets = [ ];
+        telegram.enable = true;
       };
 
       boot.loader = {
