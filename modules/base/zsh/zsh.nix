@@ -53,6 +53,8 @@
             open = "xdg-open";
 
             cat = "bat";
+            ll = lib.mkForce "lsd -lah";
+            lld = "ll -L";
             htop = "btop";
             vi = "nvim";
             vim = "nvim";
