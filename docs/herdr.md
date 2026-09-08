@@ -51,9 +51,12 @@ Hyprland runs the recorder locally, even when a remote Herdr pane has focus.
 Recording and transcription do not depend on Herdr, SSH, or Pi. Nothing pastes or
 sends automatically. You can use the same shortcut outside a terminal.
 
-`modules/ui/dictation.nix` appends the binding to the generated Hyprland Lua config,
-after the shared `nixos-hyprland` config. It uses the recorder's absolute Nix store
-path. The shared source and host Lua files need no duplicate binding.
+The `nixos-hyprland` desktop module owns the recorder, pinned Whisper model, and
+shortcut. Its `modules/dictation.nix` appends the binding to the generated Hyprland
+Lua config with an absolute Nix store path. `nixos-config` only imports the desktop
+module; no separate dictation aspect or host binding is needed.
+See [local dictation in nixos-hyprland](https://github.com/kevinpita/nixos-hyprland#local-dictation)
+for source ownership and usage.
 
 The recorder uses one recording per local user. A red microphone icon on the
 right side of each DMS bar shows active microphone capture. It disappears when

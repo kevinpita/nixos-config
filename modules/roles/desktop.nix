@@ -24,7 +24,6 @@
     ];
 
     desktop.imports = [
-      config.flake.modules.nixos.dictation
       config.flake.modules.nixos.workstation
       inputs.nixos-hyprland.nixosModules.default
     ];

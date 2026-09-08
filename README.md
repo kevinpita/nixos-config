@@ -36,7 +36,7 @@ Git settings belong to `modules/dev/git.nix`. Account and Home Manager setup bel
 | Repository | Local checkout needed for | Ownership |
 | --- | --- | --- |
 | `~/nixos-config` | Runtime configuration and maintenance | Hosts, roles, container tools, Claude settings |
-| `~/nixos-hyprland` | Desktop runtime; local builds | Shared Hyprland and DMS settings |
+| `~/nixos-hyprland` | Desktop runtime; local builds | Shared Hyprland, DMS settings, and local dictation |
 | `~/nixos-pi` | Local builds and Pi development | Pi package, SDK, pinned subagents, extensions, skills |
 | `~/nixos-nvim` | Neovim development | Editor configuration |
 | `~/nixos-secrets` | Secret updates | Encrypted secrets and age recipients |
