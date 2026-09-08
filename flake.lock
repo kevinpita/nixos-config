@@ -547,22 +547,6 @@
         "type": "github"
       }
     },
-    "pi-extensions": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1788566793,
-        "narHash": "sha256-oTlcVLJtkdGQBgG/jYwZ+KZS6lxYK/toniP79tPYA3Q=",
-        "owner": "kevinpita",
-        "repo": "nixos-pi",
-        "rev": "3edd9100da74bbd3ecfeed7abf77cb56f28619d8",
-        "type": "github"
-      },
-      "original": {
-        "owner": "kevinpita",
-        "repo": "nixos-pi",
-        "type": "github"
-      }
-    },
     "nixos-secrets": {
       "flake": false,
       "locked": {
@@ -767,6 +751,22 @@
         "type": "github"
       }
     },
+    "pi-extensions": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1788868884,
+        "narHash": "sha256-ngEf6jK25GSBsm3ZXScpxUo0ZvyB3r00n4LdT5L5HO0=",
+        "owner": "kevinpita",
+        "repo": "nixos-pi",
+        "rev": "b89293cc172ac5867f9584e93291f8631035acc2",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kevinpita",
+        "repo": "nixos-pi",
+        "type": "github"
+      }
+    },
     "pi-flake": {
       "inputs": {
         "home-manager": [
@@ -828,6 +828,7 @@
         "bast-nix": "bast-nix",
         "claude-code": "claude-code",
         "codex-cli-nix": "codex-cli-nix",
+        "dankcalendar": "dankcalendar",
         "disko": "disko",
         "flake-parts": "flake-parts_2",
         "herdr-nix": "herdr-nix",
@@ -838,18 +839,17 @@
         "lazyrsync-nix": "lazyrsync-nix",
         "nixos-grub-themes": "nixos-grub-themes",
         "nixos-hardware": "nixos-hardware",
-        "dankcalendar": "dankcalendar",
+        "nixos-secrets": "nixos-secrets",
+        "nixos-work": "nixos-work",
+        "nixpkgs": "nixpkgs_9",
         "pi-extensions": "pi-extensions",
         "pi-flake": "pi-flake",
         "plugins-lze": "plugins-lze",
         "plugins-lzextras": "plugins-lzextras",
-        "wrappers": "wrappers",
-        "nixos-secrets": "nixos-secrets",
-        "nixos-work": "nixos-work",
-        "nixpkgs": "nixpkgs_9",
         "sops-nix": "sops-nix",
         "treefmt-nix": "treefmt-nix_2",
-        "tuicr-nix": "tuicr-nix"
+        "tuicr-nix": "tuicr-nix",
+        "wrappers": "wrappers"
       }
     },
     "sops-nix": {
