@@ -11,6 +11,7 @@
 
       config.flake.modules.nixos.desktop
       config.flake.modules.nixos.dni
+      config.flake.modules.nixos.herdr-ssh-client
       config.flake.modules.nixos.incus
       config.flake.modules.nixos.reverse-engineering
       config.flake.modules.nixos.vmware

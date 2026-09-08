@@ -1,8 +1,6 @@
 {
   flake.modules.nixos.dictation =
     {
-      config,
-      inputs,
       lib,
       pkgs,
       username,
@@ -32,22 +30,16 @@
         ];
         text = ''
           export DICTATE_MODEL="''${DICTATE_MODEL:-${whisperSmallEn}}"
-          ${lib.optionalString (config.dictation.pulseServer != null) ''
-            export PULSE_SERVER=${lib.escapeShellArg config.dictation.pulseServer}
-          ''}
         ''
         + builtins.readFile ./dictate-toggle.sh;
       };
     in
     {
-      imports = [ inputs.nixos-pi.nixosModules.dictationExtension ];
-
-      options.dictation.pulseServer = lib.mkOption {
-        type = lib.types.nullOr lib.types.str;
-        default = null;
-        description = "PulseAudio server used by the dictation recorder.";
+      home-manager.users.${username} = {
+        home.packages = [ dictateToggle ];
+        xdg.configFile."hypr/hyprland.lua".text = lib.mkAfter ''
+          hl.bind("SUPER + G", hl.dsp.exec_cmd("${dictateToggle}/bin/dictate-toggle"))
+        '';
       };
-
-      config.home-manager.users.${username}.home.packages = [ dictateToggle ];
     };
 }

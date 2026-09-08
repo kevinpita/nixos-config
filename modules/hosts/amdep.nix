@@ -8,6 +8,7 @@
         ../../hosts/amdep/hardware-configuration.nix
 
         config.flake.modules.nixos.desktop
+        config.flake.modules.nixos.herdr-ssh-client
         config.flake.modules.nixos.qemu
       ];
 

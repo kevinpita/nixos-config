@@ -50,73 +50,71 @@
       };
     in
     {
-      environment.systemPackages = [
-        pkgs.bun
-        pkgs.herdr
-      ];
+      environment.systemPackages = [ pkgs.bun ];
 
       home-manager.users.${username} = {
-        xdg.configFile."herdr/config.toml" = {
-          force = true;
-          text = ''
-            onboarding = false
+        imports = [ inputs.herdr-nix.homeModules.default ];
 
-            [theme]
-            name = "dracula"
-
-            [ui]
-            show_agent_labels_on_pane_borders = true
-
-            [keys]
-            goto = ""
-
-            [[keys.command]]
-            key = "prefix+g"
-            type = "popup"
-            command = "lazygit"
-            description = "open lazygit"
-            width = "80%"
-            height = "80%"
-
-            [[keys.command]]
-            key = "prefix+y"
-            type = "popup"
-            command = "yazi"
-            description = "open yazi"
-            width = "80%"
-            height = "80%"
-
-            [[keys.command]]
-            key = "prefix+o"
-            type = "shell"
-            command = "${openPiTab}/bin/herdr-open-pi-tab"
-            description = "open Pi in a new tab"
-
-            [[keys.command]]
-            key = "prefix+alt+p"
-            type = "popup"
-            command = "${openPrWorkspaces}/bin/herdr-open-pr-workspaces"
-            description = "choose and open GitHub PR workspaces"
-            width = "65%"
-            height = "65%"
-
-            [ui.sound]
-            enabled = false
-          '';
+        programs.herdr = {
+          enable = true;
+          package = pkgs.herdr;
+          extraPackages = with pkgs; [
+            fzf
+            git
+            jq
+            openssh
+            worktrunk
+          ];
+          plugins.worktrunk = herdrWorktrunk;
+          settings = {
+            theme.name = "dracula";
+            ui = {
+              show_agent_labels_on_pane_borders = true;
+              sound.enabled = false;
+            };
+            keys = {
+              goto = "";
+              open_notification_target = "";
+              command = [
+                {
+                  key = "prefix+g";
+                  type = "popup";
+                  command = "${pkgs.lazygit}/bin/lazygit";
+                  description = "open lazygit";
+                  width = "80%";
+                  height = "80%";
+                }
+                {
+                  key = "prefix+y";
+                  type = "popup";
+                  command = "${pkgs.yazi}/bin/yazi";
+                  description = "open yazi";
+                  width = "80%";
+                  height = "80%";
+                }
+                {
+                  key = "prefix+o";
+                  type = "shell";
+                  command = "${openPiTab}/bin/herdr-open-pi-tab";
+                  description = "open Pi in a new tab";
+                }
+                {
+                  key = "prefix+alt+p";
+                  type = "popup";
+                  command = "${openPrWorkspaces}/bin/herdr-open-pr-workspaces";
+                  description = "choose and open GitHub PR workspaces";
+                  width = "65%";
+                  height = "65%";
+                }
+              ];
+            };
+          };
         };
 
-        home.activation.installHerdrWorktrunk =
-          inputs.home-manager.lib.hm.dag.entryAfter [ "writeBoundary" ]
+        home.activation.reloadHerdrConfig =
+          inputs.home-manager.lib.hm.dag.entryAfter [ "linkGeneration" ]
             ''
               if [[ -z "''${DRY_RUN_CMD:-}" ]]; then
-                (
-                  # Register offline so an older running server cannot block activation.
-                  plugin_socket_dir="$(${pkgs.coreutils}/bin/mktemp -d)"
-                  trap '${pkgs.coreutils}/bin/rmdir "$plugin_socket_dir"' EXIT
-                  HERDR_SOCKET_PATH="$plugin_socket_dir/herdr.sock" \
-                    ${pkgs.herdr}/bin/herdr plugin link "${herdrWorktrunk}" >/dev/null
-                )
-
                 ${pkgs.herdr}/bin/herdr server reload-config >/dev/null 2>&1 || true
               fi
             '';

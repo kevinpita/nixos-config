@@ -59,6 +59,8 @@ Use `nix flake update` for a complete dependency update. Review the lock diff be
 
 Pi and `pi-subagents` are packaged together in `nixos-pi`. Restart Pi after applying a runtime update.
 
+See [Herdr SSH machines and dictation](docs/herdr.md) for the declarative Herdr settings, remote connections, and local Super+G dictation.
+
 ## Hosts
 
 Hosts are defined as `modules/hosts/<hostname>.nix` aspects and auto-discovered. Deploy with `--flake ~/nixos-config#<hostname>`.
