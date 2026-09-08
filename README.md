@@ -68,6 +68,10 @@ Use `nix flake update` for a complete dependency update. Review the lock diff be
 
 The `pi-flake` input supplies the Pi runtime. `modules/pi.nix` selects extensions and npm packages. Restart Pi after applying a runtime update.
 
+Herdr Auto Title manages tab names from the directory, branch, and terminal title. It does not generate names for saved Pi sessions. The former Pi `auto-session-name` and dictation extensions are removed; desktop Super+G dictation remains available.
+
+After applying the Auto Title configuration, restart the Herdr server when you can close its active session. A configuration reload or a new terminal client does not start this plugin. Do not stop the server while work is running.
+
 See [Herdr SSH machines and dictation](docs/herdr.md) for the declarative Herdr settings, remote connections, and local Super+G dictation.
 
 ## Hosts

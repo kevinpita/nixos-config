@@ -65,7 +65,10 @@
             openssh
             worktrunk
           ];
-          plugins.worktrunk = herdrWorktrunk;
+          plugins = {
+            worktrunk = herdrWorktrunk;
+            auto-title = pkgs.callPackage ../../packages/herdr-auto-title/package.nix { };
+          };
           settings = {
             theme.name = "dracula";
             ui = {

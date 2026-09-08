@@ -95,7 +95,6 @@
             };
 
             ".pi/agent/extensions/auto-compact.ts".source = extensions + "/auto-compact.ts";
-            ".pi/agent/extensions/auto-session-name.ts".source = extensions + "/auto-session-name.ts";
             ".pi/agent/extensions/copy-code/index.ts".source = extensions + "/copy-code/index.ts";
             ".pi/agent/extensions/copy-code/parser.ts".source = extensions + "/copy-code/parser.ts";
             ".pi/agent/extensions/file-picker.ts".source = extensions + "/file-picker.ts";
@@ -171,15 +170,6 @@
 
             ".pi/agent/prompts".source = ../pi/prompts;
             ".pi/agent/themes".source = ../pi/themes;
-
-            ".pi/agent/zentui.json" = {
-              force = true;
-              text = builtins.toJSON {
-                extensionStatuses.colorModes = {
-                  dictation = "original";
-                };
-              };
-            };
 
             ".claude/skills" = {
               force = true;

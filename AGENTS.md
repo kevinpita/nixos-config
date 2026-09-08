@@ -44,4 +44,3 @@ Format the repository:
 ```bash
 nix fmt
 ```
-```
