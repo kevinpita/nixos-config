@@ -9,9 +9,15 @@
         config.flake.modules.nixos.hermes-vm
         config.flake.modules.nixos.kubernetes-server
         config.flake.modules.nixos.selfhosted
+        config.flake.modules.nixos.selfhosted-web
       ];
 
       services.k3s.extraFlags = [ "--tls-san=fium.tail235c8.ts.net" ];
+
+      selfhosted.web = {
+        domain = "kevinpita.com";
+        tailscaleIPv4 = "100.85.41.60";
+      };
 
       selfhosted.metrics = {
         tailnetDomain = "tail235c8.ts.net";

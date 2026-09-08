@@ -124,9 +124,17 @@ in
           done
         '';
 
-        networking.firewall.interfaces.${config.services.tailscale.interfaceName}.allowedTCPPorts = [
-          grafana.settings.server.http_port
-        ];
+        networking.firewall.interfaces.${config.services.tailscale.interfaceName}.allowedTCPPorts =
+          lib.optionals
+            (
+              !(builtins.elem grafana.settings.server.http_addr [
+                "127.0.0.1"
+                "::1"
+              ])
+            )
+            [
+              grafana.settings.server.http_port
+            ];
       };
     };
 }
