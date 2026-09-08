@@ -9,7 +9,7 @@
         config.flake.modules.nixos.hermes-vm
         config.flake.modules.nixos.kubernetes-server
         config.flake.modules.nixos.selfhosted
-        config.flake.modules.nixos.selfhosted-web
+        config.flake.modules.nixos.selfhosted-secrets
       ];
 
       services.k3s.extraFlags = [ "--tls-san=fium.tail235c8.ts.net" ];
