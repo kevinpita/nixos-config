@@ -141,11 +141,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1788789613,
-        "narHash": "sha256-0dUlxg2DvBjMd+UimytDBHOspB4uDtY104f0Ejgiwhs=",
+        "lastModified": 1788873938,
+        "narHash": "sha256-gIxv9O8g0qP+BH/i39fLYMjJ6KjExBp4PMjFRHAtZpk=",
         "owner": "AvengeMedia",
         "repo": "dankcalendar",
-        "rev": "fb812604a48f4763f938a1ff6a1fee9f6fef81a5",
+        "rev": "c9f60d4a9253a43f2b979931d92966b117392769",
         "type": "github"
       },
       "original": {
@@ -550,11 +550,11 @@
     "nixos-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1788815082,
-        "narHash": "sha256-SbVkfoj/KMXKiY8nDGBgBPzJNHPnzn9nReyi8eg0kBo=",
+        "lastModified": 1788874718,
+        "narHash": "sha256-7ROkf44/bMVANbchtDGyWXW2TbP7ph6QpAdxdKYuIL8=",
         "ref": "refs/heads/main",
-        "rev": "f3d2c800127eab307d531af6b3370b4833ec40fa",
-        "revCount": 31,
+        "rev": "04a7c469c0b917b49818b207aaf287c68c055dd9",
+        "revCount": 32,
         "type": "git",
         "url": "ssh://git@github.com/kevinpita/nixos-secrets"
       },

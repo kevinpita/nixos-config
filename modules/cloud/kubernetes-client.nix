@@ -1,11 +1,34 @@
 {
   flake.modules.nixos.kubernetes-client =
     {
+      inputs,
+      lib,
       pkgs,
       username,
+      ciMode,
       ...
     }:
+    let
+      secretsPath = "${inputs.nixos-secrets}/secrets";
+      kubeFiles = lib.filterAttrs (
+        name: type: type == "regular" && builtins.match "kube-.+\\.yaml" name != null
+      ) (builtins.readDir secretsPath);
+    in
     {
+      sops.secrets = lib.optionalAttrs (!ciMode) (
+        lib.mapAttrs' (
+          name: _:
+          lib.nameValuePair (lib.removeSuffix ".yaml" name) {
+            sopsFile = "${secretsPath}/${name}";
+            format = "yaml";
+            key = "";
+            owner = username;
+            mode = "0600";
+            path = "/home/${username}/.kube/${name}";
+          }
+        ) kubeFiles
+      );
+
       environment.systemPackages = [
         pkgs.argocd
         pkgs.helm-tui

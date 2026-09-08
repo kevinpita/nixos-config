@@ -72,8 +72,6 @@ Herdr Auto Title manages tab names from the directory, branch, and terminal titl
 
 After applying the Auto Title configuration, restart the Herdr server when you can close its active session. A configuration reload or a new terminal client does not start this plugin. Do not stop the server while work is running.
 
-See [Herdr SSH machines and dictation](docs/herdr.md) for the declarative Herdr settings, remote connections, and local Super+G dictation.
-
 ## Hosts
 
 Hosts are defined as `modules/hosts/<hostname>.nix` aspects and auto-discovered. Deploy with `--flake ~/nixos-config#<hostname>`.
@@ -81,7 +79,7 @@ Hosts are defined as `modules/hosts/<hostname>.nix` aspects and auto-discovered.
 | Host | Type | Notes |
 | ------- | ------------------- | ------------------------------------------- |
 | amdep | Workstation | Full desktop, dual-boot |
-| fium | Server | Self-hosted monitoring, ZFS storage, [Hermes Debian VM](docs/hermes-vm.md) |
+| fium | Server | Self-hosted monitoring, ZFS storage, Hermes Debian VM, Kubernetes |
 | minidesk | Server | Work configuration |
 | t14g6 | ThinkPad laptop | Full desktop, TLP, nixos-hardware module |
 
@@ -218,8 +216,4 @@ The shipped age key provides the SSH keys and user password. On a desktop, use a
 
 ## Self-hosted monitoring
 
-`fium` runs Grafana and Prometheus. All installed NixOS hosts provide node-exporter metrics over Tailscale. See [Self-hosted monitoring](docs/selfhosted.md) for access, credentials, additional targets, and deployment.
-
-## Containers
-
-All three hosts use rootless Podman. See [Container use and Docker migration](docs/containers.md) before applying this change to a host with Docker workloads. Docker images and volumes are not moved or deleted automatically.
+`fium` runs Grafana and Prometheus. All installed NixOS hosts provide node-exporter metrics over Tailscale.

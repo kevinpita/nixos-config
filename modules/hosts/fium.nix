@@ -7,10 +7,11 @@
         ../../hosts/fium/disko-config.nix
         ../../hosts/fium/hardware-configuration.nix
         config.flake.modules.nixos.hermes-vm
-        config.flake.modules.nixos.kubernetes-client
-        config.flake.modules.nixos.server
+        config.flake.modules.nixos.kubernetes-server
         config.flake.modules.nixos.selfhosted
       ];
+
+      services.k3s.extraFlags = [ "--tls-san=fium.tail235c8.ts.net" ];
 
       selfhosted.metrics = {
         tailnetDomain = "tail235c8.ts.net";
