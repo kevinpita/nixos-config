@@ -1,4 +1,4 @@
-{ config, inputs, ... }:
+{ config, ... }:
 {
   flake.modules.nixos = {
     workstation.imports = with config.flake.modules.nixos; [
@@ -25,7 +25,7 @@
 
     desktop.imports = [
       config.flake.modules.nixos.workstation
-      inputs.nixos-hyprland.nixosModules.default
+      config.flake.modules.nixos.hyprland
     ];
   };
 }

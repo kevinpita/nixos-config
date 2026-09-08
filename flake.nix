@@ -43,9 +43,19 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nvim-config = {
-      url = "github:kevinpita/nixos-nvim";
+    wrappers = {
+      url = "github:BirdeeHub/nix-wrapper-modules";
       inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    plugins-lze = {
+      url = "github:BirdeeHub/lze";
+      flake = false;
+    };
+
+    plugins-lzextras = {
+      url = "github:BirdeeHub/lzextras";
+      flake = false;
     };
 
     nixos-secrets = {
@@ -68,16 +78,20 @@
 
     bast-nix.url = "github:kevinpita/bast-nix";
 
-    nixos-pi = {
+    pi-extensions = {
       url = "github:kevinpita/nixos-pi";
+      flake = false;
+    };
+
+    pi-flake = {
+      url = "github:ChauDucToan/pi-flake";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
 
-    nixos-hyprland = {
-      url = "github:kevinpita/nixos-hyprland";
+    dankcalendar = {
+      url = "github:AvengeMedia/dankcalendar";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.home-manager.follows = "home-manager";
     };
 
     ku-nix.url = "github:kevinpita/ku-nix";

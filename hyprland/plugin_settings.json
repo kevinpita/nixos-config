@@ -1,0 +1,40 @@
+{
+  "aiOverviewControl": {
+    "enabled": true,
+    "providerSelection": "codex,claude,antigravity",
+    "pillMode": "top",
+    "barWindowOverrides": "codex:highest,claude:highest,antigravity:highest",
+    "densityMode": "compact",
+    "pillProviders": "codex"
+  },
+  "calculator": {
+    "enabled": true,
+    "trigger": "="
+  },
+  "dankCalendarAgenda": {
+    "enabled": true,
+    "dynamicWidth": true
+  },
+  "dockerManager": {
+    "enabled": true,
+    "dockerBinary": "podman",
+    "terminalApp": "ghostty",
+    "groupByCompose": false
+  },
+  "emojiLauncher": {
+    "enabled": true
+  },
+  "piSessions": {
+    "enabled": true
+  },
+  "pixelBuds": {
+    "enabled": true
+  },
+  "timeManager": {
+    "enabled": true,
+    "displayMode": "time"
+  },
+  "workspaceFinder": {
+    "enabled": true
+  }
+}

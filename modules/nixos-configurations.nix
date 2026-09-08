@@ -58,7 +58,7 @@ in
           module
           inputs.disko.nixosModules.disko
           inputs.home-manager.nixosModules.home-manager
-          inputs.nvim-config.nixosModules.neovim
+          config.flake.modules.nixos.neovim
           inputs.sops-nix.nixosModules.sops
         ];
         specialArgs = {

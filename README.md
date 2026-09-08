@@ -9,9 +9,9 @@ Run these commands from `~/nixos-config`. Builds do not activate the configurati
 | `nix fmt` | Locked | Format and lint repository files |
 | `just build` | Locked, real private inputs | Build the current host without activation |
 | `just switch` | Locked, real private inputs | Build and activate the current host |
-| `just build-local` | Local Pi and Hyprland checkouts; locked private inputs | Build sibling development changes without activation |
+| `just build-local` | Local Pi extensions; locked private inputs | Build extension changes without activation |
 
-`build` and `switch` use the same input revisions. `build-local` does not change `flake.lock`. Publish sibling changes and update the lock before using `switch`.
+`build` and `switch` use the same input revisions. Configuration changes in this repository need no input update. `build-local` is only for external Pi extension development and does not change `flake.lock`. Publish extension changes and update `pi-extensions` before using `switch`.
 
 ## Where to make changes
 
@@ -21,6 +21,13 @@ modules/nixos-configurations.nix Host discovery and shared package set
 modules/hosts/<hostname>.nix     Host hardware, role, and feature selection
 modules/roles/                  Shared feature groups
 modules/<category>/             Feature settings (aspects)
+modules/neovim.nix              Neovim integration
+modules/pi.nix                  Pi settings and integration
+modules/hyprland/               Desktop and DMS integration
+neovim/                        Lua configuration and Nix wrapper
+pi/                            Skills, prompts, themes, and maintenance
+hyprland/                      Lua, DMS preferences, plugins, and patches
+packages/                      Local helper packages
 hosts/<hostname>/               Raw hardware, disk, and host UI files
 lib/private-inputs.nix          Private-input validation
 ```
@@ -35,29 +42,31 @@ Git settings belong to `modules/dev/git.nix`. Account and Home Manager setup bel
 
 | Repository | Local checkout needed for | Ownership |
 | --- | --- | --- |
-| `~/nixos-config` | Runtime configuration and maintenance | Hosts, roles, container tools, Claude settings |
-| `~/nixos-hyprland` | Desktop runtime; local builds | Shared Hyprland, DMS settings, and local dictation |
-| `~/nixos-pi` | Local builds and Pi development | Pi package, SDK, pinned subagents, extensions, skills |
-| `~/nixos-nvim` | Neovim development | Editor configuration |
+| `~/nixos-config` | Desktop runtime and configuration changes | Hosts, roles, Neovim, Pi configuration, Hyprland, DMS, and local helpers |
+| `~/nixos-pi` | Local extension development only | Pi extension code; consumed as the `pi-extensions` source input |
 | `~/nixos-secrets` | Secret updates | Encrypted secrets and age recipients |
 | `~/nixos-work` | Private work configuration updates | `github`, `cloud`, and `servers` modules |
 
 Locked builds fetch the inputs they need. A local secrets or work checkout is not required for a locked build, but GitHub SSH access is required when those inputs are not cached.
 
-Hyprland loads Lua files from writable checkouts. DMS settings and Claude settings also use writable files. **A Nix generation rollback does not restore those files.** Record their revisions and review their Git changes separately. Do not assume that an old system generation contains an old desktop configuration.
+Hyprland loads Lua from `~/nixos-config/hyprland/` and `hosts/<hostname>/`. DMS and Claude preferences also use writable files in this repository. **A Nix generation rollback does not restore those files.** Review their Git changes separately.
+
+DMS recent emoji and the timer's last-used mode use `~/.local/state/DankMaterialShell/plugins/`, not Git. Activation copies these values from the old plugin settings when no state value exists. Plugin preferences still use `hyprland/plugin_settings.json`.
+
+The old Neovim and Hyprland repositories are no longer inputs. Keep their clones until the migration has been applied and verified on each desktop host. No repository history was rewritten. The imported sources were the locked revisions: Neovim `6c6c87d`, Hyprland `d8ad2f1`, and Pi `3edd910`.
 
 ## Update inputs
 
-For a sibling change, publish it, then update only that input:
+For an external Pi extension change, publish it, then update only that input:
 
 ```bash
-nix flake update nixos-pi
+nix flake update pi-extensions
 just build
 ```
 
 Use `nix flake update` for a complete dependency update. Review the lock diff before applying it. Some package inputs intentionally use separate nixpkgs revisions; do not add `follows` without checking that package's compatibility.
 
-Pi and `pi-subagents` are packaged together in `nixos-pi`. Restart Pi after applying a runtime update.
+The `pi-flake` input supplies the Pi runtime. `modules/pi.nix` selects extensions and npm packages. Restart Pi after applying a runtime update.
 
 See [Herdr SSH machines and dictation](docs/herdr.md) for the declarative Herdr settings, remote connections, and local Super+G dictation.
 
@@ -191,22 +200,12 @@ The shipped age key provides the SSH keys and user password. On a desktop, use a
    git clone git@github.com:kevinpita/nixos-config.git ~/nixos-config
    ```
 
-1. On desktop hosts, clone Hyprland and select the revision in the lock:
+1. On desktop hosts, use the same `nixos-config` revision that you deploy. No separate Neovim or Hyprland checkout is required.
 
-   ```bash
-   git clone git@github.com:kevinpita/nixos-hyprland.git ~/nixos-hyprland
-   git -C ~/nixos-hyprland checkout --detach \
-     "$(jq -r '.nodes["nixos-hyprland"].locked.rev' ~/nixos-config/flake.lock)"
-   ```
-
-   For later Hyprland development, create a branch from this revision. Review writable settings separately from Nix updates.
-
-1. If you need local development commands, clone the missing sibling checkouts:
+1. If you need to develop Pi extensions with `build-local`, clone their repository:
 
    ```bash
    git clone git@github.com:kevinpita/nixos-pi.git ~/nixos-pi
-   # Headless hosts also need this checkout for build-local.
-   test -d ~/nixos-hyprland || git clone git@github.com:kevinpita/nixos-hyprland.git ~/nixos-hyprland
    ```
 
 1. If you need to edit secrets, clone `nixos-secrets` and restore the admin key to `~/.config/sops/age/keys.txt` from KeePass. Set mode `0600`.

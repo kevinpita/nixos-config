@@ -1,0 +1,20 @@
+--- a/TimeManagerWidget.qml
++++ b/TimeManagerWidget.qml
+@@ -159,7 +159,7 @@
+         resetStop();
+         globalMode.set(mode);
+         if (pluginService)
+-            pluginService.savePluginData(pluginId, "lastMode", mode);
++            pluginService.savePluginState(pluginId, "lastMode", mode);
+     }
+ 
+     function startPause() {
+@@ -300,7 +300,7 @@
+ 
+     // ── Restore last mode on load ──
+     Component.onCompleted: {
+-        var savedMode = pluginService ? pluginService.loadPluginData(pluginId, "lastMode") : null;
++        var savedMode = pluginService ? pluginService.loadPluginState(pluginId, "lastMode") : null;
+         if (savedMode && ["timer", "stopwatch", "pomodoro"].indexOf(savedMode) >= 0)
+             globalMode.set(savedMode);
+     }

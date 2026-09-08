@@ -1,0 +1,41 @@
+--- a/EmojiLauncher.qml
++++ b/EmojiLauncher.qml
+@@ -35,6 +35,11 @@
+         target: pluginService
+         enabled: pluginService !== null
+ 
++        function onPluginStateChanged(changedPluginId) {
++            if (changedPluginId === "emojiLauncher")
++                loadSettings();
++        }
++
+         function onPluginDataChanged(changedPluginId) {
+             if (changedPluginId === "emojiLauncher")
+                 loadSettings();
+@@ -47,7 +52,7 @@
+         trigger = pluginService.loadPluginData("emojiLauncher", "trigger", ":e");
+         pasteOnSelect = pluginService.loadPluginData("emojiLauncher", "pasteOnSelect", false);
+         useDMS = pluginService.loadPluginData("emojiLauncher", "useDMS", true);
+-        var storedRecent = pluginService.loadPluginData("emojiLauncher", "recentEmojis", "");
++        var storedRecent = pluginService.loadPluginState("emojiLauncher", "recentEmojis", "");
+         recentEmojis = storedRecent.length > 0 ? storedRecent.split(",") : [];
+         defaultSkinTone = pluginService.loadPluginData("emojiLauncher", "defaultSkinTone", "");
+     }
+@@ -278,7 +283,7 @@
+         // while undefined _preScored lets DMS use its own default (900).
+         const recentMap = {};
+         if (trimmedQuery.length === 0 && pluginService) {
+-            const storedR = pluginService.loadPluginData("emojiLauncher", "recentEmojis", "");
++            const storedR = pluginService.loadPluginState("emojiLauncher", "recentEmojis", "");
+             if (storedR && storedR.length > 0) {
+                 const storedArr = storedR.split(",");
+                 for (let r = 0; r < storedArr.length; r++) {
+@@ -381,7 +386,7 @@
+             arr.length = 20;
+         recentEmojis = arr;
+         if (pluginService)
+-            pluginService.savePluginData("emojiLauncher", "recentEmojis", arr.join(","));
++            pluginService.savePluginState("emojiLauncher", "recentEmojis", arr.join(","));
+     }
+ 
+     function executeItem(item) {

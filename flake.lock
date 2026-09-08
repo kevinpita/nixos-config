@@ -137,7 +137,6 @@
       "inputs": {
         "dank-qml-common": "dank-qml-common",
         "nixpkgs": [
-          "nixos-hyprland",
           "nixpkgs"
         ]
       },
@@ -548,40 +547,8 @@
         "type": "github"
       }
     },
-    "nixos-hyprland": {
-      "inputs": {
-        "dankcalendar": "dankcalendar",
-        "home-manager": [
-          "home-manager"
-        ],
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1788855223,
-        "narHash": "sha256-7e6cuxKQKycbZCsKDvyejeUuQbCG9VU3Nn2bFTfZgt8=",
-        "owner": "kevinpita",
-        "repo": "nixos-hyprland",
-        "rev": "d8ad2f17fdbf7f4cdb5f19564eebc597672d7780",
-        "type": "github"
-      },
-      "original": {
-        "owner": "kevinpita",
-        "repo": "nixos-hyprland",
-        "type": "github"
-      }
-    },
-    "nixos-pi": {
-      "inputs": {
-        "home-manager": [
-          "home-manager"
-        ],
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "pi-flake": "pi-flake"
-      },
+    "pi-extensions": {
+      "flake": false,
       "locked": {
         "lastModified": 1788566793,
         "narHash": "sha256-oTlcVLJtkdGQBgG/jYwZ+KZS6lxYK/toniP79tPYA3Q=",
@@ -800,37 +767,12 @@
         "type": "github"
       }
     },
-    "nvim-config": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "plugins-lze": "plugins-lze",
-        "plugins-lzextras": "plugins-lzextras",
-        "wrappers": "wrappers"
-      },
-      "locked": {
-        "lastModified": 1786694564,
-        "narHash": "sha256-B5Y/iEa/4QBFl0i9XvvJuOIczbCvnXP9HFaA1CdP0xg=",
-        "owner": "kevinpita",
-        "repo": "nixos-nvim",
-        "rev": "6c6c87ddf15d492924a2bff1f006f5fe7ebe7d39",
-        "type": "github"
-      },
-      "original": {
-        "owner": "kevinpita",
-        "repo": "nixos-nvim",
-        "type": "github"
-      }
-    },
     "pi-flake": {
       "inputs": {
         "home-manager": [
-          "nixos-pi",
           "home-manager"
         ],
         "nixpkgs": [
-          "nixos-pi",
           "nixpkgs"
         ]
       },
@@ -896,12 +838,15 @@
         "lazyrsync-nix": "lazyrsync-nix",
         "nixos-grub-themes": "nixos-grub-themes",
         "nixos-hardware": "nixos-hardware",
-        "nixos-hyprland": "nixos-hyprland",
-        "nixos-pi": "nixos-pi",
+        "dankcalendar": "dankcalendar",
+        "pi-extensions": "pi-extensions",
+        "pi-flake": "pi-flake",
+        "plugins-lze": "plugins-lze",
+        "plugins-lzextras": "plugins-lzextras",
+        "wrappers": "wrappers",
         "nixos-secrets": "nixos-secrets",
         "nixos-work": "nixos-work",
         "nixpkgs": "nixpkgs_9",
-        "nvim-config": "nvim-config",
         "sops-nix": "sops-nix",
         "treefmt-nix": "treefmt-nix_2",
         "tuicr-nix": "tuicr-nix"
@@ -1096,7 +1041,6 @@
     "wrappers": {
       "inputs": {
         "nixpkgs": [
-          "nvim-config",
           "nixpkgs"
         ]
       },

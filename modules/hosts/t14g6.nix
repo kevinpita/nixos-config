@@ -7,7 +7,7 @@
       ../../hosts/t14g6/laptop.nix
 
       inputs.nixos-hardware.nixosModules.lenovo-thinkpad-t14-amd-gen6
-      inputs.nixos-hyprland.nixosModules.thinkpadLaptop
+      config.flake.modules.nixos.thinkpad-laptop
 
       config.flake.modules.nixos.desktop
       config.flake.modules.nixos.dni
