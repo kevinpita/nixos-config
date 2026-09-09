@@ -17,6 +17,7 @@
         # Database and messaging clients
         lazysql
         mqttui
+        postgresql
       ];
 
       home-manager.users.${username} = {
