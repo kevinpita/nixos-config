@@ -21,9 +21,6 @@
 
       home-manager.users.${username} = {
         home.packages = with pkgs; [
-          # Development environments
-          devenv
-
           # Nix language tools
           nixd
           nixfmt

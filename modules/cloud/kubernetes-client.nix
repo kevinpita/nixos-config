@@ -37,6 +37,7 @@
         pkgs.kubectl
         pkgs.kubernetes-helm
         pkgs.kubie
+        pkgs.terraform
       ];
 
       home-manager.users.${username} = {
