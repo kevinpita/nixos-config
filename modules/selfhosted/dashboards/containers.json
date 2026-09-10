@@ -1,0 +1,1184 @@
+{
+  "uid": "containers",
+  "title": "Containers",
+  "description": "Rootless Podman containers for the configured user on each host. Select a device to inspect state, uptime, and resource use. Offline exporters and failed collection are not shown as zero containers.",
+  "tags": [
+    "nixos",
+    "selfhosted",
+    "podman"
+  ],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": false,
+  "refresh": "30s",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "host",
+        "label": "Device",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "query": {
+          "query": "label_values(up{job=\"podman\"}, host)",
+          "refId": "StandardVariableQuery"
+        },
+        "definition": "label_values(up{job=\"podman\"}, host)",
+        "refresh": 2,
+        "sort": 1,
+        "multi": false,
+        "includeAll": false,
+        "options": [],
+        "current": {}
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Exporter",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      },
+      "description": "Whether Prometheus can reach the exporter through Tailscale.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "DOWN",
+                  "color": "red"
+                },
+                "1": {
+                  "text": "UP",
+                  "color": "green"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "up{job=\"podman\",host=\"$host\"}",
+          "legendFormat": "Exporter",
+          "range": false,
+          "instant": true,
+          "format": "time_series",
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "horizontal",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none"
+      }
+    },
+    {
+      "id": 2,
+      "title": "Container collection",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 4,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      },
+      "description": "A reachable exporter can still fail to read the Podman socket.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "FAILED",
+                  "color": "red"
+                },
+                "1": {
+                  "text": "OK",
+                  "color": "green"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "podman_scrape_collector_success{job=\"podman\",host=\"$host\",collector=\"container\"} and on (host) (up{job=\"podman\",host=\"$host\"} == 1)",
+          "legendFormat": "Container collection",
+          "range": false,
+          "instant": true,
+          "format": "time_series",
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "horizontal",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none"
+      }
+    },
+    {
+      "id": 3,
+      "title": "Running containers",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      },
+      "description": "Zero is shown only when collection succeeds. Missing data does not mean zero containers.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "((sum by (host) (podman_container_state{job=\"podman\",host=\"$host\"} == bool 2) or on (host) (0 * ((up{job=\"podman\",host=\"$host\"} == 1) and on (host) (podman_scrape_collector_success{job=\"podman\",host=\"$host\",collector=\"container\"} == 1)))) and on (host) ((up{job=\"podman\",host=\"$host\"} == 1) and on (host) (podman_scrape_collector_success{job=\"podman\",host=\"$host\",collector=\"container\"} == 1)))",
+          "legendFormat": "Running containers",
+          "range": false,
+          "instant": true,
+          "format": "time_series",
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "horizontal",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none"
+      }
+    },
+    {
+      "id": 4,
+      "title": "Not running",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      },
+      "description": "Includes created, initialized, stopped, paused, exited, removing, stopping, and unknown states.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "((sum by (host) (podman_container_state{job=\"podman\",host=\"$host\"} != bool 2) or on (host) (0 * ((up{job=\"podman\",host=\"$host\"} == 1) and on (host) (podman_scrape_collector_success{job=\"podman\",host=\"$host\",collector=\"container\"} == 1)))) and on (host) ((up{job=\"podman\",host=\"$host\"} == 1) and on (host) (podman_scrape_collector_success{job=\"podman\",host=\"$host\",collector=\"container\"} == 1)))",
+          "legendFormat": "Not running",
+          "range": false,
+          "instant": true,
+          "format": "time_series",
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "horizontal",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none"
+      }
+    },
+    {
+      "id": 5,
+      "title": "Logical CPUs",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      },
+      "description": "Machine capacity from node-exporter. One fully used logical CPU is 100 divided by this count percent of the machine.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(count by (host) (node_cpu_seconds_total{job=\"node\",host=\"$host\",mode=\"idle\"}) and on (host) (up{job=\"node\",host=\"$host\"} == 1))",
+          "legendFormat": "Logical CPUs",
+          "range": false,
+          "instant": true,
+          "format": "time_series",
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "horizontal",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none"
+      }
+    },
+    {
+      "id": 6,
+      "title": "Machine RAM",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 20,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      },
+      "description": "Total RAM available to the operating system, from node-exporter.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(node_memory_MemTotal_bytes{job=\"node\",host=\"$host\"} and on (host) (up{job=\"node\",host=\"$host\"} == 1))",
+          "legendFormat": "Machine RAM",
+          "range": false,
+          "instant": true,
+          "format": "time_series",
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "horizontal",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none"
+      }
+    },
+    {
+      "id": 7,
+      "title": "Containers",
+      "type": "table",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 16,
+        "h": 10
+      },
+      "description": "All containers in the configured user account. An empty table is valid only when container collection is OK.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "State"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "0": {
+                        "text": "Created",
+                        "color": "blue"
+                      },
+                      "1": {
+                        "text": "Initialized",
+                        "color": "blue"
+                      },
+                      "2": {
+                        "text": "Running",
+                        "color": "green"
+                      },
+                      "3": {
+                        "text": "Stopped",
+                        "color": "gray"
+                      },
+                      "4": {
+                        "text": "Paused",
+                        "color": "yellow"
+                      },
+                      "5": {
+                        "text": "Exited",
+                        "color": "gray"
+                      },
+                      "6": {
+                        "text": "Removing",
+                        "color": "orange"
+                      },
+                      "7": {
+                        "text": "Stopping",
+                        "color": "orange"
+                      },
+                      "-1": {
+                        "text": "Unknown",
+                        "color": "gray"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "podman_container_state{job=\"podman\",host=\"$host\"} and on (host) ((up{job=\"podman\",host=\"$host\"} == 1) and on (host) (podman_scrape_collector_success{job=\"podman\",host=\"$host\",collector=\"container\"} == 1))",
+          "legendFormat": "",
+          "range": false,
+          "instant": true,
+          "format": "table",
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "sortBy": [
+          {
+            "displayName": "Container",
+            "desc": false
+          }
+        ],
+        "footer": {
+          "show": false
+        }
+      },
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "name",
+                "image",
+                "pod_name",
+                "Value",
+                "id"
+              ]
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "name": 0,
+              "image": 1,
+              "pod_name": 2,
+              "Value": 3,
+              "id": 4
+            },
+            "renameByName": {
+              "name": "Container",
+              "image": "Image",
+              "pod_name": "Pod",
+              "Value": "State",
+              "id": "ID"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Running container uptime",
+      "type": "table",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 4,
+        "w": 8,
+        "h": 10
+      },
+      "description": "Time since the last start, not time since creation. Stopped containers are excluded.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Uptime"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "dtdurations"
+              }
+            ]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(time() - podman_container_started_seconds{job=\"podman\",host=\"$host\"}) and on (host, id) (podman_container_state{job=\"podman\",host=\"$host\"} == 2) and on (host) ((up{job=\"podman\",host=\"$host\"} == 1) and on (host) (podman_scrape_collector_success{job=\"podman\",host=\"$host\",collector=\"container\"} == 1))",
+          "legendFormat": "",
+          "range": false,
+          "instant": true,
+          "format": "table",
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "sortBy": [
+          {
+            "displayName": "Container",
+            "desc": false
+          }
+        ],
+        "footer": {
+          "show": false
+        }
+      },
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "name",
+                "Value"
+              ]
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "name": 0,
+              "Value": 1
+            },
+            "renameByName": {
+              "name": "Container",
+              "Value": "Uptime"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Container CPU: percent of machine",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 14,
+        "w": 12,
+        "h": 8
+      },
+      "description": "Ten largest values at each sample. CPU time is divided by the number of logical CPUs. New containers need at least two samples.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "min": 0,
+          "max": 100,
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "topk(10, (100 * rate(podman_container_cpu_seconds_total{job=\"podman\",host=\"$host\"}[$__rate_interval]) / on (host) group_left () (count by (host) (node_cpu_seconds_total{job=\"node\",host=\"$host\",mode=\"idle\"}) and on (host) (up{job=\"node\",host=\"$host\"} == 1))) and on (host) ((up{job=\"podman\",host=\"$host\"} == 1) and on (host) (podman_scrape_collector_success{job=\"podman\",host=\"$host\",collector=\"container\"} == 1)))",
+          "legendFormat": "{{name}}",
+          "range": true,
+          "instant": false,
+          "format": "time_series",
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        }
+      }
+    },
+    {
+      "id": 10,
+      "title": "Container RAM",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 14,
+        "w": 12,
+        "h": 8
+      },
+      "description": "Ten largest values at each sample. Uses the memory accounting reported by Podman.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "min": 0,
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "topk(10, podman_container_mem_usage_bytes{job=\"podman\",host=\"$host\"} and on (host) ((up{job=\"podman\",host=\"$host\"} == 1) and on (host) (podman_scrape_collector_success{job=\"podman\",host=\"$host\",collector=\"container\"} == 1)))",
+          "legendFormat": "{{name}}",
+          "range": true,
+          "instant": false,
+          "format": "time_series",
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        }
+      }
+    },
+    {
+      "id": 11,
+      "title": "Machine CPU and container CPU",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 22,
+        "w": 12,
+        "h": 8
+      },
+      "description": "Machine CPU includes all workloads. Container CPU includes only the monitored Podman user. Both use the full machine as 100 percent.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "min": 0,
+          "max": 100,
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(100 * (1 - avg by (host) (rate(node_cpu_seconds_total{job=\"node\",host=\"$host\",mode=\"idle\"}[$__rate_interval])))) and on (host) (up{job=\"node\",host=\"$host\"} == 1)",
+          "legendFormat": "Machine",
+          "range": true,
+          "instant": false,
+          "format": "time_series",
+          "editorMode": "code"
+        },
+        {
+          "refId": "B",
+          "expr": "((100 * (sum by (host) (rate(podman_container_cpu_seconds_total{job=\"podman\",host=\"$host\"}[$__rate_interval])) or on (host) (((sum by (host) (podman_container_state{job=\"podman\",host=\"$host\"} == bool 2) or on (host) (0 * ((up{job=\"podman\",host=\"$host\"} == 1) and on (host) (podman_scrape_collector_success{job=\"podman\",host=\"$host\",collector=\"container\"} == 1)))) and on (host) ((up{job=\"podman\",host=\"$host\"} == 1) and on (host) (podman_scrape_collector_success{job=\"podman\",host=\"$host\",collector=\"container\"} == 1))) == 0))) / on (host) (count by (host) (node_cpu_seconds_total{job=\"node\",host=\"$host\",mode=\"idle\"}) and on (host) (up{job=\"node\",host=\"$host\"} == 1))) and on (host) ((up{job=\"podman\",host=\"$host\"} == 1) and on (host) (podman_scrape_collector_success{job=\"podman\",host=\"$host\",collector=\"container\"} == 1))",
+          "legendFormat": "Podman containers",
+          "range": true,
+          "instant": false,
+          "format": "time_series",
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        }
+      }
+    },
+    {
+      "id": 12,
+      "title": "Machine RAM and container RAM",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 22,
+        "w": 12,
+        "h": 8
+      },
+      "description": "Host use is total minus available RAM. Podman and host memory accounting differ; do not subtract one from the other to calculate non-container use.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "min": 0,
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(node_memory_MemTotal_bytes{job=\"node\",host=\"$host\"} and on (host) (up{job=\"node\",host=\"$host\"} == 1))",
+          "legendFormat": "Machine capacity",
+          "range": true,
+          "instant": false,
+          "format": "time_series",
+          "editorMode": "code"
+        },
+        {
+          "refId": "B",
+          "expr": "(node_memory_MemTotal_bytes{job=\"node\",host=\"$host\"} - node_memory_MemAvailable_bytes{job=\"node\",host=\"$host\"}) and on (host) (up{job=\"node\",host=\"$host\"} == 1)",
+          "legendFormat": "Machine used",
+          "range": true,
+          "instant": false,
+          "format": "time_series",
+          "editorMode": "code"
+        },
+        {
+          "refId": "C",
+          "expr": "(sum by (host) (podman_container_mem_usage_bytes{job=\"podman\",host=\"$host\"}) or on (host) (((sum by (host) (podman_container_state{job=\"podman\",host=\"$host\"} == bool 2) or on (host) (0 * ((up{job=\"podman\",host=\"$host\"} == 1) and on (host) (podman_scrape_collector_success{job=\"podman\",host=\"$host\",collector=\"container\"} == 1)))) and on (host) ((up{job=\"podman\",host=\"$host\"} == 1) and on (host) (podman_scrape_collector_success{job=\"podman\",host=\"$host\",collector=\"container\"} == 1))) == 0)) and on (host) ((up{job=\"podman\",host=\"$host\"} == 1) and on (host) (podman_scrape_collector_success{job=\"podman\",host=\"$host\",collector=\"container\"} == 1))",
+          "legendFormat": "Podman containers",
+          "range": true,
+          "instant": false,
+          "format": "time_series",
+          "editorMode": "code"
+        },
+        {
+          "refId": "D",
+          "expr": "node_memory_MemAvailable_bytes{job=\"node\",host=\"$host\"} and on (host) (up{job=\"node\",host=\"$host\"} == 1)",
+          "legendFormat": "Machine available",
+          "range": true,
+          "instant": false,
+          "format": "time_series",
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        }
+      }
+    },
+    {
+      "id": 13,
+      "title": "Container disk read rate",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 30,
+        "w": 12,
+        "h": 8
+      },
+      "description": "Block I/O reported by Podman. Cached I/O and some storage paths are not recorded here.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "min": 0,
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "topk(10, rate(podman_container_block_input_total{job=\"podman\",host=\"$host\"}[$__rate_interval]) and on (host) ((up{job=\"podman\",host=\"$host\"} == 1) and on (host) (podman_scrape_collector_success{job=\"podman\",host=\"$host\",collector=\"container\"} == 1)))",
+          "legendFormat": "{{name}}",
+          "range": true,
+          "instant": false,
+          "format": "time_series",
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        }
+      }
+    },
+    {
+      "id": 14,
+      "title": "Container disk write rate",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 30,
+        "w": 12,
+        "h": 8
+      },
+      "description": "Block I/O reported by Podman. Zero does not prove that a container has no disk activity.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "min": 0,
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "topk(10, rate(podman_container_block_output_total{job=\"podman\",host=\"$host\"}[$__rate_interval]) and on (host) ((up{job=\"podman\",host=\"$host\"} == 1) and on (host) (podman_scrape_collector_success{job=\"podman\",host=\"$host\",collector=\"container\"} == 1)))",
+          "legendFormat": "{{name}}",
+          "range": true,
+          "instant": false,
+          "format": "time_series",
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        }
+      }
+    }
+  ],
+  "links": [
+    {
+      "type": "link",
+      "title": "Systems",
+      "url": "/d/systems",
+      "keepTime": true
+    },
+    {
+      "type": "link",
+      "title": "ZFS pools",
+      "url": "/d/zfs-pools",
+      "keepTime": true
+    }
+  ]
+}

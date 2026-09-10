@@ -1304,6 +1304,12 @@
       "title": "ZFS pools",
       "url": "/d/zfs-pools",
       "keepTime": true
+    },
+    {
+      "type": "link",
+      "title": "Containers",
+      "url": "/d/containers",
+      "keepTime": true
     }
   ]
 }

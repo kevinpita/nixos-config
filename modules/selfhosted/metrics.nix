@@ -6,6 +6,9 @@ let
   zfsHosts = lib.filterAttrs (
     _: host: host.config.services.prometheus.exporters.zfs.enable
   ) config.flake.nixosConfigurations;
+  podmanHosts = lib.filterAttrs (
+    _: host: host.config.services.podman-exporter.enable or false
+  ) config.flake.nixosConfigurations;
 in
 {
   flake.modules.nixos.selfhosted =
@@ -69,6 +72,15 @@ in
                 ];
                 labels.host = host.config.networking.hostName;
               }) zfsHosts;
+            }
+            {
+              job_name = "podman";
+              static_configs = lib.mapAttrsToList (_: host: {
+                targets = [
+                  "${host.config.networking.hostName}.${cfg.tailnetDomain}:${toString host.config.services.podman-exporter.port}"
+                ];
+                labels.host = host.config.networking.hostName;
+              }) podmanHosts;
             }
             {
               job_name = "prometheus";
