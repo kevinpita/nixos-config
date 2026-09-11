@@ -74,6 +74,8 @@
 
     kevinpita-nixpkgs.url = "github:kevinpita/nixpkgs/helm-tui-init";
 
+    nixpkgs-pgbot.url = "github:kevinpita/nixpkgs/pgbot-init";
+
     herdr-nix.url = "github:kevinpita/herdr-nix";
 
     bast-nix.url = "github:kevinpita/bast-nix";

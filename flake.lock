@@ -610,6 +610,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-pgbot": {
+      "locked": {
+        "lastModified": 1789085774,
+        "narHash": "sha256-+6DK3qB2D8G+vLwsTSVFM7ElqBMMRft7rMQYP2RV25A=",
+        "owner": "kevinpita",
+        "repo": "nixpkgs",
+        "rev": "155afefa320048a24e1f7d73682c4431f051c7c3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kevinpita",
+        "ref": "pgbot-init",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixpkgs_10": {
       "locked": {
         "lastModified": 1770107345,
@@ -842,6 +858,7 @@
         "nixos-secrets": "nixos-secrets",
         "nixos-work": "nixos-work",
         "nixpkgs": "nixpkgs_9",
+        "nixpkgs-pgbot": "nixpkgs-pgbot",
         "pi-extensions": "pi-extensions",
         "pi-flake": "pi-flake",
         "plugins-lze": "plugins-lze",

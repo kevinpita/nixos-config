@@ -17,6 +17,7 @@ let
 
     (_final: _prev: {
       inherit (inputs.kevinpita-nixpkgs.legacyPackages.${system}) helm-tui;
+      inherit (inputs.nixpkgs-pgbot.legacyPackages.${system}) pgbot;
     })
 
     (defaultPackageOverlay "herdr" inputs.herdr-nix)

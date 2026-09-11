@@ -18,6 +18,7 @@
         lazysql
         mqttui
         postgresql
+        pgbot
       ];
 
       home-manager.users.${username} = {
