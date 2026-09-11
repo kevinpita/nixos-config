@@ -566,11 +566,11 @@
     "nixos-work": {
       "flake": false,
       "locked": {
-        "lastModified": 1788948717,
-        "narHash": "sha256-Daxl4mu9ygx5K397aImSTBxrBz34eFKu0Isk58CXydA=",
+        "lastModified": 1789086520,
+        "narHash": "sha256-YEGMsYYp1vuLjuVyKuFTYIC9LfV0svdd2Jw7Vg6n8n8=",
         "ref": "refs/heads/main",
-        "rev": "13d5b0dc39546d6f2ac99c8c7238558e8d5a1656",
-        "revCount": 23,
+        "rev": "31aab8b8232db09afc2c0af33717941645afbc5a",
+        "revCount": 24,
         "type": "git",
         "url": "ssh://git@github.com/kevinpita/nixos-work"
       },
