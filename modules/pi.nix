@@ -76,6 +76,7 @@
             ".pi/agent/extensions/file-picker.ts".source = extensions + "/file-picker.ts";
             ".pi/agent/extensions/git-reference-picker".source = extensions + "/git-reference-picker";
             ".pi/agent/extensions/global-prompt-history".source = extensions + "/global-prompt-history";
+            ".pi/agent/extensions/pi-fast".source = extensions + "/pi-fast";
             ".pi/agent/extensions/session-status".source = extensions + "/session-status";
             ".pi/agent/extensions/split-session".source = extensions + "/split-session";
             ".pi/agent/extensions/web-workflows.ts".source =
@@ -102,6 +103,11 @@
                   "${config.home.homeDirectory}/.pi/agent/npm/node_modules/pi-intercom"
                 ];
               };
+            };
+
+            ".pi/agent/pi-fast.json" = {
+              force = true;
+              text = builtins.toJSON { enabledByDefault = false; };
             };
 
             ".pi/agent/settings.json" = {
