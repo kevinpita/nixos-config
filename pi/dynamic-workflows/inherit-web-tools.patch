@@ -3,10 +3,10 @@
 @@ -1,3 +1,4 @@
 +import { createWebTools } from "./web-tools.js";
  import { randomUUID } from "node:crypto";
- import { unlinkSync, writeFileSync } from "node:fs";
+ import { realpathSync, unlinkSync, writeFileSync } from "node:fs";
  import { join } from "node:path";
-@@ -627,7 +628,8 @@
-         const baseTools = runCwd === this.cwd ? this.baseTools : createCodingTools(runCwd);
+@@ -652,7 +653,8 @@
+         const baseTools = usesBaseDirectory ? this.baseTools : createCodingTools(runCwd);
          // Apply the agentType tool policy BEFORE adding structured_output, so a
          // restrictive allowlist never strips the schema tool.
 -        const customTools = applyToolPolicy([...baseTools, ...(options.tools ?? [])], options.toolNames, options.disallowedToolNames);
