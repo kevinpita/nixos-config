@@ -12,6 +12,7 @@
           obs-studio
           sone # tidal
           vlc
+          yt-dlp
         ];
       };
     };
