@@ -7,6 +7,7 @@
         ../../hosts/minidesk/disko-config.nix
         ../../hosts/minidesk/hardware-configuration.nix
 
+        config.flake.modules.nixos.amp-runner
         config.flake.modules.nixos.aws
         config.flake.modules.nixos.development
         config.flake.modules.nixos.incus
