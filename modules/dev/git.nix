@@ -16,6 +16,11 @@
       ];
 
       home-manager.users.${username} = {
+        programs.gh = {
+          enable = true;
+          extensions = [ pkgs.gh-stack ];
+        };
+
         home.packages = with pkgs; [
           delta
           git-filter-repo
