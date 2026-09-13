@@ -10,12 +10,6 @@
       system = pkgs.stdenv.hostPlatform.system;
       piPackage = inputs.pi-flake.packages.${system}.pi-coding-agent;
       extensions = inputs.pi-extensions + "/extensions";
-      piAudit = pkgs.writeShellApplication {
-        name = "pi-audit";
-        text = ''
-          exec ${piPackage}/bin/pi -e npm:@vigolium/piolium "$@"
-        '';
-      };
       piSessionMaintenance = pkgs.writeShellApplication {
         name = "pi-session-maintenance";
         runtimeInputs = with pkgs; [
@@ -54,7 +48,6 @@
         systemPackages = with pkgs; [
           fd
           nodejs
-          piAudit
           piSessionMaintenance
         ];
 
@@ -72,26 +65,9 @@
 
             ".pi/agent/AGENTS.md".source = ../pi/AGENTS.md;
 
-            ".pi/agent/pstack.json" = {
-              force = true;
-              text = builtins.toJSON {
-                defaultOn = true;
-                models = {
-                  analysis = "openai-codex/gpt-6-astra:xhigh";
-                  implementation = "openai-codex/gpt-6-astra:xhigh";
-                  review = [ "openai-codex/gpt-6-astra:xhigh" ];
-                };
-              };
-            };
-
             ".config/rpiv-todo/config.json" = {
               force = true;
               text = builtins.toJSON { maxWidgetLines = 5; };
-            };
-
-            ".pi/settings.json" = {
-              force = true;
-              text = builtins.toJSON { ayu.checkpoint.enabled = false; };
             };
 
             ".pi/agent/extensions/auto-compact.ts".source = extensions + "/auto-compact.ts";
@@ -126,7 +102,8 @@
                 lastChangelogVersion = piPackage.version;
                 defaultProvider = "openai-codex";
                 defaultModel = "gpt-6-astra";
-                defaultThinkingLevel = "xhigh";
+                defaultThinkingLevel = "medium";
+                ayu.checkpoint.enabled = true;
                 # Pi compacts when contextTokens > contextWindow - reserveTokens.
                 # 27200 = 10% of the 272k gpt-6-astra window, so Pi's own check
                 # (after a run, or before a prompt) fires at 90%. The auto-compact
@@ -138,32 +115,32 @@
                 };
                 enableInstallTelemetry = false;
                 enableSkillCommands = true;
-                theme = "dark";
+                theme = "pi-dark";
                 tuiMode = "regular";
+                subagents.agentOverrides = {
+                  cursor-agent.disabled = true;
+                  cursor-agent-writer.disabled = true;
+                };
                 packages = [
+                  "npm:@ayulab/pi-rewind"
                   "npm:@juicesharp/rpiv-ask-user-question"
                   "npm:@juicesharp/rpiv-todo"
                   "npm:pi-cd"
                   "npm:pi-intercom"
-                  {
-                    source = "npm:@ogulcancelik/pi-herdr";
-                    skills = [ ];
-                  }
                   "npm:pi-web-access"
-                  "npm:pi-subagents"
                   {
-                    source = "npm:@kevinpita/pi-pstack";
-                    skills = [ "+skills/pstack-mode/SKILL.md" ];
+                    source = "npm:pi-subagents";
+                    prompts = [
+                      "prompts/*.md"
+                      "!prompts/gather-context-and-clarify.md"
+                    ];
                   }
                   "npm:@ff-labs/fff-bun"
                   "npm:@ff-labs/pi-fff"
-                  "npm:@narumitw/pi-usage"
-                  "npm:pi-zentui"
+                  "npm:pi-open-tui"
                   "npm:pi-simplify"
-                  "npm:pi-claude-code-tui"
                   "npm:pi-colours"
                   "npm:@quintinshaw/pi-dynamic-workflows"
-                  "${extensions}/profile-modes"
                 ];
               };
             };
