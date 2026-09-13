@@ -17,5 +17,6 @@
       ];
 
       boot.kernelPackages = pkgs.linuxPackages_latest;
+      services.moshi-hook.enable = false;
     };
 }

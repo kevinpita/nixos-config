@@ -1,6 +1,12 @@
 {
   flake.modules.nixos.moshi =
-    { pkgs, username, ... }:
+    {
+      config,
+      lib,
+      pkgs,
+      username,
+      ...
+    }:
     let
       moshiHook = pkgs.stdenvNoCC.mkDerivation {
         pname = "moshi-hook";
@@ -32,22 +38,28 @@
       };
     in
     {
-      environment.systemPackages = [ moshiHook ];
+      options.services.moshi-hook.enable = lib.mkEnableOption "the Moshi coding agent hook daemon" // {
+        default = true;
+      };
 
-      home-manager.users.${username} = {
-        systemd.user.services.moshi-hook = {
-          Unit = {
-            Description = "Moshi coding agent hook daemon";
-            StartLimitIntervalSec = 0;
+      config = lib.mkIf config.services.moshi-hook.enable {
+        environment.systemPackages = [ moshiHook ];
+
+        home-manager.users.${username} = {
+          systemd.user.services.moshi-hook = {
+            Unit = {
+              Description = "Moshi coding agent hook daemon";
+              StartLimitIntervalSec = 0;
+            };
+            Service = {
+              ExecStart = "${moshiHook}/bin/moshi-hook serve --gateway-listen 127.0.0.1:24543";
+              Environment = "PATH=%h/.nix-profile/bin:/etc/profiles/per-user/${username}/bin:/run/current-system/sw/bin";
+              Restart = "on-failure";
+              RestartSec = 5;
+              UMask = "0077";
+            };
+            Install.WantedBy = [ "default.target" ];
           };
-          Service = {
-            ExecStart = "${moshiHook}/bin/moshi-hook serve --gateway-listen 127.0.0.1:24543";
-            Environment = "PATH=%h/.nix-profile/bin:/etc/profiles/per-user/${username}/bin:/run/current-system/sw/bin";
-            Restart = "on-failure";
-            RestartSec = 5;
-            UMask = "0077";
-          };
-          Install.WantedBy = [ "default.target" ];
         };
       };
     };
