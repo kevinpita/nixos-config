@@ -105,6 +105,39 @@
               };
             };
 
+            ".pi/agent/open-tui.json" = {
+              force = true;
+              text = builtins.toJSON {
+                enabled = true;
+                settingsLanguage = "en";
+                cursorStyle = "block";
+                fullscreen.wheelScrollLines = 4;
+                icons.mode = "nerd";
+                footerSegments = {
+                  cwd = true;
+                  sessionName = false;
+                  gitBranch = true;
+                  gitStatus = true;
+                  gitCommit = false;
+                  runtime = true;
+                  context = true;
+                  tokens = true;
+                  cost = true;
+                  extensionStatuses = true;
+                };
+                telemetry = {
+                  enabled = true;
+                  tps = true;
+                  ttft = true;
+                  duration = true;
+                  tokens = true;
+                  stalls = false;
+                  cost = false;
+                };
+                thinkingPeek.lines = 1;
+              };
+            };
+
             ".pi/agent/pi-fast.json" = {
               force = true;
               text = builtins.toJSON { enabledByDefault = false; };
