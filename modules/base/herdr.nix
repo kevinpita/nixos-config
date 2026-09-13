@@ -2,16 +2,57 @@
   flake.modules.nixos.base =
     {
       inputs,
+      lib,
       pkgs,
       username,
       ...
     }:
     let
+      autoTitle = pkgs.callPackage ../../packages/herdr-auto-title/package.nix { };
+
+      startAutoTitle = pkgs.writeShellScript "herdr-start-auto-title" ''
+        export XDG_RUNTIME_DIR="''${XDG_RUNTIME_DIR:-/run/user/$UID}"
+        unit=$(${pkgs.systemd}/bin/systemd-escape --template=herdr-auto-title@.service "$HERDR_SOCKET_PATH")
+
+        # Replace an unmanaged worker only when it belongs to this session.
+        if ! ${pkgs.systemd}/bin/systemctl --user is-active --quiet "$unit"; then
+          for pid in $(${pkgs.procps}/bin/pgrep -u "$UID" -x herdr-auto-titl); do
+            if ${pkgs.gnugrep}/bin/grep -zFxq "HERDR_SOCKET_PATH=$HERDR_SOCKET_PATH" "/proc/$pid/environ" 2>/dev/null; then
+              kill "$pid" 2>/dev/null || true
+            fi
+          done
+        fi
+
+        exec ${pkgs.systemd}/bin/systemctl --user restart "$unit"
+      '';
+
+      autoTitlePlugin = pkgs.runCommand "herdr-auto-title-plugin" { } ''
+        mkdir -p "$out"
+        cp ${autoTitle}/herdr-plugin.toml "$out/herdr-plugin.toml"
+        ln -s ${startAutoTitle} "$out/herdr-auto-title"
+      '';
+
       herdrWorktrunk = pkgs.fetchFromGitHub {
         owner = "devashish2203";
         repo = "herdr-worktrunk";
         rev = "a3107ca566bafcd463bc138007a0c01051970784";
         hash = "sha256-+G4EzlQisIr8SQ1NwDfzV/27iOiC3r/2nkxjcV/aU/k=";
+      };
+
+      openFile = pkgs.writeShellApplication {
+        name = "open";
+        runtimeInputs = with pkgs; [
+          coreutils
+          curl
+          python3
+          systemd
+          tailscale
+          xdg-utils
+        ];
+        text = ''
+          preview_server=${./herdr-open-server.py}
+        ''
+        + builtins.readFile ./herdr-open.sh;
       };
 
       openPiTab = pkgs.writeShellApplication {
@@ -50,7 +91,10 @@
       };
     in
     {
-      environment.systemPackages = [ pkgs.bun ];
+      environment.systemPackages = [
+        pkgs.bun
+        openFile
+      ];
 
       home-manager.users.${username} = {
         imports = [ inputs.herdr-nix.homeModules.default ];
@@ -67,7 +111,7 @@
           ];
           plugins = {
             worktrunk = herdrWorktrunk;
-            auto-title = pkgs.callPackage ../../packages/herdr-auto-title/package.nix { };
+            auto-title = autoTitlePlugin;
           };
           settings = {
             theme.name = "dracula";
@@ -114,13 +158,32 @@
           };
         };
 
-        home.activation.reloadHerdrConfig =
-          inputs.home-manager.lib.hm.dag.entryAfter [ "linkGeneration" ]
-            ''
-              if [[ -z "''${DRY_RUN_CMD:-}" ]]; then
-                ${pkgs.herdr}/bin/herdr server reload-config >/dev/null 2>&1 || true
-              fi
-            '';
+        systemd.user.services."herdr-auto-title@" = {
+          Unit.Description = "Herdr auto-title for %I";
+          Service = {
+            ExecStart = "${autoTitle}/bin/herdr-auto-title";
+            Environment = [
+              "HERDR_SOCKET_PATH=%I"
+              "PATH=${lib.makeBinPath [ pkgs.git ]}"
+            ];
+            Restart = "on-failure";
+            RestartSec = 2;
+          };
+        };
+
+        home.activation.reloadHerdrConfig = inputs.home-manager.lib.hm.dag.entryAfter [ "reloadSystemd" ] ''
+          if [[ -z "''${DRY_RUN_CMD:-}" ]]; then
+            ${pkgs.herdr}/bin/herdr server reload-config >/dev/null 2>&1 || true
+
+            # Herdr does not run plugin startup hooks when config is reloaded.
+            while IFS= read -r socket; do
+              HERDR_SOCKET_PATH="$socket" ${startAutoTitle}
+            done < <(
+              ${pkgs.herdr}/bin/herdr session list --json |
+                ${pkgs.jq}/bin/jq -r '.sessions[] | select(.running) | .socket_path'
+            )
+          fi
+        '';
       };
     };
 }
