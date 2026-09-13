@@ -14,10 +14,10 @@
       nixpkgs.overlays = [
         (_: prev: {
           dms-shell = prev.dms-shell.overrideAttrs (old: {
-            postInstall = (old.postInstall or "") + ''
-              battery_popout=$out/share/quickshell/dms/Modules/DankBar/Popouts/BatteryPopout.qml
+            postPatch = (old.postPatch or "") + ''
+              battery_popout=../quickshell/Modules/DankBar/Popouts/BatteryPopout.qml
               chmod u+w "$(dirname "$battery_popout")" "$battery_popout"
-              patch -d $out/share/quickshell/dms -p2 < ${../../hyprland/patches/battery-popout.patch}
+              patch -d .. -p1 < ${../../hyprland/patches/battery-popout.patch}
               substituteInPlace "$battery_popout" \
                 --replace-fail '@batteryChargeStatus@' '${
                   lib.getExe (
