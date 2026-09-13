@@ -116,9 +116,11 @@ function expandSkill(command: string): string {
 
 - For a visual UI, layout, state comparison, or concept too dense for Mermaid, write one focused HTML file — a diagram, an infographic, or a short slide deck, whichever fits the point. Match the product's colors, type, spacing, and components; use real labels and data; support desktop and mobile. Then open it for the user:
 
+```bash
+open "path/to/show-me-{description}.html"
 ```
-Bash(open path/to/show-me-{description}.html)
-```
+
+If `open` prints a URL, include it in your reply so the user can Ctrl-click it in Herdr.
 
 ### guidance
 

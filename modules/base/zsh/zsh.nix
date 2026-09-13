@@ -50,8 +50,6 @@
           autosuggestion.enable = true;
           syntaxHighlighting.enable = true;
           shellAliases = {
-            open = "xdg-open";
-
             cat = "bat";
             ll = lib.mkForce "lsd -lah";
             lld = "ll -L";
