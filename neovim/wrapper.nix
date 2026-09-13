@@ -41,17 +41,21 @@ inputs:
       telescope-fzf-native-nvim
       plenary-nvim
       (nvim-treesitter.withPlugins (
-        grammars:
-        builtins.attrValues (
-          removeAttrs grammars [
-            "supercollider"
-            "tree-sitter-go-template"
-            "tree-sitter-go-template-helm"
-            "tree-sitter-org-nvim"
-            "tree-sitter-sshclientconfig"
-            "tree-sitter-supercollider"
-          ]
-        )
+        grammars: with grammars; [
+          bash
+          go
+          gomod
+          javascript
+          json
+          markdown
+          markdown_inline
+          nix
+          regex
+          toml
+          tsx
+          typescript
+          yaml
+        ]
       ))
       nvim-tree-lua
       nvim-web-devicons
