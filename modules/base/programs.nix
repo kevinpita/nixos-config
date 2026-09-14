@@ -45,6 +45,9 @@
         just
         yq-go
 
+        # Security
+        openssl
+
         # Terminals
         screen
       ];
