@@ -19,8 +19,6 @@
       agyAdapter = pkgs.writeShellScriptBin "pi-agy-review" ''
         exec ${pkgs.nodejs}/bin/node ${inputs.pi-extensions}/adapters/agy/adapter.mjs \
           ${pkgs.antigravity-cli}/bin/agy \
-          ${pkgs.bubblewrap}/bin/bwrap \
-          ${pkgs.xdg-dbus-proxy}/bin/xdg-dbus-proxy \
           ${agyReviewConfig}
       '';
       piSessionMaintenance = pkgs.writeShellApplication {
