@@ -7,8 +7,8 @@
       ...
     }:
     let
-      chargeStartThreshold = 75;
-      chargeStopThreshold = 80;
+      chargeStartThreshold = 90;
+      chargeStopThreshold = 95;
     in
     {
       nixpkgs.overlays = [
