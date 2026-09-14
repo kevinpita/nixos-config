@@ -78,6 +78,42 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
+-- Load built-in ftplugins before our FileType overrides.
+vim.cmd("filetype plugin indent on")
+
+-- Commit subjects: warn after 72 columns without wrapping the title.
+vim.g.gitcommit_summary_length = 72
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "gitcommit",
+  callback = function()
+    vim.opt_local.textwidth = 0
+    vim.opt_local.colorcolumn = "73"
+    vim.b.undo_ftplugin = (vim.b.undo_ftplugin or "") .. " | setlocal colorcolumn<"
+  end,
+})
+
+-- Keep commit metadata quiet and reserve warnings for long subjects.
+vim.api.nvim_create_autocmd("ColorScheme", {
+  callback = function()
+    vim.api.nvim_set_hl(0, "gitcommitSummary", { link = "Normal" })
+    vim.api.nvim_set_hl(0, "gitcommitOverflow", { link = "WarningMsg" })
+    for _, group in ipairs({
+      "gitcommitComment",
+      "gitcommitHeader",
+      "gitcommitType",
+      "gitcommitFile",
+      "gitcommitBranch",
+      "gitcommitSelectedType",
+      "gitcommitSelectedFile",
+      "gitcommitDiscardedType",
+      "gitcommitDiscardedFile",
+      "gitcommitUntrackedFile",
+    }) do
+      vim.api.nvim_set_hl(0, group, { fg = "#a89984", italic = false })
+    end
+  end,
+})
+
 -- Highlight on yank
 vim.api.nvim_create_autocmd("TextYankPost", {
   callback = function()
@@ -145,18 +181,14 @@ nixInfo.lze.load({
         return true
       end
 
-      local installable = require("nvim-treesitter").get_available()
       vim.api.nvim_create_autocmd("FileType", {
         callback = function(args)
           local lang = vim.treesitter.language.get_lang(args.match)
           if not lang then
             return
           end
-          if not try_attach(args.buf, lang) and vim.tbl_contains(installable, lang) then
-            require("nvim-treesitter").install(lang):await(function()
-              try_attach(args.buf, lang)
-            end)
-          end
+          -- Nix supplies parsers in wrapper.nix. Use built-in syntax when absent.
+          try_attach(args.buf, lang)
         end,
       })
     end,
