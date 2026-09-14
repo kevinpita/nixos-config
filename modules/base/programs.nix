@@ -46,6 +46,7 @@
         yq-go
 
         # Security
+        apacheHttpd # Provides htpasswd
         openssl
 
         # Terminals
