@@ -11,6 +11,7 @@
 
 - Use subagents only when explicitly asked.
 - Requests for Claude to do a task mean the `claude-code` subagent, or `claude-code-writer` for file edits.
+- Requests for Gemini or AGY to do a task mean the `gemini` subagent (alias `agy`), using AGY with Gemini 3.8 Flash High. It is handoff-only and read-only. Supply source evidence inline. Ask before routing file-edit requests to a different agent.
 
 ## Tools
 

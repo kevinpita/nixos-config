@@ -10,6 +10,19 @@
       system = pkgs.stdenv.hostPlatform.system;
       piPackage = inputs.pi-flake.packages.${system}.pi-coding-agent;
       extensions = inputs.pi-extensions + "/extensions";
+      agyReviewConfig = pkgs.writeText "agy-review-config.json" (
+        builtins.toJSON {
+          model = "gemini-3.8-flash-high";
+          effort = "high";
+        }
+      );
+      agyAdapter = pkgs.writeShellScriptBin "pi-agy-review" ''
+        exec ${pkgs.nodejs}/bin/node ${inputs.pi-extensions}/adapters/agy/adapter.mjs \
+          ${pkgs.antigravity-cli}/bin/agy \
+          ${pkgs.bubblewrap}/bin/bwrap \
+          ${pkgs.xdg-dbus-proxy}/bin/xdg-dbus-proxy \
+          ${agyReviewConfig}
+      '';
       piSessionMaintenance = pkgs.writeShellApplication {
         name = "pi-session-maintenance";
         runtimeInputs = with pkgs; [
@@ -64,6 +77,10 @@
             ".pi/agent/skills".source = ../pi/skills;
 
             ".pi/agent/AGENTS.md".source = ../pi/AGENTS.md;
+
+            ".pi/agent/agents/gemini.md".source = pkgs.replaceVars ../pi/agents/gemini.md {
+              adapter = "${agyAdapter}/bin/pi-agy-review";
+            };
 
             ".config/rpiv-todo/config.json" = {
               force = true;
