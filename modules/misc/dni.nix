@@ -24,9 +24,9 @@
               upstreamAutofirma = inputs.autofirma-nix.packages.${pkgs.stdenv.hostPlatform.system}.autofirma;
             in
             upstreamAutofirma.override {
-              maven-dependencies-hash = "sha256-aNtvfZuu84dS3/ZvbuVlmt2ELQFHr0OtNABnDo/Hdp4=";
+              maven-dependencies-hash = "sha256-FiMjTpLUCxawTjilg0Ya0o95W/c+lnId9Ibu1Mz4u6g=";
               jmulticard = upstreamAutofirma.clienteafirma.dependencies.jmulticard.override {
-                maven-dependencies-hash = "sha256-2lUqrN8s0KTbk8wd76FkU5wgaPZnzmpO9rgTE6Oe+os=";
+                maven-dependencies-hash = "sha256-GakJJSlMgkq85D0iUdvZpDg8dof363XT0KiqWkMU8+k=";
               };
 
               buildFHSEnv =
