@@ -165,6 +165,22 @@
                 theme = "pi-dark";
                 tuiMode = "regular";
                 subagents.agentOverrides = {
+                  scout = {
+                    model = "openai-codex/gpt-5.6-sol";
+                    thinking = "medium";
+                  };
+                  worker = {
+                    model = "openai-codex/gpt-5.6-sol";
+                    thinking = "xhigh";
+                  };
+                  reviewer = {
+                    model = "openai-codex/gpt-6-astra";
+                    thinking = "high";
+                  };
+                  oracle = {
+                    model = "openai-codex/gpt-6-astra";
+                    thinking = "xhigh";
+                  };
                   cursor-agent.disabled = true;
                   cursor-agent-writer.disabled = true;
                 };
