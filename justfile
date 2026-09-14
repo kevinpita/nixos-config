@@ -22,6 +22,8 @@ build:
 build-local:
   nh os build --no-write-lock-file --override-input pi-extensions "path:$HOME/nixos-pi" "{{root}}"
 
-# Check the real locked configuration before applying it.
-switch: check
+# Pull first, resolve conflicts with Pi, then check and apply the configuration.
+switch:
+  bash "{{root}}/scripts/pull-before-switch.sh" "{{root}}"
+  just --justfile "{{root}}/justfile" check
   nh os switch --no-write-lock-file "{{root}}"
