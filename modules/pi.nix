@@ -103,6 +103,11 @@
                   webToolsTypes = ../pi/dynamic-workflows/web-tools.d.ts;
                 };
 
+            ".pi/agent/extensions/subagents.ts".source = pkgs.replaceVars ../pi/extensions/subagents.ts {
+              patch = "${pkgs.gnupatch}/bin/patch";
+              toolPatch = ../pi/subagents/tool-availability.patch;
+            };
+
             ".pi/agent/extensions/subagent/config.json" = {
               force = true;
               text = builtins.toJSON {
@@ -179,6 +184,11 @@
                 enableSkillCommands = true;
                 theme = "pi-dark";
                 tuiMode = "regular";
+                # Children load only the web provider, not parent UI extensions
+                # such as pi-colours. Agent tool allowlists still apply.
+                subagents.defaultExtensions = [
+                  "${config.home.homeDirectory}/.pi/agent/npm/node_modules/pi-web-access/index.ts"
+                ];
                 subagents.agentOverrides = {
                   scout = {
                     model = "openai-codex/gpt-5.6-sol";
@@ -212,6 +222,8 @@
                   }
                   {
                     source = "npm:pi-subagents";
+                    # subagents.ts loads a patched copy. Keep npm resources.
+                    extensions = [ ];
                     prompts = [
                       "prompts/*.md"
                       "!prompts/gather-context-and-clarify.md"
