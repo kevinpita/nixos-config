@@ -26,4 +26,5 @@ build-local:
 switch:
   bash "{{root}}/scripts/pull-before-switch.sh" "{{root}}"
   just --justfile "{{root}}/justfile" check
+  if git rev-parse --verify --quiet MERGE_HEAD >/dev/null; then git commit --no-edit; fi
   nh os switch --no-write-lock-file "{{root}}"
