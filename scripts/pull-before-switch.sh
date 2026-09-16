@@ -19,7 +19,8 @@ done
 branch=$(git symbolic-ref --quiet HEAD) || fail 'Check out a branch before switching.'
 
 # Use a merge even when the user has pull.rebase or pull.ff=only configured.
-if git pull --no-rebase --ff --no-autostash --no-edit; then
+# Leave non-fast-forward merges uncommitted so the resulting tree can be checked first.
+if git pull --no-rebase --no-commit --ff --no-autostash --no-edit; then
   exit 0
 fi
 
@@ -40,8 +41,8 @@ Only edit files needed to resolve the conflicts, then stage the resolved files.
 Do not commit, abort the merge, reset, stash, change branches, pull, push, or run
 switch or any system activation command. Do not delegate to other agents.
 If a resolution requires a user decision, explain the blocker and leave that
-conflict unresolved. The calling script will verify the Git state, commit the
-merge, and run the configuration checks before switching.' </dev/null ||
+conflict unresolved. The calling workflow will verify the Git state, run the
+configuration checks, and commit the merge only after they pass.' </dev/null ||
   fail 'Pi failed. The merge is left for manual review.'
 
 [[ "$(git symbolic-ref --quiet HEAD)" == "$branch" && "$(git rev-parse HEAD)" == "$head" ]] ||
@@ -52,5 +53,3 @@ merge, and run the configuration checks before switching.' </dev/null ||
 git diff --quiet || fail 'Unstaged changes remain. Review and stage the resolution manually.'
 [[ -z "$(git ls-files --others --exclude-standard)" ]] || fail 'Untracked files remain. Review them manually.'
 git diff --cached --check || fail 'The staged merge has whitespace errors or conflict markers.'
-git commit --no-edit
-[[ -z "$(git status --porcelain --untracked-files=all)" ]] || fail 'The working tree is not clean after the merge commit.'
