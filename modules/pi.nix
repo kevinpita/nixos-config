@@ -103,10 +103,7 @@
                   webToolsTypes = ../pi/dynamic-workflows/web-tools.d.ts;
                 };
 
-            ".pi/agent/extensions/subagents.ts".source = pkgs.replaceVars ../pi/extensions/subagents.ts {
-              patch = "${pkgs.gnupatch}/bin/patch";
-              toolPatch = ../pi/subagents/tool-availability.patch;
-            };
+            ".pi/agent/extensions/subagents.ts".source = ../pi/extensions/subagents.ts;
 
             ".pi/agent/extensions/subagent/config.json" = {
               force = true;
@@ -222,7 +219,7 @@
                   }
                   {
                     source = "npm:pi-subagents";
-                    # subagents.ts loads a patched copy. Keep npm resources.
+                    # subagents.ts loads the extension. Keep npm resources.
                     extensions = [ ];
                     prompts = [
                       "prompts/*.md"
