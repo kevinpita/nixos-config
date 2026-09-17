@@ -103,6 +103,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    ink-nix = {
+      url = "github:kevinpita/ink-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     tuicr-nix = {
       url = "github:kevinpita/tuicr-nix";
       inputs.nixpkgs.follows = "nixpkgs";

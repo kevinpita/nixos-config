@@ -393,6 +393,26 @@
         "type": "github"
       }
     },
+    "ink-nix": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789668515,
+        "narHash": "sha256-iExERAgyh3NA/pgPPKY7CD5zBkSHeTOWRbRSwOnPvfs=",
+        "owner": "kevinpita",
+        "repo": "ink-nix",
+        "rev": "71e8f0a6a21fd61fafae84a0819f5601a831b2cb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kevinpita",
+        "repo": "ink-nix",
+        "type": "github"
+      }
+    },
     "jmulticard-src": {
       "flake": false,
       "locked": {
@@ -850,6 +870,7 @@
         "herdr-nix": "herdr-nix",
         "home-manager": "home-manager_2",
         "import-tree": "import-tree",
+        "ink-nix": "ink-nix",
         "kevinpita-nixpkgs": "kevinpita-nixpkgs",
         "ku-nix": "ku-nix",
         "lazyrsync-nix": "lazyrsync-nix",

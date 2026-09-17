@@ -25,6 +25,7 @@
         bast
         bat
         fzf
+        ink
         lazyrsync
         moreutils
         ripgrep
