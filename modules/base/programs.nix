@@ -26,6 +26,7 @@
         bat
         fzf
         lazyrsync
+        moreutils
         ripgrep
         tree
 
