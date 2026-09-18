@@ -91,6 +91,7 @@
             ".pi/agent/extensions/file-picker.ts".source = extensions + "/file-picker.ts";
             ".pi/agent/extensions/git-reference-picker".source = extensions + "/git-reference-picker";
             ".pi/agent/extensions/global-prompt-history".source = extensions + "/global-prompt-history";
+            ".pi/agent/extensions/jev-context".source = extensions + "/jev-context";
             ".pi/agent/extensions/pi-fast".source = extensions + "/pi-fast";
             ".pi/agent/extensions/session-status".source = extensions + "/session-status";
             ".pi/agent/extensions/split-session".source = extensions + "/split-session";
@@ -152,6 +153,18 @@
                   cost = false;
                 };
                 thinkingPeek.lines = 1;
+              };
+            };
+
+            ".pi/agent/jev-context.json" = {
+              force = true;
+              text = builtins.toJSON {
+                enabled = false;
+                threshold = 0.8;
+                buffer = 5;
+                cache = true;
+                model = "jev-latest";
+                timeoutMs = 60000;
               };
             };
 
