@@ -91,7 +91,6 @@
             ".pi/agent/extensions/file-picker.ts".source = extensions + "/file-picker.ts";
             ".pi/agent/extensions/git-reference-picker".source = extensions + "/git-reference-picker";
             ".pi/agent/extensions/global-prompt-history".source = extensions + "/global-prompt-history";
-            ".pi/agent/extensions/jev-context".source = extensions + "/jev-context";
             ".pi/agent/extensions/pi-fast".source = extensions + "/pi-fast";
             ".pi/agent/extensions/session-status".source = extensions + "/session-status";
             ".pi/agent/extensions/split-session".source = extensions + "/split-session";
@@ -225,6 +224,7 @@
                   "npm:@juicesharp/rpiv-todo"
                   "npm:pi-cd"
                   "npm:pi-intercom"
+                  "npm:pi-jev-context"
                   # web-workflows.ts loads both factories to share the web tools.
                   {
                     source = "npm:pi-web-access";
