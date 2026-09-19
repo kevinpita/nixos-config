@@ -68,17 +68,29 @@
       flake = false;
     };
 
-    claude-code.url = "github:sadjow/claude-code-nix";
+    claude-code = {
+      url = "github:sadjow/claude-code-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
-    codex-cli-nix.url = "github:sadjow/codex-cli-nix";
+    codex-cli-nix = {
+      url = "github:sadjow/codex-cli-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     kevinpita-nixpkgs.url = "github:kevinpita/nixpkgs/helm-tui-init";
 
     nixpkgs-pgbot.url = "github:kevinpita/nixpkgs/pgbot-init";
 
-    herdr-nix.url = "github:kevinpita/herdr-nix";
+    herdr-nix = {
+      url = "github:kevinpita/herdr-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
-    bast-nix.url = "github:kevinpita/bast-nix";
+    bast-nix = {
+      url = "github:kevinpita/bast-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     pi-extensions = {
       url = "github:kevinpita/nixos-pi";
@@ -96,7 +108,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    ku-nix.url = "github:kevinpita/ku-nix";
+    ku-nix = {
+      url = "github:kevinpita/ku-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     lazyrsync-nix = {
       url = "github:kevinpita/lazyrsync-nix";

@@ -8,8 +8,6 @@ let
   username = "kevin";
   system = "x86_64-linux";
 
-  defaultPackageOverlay = name: input: _final: _prev: { ${name} = input.packages.${system}.default; };
-
   overlays = [
     inputs.claude-code.overlays.default
 
@@ -20,11 +18,11 @@ let
       inherit (inputs.nixpkgs-pgbot.legacyPackages.${system}) pgbot;
     })
 
-    (defaultPackageOverlay "herdr" inputs.herdr-nix)
+    inputs.herdr-nix.overlays.default
 
-    (defaultPackageOverlay "bast" inputs.bast-nix)
+    inputs.bast-nix.overlays.default
 
-    (defaultPackageOverlay "ku" inputs.ku-nix)
+    inputs.ku-nix.overlays.default
 
     inputs.lazyrsync-nix.overlays.default
 
