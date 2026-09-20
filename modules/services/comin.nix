@@ -1,12 +1,18 @@
 { inputs, ... }:
 {
   flake.modules.nixos.server =
-    { pkgs, username, ... }:
+    {
+      config,
+      pkgs,
+      username,
+      ...
+    }:
     {
       imports = [ inputs.comin.nixosModules.comin ];
 
       services.comin = {
         enable = true;
+        exporter.openFirewall = false;
         remotes = [
           {
             name = "origin";
@@ -15,6 +21,17 @@
           }
         ];
       };
+
+      assertions = [
+        {
+          assertion = config.services.tailscale.enable && config.networking.firewall.enable;
+          message = "Comin metrics requires Tailscale and the host firewall.";
+        }
+      ];
+
+      networking.firewall.interfaces.${config.services.tailscale.interfaceName}.allowedTCPPorts = [
+        config.services.comin.exporter.port
+      ];
 
       # Pin GitHub's host key for unattended private flake input fetches.
       programs.ssh.knownHosts."github.com".publicKey =
