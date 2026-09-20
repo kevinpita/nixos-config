@@ -1,9 +1,23 @@
 ---
 name: show-me
-description: Help the user understand the current topic visually with concise diagrams, code-shape sketches, and focused HTML artifacts.
+description: Help the user understand the current topic visually with inline text diagrams and code-shape sketches. Create HTML views when explicitly requested.
 ---
 
 Help the user understand the current topic of conversation visually. Skip the preamble and keep prose brief. Pick the smallest view that makes the key point clear.
+
+## Output directly in Pi
+
+Default to diagrams in the chat response, readable in Pi without a browser or extension. Use compact boxes, trees, and ASCII arrows in `text` fences. Keep diagrams narrow, and split dense diagrams into smaller views. When running as a subagent, return the diagram in the response so the parent can include it in chat.
+
+```text
+[User request]
+      |
+      v
+[Agent loads show-me]
+      |
+      v
+[Diagram in Pi chat]
+```
 
 ## Choose a readable format
 
@@ -11,7 +25,7 @@ Help the user understand the current topic of conversation visually. Skip the pr
 - Use a language-tagged fence when the content fits that language. Use `yaml` for role or state mappings, `python` for Python-like pseudocode, and `tsx` for component sketches. Syntax colours depend on the user's renderer and theme.
 - Reserve `text` fences for spatial layouts that need fixed-width alignment, such as file trees. Prefer one compact diagram over several grey text blocks.
 - Use `diff` for actual before/after changes, not to colour unrelated facts green or red.
-- When the user asks for colour, or colour is needed to distinguish roles or states, create the HTML view described below. Pair each colour with a text label. Keep a short summary in chat.
+- Distinguish roles and states with text labels. If the user explicitly requests a colour view, use the HTML view described below and keep a short summary in chat.
 - Use ASCII arrows `->` and `<-` in text diagrams.
 
 For example, show roles as a structured mapping rather than aligned prose:
@@ -65,7 +79,7 @@ src/
 └── transport/      # sends API requests
 ```
 
-- Show component interaction, control flow, or data flow with Mermaid when the output surface renders it. In a terminal that shows raw Mermaid source, use a small text diagram or an HTML view instead:
+- Show component interaction, control flow, or data flow with text diagrams in Pi. Use Mermaid only when the user requests its source or the output surface is known to render it:
 
 ```mermaid
 sequenceDiagram
@@ -136,7 +150,7 @@ function expandSkill(command: string): string {
 }
 ```
 
-- For a requested colour view, visual UI, layout, state comparison, or concept too dense for a chat diagram, write one focused HTML file. Use a diagram, an infographic, or a short slide deck, whichever fits the point. Match the product's colours, type, spacing, and components. If there is no product style, use a high-contrast dark background with a small, consistent set of accent colours. Use real labels and data, distinguish unknown from unsupported, and support desktop and mobile. Then open it for the user:
+- Only when the user explicitly requests HTML, a browser view, or a colour view, write one focused HTML file. Use a diagram, an infographic, or a short slide deck, whichever fits the point. Match the product's colours, type, spacing, and components. If there is no product style, use a high-contrast dark background with a small, consistent set of accent colours. Use real labels and data, distinguish unknown from unsupported, and support desktop and mobile. Then open it for the user:
 
 ```bash
 open "path/to/show-me-{description}.html"
