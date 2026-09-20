@@ -1,41 +1,27 @@
 # Install or reinstall a host
 
-Use a deploying machine with Nix flakes enabled, GitHub SSH access to the private inputs, and this repository checked out. Run local commands from `~/nixos-config` in the same Bash shell. Replace `<hostname>` and `<ip>` with the target host name and installer address.
+Run commands from `~/nixos-config` on a machine with Nix flakes and SSH access to the private GitHub inputs. Use the same Bash shell throughout. Replace `<hostname>` and `<ip>` with the target host and installer address.
 
 > [!CAUTION]
-> This is a full installation, including for an existing device. Disko can erase the selected disks. Back up data and the host's age key first. For a manual configuration update, use `just switch` on the installed host instead.
+> Disko can erase the selected disks. Back up data and the host's age key. To update an installed host instead, use `just switch`.
 
-## Automatic server deployments
+## 1. Boot the installer
 
-The `server` role enables Comin through `modules/services/comin.nix`. It pulls the configuration repository's `main` branch and builds and switches the configuration matching the host name. Push committed changes to deploy them. Comin uses the committed lockfile, rather than updating dependencies itself.
+Boot the [NixOS minimal ISO](https://nixos.org/download/), connect to the network, set a root password with `sudo passwd root`, and find the address with `ip a`. Confirm that `ssh root@<ip>` works.
 
-After this module is first added, commit and push it before running `just switch` once on each existing server. This prevents Comin from pulling an older configuration that disables the service. Workstations do not enable Comin.
+Alternatively, build this repo's ISO with `nix build .#installer-iso`. Its root password is `root`. Change it immediately and use a trusted network.
 
-Comin runs as root for activation. It uses the existing SOPS-managed user SSH key to fetch the private flake inputs, with strict verification against a pinned GitHub host key. The key must have read access to both private repositories without an interactive passphrase or SSH agent. SOPS decryption still uses the host's `/var/lib/sops-nix/key.txt`, and no user login is required.
+## 2. Prepare the host
 
-Use `systemctl status comin` and `journalctl -u comin -f` to inspect deployments. Treat write access to `main` as permission to deploy root-level changes to every server. This setup does not schedule reboots.
+For an unchanged reinstall, reuse the host files and age key. Check that the disk identifiers still match.
 
-## 1. Boot the target and choose the host
+For a new host:
 
-Boot the target with the [NixOS minimal ISO](https://nixos.org/download/). Connect it to the network, run `sudo passwd root`, and find its address with `ip a`. Confirm that `ssh root@<ip>` works from the deploying machine.
+1. Copy an existing [host entry point](modules/hosts/) to `modules/hosts/<hostname>.nix`. Set its name to `flake.modules.nixos."hosts/<hostname>"`, update its hardware and disko imports, and select the role and features. Host discovery is automatic.
+1. Create `hosts/<hostname>/disko-config.nix` from an existing layout or [`hosts/disko-btrfs.nix`](hosts/disko-btrfs.nix). Use `lsblk -o NAME,SIZE,MODEL,SERIAL` and `ls -l /dev/disk/by-id/` on the target to choose the disk. Check boot mode, encryption, and swap.
+1. Set hardware-specific options. For a desktop, add and reference `hosts/<hostname>/hyprland.lua` as existing desktop hosts do.
 
-You can also build this repository's ISO with `nix build .#installer-iso`. Its root password is `root`. Use it only on a trusted network and change the password immediately.
-
-| Situation | What to reuse or change |
-| --- | --- |
-| Reinstall the same device | Reuse its host module, hardware configuration, disk layout, and backed-up age key. Verify the disk identifiers before installation. |
-| Replace hardware under an existing host name | Reuse the host identity and age key, but regenerate the hardware configuration and review the disk layout and hardware-specific settings. Do not keep the old machine active with the same identity. |
-| Add another device | Choose a unique host name, create its module and disk layout, generate its hardware configuration, and add new host secrets. |
-
-## 2. Prepare the configuration
-
-Skip file creation for an unchanged device. For a new host:
-
-1. Create `modules/hosts/<hostname>.nix`, using an existing [host entry point](modules/hosts/) as a reference. Define `flake.modules.nixos."hosts/<hostname>"`, import its hardware and disko files from `../../hosts/<hostname>/`, and select a role such as `config.flake.modules.nixos.desktop` or `config.flake.modules.nixos.server`. Hosts are discovered automatically. Do not add imports to `flake.nix`.
-1. Create `hosts/<hostname>/disko-config.nix`. Adapt an existing layout or use [`hosts/disko-btrfs.nix`](hosts/disko-btrfs.nix). Check the target's disks with `lsblk -o NAME,SIZE,MODEL,SERIAL` and `ls -l /dev/disk/by-id/`. Set the correct device, boot mode, encryption, and swap size. Do not copy another machine's disk identifier.
-1. Set any host-specific networking, CPU/GPU, laptop, and desktop settings. For a desktop, add and reference its `hosts/<hostname>/hyprland.lua` as the existing desktop hosts do.
-
-For new or changed hardware, generate the hardware file **from the target**, on the deploying machine:
+For new or changed hardware, generate the hardware configuration from the target:
 
 ```bash
 mkdir -p 'hosts/<hostname>'
@@ -43,11 +29,11 @@ ssh root@<ip> 'nixos-generate-config --show-hardware-config --no-filesystems' \
   > 'hosts/<hostname>/hardware-configuration.nix'
 ```
 
-Confirm the command succeeded and review the generated file. `--no-filesystems` leaves storage configuration to disko. This only scans hardware, it does not install or format anything. Generate it before deployment so you can review and commit the result.
+Check that the command succeeded and review the output. Disko owns the filesystem configuration. When replacing hardware, also review the disk layout and hardware-specific options. Do not run two machines with the same host identity.
 
-## 3. Prepare the age key and secrets
+## 3. Prepare secrets
 
-The installed system needs `/var/lib/sops-nix/key.txt` to decrypt its credentials on first boot:
+Create the directory that will supply the host's age key at installation:
 
 ```bash
 umask 077
@@ -55,34 +41,34 @@ extra_files=$(mktemp -d)
 mkdir -p "$extra_files/var/lib/sops-nix"
 ```
 
-**Existing host identity:** restore its age key from KeePass to `$extra_files/var/lib/sops-nix/key.txt` and set its mode to `0600`. No secret changes are needed if the same key and host name are reused.
+**Existing host:** restore its age key from KeePass to `$extra_files/var/lib/sops-nix/key.txt`, with mode `0600`. If the key and secrets are unchanged, continue to step 4.
 
-**New host identity:** generate and back up a new key in KeePass:
+**New host:** generate a key, back it up in KeePass, and print its public recipient:
 
 ```bash
 age-keygen -o "$extra_files/var/lib/sops-nix/key.txt"
 age-keygen -y "$extra_files/var/lib/sops-nix/key.txt"
 ```
 
-Then, in `~/nixos-secrets`:
+In `~/nixos-secrets`:
 
-1. Restore the admin key to `~/.config/sops/age/keys.txt` with mode `0600` if needed.
-1. Add the new public age recipient and host creation rule to `.sops.yaml`. Include the recipient in the rule for `secrets/common.yaml` and any shared secrets the selected services need.
-1. Create `secrets/<hostname>.yaml` with `sops`. The base configuration requires `ssh-auth-key`, `ssh-auth-key-pub`, `ssh-sign-key`, and `ssh-sign-key-pub`. Add any secrets required by the selected services. Register the new SSH public keys with GitHub or other services as needed.
-1. Run `sops updatekeys secrets/common.yaml` and repeat for any other existing secret files whose recipients changed. Keep the common `user-password` entry.
-1. Review, **commit, and push** `.sops.yaml` and the encrypted secret files. Never commit private age keys or plaintext secrets.
+1. Make sure the admin key is at `~/.config/sops/age/keys.txt`, with mode `0600`.
+1. Add the recipient and host rule to `.sops.yaml`. Include it in the rules for `secrets/common.yaml` and any required shared secrets.
+1. Create `secrets/<hostname>.yaml` with `sops`. Include `ssh-auth-key`, `ssh-auth-key-pub`, `ssh-sign-key`, `ssh-sign-key-pub`, and any service secrets. Register the public SSH keys with GitHub or other services as needed.
+1. Run `sops updatekeys` on existing secret files whose recipients changed. Keep the common `user-password` entry.
+1. Commit and push the encrypted files and `.sops.yaml`. Never commit private age keys or plaintext secrets.
 
-Back in `~/nixos-config`, fetch the published secret revision:
+If secrets changed, return to `~/nixos-config` and run:
 
 ```bash
 nix flake update nixos-secrets
 ```
 
-Skip this update if the secrets did not change. If you replace a lost age key, update the host's recipient and re-encrypt its host and shared secret files with an authorized admin key before deployment.
+If an age key was lost, use an authorized admin key to update the recipient and re-encrypt the host and shared secrets before installation.
 
-## 4. Review and commit the configuration
+## 4. Build and commit
 
-Add new host files to Git so that the flake can see them, then format and build the target without activation:
+Stage new host files so the flake can see them, then format and build without activation:
 
 ```bash
 git add 'modules/hosts/<hostname>.nix' 'hosts/<hostname>/'
@@ -90,13 +76,11 @@ nix fmt
 nix build '.#nixosConfigurations.<hostname>.config.system.build.toplevel'
 ```
 
-Review the host files and `flake.lock`, stage the intended changes, then **commit and push** them. Include any related module changes. Do not commit the extra-files directory. For an unchanged reinstall, no new commit is needed.
+Review, commit, and push the host files, lockfile, and related module changes. An unchanged reinstall needs no new commit. Record `git rev-parse HEAD` for the desktop checkout below.
 
-Record `git rev-parse HEAD` so that the target's desktop checkout can use the deployed revision.
+## 5. Optional: register a server with Tailscale
 
-## 5. Optionally prepare Tailscale for a server
-
-A fresh installation does not retain the old Tailscale state, even if it reuses the age key. For first-boot registration, add a one-use, non-ephemeral auth key:
+A reinstall loses Tailscale state. To register at first boot, supply a one-use, non-ephemeral auth key:
 
 ```bash
 mkdir -p "$extra_files/var/lib/tailscale"
@@ -106,13 +90,13 @@ mkdir -p "$extra_files/var/lib/tailscale"
  printf '%s' "$key" > "$extra_files/var/lib/tailscale/bootstrap-auth-key")
 ```
 
-Use a pre-approved key if device approval is enabled. Tailnet policy must permit Tailscale SSH. Exit-node approval is separate.
+Use a pre-approved key if device approval is enabled. Tailnet policy must allow Tailscale SSH. Exit-node approval is separate.
 
-Without this file, automatic registration is skipped. The server deletes the file after successful registration and retries failures. Inspect failures with `journalctl -u tailscaled-autoconnect`. To retry later, provide a fresh key at `/var/lib/tailscale/bootstrap-auth-key` and run `sudo systemctl restart tailscaled-autoconnect`.
+Without this file, automatic registration is skipped. The server deletes it after success and retries failures. Check `journalctl -u tailscaled-autoconnect`. To retry with a new key, replace `/var/lib/tailscale/bootstrap-auth-key` and run `sudo systemctl restart tailscaled-autoconnect`.
 
-## 6. Deploy and finish
+## 6. Install
 
-Check the target address and disk selection once more, then run:
+Confirm the target address and disk selection, then run:
 
 ```bash
 nix run github:nix-community/nixos-anywhere -- \
@@ -120,9 +104,13 @@ nix run github:nix-community/nixos-anywhere -- \
   --flake '.#<hostname>' --target-host root@<ip>
 ```
 
-After reboot, confirm that the installed system boots, secrets decrypt, and network access works. For encrypted disks, be ready to enter the LUKS passphrase at the console. After successful installation and key backup, remove the local temporary files with `rm -rf -- "$extra_files"`.
+After reboot, check boot, secret decryption, and network access. Encrypted disks need the LUKS passphrase at the console. Once installation succeeds and the age key is backed up, remove the temporary files:
 
-On a desktop, log in as `kevin` at a text console before starting the desktop session:
+```bash
+rm -rf -- "$extra_files"
+```
+
+On a desktop, log in as `kevin` at a text console and prepare the checkout before starting the desktop session:
 
 ```bash
 git clone git@github.com:kevinpita/nixos-config.git ~/nixos-config
@@ -130,4 +118,12 @@ cd ~/nixos-config
 git checkout <deployed-commit>
 ```
 
-Use the commit recorded in step 4. No separate Neovim or Hyprland clone is needed. Clone `~/nixos-pi`, `~/nixos-secrets`, or `~/nixos-work` only if you need to edit those repositories.
+Use the commit recorded in step 4. No separate Neovim or Hyprland clone is needed. Clone the private input repositories only to edit them.
+
+## Server updates
+
+Servers use [Comin](modules/services/comin.nix) to build and activate `main` with its committed lockfile. Push changes to deploy them. Workstations use `just switch`. Comin does not schedule reboots.
+
+When first enabling Comin on an existing server, commit and push the configuration before running `just switch`. Its SOPS-managed SSH key must read the private inputs without a passphrase or SSH agent. Write access to `main` permits root-level changes on every server.
+
+Check deployments with `systemctl status comin`, `journalctl -u comin -f`, or Grafana's **Monitoring / Comin deployments** dashboard. Metrics travel over Tailscale and show local deployment events, not whether a server matches the latest GitHub commit.
