@@ -103,8 +103,6 @@
                   webToolsTypes = ../pi/dynamic-workflows/web-tools.d.ts;
                 };
 
-            ".pi/agent/extensions/subagents.ts".source = ../pi/extensions/subagents.ts;
-
             ".pi/agent/extensions/subagent/config.json" = {
               force = true;
               text = builtins.toJSON {
@@ -232,8 +230,6 @@
                   }
                   {
                     source = "npm:pi-subagents";
-                    # subagents.ts loads the extension. Keep npm resources.
-                    extensions = [ ];
                     prompts = [
                       "prompts/*.md"
                       "!prompts/gather-context-and-clarify.md"
