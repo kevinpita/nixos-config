@@ -1,0 +1,84 @@
+{
+  "uid": "smart-disks",
+  "title": "SMART disks",
+  "description": "Physical drive health and ATA self-test logs. smartd schedules tests. smartctl_exporter reads health data independently. Missing data does not mean a drive is healthy. Self-test log counts do not prove that a test ran today.",
+  "tags": ["nixos", "selfhosted"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": false,
+  "refresh": "1m",
+  "time": {"from": "now-7d", "to": "now"},
+  "templating": {
+    "list": [
+      {
+        "name": "host", "label": "Host", "type": "query",
+        "datasource": {"type": "prometheus", "uid": "prometheus"},
+        "query": {"query": "label_values(up{job=\"smartctl\"}, host)", "refId": "StandardVariableQuery"},
+        "definition": "label_values(up{job=\"smartctl\"}, host)",
+        "refresh": 2, "sort": 1, "multi": false, "includeAll": false,
+        "options": [], "current": {}
+      },
+      {
+        "name": "device", "label": "Drive", "type": "query",
+        "datasource": {"type": "prometheus", "uid": "prometheus"},
+        "query": {"query": "label_values(smartctl_device{job=\"smartctl\",host=\"$host\"}, device)", "refId": "StandardVariableQuery"},
+        "definition": "label_values(smartctl_device{job=\"smartctl\",host=\"$host\"}, device)",
+        "refresh": 2, "sort": 1, "multi": true, "includeAll": true,
+        "allValue": ".*", "options": [], "current": {"text": "All", "value": "$__all"}
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1, "title": "SMART exporter", "type": "stat",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": {"x": 0, "y": 0, "w": 6, "h": 5},
+      "targets": [{"refId": "A", "expr": "up{job=\"smartctl\",host=\"$host\"}", "instant": true}],
+      "fieldConfig": {"defaults": {"noValue": "No data", "mappings": [{"type": "value", "options": {"0": {"text": "Down", "color": "red"}, "1": {"text": "Up", "color": "green"}}}]}, "overrides": []},
+      "options": {"colorMode": "background", "reduceOptions": {"calcs": ["lastNotNull"], "values": false}}
+    },
+    {
+      "id": 2, "title": "Drive SMART health", "type": "stat",
+      "description": "Overall drive-reported health. A passed result does not exclude individual attribute or self-test errors.",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": {"x": 6, "y": 0, "w": 18, "h": 5},
+      "targets": [{"refId": "A", "expr": "smartctl_device_smart_status{job=\"smartctl\",host=\"$host\",device=~\"$device\"}", "legendFormat": "{{device}}", "instant": true}],
+      "fieldConfig": {"defaults": {"noValue": "No data", "mappings": [{"type": "value", "options": {"0": {"text": "Failed", "color": "red"}, "1": {"text": "Passed", "color": "green"}}}]}, "overrides": []},
+      "options": {"colorMode": "background", "reduceOptions": {"calcs": ["lastNotNull"], "values": false}}
+    },
+    {
+      "id": 3, "title": "Drive temperature", "type": "timeseries",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": {"x": 0, "y": 5, "w": 12, "h": 8},
+      "targets": [{"refId": "A", "expr": "smartctl_device_temperature{job=\"smartctl\",host=\"$host\",device=~\"$device\",temperature_type=\"current\"}", "legendFormat": "{{device}}"}],
+      "fieldConfig": {"defaults": {"unit": "celsius", "noValue": "No data"}, "overrides": []}
+    },
+    {
+      "id": 4, "title": "ATA sector warnings", "type": "timeseries",
+      "description": "Raw ATA attributes: 5 = reallocated sectors, 197 = pending sectors, 198 = offline uncorrectable sectors. Values depend on drive firmware.",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": {"x": 12, "y": 5, "w": 12, "h": 8},
+      "targets": [{"refId": "A", "expr": "smartctl_device_attribute{job=\"smartctl\",host=\"$host\",device=~\"$device\",attribute_value_type=\"raw\",attribute_id=~\"5|197|198\"}", "legendFormat": "{{device}} {{attribute_name}}"}],
+      "fieldConfig": {"defaults": {"min": 0, "decimals": 0, "noValue": "No data"}, "overrides": []}
+    },
+    {
+      "id": 5, "title": "ATA self-test log errors", "type": "stat",
+      "description": "Errors reported in the drive self-test log, not just the latest test. No data means no supported log was exported. These values do not prove daily test completion.",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": {"x": 0, "y": 13, "w": 12, "h": 6},
+      "targets": [{"refId": "A", "expr": "max by (device) (smartctl_device_self_test_log_error_count{job=\"smartctl\",host=\"$host\",device=~\"$device\"})", "legendFormat": "{{device}}", "instant": true}],
+      "fieldConfig": {"defaults": {"noValue": "No data", "decimals": 0, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]}}, "overrides": []},
+      "options": {"colorMode": "background", "reduceOptions": {"calcs": ["lastNotNull"], "values": false}}
+    },
+    {
+      "id": 6, "title": "ATA self-test log entries", "type": "stat",
+      "description": "Entries retained in each drive log, not a lifetime test counter. Logs can wrap. This panel does not show when the latest test ran.",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": {"x": 12, "y": 13, "w": 12, "h": 6},
+      "targets": [{"refId": "A", "expr": "max by (device) (smartctl_device_self_test_log_count{job=\"smartctl\",host=\"$host\",device=~\"$device\"})", "legendFormat": "{{device}}", "instant": true}],
+      "fieldConfig": {"defaults": {"noValue": "No data", "decimals": 0}, "overrides": []},
+      "options": {"colorMode": "none", "reduceOptions": {"calcs": ["lastNotNull"], "values": false}}
+    }
+  ]
+}

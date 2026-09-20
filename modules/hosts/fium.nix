@@ -43,6 +43,17 @@
         };
       };
 
+      services.zfs.autoScrub = {
+        enable = true;
+        interval = "Sun *-*-* 04:00:00";
+        # An empty list includes every imported pool.
+        pools = [ ];
+      };
+
+      # Add weekly extended tests to the shared daily short tests.
+      # Keep extended tests away from the Sunday ZFS scrub.
+      services.smartd.defaults.monitored = "-a -s (S/../.././01|L/../../3/02)";
+
       boot.supportedFilesystems = [ "zfs" ];
       boot.zfs = {
         devNodes = "/dev/disk/by-id";

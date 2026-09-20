@@ -9,9 +9,6 @@ let
   cominHosts = lib.filterAttrs (
     _: host: host.config.services.comin.enable or false
   ) config.flake.nixosConfigurations;
-  podmanHosts = lib.filterAttrs (
-    _: host: host.config.services.podman-exporter.enable or false
-  ) config.flake.nixosConfigurations;
 in
 {
   flake.modules.nixos.selfhosted =
@@ -77,13 +74,24 @@ in
               }) zfsHosts;
             }
             {
+              job_name = "smartctl";
+              scrape_interval = "1m";
+              scrape_timeout = "30s";
+              static_configs = lib.mapAttrsToList (_: host: {
+                targets = [
+                  "${host.config.networking.hostName}.${cfg.tailnetDomain}:${toString host.config.services.prometheus.exporters.smartctl.port}"
+                ];
+                labels.host = host.config.networking.hostName;
+              }) monitoredHosts;
+            }
+            {
               job_name = "podman";
               static_configs = lib.mapAttrsToList (_: host: {
                 targets = [
                   "${host.config.networking.hostName}.${cfg.tailnetDomain}:${toString host.config.services.podman-exporter.port}"
                 ];
                 labels.host = host.config.networking.hostName;
-              }) podmanHosts;
+              }) monitoredHosts;
             }
             {
               job_name = "comin";
