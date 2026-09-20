@@ -16,7 +16,7 @@ in
 if ciMode != isCi work then
   throw "Public CI requires both nixos-secrets and nixos-work dummy inputs; do not mix real and dummy inputs."
 else if !ciMode && !builtins.pathExists "${secrets}/secrets/common.yaml" then
-  throw "nixos-secrets must contain secrets/common.yaml. Use check-public for explicit dummy-input validation."
+  throw "nixos-secrets must contain secrets/common.yaml. For public CI validation, override both private inputs with ci-dummy-input."
 else if
   !builtins.isAttrs workConfig
   || !builtins.all (
