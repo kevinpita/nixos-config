@@ -6,6 +6,7 @@
 - Attach new aspects to the applicable role by default. Extending an imported aspect needs no extra import.
 - `import-tree` loads Nix files under `modules/`. Keep raw NixOS helper modules outside that directory. Do not add manual imports to `flake.nix`.
 - Run `nix fmt` after changes. Activate the system only when asked.
+- Keep verification quick and focused on changed files. Use formatting, syntax checks, and diff review by default. Run full NixOS evaluations, system derivation checks (`system.build.toplevel.drvPath`), builds, or multi-host checks only when explicitly asked. Report which checks ran and which were skipped.
 - After changes, check whether related documentation needs updating and fix anything made inaccurate.
 - Keep documentation focused on purpose, ownership, and stable conventions. Leave changing defaults and shortcut lists in the code.
 - Use Conventional Commit messages when asked to commit.
