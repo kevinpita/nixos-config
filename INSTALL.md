@@ -3,7 +3,17 @@
 Use a deploying machine with Nix flakes enabled, GitHub SSH access to the private inputs, and this repository checked out. Run local commands from `~/nixos-config` in the same Bash shell. Replace `<hostname>` and `<ip>` with the target host name and installer address.
 
 > [!CAUTION]
-> This is a full installation, including for an existing device. Disko can erase the selected disks. Back up data and the host's age key first. For a normal configuration update, use `just switch` on the installed host instead.
+> This is a full installation, including for an existing device. Disko can erase the selected disks. Back up data and the host's age key first. For a manual configuration update, use `just switch` on the installed host instead.
+
+## Automatic server deployments
+
+The `server` role enables Comin through `modules/services/comin.nix`. It pulls the configuration repository's `main` branch and builds and switches the configuration matching the host name. Push committed changes to deploy them. Comin uses the committed lockfile, rather than updating dependencies itself.
+
+After this module is first added, commit and push it before running `just switch` once on each existing server. This prevents Comin from pulling an older configuration that disables the service. Workstations do not enable Comin.
+
+Comin runs as root for activation. It uses the existing SOPS-managed user SSH key to fetch the private flake inputs, with strict verification against a pinned GitHub host key. The key must have read access to both private repositories without an interactive passphrase or SSH agent. SOPS decryption still uses the host's `/var/lib/sops-nix/key.txt`, and no user login is required.
+
+Use `systemctl status comin` and `journalctl -u comin -f` to inspect deployments. Treat write access to `main` as permission to deploy root-level changes to every server. This setup does not schedule reboots.
 
 ## 1. Boot the target and choose the host
 
