@@ -126,4 +126,4 @@ Servers use [Comin](modules/services/comin.nix) to build and activate `main` wit
 
 When first enabling Comin on an existing server, commit and push the configuration before running `just switch`. Its SOPS-managed SSH key must read the private inputs without a passphrase or SSH agent. Write access to `main` permits root-level changes on every server.
 
-Check deployments with `systemctl status comin`, `journalctl -u comin -f`, or Grafana's **Monitoring / Comin deployments** dashboard. Metrics travel over Tailscale and show local deployment events, not whether a server matches the latest GitHub commit.
+Check deployments with `systemctl status comin`, `journalctl -u comin -f`, or Grafana's **Monitoring / Comin deployments** dashboard. Metrics travel over Tailscale and show local deployment events, not whether a server matches the latest GitHub commit. The Comin post-deployment hook records the last successful deployment time in `/var/lib/comin-metrics` for node-exporter. This timestamp survives restarts and becomes available after the first successful deployment with the hook enabled.

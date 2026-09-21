@@ -3,6 +3,7 @@
   flake.modules.nixos.server =
     {
       config,
+      lib,
       pkgs,
       username,
       ...
@@ -13,6 +14,15 @@
       services.comin = {
         enable = true;
         exporter.openFirewall = false;
+        postDeploymentCommand = lib.getExe (
+          pkgs.writeShellApplication {
+            name = "comin-deployment-metric";
+            runtimeInputs = [ pkgs.coreutils ];
+            text = ''
+              exec ${pkgs.bash}/bin/bash ${./comin-deployment-metric.sh} /var/lib/comin-metrics
+            '';
+          }
+        );
         remotes = [
           {
             name = "origin";
@@ -21,6 +31,12 @@
           }
         ];
       };
+
+      # Persist the timestamp across Comin restarts and export it through node-exporter.
+      systemd.tmpfiles.rules = [ "d /var/lib/comin-metrics 0755 root root -" ];
+      services.prometheus.exporters.node.extraFlags = [
+        "--collector.textfile.directory=/var/lib/comin-metrics"
+      ];
 
       assertions = [
         {

@@ -106,8 +106,8 @@
       }
     },
     {
-      "id": 2,
-      "title": "Deployment suspended",
+      "id": 10,
+      "title": "Last successful deployment",
       "type": "stat",
       "datasource": {
         "type": "prometheus",
@@ -119,35 +119,22 @@
         "w": 8,
         "h": 4
       },
-      "description": "Whether automatic deployments are suspended.",
+      "description": "Local date and time recorded by the Comin post-deployment hook after a successful deployment. Persists across restarts. Available after the first successful deployment with the hook enabled. Failed attempts leave the previous time unchanged. This is not a Git commit time or a Prometheus scrape time.",
       "fieldConfig": {
         "defaults": {
-          "noValue": "No data",
+          "unit": "dateTimeAsLocal",
+          "noValue": "No recorded deployment",
           "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [
-            {
-              "type": "value",
-              "options": {
-                "0": {
-                  "text": "No",
-                  "color": "green"
-                },
-                "1": {
-                  "text": "Yes",
-                  "color": "red"
-                }
-              }
-            }
-          ]
+            "mode": "fixed",
+            "fixedColor": "green"
+          }
         },
         "overrides": []
       },
       "targets": [
         {
           "refId": "A",
-          "expr": "comin_is_suspended{job=\"comin\",host=~\"$host\"} and on(instance) (up{job=\"comin\",host=~\"$host\"} == 1)",
+          "expr": "(comin_last_successful_deployment_timestamp_seconds{job=\"node\",host=~\"$host\"} > 0) * 1000 and on(instance) (up{job=\"node\",host=~\"$host\"} == 1)",
           "legendFormat": "{{host}}",
           "instant": true,
           "range": false
@@ -162,7 +149,8 @@
           "values": false
         },
         "colorMode": "value",
-        "textMode": "value_and_name"
+        "textMode": "value_and_name",
+        "graphMode": "none"
       }
     },
     {
@@ -234,9 +222,9 @@
         "uid": "prometheus"
       },
       "gridPos": {
-        "x": 0,
+        "x": 12,
         "y": 4,
-        "w": 8,
+        "w": 12,
         "h": 4
       },
       "description": "Last reported stage result, not proof that the latest GitHub commit is deployed. Gauges can reset when Comin restarts.",
@@ -286,126 +274,6 @@
       }
     },
     {
-      "id": 5,
-      "title": "Last evaluation",
-      "type": "stat",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "x": 8,
-        "y": 4,
-        "w": 8,
-        "h": 4
-      },
-      "description": "Last reported stage result, not proof that the latest GitHub commit is deployed. Gauges can reset when Comin restarts.",
-      "fieldConfig": {
-        "defaults": {
-          "noValue": "No data",
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [
-            {
-              "type": "value",
-              "options": {
-                "0": {
-                  "text": "No failure reported",
-                  "color": "green"
-                },
-                "1": {
-                  "text": "Failed",
-                  "color": "red"
-                }
-              }
-            }
-          ]
-        },
-        "overrides": []
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "expr": "comin_last_eval_failed{job=\"comin\",host=~\"$host\"} and on(instance) (up{job=\"comin\",host=~\"$host\"} == 1)",
-          "legendFormat": "{{host}}",
-          "instant": true,
-          "range": false
-        }
-      ],
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "colorMode": "value",
-        "textMode": "value_and_name"
-      }
-    },
-    {
-      "id": 6,
-      "title": "Last build",
-      "type": "stat",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "x": 16,
-        "y": 4,
-        "w": 8,
-        "h": 4
-      },
-      "description": "Last reported stage result, not proof that the latest GitHub commit is deployed. Gauges can reset when Comin restarts.",
-      "fieldConfig": {
-        "defaults": {
-          "noValue": "No data",
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [
-            {
-              "type": "value",
-              "options": {
-                "0": {
-                  "text": "No failure reported",
-                  "color": "green"
-                },
-                "1": {
-                  "text": "Failed",
-                  "color": "red"
-                }
-              }
-            }
-          ]
-        },
-        "overrides": []
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "expr": "comin_last_build_failed{job=\"comin\",host=~\"$host\"} and on(instance) (up{job=\"comin\",host=~\"$host\"} == 1)",
-          "legendFormat": "{{host}}",
-          "instant": true,
-          "range": false
-        }
-      ],
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "colorMode": "value",
-        "textMode": "value_and_name"
-      }
-    },
-    {
       "id": 7,
       "title": "Last activation",
       "type": "stat",
@@ -415,8 +283,8 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 8,
-        "w": 8,
+        "y": 4,
+        "w": 12,
         "h": 4
       },
       "description": "Last reported activation result. Missing or unreachable exporters are not shown as successful.",
@@ -475,9 +343,9 @@
       },
       "description": "Commit and status of the last reported deployment, which may have failed. This is not a comparison against GitHub HEAD. Data may be absent until a deployment is reported after restart.",
       "gridPos": {
-        "x": 8,
+        "x": 0,
         "y": 8,
-        "w": 16,
+        "w": 24,
         "h": 6
       },
       "targets": [
