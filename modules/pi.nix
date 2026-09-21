@@ -80,6 +80,11 @@
               adapter = "${agyAdapter}/bin/pi-agy-review";
             };
 
+            ".config/rpiv-ask-user-question/config.json" = {
+              force = true;
+              text = builtins.toJSON { collapseKey = "alt+o"; };
+            };
+
             ".config/rpiv-todo/config.json" = {
               force = true;
               text = builtins.toJSON { maxWidgetLines = 5; };
