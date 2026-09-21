@@ -44,7 +44,10 @@
     {
       systemd.user.services.keyboard-backlight-osd = {
         description = "Show keyboard backlight changes in the DMS OSD";
-        after = [ "dms.service" ];
+        after = [
+          "graphical-session.target"
+          "dms.service"
+        ];
         partOf = [ "graphical-session.target" ];
         wantedBy = [ "graphical-session.target" ];
         unitConfig.ConditionPathExists = "/sys/class/leds/tpacpi::kbd_backlight/brightness";
