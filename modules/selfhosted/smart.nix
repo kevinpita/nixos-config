@@ -7,6 +7,18 @@
       ...
     }:
     {
+      # Export recorded self-test age and result. Keep the read time as a
+      # freshness guard so cached data cannot hide failed disk reads.
+      nixpkgs.overlays = [
+        (_final: prev: {
+          prometheus-smartctl-exporter = prev.prometheus-smartctl-exporter.overrideAttrs (old: {
+            patches = (old.patches or [ ]) ++ [
+              ../../packages/prometheus-smartctl-exporter/self-test-history.patch
+            ];
+          });
+        })
+      ];
+
       services.prometheus.exporters.smartctl = {
         enable = lib.mkDefault config.services.smartd.enable;
         openFirewall = false;

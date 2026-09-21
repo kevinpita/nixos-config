@@ -5,7 +5,7 @@
   "tags": ["nixos", "selfhosted"],
   "timezone": "browser",
   "schemaVersion": 39,
-  "version": 2,
+  "version": 4,
   "editable": false,
   "refresh": "1m",
   "time": {"from": "now-7d", "to": "now"},
@@ -39,18 +39,27 @@
       "options": {"colorMode": "background", "reduceOptions": {"calcs": ["lastNotNull"], "values": false}}
     },
     {
-      "id": 2, "title": "Drive SMART health", "type": "stat",
-      "description": "Overall drive-reported health. A passed result does not exclude individual attribute or self-test errors.",
+      "id": 2, "title": "Last recorded self-test (powered-on age)", "type": "stat",
+      "description": "Age and result of the latest recorded self-test that ended, including failed or aborted tests. Running tests do not replace that record. Yellow after 28 powered-on hours, red after 48. Drive logs record power-on hours, not calendar dates: powered-off time is excluded and resolution is one hour. Unknown means no usable record, unsupported logs, ambiguous ATA counter wrap, or a disk read older than 10 minutes. An old Passed result is not proof that scheduled tests still run.",
       "datasource": {"type": "prometheus", "uid": "prometheus"},
       "gridPos": {"x": 6, "y": 0, "w": 18, "h": 5},
-      "targets": [{"refId": "A", "expr": "smartctl_device_smart_status{job=\"smartctl\",host=\"$host\",device=~\"$device\"}", "legendFormat": "{{device}}", "instant": true}],
-      "fieldConfig": {"defaults": {"noValue": "No data", "mappings": [{"type": "value", "options": {"0": {"text": "Failed", "color": "red"}, "1": {"text": "Passed", "color": "green"}}}]}, "overrides": []},
-      "options": {"colorMode": "background", "reduceOptions": {"calcs": ["lastNotNull"], "values": false}}
+      "targets": [{"refId": "A", "expr": "(smartctl_device_self_test_age_seconds{job=\"smartctl\",host=\"$host\",device=~\"$device\"} and on(instance,device) (time() - smartctl_device_smart_status_read_time_seconds{job=\"smartctl\",host=\"$host\",device=~\"$device\"} < 600)) or on(instance,device) label_replace((0 * smartctl_device{job=\"smartctl\",host=\"$host\",device=~\"$device\"} - 1), \"result\", \"Unknown\", \"device\", \".*\")", "legendFormat": "{{device}}: {{result}}", "instant": true}],
+      "fieldConfig": {"defaults": {"unit": "s", "noValue": "Unknown", "mappings": [{"type": "value", "options": {"-1": {"text": "Unknown", "color": "gray"}}}], "thresholds": {"mode": "absolute", "steps": [{"color": "gray", "value": null}, {"color": "green", "value": 0}, {"color": "yellow", "value": 100800}, {"color": "red", "value": 172800}]}}, "overrides": [{"matcher": {"id": "byRegexp", "options": ".*: (Failed|Aborted)$"}, "properties": [{"id": "thresholds", "value": {"mode": "absolute", "steps": [{"color": "red", "value": null}]}}]}, {"matcher": {"id": "byRegexp", "options": ".*: Unknown$"}, "properties": [{"id": "thresholds", "value": {"mode": "absolute", "steps": [{"color": "gray", "value": null}]}}]}]},
+      "options": {"colorMode": "value", "graphMode": "none", "textMode": "value_and_name", "reduceOptions": {"calcs": ["lastNotNull"], "values": false}}
+    },
+    {
+      "id": 12, "title": "Overall SMART health (not a self-test)", "type": "stat",
+      "description": "Current drive-reported overall health, not evidence that a self-test ran. See Last recorded self-test above for test age and result. Health reads older than 10 minutes are hidden.",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": {"x": 0, "y": 5, "w": 24, "h": 4},
+      "targets": [{"refId": "A", "expr": "smartctl_device_smart_status{job=\"smartctl\",host=\"$host\",device=~\"$device\"} and on(instance,device) (time() - smartctl_device_smart_status_read_time_seconds{job=\"smartctl\",host=\"$host\",device=~\"$device\"} < 600)", "legendFormat": "{{device}}", "instant": true}],
+      "fieldConfig": {"defaults": {"noValue": "Unknown", "mappings": [{"type": "value", "options": {"0": {"text": "Failing", "color": "red"}, "1": {"text": "OK", "color": "green"}}}]}, "overrides": []},
+      "options": {"colorMode": "value", "graphMode": "none", "textMode": "value_and_name", "reduceOptions": {"calcs": ["lastNotNull"], "values": false}}
     },
     {
       "id": 3, "title": "Drive temperature", "type": "timeseries",
       "datasource": {"type": "prometheus", "uid": "prometheus"},
-      "gridPos": {"x": 0, "y": 5, "w": 12, "h": 8},
+      "gridPos": {"x": 0, "y": 9, "w": 12, "h": 8},
       "targets": [{"refId": "A", "expr": "smartctl_device_temperature{job=\"smartctl\",host=\"$host\",device=~\"$device\",temperature_type=\"current\"}", "legendFormat": "{{device}}"}],
       "fieldConfig": {"defaults": {"unit": "celsius", "noValue": "No data"}, "overrides": []}
     },
@@ -58,7 +67,7 @@
       "id": 4, "title": "ATA sector warnings", "type": "timeseries",
       "description": "Raw ATA attributes: 5 = reallocated sectors, 197 = pending sectors, 198 = offline uncorrectable sectors. Values depend on drive firmware.",
       "datasource": {"type": "prometheus", "uid": "prometheus"},
-      "gridPos": {"x": 12, "y": 5, "w": 12, "h": 8},
+      "gridPos": {"x": 12, "y": 9, "w": 12, "h": 8},
       "targets": [{"refId": "A", "expr": "smartctl_device_attribute{job=\"smartctl\",host=\"$host\",device=~\"$device\",attribute_value_type=\"raw\",attribute_id=~\"5|197|198\"}", "legendFormat": "{{device}} {{attribute_name}}"}],
       "fieldConfig": {"defaults": {"min": 0, "decimals": 0, "noValue": "No data"}, "overrides": []}
     },
@@ -66,7 +75,7 @@
       "id": 5, "title": "ATA self-test log errors", "type": "stat",
       "description": "Errors reported in the drive self-test log, not just the latest test. No data means no supported log was exported. These values do not prove daily test completion.",
       "datasource": {"type": "prometheus", "uid": "prometheus"},
-      "gridPos": {"x": 0, "y": 13, "w": 12, "h": 6},
+      "gridPos": {"x": 0, "y": 17, "w": 12, "h": 6},
       "targets": [{"refId": "A", "expr": "max by (device) (smartctl_device_self_test_log_error_count{job=\"smartctl\",host=\"$host\",device=~\"$device\"})", "legendFormat": "{{device}}", "instant": true}],
       "fieldConfig": {"defaults": {"noValue": "No data", "decimals": 0, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]}}, "overrides": []},
       "options": {"colorMode": "background", "reduceOptions": {"calcs": ["lastNotNull"], "values": false}}
@@ -75,7 +84,7 @@
       "id": 6, "title": "ATA self-test log entries", "type": "stat",
       "description": "Entries retained in each drive log, not a lifetime test counter. Logs can wrap. This panel does not show when the latest test ran.",
       "datasource": {"type": "prometheus", "uid": "prometheus"},
-      "gridPos": {"x": 12, "y": 13, "w": 12, "h": 6},
+      "gridPos": {"x": 12, "y": 17, "w": 12, "h": 6},
       "targets": [{"refId": "A", "expr": "max by (device) (smartctl_device_self_test_log_count{job=\"smartctl\",host=\"$host\",device=~\"$device\"})", "legendFormat": "{{device}}", "instant": true}],
       "fieldConfig": {"defaults": {"noValue": "No data", "decimals": 0}, "overrides": []},
       "options": {"colorMode": "none", "reduceOptions": {"calcs": ["lastNotNull"], "values": false}}
@@ -84,7 +93,7 @@
       "id": 7, "title": "NVMe critical warnings", "type": "stat",
       "description": "Controller warning bitmask. Zero means no active critical warning. Nonzero can indicate low spare capacity, temperature, reliability, read-only media, or backup failure. No data does not mean healthy.",
       "datasource": {"type": "prometheus", "uid": "prometheus"},
-      "gridPos": {"x": 0, "y": 19, "w": 8, "h": 6},
+      "gridPos": {"x": 0, "y": 23, "w": 8, "h": 6},
       "targets": [{"refId": "A", "expr": "smartctl_device_critical_warning{job=\"smartctl\",host=\"$host\",device=~\"$device\"}", "legendFormat": "{{device}}", "instant": true}],
       "fieldConfig": {"defaults": {"noValue": "No data", "decimals": 0, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]}}, "overrides": []},
       "options": {"colorMode": "value", "reduceOptions": {"calcs": ["lastNotNull"], "values": false}}
@@ -93,7 +102,7 @@
       "id": 8, "title": "NVMe endurance used", "type": "stat",
       "description": "Vendor estimate of endurance consumed, not disk space used. Can exceed 100%. Reaching 100% does not by itself prove drive failure.",
       "datasource": {"type": "prometheus", "uid": "prometheus"},
-      "gridPos": {"x": 8, "y": 19, "w": 8, "h": 6},
+      "gridPos": {"x": 8, "y": 23, "w": 8, "h": 6},
       "targets": [{"refId": "A", "expr": "smartctl_device_percentage_used{job=\"smartctl\",host=\"$host\",device=~\"$device\"}", "legendFormat": "{{device}}", "instant": true}],
       "fieldConfig": {"defaults": {"unit": "percent", "min": 0, "noValue": "No data", "decimals": 0}, "overrides": []},
       "options": {"colorMode": "none", "reduceOptions": {"calcs": ["lastNotNull"], "values": false}}
@@ -102,7 +111,7 @@
       "id": 9, "title": "NVMe available spare", "type": "timeseries",
       "description": "Remaining spare capacity and the drive-reported minimum threshold. A value below the threshold indicates low spare capacity.",
       "datasource": {"type": "prometheus", "uid": "prometheus"},
-      "gridPos": {"x": 16, "y": 19, "w": 8, "h": 6},
+      "gridPos": {"x": 16, "y": 23, "w": 8, "h": 6},
       "targets": [
         {"refId": "A", "expr": "smartctl_device_available_spare{job=\"smartctl\",host=\"$host\",device=~\"$device\"}", "legendFormat": "{{device}} spare"},
         {"refId": "B", "expr": "smartctl_device_available_spare_threshold{job=\"smartctl\",host=\"$host\",device=~\"$device\"}", "legendFormat": "{{device}} threshold"}
@@ -113,7 +122,7 @@
       "id": 10, "title": "NVMe media errors", "type": "stat",
       "description": "Lifetime count of unrecovered data integrity errors. A nonzero count can be historical. It does not prove that a new error occurred in the selected time range.",
       "datasource": {"type": "prometheus", "uid": "prometheus"},
-      "gridPos": {"x": 0, "y": 25, "w": 12, "h": 6},
+      "gridPos": {"x": 0, "y": 29, "w": 12, "h": 6},
       "targets": [{"refId": "A", "expr": "smartctl_device_media_errors{job=\"smartctl\",host=\"$host\",device=~\"$device\"}", "legendFormat": "{{device}}", "instant": true}],
       "fieldConfig": {"defaults": {"noValue": "No data", "decimals": 0, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]}}, "overrides": []},
       "options": {"colorMode": "value", "reduceOptions": {"calcs": ["lastNotNull"], "values": false}}
@@ -122,7 +131,7 @@
       "id": 11, "title": "NVMe error log entries", "type": "stat",
       "description": "Lifetime count of controller error log entries. Includes command errors and does not by itself indicate media damage. Not a self-test count.",
       "datasource": {"type": "prometheus", "uid": "prometheus"},
-      "gridPos": {"x": 12, "y": 25, "w": 12, "h": 6},
+      "gridPos": {"x": 12, "y": 29, "w": 12, "h": 6},
       "targets": [{"refId": "A", "expr": "smartctl_device_num_err_log_entries{job=\"smartctl\",host=\"$host\",device=~\"$device\"}", "legendFormat": "{{device}}", "instant": true}],
       "fieldConfig": {"defaults": {"noValue": "No data", "decimals": 0}, "overrides": []},
       "options": {"colorMode": "none", "reduceOptions": {"calcs": ["lastNotNull"], "values": false}}

@@ -1,0 +1,311 @@
+--- a/metrics.go
++++ b/metrics.go
+@@ -18,6 +18,18 @@
+ )
+ 
+ var (
++	metricDeviceSelfTestAge = prometheus.NewDesc(
++		"smartctl_device_self_test_age_seconds",
++		"Powered-on seconds since the latest recorded self-test ended, excluding tests still running.",
++		[]string{"device", "result"},
++		nil,
++	)
++	metricDeviceSmartStatusReadTime = prometheus.NewDesc(
++		"smartctl_device_smart_status_read_time_seconds",
++		"Unix time of the SMART health read, retained with cached results.",
++		[]string{"device"},
++		nil,
++	)
+ 	metricSmartctlVersion = prometheus.NewDesc(
+ 		"smartctl_version",
+ 		"smartctl version",
+--- a/readjson.go
++++ b/readjson.go
+@@ -14,6 +14,7 @@
+ package main
+ 
+ import (
++	stdjson "encoding/json"
+ 	"fmt"
+ 	"log/slog"
+ 	"os"
+@@ -78,8 +79,32 @@
+ 	jsonOk := jsonIsOk(logger, json)
+ 	logger.Debug("Collected S.M.A.R.T. json data", "device", device, "duration", time.Since(start))
+ 	if rcOk && jsonOk {
+-		jsonCache.Store(device, JSONCache{JSON: json, LastCollect: time.Now()})
+-	}
++		jsonCache.Store(device, JSONCache{JSON: withSelfTestLog(logger, device, json), LastCollect: time.Now()})
++	}
++}
++
++// Query the log separately: unsupported self-tests must not discard valid health.
++func withSelfTestLog(logger *slog.Logger, device Device, health gjson.Result) gjson.Result {
++	out, _ := exec.Command(*smartctlPath, "--json", "--log=selftest", "--nocheck="+*smartctlPowerModeCheck, "--device="+device.Type, device.Name).Output()
++	log := parseJSON(string(out))
++	status := log.Get("smartctl.exit_status")
++	if !status.Exists() || !resultCodeIsOk(logger, device, status.Int()) || !jsonIsOk(logger, log) {
++		return health
++	}
++	var merged map[string]stdjson.RawMessage
++	if err := stdjson.Unmarshal([]byte(health.Raw), &merged); err != nil || merged == nil {
++		return health
++	}
++	for _, key := range []string{"ata_smart_self_test_log", "nvme_self_test_log"} {
++		if value := log.Get(key); value.Exists() {
++			merged[key] = stdjson.RawMessage(value.Raw)
++		}
++	}
++	out, err := stdjson.Marshal(merged)
++	if err != nil {
++		return health
++	}
++	return parseJSON(string(out))
+ }
+ 
+ func readSMARTctlDevices(logger *slog.Logger) gjson.Result {
+--- a/smartctl.go
++++ b/smartctl.go
+@@ -99,6 +99,7 @@
+ 	smart.mineDeviceStatistics()
+ 	smart.mineDeviceErrorLog()
+ 	smart.mineDeviceSelfTestLog()
++	smart.mineSelfTestAge()
+ 	smart.mineDeviceERC()
+ 	smart.mineSmartStatus()
+ 
+@@ -476,6 +477,15 @@
+ 			smartStatus.Get("passed").Float(),
+ 			smart.device.device,
+ 		)
++		// Use the cached smartctl timestamp, not the time of this scrape.
++		if readTime := smart.json.Get("local_time.time_t"); readTime.Exists() {
++			smart.ch <- prometheus.MustNewConstMetric(
++				metricDeviceSmartStatusReadTime,
++				prometheus.GaugeValue,
++				readTime.Float(),
++				smart.device.device,
++			)
++		}
+ 	}
+ }
+ 
+@@ -543,6 +553,64 @@
+ 	}
+ }
+ 
++func (smart *SMARTctl) mineSelfTestAge() {
++	hours := smart.json.Get("power_on_time.hours")
++	if !hours.Exists() || hours.Float() < 0 {
++		return
++	}
++	nvme := smart.json.Get("nvme_self_test_log").Exists()
++	table := smart.json.Get("nvme_self_test_log.table")
++	if !nvme {
++		// ATA log timestamps wrap at 65536 hours. Do not guess an epoch.
++		if hours.Float() >= 65536 {
++			return
++		}
++		table = smart.json.Get("ata_smart_self_test_log.extended.table")
++		if len(table.Array()) == 0 {
++			table = smart.json.Get("ata_smart_self_test_log.standard.table")
++		}
++	}
++	// smartctl returns the newest entries first. Do not replace a recent
++	// failure or abort with an older successful result.
++	for _, entry := range table.Array() {
++		status := entry.Get("status.value")
++		ended := entry.Get("lifetime_hours")
++		if nvme {
++			status = entry.Get("self_test_result.value")
++			ended = entry.Get("power_on_hours")
++		}
++		if !status.Exists() {
++			continue
++		}
++		code := status.Int()
++		if !nvme {
++			code >>= 4
++		}
++		if code == 15 { // ATA still running, or unused NVMe entry.
++			continue
++		}
++		if !ended.Exists() || ended.Float() < 0 || ended.Float() > hours.Float() {
++			return
++		}
++		result := "Unknown"
++		if code == 0 {
++			result = "Passed"
++		} else if (!nvme && code >= 3 && code <= 8) || (nvme && code >= 5 && code <= 7) {
++			result = "Failed"
++		} else if (!nvme && (code == 1 || code == 2)) || (nvme && ((code >= 1 && code <= 4) || code == 8 || code == 9)) {
++			result = "Aborted"
++		}
++		smart.ch <- prometheus.MustNewConstMetric(
++			metricDeviceSelfTestAge,
++			prometheus.GaugeValue,
++			(hours.Float()-ended.Float())*3600,
++			smart.device.device,
++			result,
++		)
++		return
++	}
++}
++
+ func (smart *SMARTctl) mineDeviceSelfTestLog() {
+ 	for logType, status := range smart.json.Get("ata_smart_self_test_log").Map() {
+ 		smart.ch <- prometheus.MustNewConstMetric(
+--- /dev/null
++++ b/freshness_test.go
+@@ -0,0 +1,50 @@
++package main
++
++import (
++	"log/slog"
++	"testing"
++
++	"github.com/prometheus/client_golang/prometheus"
++	dto "github.com/prometheus/client_model/go"
++	"github.com/tidwall/gjson"
++)
++
++// A fresh scrape must not make cached SMART health look newly read.
++func TestHealthReadTime(t *testing.T) {
++	for _, tc := range []struct {
++		name string
++		json string
++		want float64
++	}{
++		{"cached passed", `{"device":{"name":"/dev/nvme0","type":"nvme"},"smart_status":{"passed":true},"local_time":{"time_t":1600000000}}`, 1600000000},
++		{"cached failed", `{"smart_status":{"passed":false},"local_time":{"time_t":1600000001}}`, 1600000001},
++		{"missing timestamp", `{"smart_status":{"passed":true}}`, 0},
++		{"missing health", `{"local_time":{"time_t":1600000000}}`, 0},
++	} {
++		t.Run(tc.name, func(t *testing.T) {
++			for range 2 {
++				ch := make(chan prometheus.Metric, 8)
++				smart := NewSMARTctl(slog.Default(), gjson.Parse(tc.json), ch)
++				smart.mineSmartStatus()
++				close(ch)
++				found := false
++				for metric := range ch {
++					if metric.Desc().String() != prometheus.NewDesc("smartctl_device_smart_status_read_time_seconds", "Unix time of the SMART health read, retained with cached results.", []string{"device"}, nil).String() {
++						continue
++					}
++					found = true
++					var value dto.Metric
++					if err := metric.Write(&value); err != nil {
++						t.Fatal(err)
++					}
++					if value.GetGauge().GetValue() != tc.want {
++						t.Fatalf("got %v, want %v", value.GetGauge().GetValue(), tc.want)
++					}
++				}
++				if found != (tc.want != 0) {
++					t.Fatalf("timestamp present = %v, want %v", found, tc.want != 0)
++				}
++			}
++		})
++	}
++}
+--- /dev/null
++++ b/selftest_history_test.go
+@@ -0,0 +1,98 @@
++package main
++
++import (
++	"log/slog"
++	"os"
++	"path/filepath"
++	"testing"
++
++	"github.com/prometheus/client_golang/prometheus"
++	dto "github.com/prometheus/client_model/go"
++	"github.com/tidwall/gjson"
++)
++
++func TestSelfTestLogRead(t *testing.T) {
++	original := *smartctlPath
++	t.Cleanup(func() { *smartctlPath = original })
++	for _, tc := range []struct {
++		name, output, exit string
++		wantLog            bool
++	}{
++		{"available", `{"smartctl":{"exit_status":0},"ata_smart_self_test_log":{"standard":{"table":[{"status":{"value":0},"lifetime_hours":75}]}}}`, "0", true},
++		{"failed test is still evidence", `{"smartctl":{"exit_status":128},"ata_smart_self_test_log":{"standard":{"table":[{"status":{"value":112},"lifetime_hours":75}]}}}`, "128", true},
++		{"unsupported keeps health", `{"smartctl":{"exit_status":2,"messages":[{"severity":"error","string":"unsupported"}]}}`, "2", false},
++		{"invalid response keeps health", `not json`, "1", false},
++	} {
++		t.Run(tc.name, func(t *testing.T) {
++			path := filepath.Join(t.TempDir(), "smartctl")
++			script := "#!/bin/sh\ncase \" $* \" in *' --log=selftest '*) ;; *) exit 1 ;; esac\nprintf '%s' '" + tc.output + "'\nexit " + tc.exit + "\n"
++			if err := os.WriteFile(path, []byte(script), 0700); err != nil {
++				t.Fatal(err)
++			}
++			*smartctlPath = path
++			health := gjson.Parse(`{"smart_status":{"passed":true},"local_time":{"time_t":1600000000},"power_on_time":{"hours":100}}`)
++			got := withSelfTestLog(slog.Default(), Device{Name: "/dev/sda", Type: "sat"}, health)
++			if !got.Get("smart_status.passed").Bool() || got.Get("local_time.time_t").Int() != 1600000000 {
++				t.Fatal("health or original timestamp lost")
++			}
++			if got.Get("ata_smart_self_test_log").Exists() != tc.wantLog {
++				t.Fatalf("log presence = %v", !tc.wantLog)
++			}
++		})
++	}
++}
++
++// Only a recorded self-test can supply test age. Overall health and scrape
++// times must not substitute for a test, and old tests must remain old.
++func TestSelfTestHistoryAge(t *testing.T) {
++	for _, tc := range []struct {
++		name, data, result string
++		age                float64
++		present            bool
++	}{
++		{"ATA passed", `{"power_on_time":{"hours":100},"ata_smart_self_test_log":{"standard":{"table":[{"status":{"value":0},"lifetime_hours":75}]}}}`, "Passed", 25 * 3600, true},
++		{"ATA latest failed", `{"power_on_time":{"hours":100},"ata_smart_self_test_log":{"standard":{"table":[{"status":{"value":112},"lifetime_hours":90},{"status":{"value":0},"lifetime_hours":75}]}}}`, "Failed", 10 * 3600, true},
++		{"ATA aborted", `{"power_on_time":{"hours":100},"ata_smart_self_test_log":{"standard":{"table":[{"status":{"value":16},"lifetime_hours":90}]}}}`, "Aborted", 10 * 3600, true},
++		{"ATA running keeps prior age", `{"power_on_time":{"hours":100},"ata_smart_self_test_log":{"standard":{"table":[{"status":{"value":249},"lifetime_hours":100},{"status":{"value":0},"lifetime_hours":75}]}}}`, "Passed", 25 * 3600, true},
++		{"ATA extended preferred", `{"power_on_time":{"hours":100},"ata_smart_self_test_log":{"extended":{"table":[{"status":{"value":0},"lifetime_hours":99}]},"standard":{"table":[{"status":{"value":0},"lifetime_hours":75}]}}}`, "Passed", 3600, true},
++		{"NVMe passed five years ago", `{"power_on_time":{"hours":45000},"nvme_self_test_log":{"table":[{"self_test_result":{"value":0},"power_on_hours":1200}]}}`, "Passed", 43800 * 3600, true},
++		{"NVMe failed", `{"power_on_time":{"hours":100},"nvme_self_test_log":{"table":[{"self_test_result":{"value":7},"power_on_hours":98}]}}`, "Failed", 7200, true},
++		{"NVMe aborted", `{"power_on_time":{"hours":100},"nvme_self_test_log":{"table":[{"self_test_result":{"value":2},"power_on_hours":98}]}}`, "Aborted", 7200, true},
++		{"zero lifetime valid", `{"power_on_time":{"hours":1},"nvme_self_test_log":{"table":[{"self_test_result":{"value":0},"power_on_hours":0}]}}`, "Passed", 3600, true},
++		{"health is not a test", `{"power_on_time":{"hours":100},"smart_status":{"passed":true}}`, "", 0, false},
++		{"empty log", `{"power_on_time":{"hours":100},"nvme_self_test_log":{"table":[]}}`, "", 0, false},
++		{"missing hours", `{"nvme_self_test_log":{"table":[{"self_test_result":{"value":0},"power_on_hours":98}]}}`, "", 0, false},
++		{"missing entry time", `{"power_on_time":{"hours":100},"nvme_self_test_log":{"table":[{"self_test_result":{"value":0}}]}}`, "", 0, false},
++		{"future entry", `{"power_on_time":{"hours":10},"nvme_self_test_log":{"table":[{"self_test_result":{"value":0},"power_on_hours":98}]}}`, "", 0, false},
++		{"ATA wrap ambiguous", `{"power_on_time":{"hours":65536},"ata_smart_self_test_log":{"standard":{"table":[{"status":{"value":0},"lifetime_hours":0}]}}}`, "", 0, false},
++	} {
++		t.Run(tc.name, func(t *testing.T) {
++			ch := make(chan prometheus.Metric, 128)
++			smart := NewSMARTctl(slog.Default(), gjson.Parse(tc.data), ch)
++			smart.Collect()
++			close(ch)
++			found := false
++			for metric := range ch {
++				if metric.Desc().String() != prometheus.NewDesc("smartctl_device_self_test_age_seconds", "Powered-on seconds since the latest recorded self-test ended, excluding tests still running.", []string{"device", "result"}, nil).String() {
++					continue
++				}
++				found = true
++				var value dto.Metric
++				if err := metric.Write(&value); err != nil {
++					t.Fatal(err)
++				}
++				if value.GetGauge().GetValue() != tc.age {
++					t.Fatalf("age = %v, want %v", value.GetGauge().GetValue(), tc.age)
++				}
++				for _, label := range value.GetLabel() {
++					if label.GetName() == "result" && label.GetValue() != tc.result {
++						t.Fatalf("result = %s, want %s", label.GetValue(), tc.result)
++					}
++				}
++			}
++			if found != tc.present {
++				t.Fatalf("present = %v, want %v", found, tc.present)
++			}
++		})
++	}
++}
