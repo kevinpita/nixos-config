@@ -35,8 +35,8 @@
       herdrWorktrunk = pkgs.fetchFromGitHub {
         owner = "devashish2203";
         repo = "herdr-worktrunk";
-        rev = "a3107ca566bafcd463bc138007a0c01051970784";
-        hash = "sha256-+G4EzlQisIr8SQ1NwDfzV/27iOiC3r/2nkxjcV/aU/k=";
+        rev = "8ceca541de8fb0d6006727e172534e1e2af17224";
+        hash = "sha256-unoP8GUAULiOBTrS/+noCed/VOw6yqBObqHmit17xy0=";
       };
 
       openFile = pkgs.writeShellApplication {
@@ -99,6 +99,12 @@
       home-manager.users.${username} = {
         imports = [ inputs.herdr-nix.homeModules.default ];
 
+        xdg.configFile."herdr/plugins/config/worktrunk/config.toml".text = ''
+          picker_placement = "popup"
+          popup_width = "70%"
+          popup_height = 24
+        '';
+
         programs.herdr = {
           enable = true;
           package = pkgs.herdr;
@@ -122,7 +128,14 @@
             keys = {
               goto = "";
               open_notification_target = "";
+              workspace_picker = "";
               command = [
+                {
+                  key = "prefix+w";
+                  type = "plugin_action";
+                  command = "worktrunk.open";
+                  description = "Worktree: switch / create from default branch";
+                }
                 {
                   key = "prefix+g";
                   type = "popup";
