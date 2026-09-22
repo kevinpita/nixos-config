@@ -21,7 +21,7 @@ PluginComponent {
     property string lastUpdated: ""
     property int clockTick: 0
 
-    readonly property string providerSelection: String(pluginData.providerSelection || "codex,claude,antigravity")
+    readonly property string providerSelection: String(pluginData.providerSelection || "codex,claude,kimi")
     readonly property var selectedProviderIds: {
         const selected = parseCsv(providerSelection);
         return selected.length > 0 ? selected : ["codex"];
@@ -74,7 +74,7 @@ PluginComponent {
             codex: "Codex",
             claude: "Claude",
             copilot: "Copilot",
-            antigravity: "Antigravity",
+            kimi: "Kimi",
             gemini: "Gemini",
             cursor: "Cursor",
             openrouter: "OpenRouter",

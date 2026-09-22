@@ -16,7 +16,6 @@
         mkdir -p "$out"
         cp -a ${aiOverviewControlUpstream}/. "$out/"
         chmod -R u+w "$out"
-        patch -d "$out" -p1 < ${../../hyprland/plugins/aiOverviewControl/agy-cli-token.patch}
         cp ${../../hyprland/plugins/aiOverviewControl/NativeQuotaWidget.qml} "$out/NativeQuotaWidget.qml"
         cp ${../../hyprland/plugins/aiOverviewControl/NativeQuotaSettings.qml} "$out/NativeQuotaSettings.qml"
         substituteInPlace "$out/plugin.json" \
@@ -30,7 +29,6 @@
           bash
           curl
           jq
-          libsecret
         ];
 
         xdg.configFile."DankMaterialShell/plugins/aiOverviewControl" = {
