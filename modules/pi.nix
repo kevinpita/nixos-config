@@ -213,6 +213,7 @@
                   "npm:pi-cd"
                   "npm:pi-intercom"
                   "npm:pi-jev-context"
+                  "npm:pi-schedule-prompt"
                   # web-workflows.ts loads both factories to share the web tools.
                   {
                     source = "npm:pi-web-access";
