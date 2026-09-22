@@ -151,10 +151,6 @@
         programs.dms-shell = {
           enable = true;
           systemd.enable = false;
-          enableVPN = true;
-          enableDynamicTheming = true;
-          enableAudioWavelength = false;
-          enableCalendarEvents = false;
         };
 
         home-manager.users.${username} =
