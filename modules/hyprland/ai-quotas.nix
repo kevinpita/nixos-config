@@ -1,6 +1,9 @@
 {
   flake.modules.nixos.hyprland =
     {
+      ciMode,
+      config,
+      lib,
       pkgs,
       username,
       ...
@@ -24,6 +27,14 @@
       '';
     in
     {
+      sops = lib.mkIf (!ciMode) {
+        secrets.kimi = { };
+        templates."ai-quotas.env" = {
+          owner = username;
+          content = "KIMI_API_KEY=${config.sops.placeholder.kimi}\n";
+        };
+      };
+
       home-manager.users.${username} = {
         home.packages = with pkgs; [
           bash
@@ -37,7 +48,10 @@
           force = true;
         };
 
-        systemd.user.services.dms.Unit.X-Restart-Triggers = [ aiOverviewControl ];
+        systemd.user.services.dms = {
+          Unit.X-Restart-Triggers = [ aiOverviewControl ];
+          Service.EnvironmentFile = lib.mkIf (!ciMode) config.sops.templates."ai-quotas.env".path;
+        };
       };
     };
 }
