@@ -8,6 +8,7 @@
     {
       home-manager.users.${username} = {
         home.packages = with pkgs; [
+          fractal
           (symlinkJoin {
             name = "slack";
             paths = [ slack ];
@@ -22,6 +23,7 @@
         ];
 
         xdg.mimeApps.defaultApplications = {
+          "x-scheme-handler/matrix" = "org.gnome.Fractal.desktop";
           "x-scheme-handler/tg" = "org.telegram.desktop.desktop";
           "x-scheme-handler/tonsite" = "org.telegram.desktop.desktop";
         };
