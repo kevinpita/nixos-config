@@ -180,11 +180,11 @@
               text = builtins.toJSON {
                 lastChangelogVersion = piPackage.version;
                 defaultProvider = "openai-codex";
-                defaultModel = "gpt-6-astra";
+                defaultModel = "gpt-6-sol";
                 defaultThinkingLevel = "medium";
                 ayu.checkpoint.enabled = true;
                 # Pi compacts when contextTokens > contextWindow - reserveTokens.
-                # 27200 = 10% of the 272k gpt-6-astra window, so Pi's own check
+                # 27200 = 10% of the 272k gpt-6-sol window, so Pi's own check
                 # (after a run, or before a prompt) fires at 90%. The auto-compact
                 # extension covers the same 90% line in the middle of a run.
                 compaction = {
