@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Forward Alertmanager alerts and successful Comin deployments to Matrix."""
+"""Forward Grafana alerts and successful Comin deployments to Matrix."""
 
 import hashlib
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -88,7 +88,7 @@ class Notifier:
 
     def notify_alerts(self, payload):
         if payload.get("receiver") != "matrix" or not isinstance(payload.get("alerts"), list):
-            raise ValueError("Invalid Alertmanager webhook")
+            raise ValueError("Invalid Grafana webhook")
         lines = []
         for alert in payload["alerts"]:
             labels = alert["labels"]
@@ -109,7 +109,7 @@ class Notifier:
 def handler_for(notifier):
     class Handler(BaseHTTPRequestHandler):
         def do_POST(self):
-            if self.path != "/alertmanager":
+            if self.path != "/grafana":
                 self.send_error(404)
                 return
             try:
