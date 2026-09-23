@@ -87,16 +87,25 @@ class Notifier:
             self.save_state()
 
     def notify_alerts(self, payload):
-        if payload.get("receiver") != "matrix" or not isinstance(payload.get("alerts"), list):
+        if not isinstance(payload, dict) or not isinstance(payload.get("alerts"), list):
             raise ValueError("Invalid Grafana webhook")
         lines = []
         for alert in payload["alerts"]:
-            labels = alert["labels"]
-            annotations = alert.get("annotations", {})
+            if not isinstance(alert, dict):
+                raise ValueError("Invalid Grafana alert")
+            labels = alert.get("labels") or {}
+            annotations = alert.get("annotations") or {}
+            if not isinstance(labels, dict) or not isinstance(annotations, dict):
+                raise ValueError("Invalid Grafana alert labels or annotations")
+            status = alert.get("status", payload.get("status"))
+            if status not in ("firing", "resolved"):
+                raise ValueError("Invalid Grafana alert status")
             lines.append(
-                f"{alert['status'].upper()} [{labels.get('severity', 'unknown')}] "
-                f"{labels['alertname']} on {labels.get('host', labels.get('instance', 'unknown'))}\n"
-                f"{annotations.get('summary', '')}\n{annotations.get('description', '')}"
+                f"{status.upper()} [{labels.get('severity', 'unknown')}] "
+                f"{labels.get('alertname') or payload.get('title') or 'Grafana alert'} "
+                f"on {labels.get('host', labels.get('instance', 'unknown'))}\n"
+                f"{annotations.get('summary') or payload.get('title', '')}\n"
+                f"{annotations.get('description') or payload.get('message', '')}"
             )
         if not lines:
             return
@@ -119,7 +128,8 @@ def handler_for(notifier):
                     return
                 payload = json.loads(self.rfile.read(length))
                 notifier.notify_alerts(payload)
-            except (ValueError, KeyError, TypeError):
+            except (ValueError, KeyError, TypeError) as error:
+                logging.warning("Grafana webhook rejected: %s", error)
                 self.send_error(400)
                 return
             except Exception:
