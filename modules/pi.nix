@@ -242,6 +242,11 @@
             ".pi/agent/prompts".source = ../pi/prompts;
             ".pi/agent/themes".source = ../pi/themes;
 
+            ".gemini/antigravity-cli/skills" = {
+              force = true;
+              source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.pi/agent/skills";
+            };
+
             ".claude/skills" = {
               force = true;
               source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.pi/agent/skills";
