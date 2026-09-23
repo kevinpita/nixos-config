@@ -10,6 +10,7 @@
     let
       cfg = config.selfhosted.web;
       grafanaDomain = "grafana.${cfg.domain}";
+      alertDomain = "alert.${cfg.domain}";
       argoDomain = "argo.${cfg.domain}";
       chartVersion = "10.8.2";
       ingressChartVersion = "41.5.0";
@@ -42,6 +43,10 @@
           {
             assertion = config.services.grafana.enable;
             message = "selfhosted-web requires Grafana.";
+          }
+          {
+            assertion = config.services.prometheus.alertmanager.enable;
+            message = "selfhosted-web requires Alertmanager.";
           }
           {
             assertion = builtins.elem "traefik" config.services.k3s.disable;
@@ -81,6 +86,11 @@
               @grafana host ${grafanaDomain}
               handle @grafana {
                 reverse_proxy 127.0.0.1:${toString config.services.grafana.settings.server.http_port}
+              }
+
+              @alertmanager host ${alertDomain}
+              handle @alertmanager {
+                reverse_proxy 127.0.0.1:${toString config.services.prometheus.alertmanager.port}
               }
 
               @argo host ${argoDomain}
