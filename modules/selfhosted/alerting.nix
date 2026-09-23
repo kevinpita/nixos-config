@@ -8,7 +8,7 @@
       ...
     }:
     let
-      telegramEnabled = config.selfhosted.metrics.telegram.enable && !ciMode;
+      matrixEnabled = !ciMode;
       alertmanager = config.services.prometheus.alertmanager;
       filesystemAvailable = ''
         node_filesystem_avail_bytes{job="node",fstype!~"tmpfs|devtmpfs|overlay|squashfs|ramfs|nsfs"}
@@ -167,9 +167,6 @@
       };
     in
     {
-      options.selfhosted.metrics.telegram.enable =
-        lib.mkEnableOption "Telegram warning, critical, and recovery messages using the host's SOPS secrets";
-
       config = {
         services.prometheus = {
           ruleFiles = [ (pkgs.writeText "selfhosted-alert-rules.json" (builtins.toJSON rules)) ];
@@ -181,86 +178,81 @@
             listenAddress = "127.0.0.1";
             openFirewall = false;
             extraFlags = [ "--cluster.listen-address=" ];
-            # The numeric chat ID is available only after runtime substitution.
-            checkConfig = !telegramEnabled;
-            environmentFile = lib.mkIf telegramEnabled config.sops.templates."alertmanager.env".path;
-            configText = lib.replaceStrings [ ''"@TELEGRAM_CHAT_ID@"'' ] [ "\${TELEGRAM_CHAT_ID}" ] (
-              builtins.toJSON {
-                route = {
-                  receiver = "discard";
-                  group_by = [
-                    "alertname"
-                    "host"
-                    "instance"
-                  ];
-                  group_wait = "30s";
-                  group_interval = "5m";
-                  repeat_interval = "4h";
-                  routes = lib.optional telegramEnabled {
-                    receiver = "telegram";
-                    matchers = [ ''severity=~"warning|critical"'' ];
-                  };
+            configText = builtins.toJSON {
+              route = {
+                receiver = "discard";
+                group_by = [
+                  "alertname"
+                  "host"
+                  "instance"
+                ];
+                group_wait = "30s";
+                group_interval = "5m";
+                repeat_interval = "4h";
+                routes = lib.optional matrixEnabled {
+                  receiver = "matrix";
+                  matchers = [ ''severity=~"warning|critical"'' ];
                 };
-                inhibit_rules = [
+              };
+              inhibit_rules = [
+                {
+                  source_matchers = [ ''severity="critical"'' ];
+                  target_matchers = [ ''severity="warning"'' ];
+                  equal = [
+                    "alertname"
+                    "instance"
+                    "device"
+                    "mountpoint"
+                    "pool"
+                  ];
+                }
+              ];
+              receivers = [
+                { name = "discard"; }
+              ]
+              ++ lib.optional matrixEnabled {
+                name = "matrix";
+                webhook_configs = [
                   {
-                    source_matchers = [ ''severity="critical"'' ];
-                    target_matchers = [ ''severity="warning"'' ];
-                    equal = [
-                      "alertname"
-                      "instance"
-                      "device"
-                      "mountpoint"
-                      "pool"
-                    ];
+                    url = "http://127.0.0.1:9187/alertmanager";
+                    send_resolved = true;
                   }
                 ];
-                receivers = [
-                  { name = "discard"; }
-                ]
-                ++ lib.optional telegramEnabled {
-                  name = "telegram";
-                  telegram_configs = [
-                    {
-                      bot_token_file = "/run/credentials/alertmanager.service/telegram-bot-token";
-                      chat_id = "@TELEGRAM_CHAT_ID@";
-                      parse_mode = "";
-                      send_resolved = true;
-                      message = ''
-                        {{ range .Alerts }}{{ .Status | toUpper }} [{{ .Labels.severity }}] {{ .Labels.alertname }}
-                        {{ .Annotations.summary }}
-                        {{ .Annotations.description }}
-
-                        {{ end }}
-                      '';
-                    }
-                  ];
-                };
-              }
-            );
+              };
+            };
           };
         };
 
-        sops = lib.mkIf telegramEnabled {
-          secrets = {
-            telegram-bot-token.restartUnits = [ "alertmanager.service" ];
-            telegram-chat-id.restartUnits = [ "alertmanager.service" ];
-          };
-          templates."alertmanager.env" = {
-            content = ''
-              TELEGRAM_CHAT_ID=${config.sops.placeholder.telegram-chat-id}
-            '';
-            restartUnits = [ "alertmanager.service" ];
-          };
+        sops.secrets = lib.mkIf matrixEnabled {
+          matrix.restartUnits = [ "matrix-notifier.service" ];
+          "matrix-chat".restartUnits = [ "matrix-notifier.service" ];
         };
 
-        systemd.services.alertmanager.serviceConfig = {
-          UMask = "0077";
-          LoadCredential = lib.mkIf telegramEnabled [
-            "telegram-bot-token:${config.sops.secrets.telegram-bot-token.path}"
+        systemd.services.matrix-notifier = lib.mkIf matrixEnabled {
+          description = "Deliver Alertmanager alerts and Comin deployments to Matrix";
+          wantedBy = [ "multi-user.target" ];
+          after = [
+            "network-online.target"
+            "prometheus.service"
           ];
-          ExecStartPre = lib.mkAfter [
-            "${alertmanager.package}/bin/amtool check-config /tmp/alert-manager-substituted.yaml"
-          ];
+          wants = [ "network-online.target" ];
+          serviceConfig = {
+            Type = "simple";
+            DynamicUser = true;
+            StateDirectory = "matrix-notifier";
+            LoadCredential = [
+              "matrix:${config.sops.secrets.matrix.path}"
+              "matrix-chat:${config.sops.secrets."matrix-chat".path}"
+            ];
+            ExecStart = "${lib.getExe pkgs.python3} ${./matrix-notifier.py} /run/credentials/matrix-notifier.service/matrix /run/credentials/matrix-notifier.service/matrix-chat /var/lib/matrix-notifier";
+            Restart = "on-failure";
+            RestartSec = "10s";
+            NoNewPrivileges = true;
+            ProtectSystem = "strict";
+            ProtectHome = true;
+            PrivateTmp = true;
+            UMask = "0077";
+          };
         };
       };
     };
