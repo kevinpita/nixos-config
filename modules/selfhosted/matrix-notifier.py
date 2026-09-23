@@ -2,6 +2,7 @@
 """Forward Grafana alerts and successful Comin deployments to Matrix."""
 
 import hashlib
+from html import escape
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 import logging
@@ -44,16 +45,19 @@ class Notifier:
         if not isinstance(self.state.get("baseline"), int) or not isinstance(self.state.get("last"), dict):
             raise ValueError("Invalid deployment state")
 
-    def send(self, text, transaction_id):
+    def send(self, text, transaction_id, formatted_html=None):
         url = (
             MATRIX_URL
             + quote(self.room_id, safe="")
             + "/send/m.room.message/"
             + quote(transaction_id, safe="")
         )
+        content = {"msgtype": "m.text", "body": text}
+        if formatted_html is not None:
+            content.update({"format": "org.matrix.custom.html", "formatted_body": formatted_html})
         response = request_json(
             url,
-            {"msgtype": "m.text", "body": text},
+            content,
             {"Authorization": "Bearer " + self.token, "Content-Type": "application/json"},
             method="PUT",
         )
@@ -90,6 +94,7 @@ class Notifier:
         if not isinstance(payload, dict) or not isinstance(payload.get("alerts"), list):
             raise ValueError("Invalid Grafana webhook")
         lines = []
+        formatted_lines = []
         for alert in payload["alerts"]:
             if not isinstance(alert, dict):
                 raise ValueError("Invalid Grafana alert")
@@ -100,19 +105,27 @@ class Notifier:
             status = alert.get("status", payload.get("status"))
             if status not in ("firing", "resolved"):
                 raise ValueError("Invalid Grafana alert status")
-            lines.append(
+            heading = (
                 f"{status.upper()} [{labels.get('severity', 'unknown')}] "
                 f"{labels.get('alertname') or payload.get('title') or 'Grafana alert'} "
-                f"on {labels.get('host', labels.get('instance', 'unknown'))}\n"
-                f"{annotations.get('summary') or payload.get('title', '')}\n"
-                f"{annotations.get('description') or payload.get('message', '')}"
+                f"on {labels.get('host', labels.get('instance', 'unknown'))}"
+            )
+            text = "\n".join(filter(None, [
+                heading,
+                annotations.get("summary") or payload.get("title", ""),
+                annotations.get("description", ""),
+            ]))
+            lines.append(text)
+            formatted_lines.append(
+                f"<strong>{status.upper()}</strong>"
+                + escape(text[len(status):]).replace("\n", "<br>")
             )
         if not lines:
             return
         # Reuse the transaction ID on retries, so a lost HTTP response does not
         # cause a second Matrix message.
         transaction_id = hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
-        self.send("\n\n".join(lines), transaction_id)
+        self.send("\n\n".join(lines), transaction_id, "<br><br>".join(formatted_lines))
 
 
 def handler_for(notifier):
