@@ -3,8 +3,7 @@
   "title": "Systems",
   "description": "Select a device to inspect CPU, memory, filesystems, disks, and network interfaces.",
   "tags": [
-    "nixos",
-    "selfhosted"
+    "nixos"
   ],
   "timezone": "browser",
   "schemaVersion": 39,
@@ -18,18 +17,18 @@
   "templating": {
     "list": [
       {
-        "name": "instance",
-        "label": "Device",
+        "name": "host",
+        "label": "Host",
         "type": "query",
         "datasource": {
           "type": "prometheus",
           "uid": "prometheus"
         },
         "query": {
-          "query": "label_values(up{job=\"node\"}, instance)",
+          "query": "label_values(up{job=\"node\"}, host)",
           "refId": "StandardVariableQuery"
         },
-        "definition": "label_values(up{job=\"node\"}, instance)",
+        "definition": "label_values(up{job=\"node\"}, host)",
         "refresh": 2,
         "sort": 1,
         "multi": false,
@@ -105,7 +104,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "up{job=\"node\",instance=\"$instance\"}",
+          "expr": "up{job=\"node\",host=\"$host\"}",
           "legendFormat": "Status",
           "range": false,
           "instant": true,
@@ -164,7 +163,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "time() - node_boot_time_seconds{job=\"node\",instance=\"$instance\"}",
+          "expr": "time() - node_boot_time_seconds{job=\"node\",host=\"$host\"}",
           "legendFormat": "Uptime",
           "range": false,
           "instant": true,
@@ -234,7 +233,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "100 * (1 - avg(rate(node_cpu_seconds_total{job=\"node\",instance=\"$instance\",mode=\"idle\"}[$__rate_interval])))",
+          "expr": "100 * (1 - avg(rate(node_cpu_seconds_total{job=\"node\",host=\"$host\",mode=\"idle\"}[$__rate_interval])))",
           "legendFormat": "CPU",
           "range": false,
           "instant": true,
@@ -304,7 +303,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "100 * (1 - node_memory_MemAvailable_bytes{job=\"node\",instance=\"$instance\"} / node_memory_MemTotal_bytes{job=\"node\",instance=\"$instance\"})",
+          "expr": "100 * (1 - node_memory_MemAvailable_bytes{job=\"node\",host=\"$host\"} / node_memory_MemTotal_bytes{job=\"node\",host=\"$host\"})",
           "legendFormat": "RAM",
           "range": false,
           "instant": true,
@@ -383,7 +382,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "100 * (1 - rate(node_cpu_seconds_total{job=\"node\",instance=\"$instance\",mode=\"idle\"}[$__rate_interval]))",
+          "expr": "100 * (1 - rate(node_cpu_seconds_total{job=\"node\",host=\"$host\",mode=\"idle\"}[$__rate_interval]))",
           "legendFormat": "CPU {{cpu}}",
           "range": true,
           "instant": false,
@@ -451,7 +450,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "node_memory_MemTotal_bytes{job=\"node\",instance=\"$instance\"} - node_memory_MemAvailable_bytes{job=\"node\",instance=\"$instance\"}",
+          "expr": "node_memory_MemTotal_bytes{job=\"node\",host=\"$host\"} - node_memory_MemAvailable_bytes{job=\"node\",host=\"$host\"}",
           "legendFormat": "Used",
           "range": true,
           "instant": false,
@@ -459,7 +458,7 @@
         },
         {
           "refId": "B",
-          "expr": "node_memory_MemAvailable_bytes{job=\"node\",instance=\"$instance\"}",
+          "expr": "node_memory_MemAvailable_bytes{job=\"node\",host=\"$host\"}",
           "legendFormat": "Available",
           "range": true,
           "instant": false,
@@ -467,7 +466,7 @@
         },
         {
           "refId": "C",
-          "expr": "node_memory_MemTotal_bytes{job=\"node\",instance=\"$instance\"}",
+          "expr": "node_memory_MemTotal_bytes{job=\"node\",host=\"$host\"}",
           "legendFormat": "Total",
           "range": true,
           "instant": false,
@@ -535,7 +534,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "node_load1{job=\"node\",instance=\"$instance\"}",
+          "expr": "node_load1{job=\"node\",host=\"$host\"}",
           "legendFormat": "1 minute",
           "range": true,
           "instant": false,
@@ -543,7 +542,7 @@
         },
         {
           "refId": "B",
-          "expr": "node_load5{job=\"node\",instance=\"$instance\"}",
+          "expr": "node_load5{job=\"node\",host=\"$host\"}",
           "legendFormat": "5 minute",
           "range": true,
           "instant": false,
@@ -551,7 +550,7 @@
         },
         {
           "refId": "C",
-          "expr": "node_load15{job=\"node\",instance=\"$instance\"}",
+          "expr": "node_load15{job=\"node\",host=\"$host\"}",
           "legendFormat": "15 minute",
           "range": true,
           "instant": false,
@@ -619,7 +618,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "node_memory_SwapTotal_bytes{job=\"node\",instance=\"$instance\"} - node_memory_SwapFree_bytes{job=\"node\",instance=\"$instance\"}",
+          "expr": "node_memory_SwapTotal_bytes{job=\"node\",host=\"$host\"} - node_memory_SwapFree_bytes{job=\"node\",host=\"$host\"}",
           "legendFormat": "Used",
           "range": true,
           "instant": false,
@@ -627,7 +626,7 @@
         },
         {
           "refId": "B",
-          "expr": "node_memory_SwapTotal_bytes{job=\"node\",instance=\"$instance\"}",
+          "expr": "node_memory_SwapTotal_bytes{job=\"node\",host=\"$host\"}",
           "legendFormat": "Total",
           "range": true,
           "instant": false,
@@ -699,7 +698,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "100 * (1 - node_disk_mounted_available_bytes{job=\"node\",instance=\"$instance\"} / (node_disk_mounted_size_bytes{job=\"node\",instance=\"$instance\"} > 0)) and on (instance) (time() - node_disk_collection_timestamp_seconds{job=\"node\",instance=\"$instance\"} < 180)",
+          "expr": "100 * (1 - node_disk_mounted_available_bytes{job=\"node\",host=\"$host\"} / (node_disk_mounted_size_bytes{job=\"node\",host=\"$host\"} > 0)) and on (instance) (time() - node_disk_collection_timestamp_seconds{job=\"node\",host=\"$host\"} < 180)",
           "legendFormat": "{{device}} - {{model}}",
           "range": false,
           "instant": true,
@@ -761,7 +760,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "node_disk_mounted_available_bytes{job=\"node\",instance=\"$instance\"} and on (instance) (time() - node_disk_collection_timestamp_seconds{job=\"node\",instance=\"$instance\"} < 180)",
+          "expr": "node_disk_mounted_available_bytes{job=\"node\",host=\"$host\"} and on (instance) (time() - node_disk_collection_timestamp_seconds{job=\"node\",host=\"$host\"} < 180)",
           "legendFormat": "{{device}} - {{model}}",
           "range": false,
           "instant": true,
@@ -823,7 +822,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "node_physical_disk_size_bytes{job=\"node\",instance=\"$instance\"} and on (instance) (time() - node_disk_collection_timestamp_seconds{job=\"node\",instance=\"$instance\"} < 180)",
+          "expr": "node_physical_disk_size_bytes{job=\"node\",host=\"$host\"} and on (instance) (time() - node_disk_collection_timestamp_seconds{job=\"node\",host=\"$host\"} < 180)",
           "legendFormat": "{{device}} - {{model}}",
           "range": false,
           "instant": true,
@@ -891,7 +890,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "rate(node_network_receive_bytes_total{job=\"node\",instance=\"$instance\",device!~\"lo|veth.*|br-.*\"}[$__rate_interval])",
+          "expr": "rate(node_network_receive_bytes_total{job=\"node\",host=\"$host\",device!~\"lo|veth.*|br-.*\"}[$__rate_interval])",
           "legendFormat": "{{device}}",
           "range": true,
           "instant": false,
@@ -959,7 +958,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "rate(node_network_transmit_bytes_total{job=\"node\",instance=\"$instance\",device!~\"lo|veth.*|br-.*\"}[$__rate_interval])",
+          "expr": "rate(node_network_transmit_bytes_total{job=\"node\",host=\"$host\",device!~\"lo|veth.*|br-.*\"}[$__rate_interval])",
           "legendFormat": "{{device}}",
           "range": true,
           "instant": false,
@@ -1027,7 +1026,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "rate(node_disk_read_bytes_total{job=\"node\",instance=\"$instance\",device!~\"loop.*|ram.*|zram.*|fd.*\"}[$__rate_interval])",
+          "expr": "rate(node_disk_read_bytes_total{job=\"node\",host=\"$host\",device!~\"loop.*|ram.*|zram.*|fd.*\"}[$__rate_interval])",
           "legendFormat": "{{device}} read",
           "range": true,
           "instant": false,
@@ -1035,7 +1034,7 @@
         },
         {
           "refId": "B",
-          "expr": "rate(node_disk_written_bytes_total{job=\"node\",instance=\"$instance\",device!~\"loop.*|ram.*|zram.*|fd.*\"}[$__rate_interval])",
+          "expr": "rate(node_disk_written_bytes_total{job=\"node\",host=\"$host\",device!~\"loop.*|ram.*|zram.*|fd.*\"}[$__rate_interval])",
           "legendFormat": "{{device}} write",
           "range": true,
           "instant": false,
@@ -1114,7 +1113,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "100 * rate(node_disk_io_time_seconds_total{job=\"node\",instance=\"$instance\",device!~\"loop.*|ram.*|zram.*|fd.*\"}[$__rate_interval])",
+          "expr": "100 * rate(node_disk_io_time_seconds_total{job=\"node\",host=\"$host\",device!~\"loop.*|ram.*|zram.*|fd.*\"}[$__rate_interval])",
           "legendFormat": "{{device}}",
           "range": true,
           "instant": false,
@@ -1165,7 +1164,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sort_desc(topk(20, node_folder_allocated_bytes{job=\"node\",instance=\"$instance\",scope=\"system\"}) and on (instance) (time() - node_folder_collection_timestamp_seconds{job=\"node\",instance=\"$instance\"} < 28800))",
+          "expr": "sort_desc(topk(20, node_folder_allocated_bytes{job=\"node\",host=\"$host\",scope=\"system\"}) and on (instance) (time() - node_folder_collection_timestamp_seconds{job=\"node\",host=\"$host\"} < 28800))",
           "legendFormat": "{{path}}",
           "range": false,
           "instant": true,
@@ -1216,7 +1215,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sort_desc(topk(20, node_folder_allocated_bytes{job=\"node\",instance=\"$instance\",scope=\"home\"}) and on (instance) (time() - node_folder_collection_timestamp_seconds{job=\"node\",instance=\"$instance\"} < 28800))",
+          "expr": "sort_desc(topk(20, node_folder_allocated_bytes{job=\"node\",host=\"$host\",scope=\"home\"}) and on (instance) (time() - node_folder_collection_timestamp_seconds{job=\"node\",host=\"$host\"} < 28800))",
           "legendFormat": "{{path}}",
           "range": false,
           "instant": true,
@@ -1283,33 +1282,13 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "time() - node_folder_collection_timestamp_seconds{job=\"node\",instance=\"$instance\"}",
+          "expr": "time() - node_folder_collection_timestamp_seconds{job=\"node\",host=\"$host\"}",
           "legendFormat": "Since last scan",
           "range": false,
           "instant": true,
           "editorMode": "code"
         }
       ]
-    }
-  ],
-  "links": [
-    {
-      "type": "link",
-      "title": "Systems",
-      "url": "/d/systems",
-      "keepTime": true
-    },
-    {
-      "type": "link",
-      "title": "ZFS pools",
-      "url": "/d/zfs-pools",
-      "keepTime": true
-    },
-    {
-      "type": "link",
-      "title": "Containers",
-      "url": "/d/containers",
-      "keepTime": true
     }
   ]
 }

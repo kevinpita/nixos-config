@@ -3,8 +3,7 @@
   "title": "ZFS pools",
   "description": "Select a device and one or more pools. Pool properties come from zfs_exporter; dataset I/O and host-wide ARC data come from node-exporter.",
   "tags": [
-    "nixos",
-    "selfhosted"
+    "nixos"
   ],
   "timezone": "browser",
   "schemaVersion": 39,
@@ -1204,20 +1203,6 @@
           "editorMode": "code"
         }
       ]
-    }
-  ],
-  "links": [
-    {
-      "type": "link",
-      "title": "Systems",
-      "url": "/d/systems",
-      "keepTime": true
-    },
-    {
-      "type": "link",
-      "title": "ZFS pools",
-      "url": "/d/zfs-pools",
-      "keepTime": true
     }
   ]
 }

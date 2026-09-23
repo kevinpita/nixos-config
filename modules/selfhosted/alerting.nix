@@ -14,6 +14,7 @@
         node_filesystem_avail_bytes{job="node",fstype!~"tmpfs|devtmpfs|overlay|squashfs|ramfs|nsfs"}
         / node_filesystem_size_bytes
       '';
+      scrubFresh = ''time() - node_zfs_scrub_collection_timestamp_seconds{job="node",host="fium"} < 180'';
       rules = {
         groups = [
           {
@@ -91,8 +92,58 @@
                 };
               }
               {
+                alert = "SmartHealthFailed";
+                expr = ''smartctl_device_smart_status{job="smartctl",host=~"fium|minidesk"} == 0'';
+                for = "2m";
+                labels.severity = "critical";
+                annotations = {
+                  summary = "SMART health failed on {{ $labels.host }}";
+                  description = "Drive {{ $labels.device }} reports failed overall health. Check smartctl.";
+                };
+              }
+              {
+                alert = "SmartDrivesUnreported";
+                expr = ''(smartctl_devices{job="smartctl",host=~"fium|minidesk"} - on(host,instance) (count by(host,instance) (smartctl_device{job="smartctl",host=~"fium|minidesk"}) or on(host,instance) (0 * smartctl_devices{job="smartctl",host=~"fium|minidesk"}))) > 0'';
+                for = "10m";
+                labels.severity = "critical";
+                annotations = {
+                  summary = "SMART data missing on {{ $labels.host }}";
+                  description = "The exporter discovered more drives than it could read. Check device permissions and exporter logs.";
+                };
+              }
+              {
+                alert = "ZfsScrubMissing";
+                expr = ''(node_zfs_pool_last_scrub_timestamp_seconds{job="node",host="fium"} == 0) and on(instance,host) (${scrubFresh})'';
+                for = "10d";
+                labels.severity = "warning";
+                annotations = {
+                  summary = "No completed ZFS scrub on {{ $labels.host }}";
+                  description = "Pool {{ $labels.pool }} has no recorded completed scrub after 10 days.";
+                };
+              }
+              {
+                alert = "ZfsScrubOverdue";
+                expr = ''(time() - (node_zfs_pool_last_scrub_timestamp_seconds{job="node",host="fium"} > 0) > 10 * 24 * 60 * 60) and on(instance,host) (${scrubFresh})'';
+                for = "30m";
+                labels.severity = "warning";
+                annotations = {
+                  summary = "ZFS scrub overdue on {{ $labels.host }}";
+                  description = "Pool {{ $labels.pool }} has not completed a scrub in over 10 days.";
+                };
+              }
+              {
+                alert = "ZfsScrubCollectionStale";
+                expr = ''(up{job="node",host="fium"} == 1) unless on(instance,host) (${scrubFresh})'';
+                for = "5m";
+                labels.severity = "warning";
+                annotations = {
+                  summary = "ZFS scrub metrics stale on {{ $labels.host }}";
+                  description = "The scrub metadata collector has not reported fresh data for 5 minutes.";
+                };
+              }
+              {
                 alert = "MonitoringExporterDown";
-                expr = ''up{job=~"node|zfs",host="${config.networking.hostName}"} == 0'';
+                expr = ''up{job=~"node|zfs",host="${config.networking.hostName}"} == 0 or up{job="smartctl",host=~"fium|minidesk"} == 0'';
                 for = "5m";
                 labels.severity = "critical";
                 annotations = {

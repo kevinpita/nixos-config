@@ -1,0 +1,64 @@
+{
+  "uid": "fleet",
+  "title": "Fleet overview",
+  "description": "Compare monitored hosts at a glance. Offline hosts remain visible in exporter status; resource charts show only hosts that are reporting. SMART coverage counts are not a substitute for drive health checks.",
+  "tags": ["nixos"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": false,
+  "refresh": "30s",
+  "time": {"from": "now-6h", "to": "now"},
+  "panels": [
+    {
+      "id": 1, "title": "Host reachability", "type": "stat",
+      "description": "Node exporter reachability. An offline workstation remains Down rather than being counted as healthy.",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": {"x": 0, "y": 0, "w": 12, "h": 5},
+      "targets": [{"refId": "A", "expr": "up{job=\"node\",host!=\"\"}", "legendFormat": "{{host}}", "instant": true}],
+      "fieldConfig": {"defaults": {"noValue": "Unknown", "mappings": [{"type": "value", "options": {"0": {"text": "Down", "color": "red"}, "1": {"text": "Up", "color": "green"}}}]}, "overrides": []},
+      "options": {"colorMode": "background", "textMode": "value_and_name", "reduceOptions": {"calcs": ["lastNotNull"], "values": false}}
+    },
+    {
+      "id": 2, "title": "Unreadable SMART drives", "type": "stat",
+      "description": "Discovered drives without readable SMART data, per reporting host. This can detect an exporter that is Up but cannot read its devices. Select a host in SMART disks for details.",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": {"x": 12, "y": 0, "w": 12, "h": 5},
+      "targets": [{"refId": "A", "expr": "smartctl_devices{job=\"smartctl\"} - on(host,instance) (count by(host,instance) (smartctl_device{job=\"smartctl\"}) or on(host,instance) (0 * smartctl_devices{job=\"smartctl\"}))", "legendFormat": "{{host}}", "instant": true}],
+      "fieldConfig": {"defaults": {"noValue": "Unknown", "decimals": 0, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]}}, "overrides": []},
+      "options": {"colorMode": "background", "textMode": "value_and_name", "reduceOptions": {"calcs": ["lastNotNull"], "values": false}}
+    },
+    {
+      "id": 3, "title": "CPU use by host", "type": "timeseries",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": {"x": 0, "y": 5, "w": 12, "h": 8},
+      "targets": [{"refId": "A", "expr": "100 * (1 - avg by(host) (rate(node_cpu_seconds_total{job=\"node\",host!=\"\",mode=\"idle\"}[$__rate_interval])))", "legendFormat": "{{host}}"}],
+      "fieldConfig": {"defaults": {"unit": "percent", "min": 0, "max": 100}, "overrides": []}
+    },
+    {
+      "id": 4, "title": "RAM use by host", "type": "timeseries",
+      "description": "Excludes reclaimable memory, based on MemAvailable.",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": {"x": 12, "y": 5, "w": 12, "h": 8},
+      "targets": [{"refId": "A", "expr": "100 * (1 - node_memory_MemAvailable_bytes{job=\"node\",host!=\"\"} / node_memory_MemTotal_bytes{job=\"node\",host!=\"\"})", "legendFormat": "{{host}}"}],
+      "fieldConfig": {"defaults": {"unit": "percent", "min": 0, "max": 100}, "overrides": []}
+    },
+    {
+      "id": 5, "title": "Root filesystem use by host", "type": "timeseries",
+      "description": "Space on each host's root filesystem. Other filesystems and ZFS pools have separate dashboards.",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": {"x": 0, "y": 13, "w": 12, "h": 8},
+      "targets": [{"refId": "A", "expr": "100 * (1 - node_filesystem_avail_bytes{job=\"node\",host!=\"\",mountpoint=\"/\",fstype!~\"tmpfs|devtmpfs|overlay\"} / node_filesystem_size_bytes{job=\"node\",host!=\"\",mountpoint=\"/\"})", "legendFormat": "{{host}}"}],
+      "fieldConfig": {"defaults": {"unit": "percent", "min": 0, "max": 100}, "overrides": []}
+    },
+    {
+      "id": 6, "title": "Server reboot required", "type": "stat",
+      "description": "Comin only runs on the server hosts. No data for a workstation does not mean that it needs no reboot.",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": {"x": 12, "y": 13, "w": 12, "h": 8},
+      "targets": [{"refId": "A", "expr": "comin_need_to_reboot{job=\"comin\"} and on(host,instance) (up{job=\"comin\"} == 1)", "legendFormat": "{{host}}", "instant": true}],
+      "fieldConfig": {"defaults": {"noValue": "Unknown", "mappings": [{"type": "value", "options": {"0": {"text": "No", "color": "green"}, "1": {"text": "Yes", "color": "yellow"}}}]}, "overrides": []},
+      "options": {"colorMode": "value", "textMode": "value_and_name", "reduceOptions": {"calcs": ["lastNotNull"], "values": false}}
+    }
+  ]
+}

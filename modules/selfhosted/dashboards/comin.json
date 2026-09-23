@@ -4,7 +4,6 @@
   "description": "Pull-based NixOS deployments across the server fleet. Metrics describe local Comin events, not whether a host matches the current GitHub branch.",
   "tags": [
     "nixos",
-    "selfhosted",
     "comin"
   ],
   "timezone": "browser",

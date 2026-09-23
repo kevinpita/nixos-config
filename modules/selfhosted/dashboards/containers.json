@@ -4,7 +4,6 @@
   "description": "Rootless Podman containers for the configured user on each host. Select a device to inspect state, uptime, and resource use. Offline exporters and failed collection are not shown as zero containers.",
   "tags": [
     "nixos",
-    "selfhosted",
     "podman"
   ],
   "timezone": "browser",
@@ -1165,20 +1164,6 @@
           ]
         }
       }
-    }
-  ],
-  "links": [
-    {
-      "type": "link",
-      "title": "Systems",
-      "url": "/d/systems",
-      "keepTime": true
-    },
-    {
-      "type": "link",
-      "title": "ZFS pools",
-      "url": "/d/zfs-pools",
-      "keepTime": true
     }
   ]
 }
