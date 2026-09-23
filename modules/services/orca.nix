@@ -1,10 +1,17 @@
 { inputs, ... }:
 {
-  flake.modules.nixos.workstation = {
-    imports = [ inputs.orca-nix.nixosModules.default ];
+  flake.modules.nixos.workstation =
+    { config, ... }:
+    {
+      imports = [ inputs.orca-nix.nixosModules.default ];
 
-    programs.orca-ide.enable = true;
-  };
+      programs.orca-ide.enable = true;
+
+      # The desktop app accepts mobile pairing connections on its built-in port.
+      networking.firewall.interfaces.${config.services.tailscale.interfaceName}.allowedTCPPorts = [
+        6768
+      ];
+    };
 
   flake.modules.nixos.server =
     {
