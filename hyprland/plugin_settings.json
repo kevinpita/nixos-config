@@ -27,9 +27,6 @@
   "piSessions": {
     "enabled": true
   },
-  "pixelBuds": {
-    "enabled": true
-  },
   "timeManager": {
     "enabled": true,
     "displayMode": "time"

@@ -112,7 +112,6 @@
         "aiOverviewControl",
         "piSessions",
         "dockerManager",
-        "pixelBuds",
         "battery",
         {
           "id": "idleInhibitor",
