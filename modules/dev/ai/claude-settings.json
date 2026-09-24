@@ -36,6 +36,11 @@
     "superpowers@claude-plugins-official": true
   },
   "effortLevel": "high",
+  "modelSettings": {
+    "claude-opus-5-5": {
+      "effortLevel": "medium"
+    }
+  },
   "tui": "fullscreen",
   "skipDangerousModePermissionPrompt": true,
   "skipWorkflowUsageWarning": true,
@@ -43,9 +48,5 @@
   "preferredNotifChannel": "terminal_bell",
   "remoteControlAtStartup": false,
   "skipAutoPermissionPrompt": true,
-  "modelSettings": {
-    "claude-opus-5-5": {
-      "effortLevel": "medium"
-    }
-  }
+  "switchModelsOnFlag": false
 }
