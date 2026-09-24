@@ -19,6 +19,9 @@
         mqttui
         postgresql
         pgbot
+
+        # Blockchain nodes
+        (callPackage ../../packages/exrpd/package.nix { })
       ];
 
       home-manager.users.${username} = {
