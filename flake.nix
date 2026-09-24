@@ -92,11 +92,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    orca-nix = {
-      url = "github:kevinpita/orca-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     bast-nix = {
       url = "github:kevinpita/bast-nix";
       inputs.nixpkgs.follows = "nixpkgs";
