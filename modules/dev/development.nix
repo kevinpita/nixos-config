@@ -22,7 +22,13 @@
 
         # Blockchain nodes
         (callPackage ../../packages/exrpd/package.nix { })
+
+        # Code review canvas
+        (callPackage ../../packages/whiteboard/package.nix { })
       ];
+
+      # Whiteboard Desktop installs its agent CLI shim in ~/.local/bin.
+      environment.localBinInPath = true;
 
       home-manager.users.${username} = {
         home.packages = with pkgs; [

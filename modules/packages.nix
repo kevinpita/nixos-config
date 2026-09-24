@@ -9,6 +9,7 @@
       prometheus-podman-exporter =
         pkgs.callPackage ../packages/prometheus-podman-exporter/package.nix
           { };
+      whiteboard = pkgs.callPackage ../packages/whiteboard/package.nix { };
     };
   };
 }
