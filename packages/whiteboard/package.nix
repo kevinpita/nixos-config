@@ -18,12 +18,19 @@
   libglvnd,
   libkrb5,
   libsecret,
+  libx11,
+  libxcb,
+  libxcomposite,
+  libxdamage,
+  libxext,
+  libxfixes,
   libxkbcommon,
+  libxkbfile,
+  libxrandr,
   nspr,
   nss,
   pango,
   systemd,
-  xorg,
 }:
 
 stdenv.mkDerivation (finalAttrs: {
@@ -54,19 +61,19 @@ stdenv.mkDerivation (finalAttrs: {
     libgbm
     libkrb5
     libsecret
+    libx11
+    libxcb
+    libxcomposite
+    libxdamage
+    libxext
+    libxfixes
     libxkbcommon
+    libxkbfile
+    libxrandr
     nspr
     nss
     pango
     stdenv.cc.cc
-    xorg.libX11
-    xorg.libxcb
-    xorg.libXcomposite
-    xorg.libXdamage
-    xorg.libXext
-    xorg.libXfixes
-    xorg.libxkbfile
-    xorg.libXrandr
   ];
 
   runtimeDependencies = [
