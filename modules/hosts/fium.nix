@@ -13,6 +13,8 @@
         config.flake.modules.nixos.selfhosted-secrets
       ];
 
+      nixCache.publicKey = "fium-cache-1:Aeu01Pv7XdRgBN33KuV5B/DXzeAwpo5nLwd3Kh79fVc=";
+
       services.k3s.extraFlags = [ "--tls-san=fium.tail235c8.ts.net" ];
 
       selfhosted.web = {
