@@ -25,4 +25,10 @@
         ];
       };
     };
+
+  # Don't block boot on Wi-Fi: a slow or failing association otherwise delays
+  # network-online.target (and everything ordered after it, e.g. incus).
+  flake.modules.nixos.workstation = {
+    systemd.services.NetworkManager-wait-online.enable = false;
+  };
 }
