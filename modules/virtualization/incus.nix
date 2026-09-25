@@ -12,4 +12,10 @@
 
       users.users.${username}.extraGroups = [ "incus-admin" ];
     };
+
+  # Start incus on first use instead of during boot. Workstations run no
+  # autostart instances. Servers keep starting it at boot for theirs.
+  flake.modules.nixos.workstation = {
+    virtualisation.incus.socketActivation = true;
+  };
 }

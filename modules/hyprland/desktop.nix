@@ -148,6 +148,10 @@
           };
         };
 
+        # The upstream Type=idle holds greetd back up to 5 seconds while other
+        # boot jobs are still queued, delaying autologin for no benefit.
+        systemd.services.greetd.serviceConfig.Type = lib.mkForce "simple";
+
         programs.dms-shell = {
           enable = true;
           systemd.enable = false;
