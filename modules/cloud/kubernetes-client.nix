@@ -9,6 +9,21 @@
       ...
     }:
     let
+      helm3 = pkgs.stdenvNoCC.mkDerivation {
+        pname = "kubernetes-helm";
+        version = "3.22.0";
+        src = pkgs.fetchurl {
+          url = "https://get.helm.sh/helm-v3.22.0-linux-amd64.tar.gz";
+          hash = "sha256-Hkq0nkKWJs9saVjZFCSLeMlzCAPCdRuHYn4XHcgA57s=";
+        };
+        installPhase = ''
+          install -Dm755 helm $out/bin/helm
+        '';
+        meta.mainProgram = "helm";
+      };
+      helm = pkgs.wrapHelm helm3 {
+        plugins = [ pkgs.kubernetes-helmPlugins.helm-diff ];
+      };
       secretsPath = "${inputs.nixos-secrets}/secrets";
       kubeFiles = lib.filterAttrs (
         name: type: type == "regular" && builtins.match "kube-.+\\.yaml" name != null
@@ -35,7 +50,7 @@
         pkgs.k9s
         pkgs.ku
         pkgs.kubectl
-        pkgs.kubernetes-helm
+        helm
         pkgs.kubie
         pkgs.terraform
       ];
