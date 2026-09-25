@@ -7,6 +7,7 @@
   alsa-lib,
   at-spi2-atk,
   cairo,
+  coreutils,
   cups,
   dbus,
   expat,
@@ -102,6 +103,13 @@ stdenv.mkDerivation (finalAttrs: {
 
     substituteInPlace $out/share/applications/*.desktop \
       --replace-fail /usr/bin/review-desktop $out/bin/review-desktop
+
+    # Tutorial assets are copied from the read-only store; make the copy writable.
+    substituteInPlace $out/share/review/resources/app/review-runtime/dist/server/desktop-host.js \
+      --replace-fail 'await cp(path.join(assetsRoot, "git-stub")' \
+        'await execFileAsync("${coreutils}/bin/chmod", ["-R", "u+w", temporaryRoot]); await cp(path.join(assetsRoot, "git-stub")' \
+      --replace-fail 'await rename(temporaryRoot, sampleRoot);' \
+        'await execFileAsync("${coreutils}/bin/chmod", ["-R", "u+w", temporaryRoot]); await rename(temporaryRoot, sampleRoot);'
 
     runHook postInstall
   '';
