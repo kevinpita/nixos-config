@@ -1,0 +1,119 @@
+# Boot splash laid out like the NixOS GRUB theme menu. The highlighted GRUB
+# entry stays in place and becomes the passphrase field, so leaving GRUB only
+# changes the heading and the row contents.
+
+screen.x = Window.GetX();
+screen.y = Window.GetY();
+screen.width = Window.GetWidth();
+screen.height = Window.GetHeight();
+
+fun background_image(name) {
+  return Image(name + ".png").Scale(screen.width, screen.height);
+}
+
+backgrounds.base = background_image("base");
+backgrounds.unlock = background_image("unlock");
+backgrounds.boot = background_image("boot");
+backgrounds.shutdown = background_image("shutdown");
+
+background = Sprite();
+background.SetPosition(screen.x, screen.y, -100);
+
+# GRUB theme geometry: menu at 15% left and 40% top, 55% wide, 40 px items
+# with 2 px padding, 36 px icons, and a 20 px gap before the entry text.
+row.x = screen.x + screen.width * 0.15;
+row.y = screen.y + screen.height * 0.40;
+row.width = screen.width * 0.55;
+row.height = 44;
+
+row.left = Sprite(Image("select_w.png").Scale(5, row.height));
+row.left.SetPosition(row.x, row.y, 1);
+row.middle = Sprite(Image("select_c.png").Scale(row.width - 10, row.height));
+row.middle.SetPosition(row.x + 5, row.y, 1);
+row.right = Sprite(Image("select_e.png").Scale(5, row.height));
+row.right.SetPosition(row.x + row.width - 5, row.y, 1);
+row.icon = Sprite(Image("nixos.png").Scale(36, 36));
+row.icon.SetPosition(row.x + 4, row.y + 4, 2);
+row.text = Sprite();
+
+# The GRUB countdown label sits at 31% top. The prompt reuses that spot.
+prompt_label = Sprite();
+message_label = Sprite();
+
+fun set_text(sprite, text, font, gray, x, y) {
+  if (text == "") {
+    sprite.SetOpacity(0);
+    return;
+  }
+  image = Image.Text(text, gray, gray, gray, 1, font);
+  sprite.SetImage(image);
+  sprite.SetPosition(x, y, 2);
+  sprite.SetOpacity(1);
+}
+
+fun set_row(text) {
+  if (text == "") {
+    row.text.SetOpacity(0);
+    return;
+  }
+  image = Image.Text(text, 1, 1, 1, 1, "Ubuntu 20px");
+  row.text.SetImage(image);
+  row.text.SetPosition(row.x + 60, row.y + (row.height - image.GetHeight()) / 2, 2);
+  row.text.SetOpacity(1);
+}
+
+fun set_row_visible(opacity) {
+  row.left.SetOpacity(opacity);
+  row.middle.SetOpacity(opacity);
+  row.right.SetOpacity(opacity);
+  row.icon.SetOpacity(opacity);
+  row.text.SetOpacity(opacity);
+}
+
+fun display_normal() {
+  set_text(prompt_label, "", "Ubuntu 17px", 0.8, 0, 0);
+  if (Plymouth.GetMode() != "boot") {
+    background.SetImage(backgrounds.shutdown);
+    set_row_visible(0);
+    return;
+  }
+  if (global.asked_password) {
+    background.SetImage(backgrounds.boot);
+  } else {
+    background.SetImage(backgrounds.base);
+  }
+  set_row_visible(1);
+  set_row("NixOS");
+}
+
+fun display_entry(prompt, entry) {
+  global.asked_password = 1;
+  background.SetImage(backgrounds.unlock);
+  set_row_visible(1);
+  set_text(prompt_label, prompt, "Ubuntu 17px", 0.8, row.x, screen.y + screen.height * 0.31);
+  set_row(entry);
+}
+
+fun display_password(prompt, bullets) {
+  entry = "";
+  for (i = 0; i < bullets && i < 60; i++) {
+    entry += "•";
+  }
+  display_entry(prompt, entry);
+}
+
+fun display_message(text) {
+  set_text(message_label, text, "Ubuntu 17px", 0.8, row.x, row.y + row.height + 16);
+}
+
+fun hide_message(text) {
+  message_label.SetOpacity(0);
+}
+
+Plymouth.SetDisplayNormalFunction(display_normal);
+Plymouth.SetDisplayPasswordFunction(display_password);
+Plymouth.SetDisplayQuestionFunction(display_entry);
+Plymouth.SetDisplayMessageFunction(display_message);
+Plymouth.SetHideMessageFunction(hide_message);
+
+display_normal();
