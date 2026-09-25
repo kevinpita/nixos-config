@@ -8,6 +8,7 @@
         ../../hosts/fium/hardware-configuration.nix
         config.flake.modules.nixos.hermes-vm
         config.flake.modules.nixos.kubernetes-server
+        config.flake.modules.nixos.nix-cache-server
         config.flake.modules.nixos.selfhosted
         config.flake.modules.nixos.selfhosted-secrets
       ];

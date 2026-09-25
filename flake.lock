@@ -618,11 +618,11 @@
     "nixos-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1790154721,
-        "narHash": "sha256-0DZvvSYSZdPyA4jniWKxGNQ1vI9dILd+UmVRRcCHc58=",
+        "lastModified": 1790377130,
+        "narHash": "sha256-H7mEsG+vEGnrCCF0V9eOu8EI6Fml1TsmpftfXhf8zgg=",
         "ref": "refs/heads/main",
-        "rev": "02ef9daf09d22a1663b15d7a5c036c1608704e1b",
-        "revCount": 36,
+        "rev": "a8d167821e0683fa7fdebdc3554cef4c675fba63",
+        "revCount": 37,
         "type": "git",
         "url": "ssh://git@github.com/kevinpita/nixos-secrets"
       },
