@@ -16,8 +16,6 @@
 
       boot.kernelPackages = pkgs.linuxPackages_latest;
 
-      # Windows uses local time in the hardware clock.
-      time.hardwareClockInLocalTime = true;
       boot.loader.grub.useOSProber = true;
     };
 }
