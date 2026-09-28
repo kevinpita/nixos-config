@@ -35,12 +35,12 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "whiteboard";
-  version = "0.1.2";
+  version = "0.1.3";
 
   # Prebuilt upstream release; bump version and hash manually.
   src = fetchurl {
     url = "https://github.com/devdotfast/whiteboard/releases/download/v${finalAttrs.version}/dev-fast-review-${finalAttrs.version}-1.x86_64.rpm";
-    hash = "sha256-XVu4de/c4dN7ZuLCQcUxXzCpA2E25iD1iUxTKaMbcfc=";
+    hash = "sha256-2sPcZmi6oYIVeDwddVH6wUvT5pNkHsogaJ33EONdBLI=";
   };
 
   nativeBuildInputs = [
