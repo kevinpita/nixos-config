@@ -13,6 +13,8 @@
         tailscale
       ];
 
+      host.roles = [ "server" ];
+
       users.users.${username}.linger = true;
     };
 }

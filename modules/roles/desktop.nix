@@ -23,9 +23,12 @@
       zed
     ];
 
+    workstation.host.roles = [ "workstation" ];
+
     desktop.imports = [
       config.flake.modules.nixos.workstation
       config.flake.modules.nixos.hyprland
     ];
+    desktop.host.roles = [ "desktop" ];
   };
 }

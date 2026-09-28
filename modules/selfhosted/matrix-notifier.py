@@ -17,8 +17,6 @@ from urllib.request import Request, urlopen
 
 MATRIX_URL = "https://matrix.org/_matrix/client/v3/rooms/"
 PROMETHEUS_URL = "http://127.0.0.1:9090/api/v1/query"
-DEPLOYMENT_QUERY = 'comin_last_successful_deployment_timestamp_seconds{job="node",host=~"fium|minidesk"}'
-HOSTS = {"fium", "minidesk"}
 
 
 def request_json(url, payload=None, headers=None, method=None):
@@ -29,7 +27,8 @@ def request_json(url, payload=None, headers=None, method=None):
 
 
 class Notifier:
-    def __init__(self, token_file, room_file, state_dir):
+    def __init__(self, token_file, room_file, state_dir, hosts):
+        self.deployment_query = f'comin_last_successful_deployment_timestamp_seconds{{job="node",host=~"{hosts}"}}'
         self.token = Path(token_file).read_text(encoding="utf-8").strip()
         if not self.token:
             raise ValueError("Matrix token is empty")
@@ -70,14 +69,12 @@ class Notifier:
         os.replace(temporary, self.state_file)
 
     def poll_deployments(self):
-        url = PROMETHEUS_URL + "?" + urlencode({"query": DEPLOYMENT_QUERY})
+        url = PROMETHEUS_URL + "?" + urlencode({"query": self.deployment_query})
         result = request_json(url)
         if result.get("status") != "success":
             raise ValueError("Prometheus query failed")
         for sample in result["data"]["result"]:
-            host = sample["metric"].get("host")
-            if host not in HOSTS:
-                continue
+            host = sample["metric"]["host"]
             timestamp = int(float(sample["value"][1]))
             if timestamp <= 0:
                 continue
@@ -157,7 +154,7 @@ def handler_for(notifier):
 
 def main():
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-    notifier = Notifier(sys.argv[1], sys.argv[2], sys.argv[3])
+    notifier = Notifier(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
 
     def poll_forever():
         while True:

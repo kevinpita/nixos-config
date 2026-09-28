@@ -3,12 +3,14 @@
     {
       config,
       ciMode,
+      hostsWithRole,
       lib,
       pkgs,
       ...
     }:
     let
       matrixEnabled = !ciMode;
+      servers = lib.concatStringsSep "|" (hostsWithRole "server");
       filesystemAvailable = ''
         node_filesystem_avail_bytes{job="node",fstype!~"tmpfs|devtmpfs|overlay|squashfs|ramfs|nsfs"}
         / node_filesystem_size_bytes
@@ -87,7 +89,7 @@
         }
         {
           alert = "SmartHealthFailed";
-          expr = ''smartctl_device_smart_status{job="smartctl",host=~"fium|minidesk"} == 0'';
+          expr = ''smartctl_device_smart_status{job="smartctl",host=~"${servers}"} == 0'';
           for = "2m";
           labels.severity = "critical";
           annotations = {
@@ -97,7 +99,7 @@
         }
         {
           alert = "SmartDrivesUnreported";
-          expr = ''(smartctl_devices{job="smartctl",host=~"fium|minidesk"} - on(host,instance) (count by(host,instance) (smartctl_device{job="smartctl",host=~"fium|minidesk"}) or on(host,instance) (0 * smartctl_devices{job="smartctl",host=~"fium|minidesk"}))) > 0'';
+          expr = ''(smartctl_devices{job="smartctl",host=~"${servers}"} - on(host,instance) (count by(host,instance) (smartctl_device{job="smartctl",host=~"${servers}"}) or on(host,instance) (0 * smartctl_devices{job="smartctl",host=~"${servers}"}))) > 0'';
           for = "10m";
           labels.severity = "critical";
           annotations = {
@@ -137,7 +139,7 @@
         }
         {
           alert = "MonitoringExporterDown";
-          expr = ''up{job=~"node|smartctl",host=~"fium|minidesk"} == 0 or up{job="zfs"} == 0'';
+          expr = ''up{job=~"node|smartctl",host=~"${servers}"} == 0 or up{job="zfs"} == 0'';
           for = "5m";
           labels.severity = "critical";
           annotations = {
@@ -289,7 +291,7 @@
               "matrix:${config.sops.secrets.matrix.path}"
               "matrix-chat:${config.sops.secrets."matrix-chat".path}"
             ];
-            ExecStart = "${lib.getExe pkgs.python3} ${./matrix-notifier.py} /run/credentials/matrix-notifier.service/matrix /run/credentials/matrix-notifier.service/matrix-chat /var/lib/matrix-notifier";
+            ExecStart = "${lib.getExe pkgs.python3} ${./matrix-notifier.py} /run/credentials/matrix-notifier.service/matrix /run/credentials/matrix-notifier.service/matrix-chat /var/lib/matrix-notifier ${lib.escapeShellArg servers}";
             Restart = "on-failure";
             RestartSec = "10s";
             NoNewPrivileges = true;

@@ -114,14 +114,21 @@
     };
 
   flake.modules.nixos.herdr-ssh-client =
-    { lib, username, ... }:
+    {
+      lib,
+      username,
+      hostsWithRole,
+      ...
+    }:
+    let
+      servers = hostsWithRole "server";
+    in
     {
       home-manager.users.${username} = {
-        programs.herdr.machines = {
-          minidesk.target = "minidesk";
-          fium.target = "fium";
-        };
-        programs.ssh.settings = lib.genAttrs [ "minidesk" "fium" ] (name: {
+        programs.herdr.machines = lib.genAttrs servers (name: {
+          target = name;
+        });
+        programs.ssh.settings = lib.genAttrs servers (name: {
           HostName = "${name}.tail235c8.ts.net";
           User = username;
         });

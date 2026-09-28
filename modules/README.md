@@ -7,7 +7,7 @@ This is where NixOS and Home Manager settings are connected to machines. Change 
 `import-tree` loads Nix files below this directory as flake modules. Each named entry in `flake.modules.nixos` is an **aspect**. An aspect can be a feature, a role, or a host. Several files can contribute to the same aspect without importing each other.
 
 - `hosts/<hostname>.nix` selects a machine's hardware files, roles, and additional features. Put a machine-only exception here rather than changing a shared default.
-- `roles/` groups features. `desktop` includes `workstation` plus Hyprland. `server` provides the shared server environment. Add an aspect to a role when every machine with that role should receive it.
+- `roles/` groups features. `desktop` includes `workstation` plus Hyprland. `server` provides the shared server environment. Add an aspect to a role when every machine with that role should receive it. Each role adds its name to `host.roles`, and `hostsWithRole "<role>"` returns the matching host names. Use it instead of listing hosts by hand.
 - Feature files define the settings themselves. Extend the existing aspect when the behavior belongs to it. Create a new aspect when it needs to be selected independently.
 
 A new file is discovered automatically, but a new aspect must still be selected by a host or role. Do not add manual imports to `flake.nix`, and do not add another import just because a second file contributes to an existing aspect. Raw NixOS helper modules belong outside this directory.

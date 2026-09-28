@@ -43,6 +43,26 @@ let
   };
 
   hostModules = lib.filterAttrs (name: _: lib.hasPrefix "hosts/" name) config.flake.modules.nixos;
+
+  hostsWithRole =
+    role:
+    lib.attrNames (
+      lib.filterAttrs (_: host: lib.elem role host.config.host.roles) config.flake.nixosConfigurations
+    );
+
+  rolesModule = {
+    options.host.roles = lib.mkOption {
+      type = lib.types.listOf (
+        lib.types.enum [
+          "desktop"
+          "server"
+          "workstation"
+        ]
+      );
+      default = [ ];
+      description = "Roles this host imports. Other hosts read them through hostsWithRole.";
+    };
+  };
 in
 {
   imports = [ inputs.flake-parts.flakeModules.modules ];
@@ -57,13 +77,19 @@ in
         inherit system pkgs;
         modules = [
           module
+          rolesModule
           inputs.disko.nixosModules.disko
           inputs.home-manager.nixosModules.home-manager
           config.flake.modules.nixos.neovim
           inputs.sops-nix.nixosModules.sops
         ];
         specialArgs = {
-          inherit inputs username hostname;
+          inherit
+            inputs
+            username
+            hostname
+            hostsWithRole
+            ;
           inherit (privateInputs) ciMode workConfig;
         };
       }
