@@ -2,12 +2,17 @@
 {
   flake.modules.nixos.ai =
     {
+      lib,
       pkgs,
       username,
       ...
     }:
     let
       system = pkgs.stdenv.hostPlatform.system;
+      piEnv = {
+        PI_SKIP_VERSION_CHECK = "1";
+        PI_TELEMETRY = "0";
+      };
       piPackage = inputs.pi-flake.packages.${system}.pi-coding-agent;
       extensions = inputs.pi-extensions + "/extensions";
       piSessionMaintenance = pkgs.writeShellApplication {
@@ -30,10 +35,7 @@
         enable = true;
         users = [ username ];
         package = piPackage;
-        extraEnv = {
-          PI_SKIP_VERSION_CHECK = "1";
-          PI_TELEMETRY = "0";
-        };
+        extraEnv = piEnv;
         extensions = [ ];
         agentFiles.keybindings = {
           mutable = false;
@@ -51,10 +53,7 @@
           piSessionMaintenance
         ];
 
-        sessionVariables = {
-          PI_SKIP_VERSION_CHECK = "1";
-          PI_TELEMETRY = "0";
-        };
+        sessionVariables = piEnv;
       };
 
       home-manager.users.${username} =
@@ -247,9 +246,13 @@
               source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.pi/agent/skills";
             };
 
+            # The pstack Claude plugin ships its own bro skill.
             ".claude/skills" = {
               force = true;
-              source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.pi/agent/skills";
+              source = lib.fileset.toSource {
+                root = ../pi/skills;
+                fileset = lib.fileset.difference ../pi/skills ../pi/skills/bro;
+              };
             };
 
             ".codex/skills" = {
