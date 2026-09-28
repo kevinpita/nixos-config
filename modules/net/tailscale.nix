@@ -8,11 +8,11 @@
       services.tailscale = {
         enable = true;
         openFirewall = true;
-        extraUpFlags = [
+        extraSetFlags = [
+          "--operator=${username}"
           "--ssh"
           "--accept-routes"
         ];
-        extraSetFlags = [ "--operator=${username}" ];
       };
     };
 
@@ -31,7 +31,9 @@
       services.tailscale = {
         authKeyFile = "/var/lib/tailscale/bootstrap-auth-key";
         useRoutingFeatures = "both";
-        extraUpFlags = lib.mkAfter [ "--advertise-exit-node" ];
+        extraSetFlags = lib.mkAfter [ "--advertise-exit-node" ];
+        # `tailscale up` rejects omitting non-default prefs, so re-authentication must repeat them.
+        extraUpFlags = config.services.tailscale.extraSetFlags;
       };
 
       systemd.services.tailscaled-autoconnect = {
