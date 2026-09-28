@@ -1,7 +1,7 @@
 { config, ... }:
 {
   flake.modules.nixos."hosts/amdep" =
-    { username, pkgs, ... }:
+    { pkgs, ... }:
     {
       imports = [
         ../../hosts/amdep/disko-config.nix
@@ -13,8 +13,6 @@
       ];
 
       hardware.bluetooth.enable = true;
-
-      programs.nixos-hyprland.hostConfig = "/home/${username}/nixos-config/hosts/amdep/hyprland.lua";
 
       boot.kernelPackages = pkgs.linuxPackages_latest;
 

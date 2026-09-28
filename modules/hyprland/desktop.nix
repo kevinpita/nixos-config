@@ -2,6 +2,7 @@
   flake.modules.nixos.hyprland =
     {
       config,
+      hostname,
       lib,
       pkgs,
       username,
@@ -9,6 +10,7 @@
     }:
     let
       cfg = config.programs.nixos-hyprland;
+      hostConfig = "hosts/${hostname}/hyprland.lua";
       sessionCommand = "${lib.getExe config.programs.uwsm.package} start -e -D Hyprland hyprland.desktop";
       omasnap = pkgs.stdenv.mkDerivation {
         pname = "omasnap";
@@ -117,13 +119,17 @@
       options.programs.nixos-hyprland = {
         configDirectory = lib.mkOption {
           type = lib.types.str;
-          default = "/home/${username}/nixos-config/hyprland";
+          default = "${config.programs.nh.flake}/hyprland";
           description = "Absolute path to the writable Hyprland configuration directory";
         };
 
         hostConfig = lib.mkOption {
           type = lib.types.nullOr lib.types.str;
-          default = null;
+          default =
+            if builtins.pathExists ../../${hostConfig} then
+              "${config.programs.nh.flake}/${hostConfig}"
+            else
+              null;
           description = "Optional absolute path to host-specific Hyprland Lua configuration";
         };
       };

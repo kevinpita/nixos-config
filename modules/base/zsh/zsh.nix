@@ -1,6 +1,7 @@
 {
   flake.modules.nixos.base =
     {
+      config,
       lib,
       pkgs,
       username,
@@ -60,8 +61,8 @@
             sshl = ''awk 'tolower($1) == "host" { for (i = 2; i <= NF; i++) if ($i !~ /[*?!]/) print $i }' ~/.ssh/config'';
 
             gittime = ''git commit --amend --date="$(date -Iseconds)" --no-edit'';
-            switch = "just --justfile ~/nixos-config/justfile switch";
-            update = "cd ~/nixos-config && nix flake update";
+            switch = "just --justfile ${config.programs.nh.flake}/justfile switch";
+            update = "cd ${config.programs.nh.flake} && nix flake update";
 
             update-git = ''
               update && \

@@ -5,8 +5,6 @@
   ...
 }:
 {
-  programs.nixos-hyprland.hostConfig = "/home/${username}/nixos-config/hosts/t14g6/hyprland.lua";
-
   hardware.bluetooth.enable = true;
 
   environment.etc."systemd/system-sleep/reset-elan-touchpad" = {

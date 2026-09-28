@@ -17,7 +17,7 @@ Each host has a directory named after its NixOS host output.
 
 ## Adding or replacing a machine
 
-A new machine needs both a directory here and an aspect named `hosts/<hostname>` under `modules/hosts/`. The entry point imports the hardware and disk files and selects the role. A desktop also needs its host Lua path configured.
+A new machine needs both a directory here and an aspect named `hosts/<hostname>` under `modules/hosts/`. The entry point imports the hardware and disk files and selects the role. A desktop loads `hosts/<hostname>/hyprland.lua` automatically when that file exists.
 
 Generate hardware configuration from the target machine, not from the computer used to deploy it. Disko owns filesystem definitions, so the installation guide generates hardware with `--no-filesystems`. Reusing a host name on replacement hardware does not make its old drivers or disk identifiers valid.
 

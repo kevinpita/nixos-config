@@ -1,6 +1,11 @@
 {
   flake.modules.nixos.ai =
-    { pkgs, username, ... }:
+    {
+      config,
+      pkgs,
+      username,
+      ...
+    }:
     let
       herdrClaudeIntegration = pkgs.runCommand "herdr-claude-integration" { } ''
         export HOME="$out"
@@ -8,6 +13,7 @@
         printf '{}\n' > "$HOME/.claude/settings.json"
         ${pkgs.herdr}/bin/herdr integration install claude
       '';
+      repo = config.programs.nh.flake;
     in
     {
       environment.systemPackages = [ pkgs.claude-code ];
@@ -25,7 +31,7 @@
           # which fails with EROFS.
           home.activation.linkClaudeSettings = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
             run ln -sfn $VERBOSE_ARG \
-              "${config.home.homeDirectory}/nixos-config/modules/dev/ai/claude-settings.json" \
+              "${repo}/modules/dev/ai/claude-settings.json" \
               "${config.home.homeDirectory}/.claude/settings.json"
           '';
         };
