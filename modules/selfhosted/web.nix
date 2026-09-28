@@ -135,8 +135,8 @@
 
         services.grafana.settings = {
           server = {
-            http_addr = lib.mkForce "127.0.0.1";
-            domain = lib.mkForce grafanaDomain;
+            http_addr = "127.0.0.1";
+            domain = grafanaDomain;
             root_url = "https://${grafanaDomain}/";
             enforce_domain = true;
           };

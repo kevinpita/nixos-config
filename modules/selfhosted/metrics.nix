@@ -30,12 +30,6 @@ in
           example = "example.ts.net";
           description = "Tailscale MagicDNS suffix used by the monitored NixOS hosts.";
         };
-        extraNodeTargets = lib.mkOption {
-          type = lib.types.listOf lib.types.nonEmptyStr;
-          default = [ ];
-          example = [ "nas.example.ts.net:9100" ];
-          description = "Additional node-exporter host:port endpoints reachable from this host.";
-        };
       };
 
       config = {
@@ -55,14 +49,12 @@ in
           scrapeConfigs = [
             {
               job_name = "node";
-              static_configs =
-                lib.mapAttrsToList (_: host: {
-                  targets = [
-                    "${host.config.networking.hostName}.${cfg.tailnetDomain}:${toString host.config.services.prometheus.exporters.node.port}"
-                  ];
-                  labels.host = host.config.networking.hostName;
-                }) monitoredHosts
-                ++ lib.optional (cfg.extraNodeTargets != [ ]) { targets = cfg.extraNodeTargets; };
+              static_configs = lib.mapAttrsToList (_: host: {
+                targets = [
+                  "${host.config.networking.hostName}.${cfg.tailnetDomain}:${toString host.config.services.prometheus.exporters.node.port}"
+                ];
+                labels.host = host.config.networking.hostName;
+              }) monitoredHosts;
             }
             {
               job_name = "zfs";
@@ -113,10 +105,6 @@ in
           enable = true;
           openFirewall = false;
           settings = {
-            server = {
-              http_addr = "0.0.0.0";
-              domain = config.networking.hostName;
-            };
             security = {
               admin_password = "$__file{${grafana.dataDir}/admin-password}";
               secret_key = "$__file{${grafana.dataDir}/secret-key}";
@@ -155,18 +143,6 @@ in
             fi
           done
         '';
-
-        networking.firewall.interfaces.${config.services.tailscale.interfaceName}.allowedTCPPorts =
-          lib.optionals
-            (
-              !(builtins.elem grafana.settings.server.http_addr [
-                "127.0.0.1"
-                "::1"
-              ])
-            )
-            [
-              grafana.settings.server.http_port
-            ];
       };
     };
 }

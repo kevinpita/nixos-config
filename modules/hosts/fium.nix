@@ -24,7 +24,6 @@
 
       selfhosted.metrics = {
         tailnetDomain = "tail235c8.ts.net";
-        extraNodeTargets = [ ];
       };
 
       boot.loader = {
