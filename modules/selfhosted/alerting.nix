@@ -11,11 +11,12 @@
     let
       matrixEnabled = !ciMode;
       servers = lib.concatStringsSep "|" (hostsWithRole "server");
+      storageHost = "fium";
       filesystemAvailable = ''
         node_filesystem_avail_bytes{job="node",fstype!~"tmpfs|devtmpfs|overlay|squashfs|ramfs|nsfs"}
         / node_filesystem_size_bytes
       '';
-      scrubFresh = ''time() - node_zfs_scrub_collection_timestamp_seconds{job="node",host="fium"} < 180'';
+      scrubFresh = ''time() - node_zfs_scrub_collection_timestamp_seconds{job="node",host="${storageHost}"} < 180'';
       rules = [
         {
           alert = "FilesystemSpaceLow";
@@ -89,7 +90,7 @@
         }
         {
           alert = "SmartHealthFailed";
-          expr = ''smartctl_device_smart_status{job="smartctl",host=~"${servers}"} == 0'';
+          expr = ''smartctl_device_smart_status{job="smartctl",host="${storageHost}"} == 0'';
           for = "2m";
           labels.severity = "critical";
           annotations = {
@@ -99,7 +100,7 @@
         }
         {
           alert = "SmartDrivesUnreported";
-          expr = ''(smartctl_devices{job="smartctl",host=~"${servers}"} - on(host,instance) (count by(host,instance) (smartctl_device{job="smartctl",host=~"${servers}"}) or on(host,instance) (0 * smartctl_devices{job="smartctl",host=~"${servers}"}))) > 0'';
+          expr = ''(smartctl_devices{job="smartctl",host="${storageHost}"} - on(host,instance) (count by(host,instance) (smartctl_device{job="smartctl",host="${storageHost}"}) or on(host,instance) (0 * smartctl_devices{job="smartctl",host="${storageHost}"}))) > 0'';
           for = "10m";
           labels.severity = "critical";
           annotations = {
@@ -109,7 +110,7 @@
         }
         {
           alert = "ZfsScrubMissing";
-          expr = ''(node_zfs_pool_last_scrub_timestamp_seconds{job="node",host="fium"} == 0) and on(instance,host) (${scrubFresh})'';
+          expr = ''(node_zfs_pool_last_scrub_timestamp_seconds{job="node",host="${storageHost}"} == 0) and on(instance,host) (${scrubFresh})'';
           for = "10d";
           labels.severity = "warning";
           annotations = {
@@ -119,7 +120,7 @@
         }
         {
           alert = "ZfsScrubOverdue";
-          expr = ''(time() - (node_zfs_pool_last_scrub_timestamp_seconds{job="node",host="fium"} > 0) > 10 * 24 * 60 * 60) and on(instance,host) (${scrubFresh})'';
+          expr = ''(time() - (node_zfs_pool_last_scrub_timestamp_seconds{job="node",host="${storageHost}"} > 0) > 10 * 24 * 60 * 60) and on(instance,host) (${scrubFresh})'';
           for = "30m";
           labels.severity = "warning";
           annotations = {
@@ -129,7 +130,7 @@
         }
         {
           alert = "ZfsScrubCollectionStale";
-          expr = ''(up{job="node",host="fium"} == 1) unless on(instance,host) (${scrubFresh})'';
+          expr = ''(up{job="node",host="${storageHost}"} == 1) unless on(instance,host) (${scrubFresh})'';
           for = "5m";
           labels.severity = "warning";
           annotations = {
@@ -139,7 +140,7 @@
         }
         {
           alert = "MonitoringExporterDown";
-          expr = ''up{job=~"node|smartctl",host=~"${servers}"} == 0 or up{job="zfs"} == 0'';
+          expr = ''up{job="node",host=~"${servers}"} == 0 or up{job=~"smartctl|zfs",host="${storageHost}"} == 0'';
           for = "5m";
           labels.severity = "critical";
           annotations = {
