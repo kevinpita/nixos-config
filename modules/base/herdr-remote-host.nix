@@ -118,6 +118,7 @@
       lib,
       username,
       hostsWithRole,
+      tailnetDomain,
       ...
     }:
     let
@@ -129,7 +130,7 @@
           target = name;
         });
         programs.ssh.settings = lib.genAttrs servers (name: {
-          HostName = "${name}.tail235c8.ts.net";
+          HostName = "${name}.${tailnetDomain}";
           User = username;
         });
       };

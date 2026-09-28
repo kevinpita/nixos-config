@@ -6,6 +6,7 @@
 }:
 let
   username = "kevin";
+  tailnetDomain = "tail235c8.ts.net";
   system = "x86_64-linux";
 
   overlays = [
@@ -89,6 +90,7 @@ in
             username
             hostname
             hostsWithRole
+            tailnetDomain
             ;
           inherit (privateInputs) ciMode workConfig;
         };

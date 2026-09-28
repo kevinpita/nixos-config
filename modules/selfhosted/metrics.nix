@@ -16,22 +16,14 @@ in
       config,
       lib,
       pkgs,
+      tailnetDomain,
       ...
     }:
     let
-      cfg = config.selfhosted.metrics;
       prometheus = config.services.prometheus;
       grafana = config.services.grafana;
     in
     {
-      options.selfhosted.metrics = {
-        tailnetDomain = lib.mkOption {
-          type = lib.types.nonEmptyStr;
-          example = "example.ts.net";
-          description = "Tailscale MagicDNS suffix used by the monitored NixOS hosts.";
-        };
-      };
-
       config = {
         assertions = [
           {
@@ -51,7 +43,7 @@ in
               job_name = "node";
               static_configs = lib.mapAttrsToList (_: host: {
                 targets = [
-                  "${host.config.networking.hostName}.${cfg.tailnetDomain}:${toString host.config.services.prometheus.exporters.node.port}"
+                  "${host.config.networking.hostName}.${tailnetDomain}:${toString host.config.services.prometheus.exporters.node.port}"
                 ];
                 labels.host = host.config.networking.hostName;
               }) monitoredHosts;
@@ -60,7 +52,7 @@ in
               job_name = "zfs";
               static_configs = lib.mapAttrsToList (_: host: {
                 targets = [
-                  "${host.config.networking.hostName}.${cfg.tailnetDomain}:${toString host.config.services.prometheus.exporters.zfs.port}"
+                  "${host.config.networking.hostName}.${tailnetDomain}:${toString host.config.services.prometheus.exporters.zfs.port}"
                 ];
                 labels.host = host.config.networking.hostName;
               }) zfsHosts;
@@ -71,7 +63,7 @@ in
               scrape_timeout = "30s";
               static_configs = lib.mapAttrsToList (_: host: {
                 targets = [
-                  "${host.config.networking.hostName}.${cfg.tailnetDomain}:${toString host.config.services.prometheus.exporters.smartctl.port}"
+                  "${host.config.networking.hostName}.${tailnetDomain}:${toString host.config.services.prometheus.exporters.smartctl.port}"
                 ];
                 labels.host = host.config.networking.hostName;
               }) monitoredHosts;
@@ -80,7 +72,7 @@ in
               job_name = "podman";
               static_configs = lib.mapAttrsToList (_: host: {
                 targets = [
-                  "${host.config.networking.hostName}.${cfg.tailnetDomain}:${toString host.config.services.podman-exporter.port}"
+                  "${host.config.networking.hostName}.${tailnetDomain}:${toString host.config.services.podman-exporter.port}"
                 ];
                 labels.host = host.config.networking.hostName;
               }) monitoredHosts;
@@ -89,7 +81,7 @@ in
               job_name = "comin";
               static_configs = lib.mapAttrsToList (_: host: {
                 targets = [
-                  "${host.config.networking.hostName}.${cfg.tailnetDomain}:${toString host.config.services.comin.exporter.port}"
+                  "${host.config.networking.hostName}.${tailnetDomain}:${toString host.config.services.comin.exporter.port}"
                 ];
                 labels.host = host.config.networking.hostName;
               }) cominHosts;

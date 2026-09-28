@@ -4,7 +4,7 @@ let
 in
 {
   flake.modules.nixos.kubernetes-server =
-    { config, ... }:
+    { config, tailnetDomain, ... }:
     {
       imports = [
         server
@@ -20,6 +20,7 @@ in
         ];
         extraFlags = [
           "--tls-san=${config.networking.hostName}"
+          "--tls-san=${config.networking.hostName}.${tailnetDomain}"
           "--write-kubeconfig-mode=0600"
         ];
         extraKubeletConfig = {

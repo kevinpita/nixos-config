@@ -15,15 +15,9 @@
 
       nixCache.publicKey = "fium-cache-1:Aeu01Pv7XdRgBN33KuV5B/DXzeAwpo5nLwd3Kh79fVc=";
 
-      services.k3s.extraFlags = [ "--tls-san=fium.tail235c8.ts.net" ];
-
       selfhosted.web = {
         domain = "kevinpita.com";
         tailscaleIPv4 = "100.85.41.60";
-      };
-
-      selfhosted.metrics = {
-        tailnetDomain = "tail235c8.ts.net";
       };
 
       boot.loader = {

@@ -1,7 +1,6 @@
 { config, lib, ... }:
 let
   port = 5000;
-  tailnetDomain = "tail235c8.ts.net";
   hosts = config.flake.nixosConfigurations;
   # Hosts that serve their store, and workstations that switch from it.
   cacheHosts = lib.filter (host: host.config.services.harmonia.cache.enable) (lib.attrValues hosts);
@@ -118,7 +117,7 @@ in
     };
 
   flake.modules.nixos.workstation =
-    { lib, ... }:
+    { lib, tailnetDomain, ... }:
     {
       options.nixCache.prebuild = lib.mkOption {
         type = lib.types.bool;
