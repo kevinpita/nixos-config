@@ -7,7 +7,6 @@
         base
         herdr-remote-host
         mosh
-        moshi
         node-exporter
         podman
         tailscale
