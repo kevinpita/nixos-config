@@ -15,10 +15,10 @@
       piSessionStatus = pkgs.callPackage ../../packages/pi-session-status/package.nix { };
     in
     {
+      programs.nixos-hyprland.dmsPlugins.piSessions = piSessionsPlugin;
+
       home-manager.users.${username} = {
         home.packages = [ piSessionStatus ];
-        xdg.configFile."DankMaterialShell/plugins/piSessions".source = piSessionsPlugin;
-        systemd.user.services.dms.Unit.X-Restart-Triggers = [ piSessionsPlugin ];
       };
     };
 }

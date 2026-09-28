@@ -18,6 +18,8 @@
       };
     in
     {
+      programs.nixos-hyprland.dmsPlugins.timeManager = timeManagerPlugin;
+
       home-manager.users.${username} = {
         home.packages = with pkgs; [
           libcanberra-gtk3
@@ -25,8 +27,6 @@
           pulseaudio
         ];
 
-        xdg.configFile."DankMaterialShell/plugins/timeManager".source = timeManagerPlugin;
-        systemd.user.services.dms.Unit.X-Restart-Triggers = [ timeManagerPlugin ];
       };
     };
 }

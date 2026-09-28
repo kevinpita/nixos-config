@@ -19,10 +19,10 @@
       };
     in
     {
+      programs.nixos-hyprland.dmsPlugins.emojiLauncher = emojiLauncherPlugin;
+
       home-manager.users.${username} = {
         home.packages = [ pkgs.wl-clipboard ];
-        xdg.configFile."DankMaterialShell/plugins/emojiLauncher".source = emojiLauncherPlugin;
-        systemd.user.services.dms.Unit.X-Restart-Triggers = [ emojiLauncherPlugin ];
       };
     };
 }

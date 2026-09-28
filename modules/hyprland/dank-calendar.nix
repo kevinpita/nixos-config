@@ -20,6 +20,8 @@
       };
     in
     {
+      programs.nixos-hyprland.dmsPlugins.dankCalendarAgenda = dankCalendarAgenda;
+
       home-manager.sharedModules = [ inputs.dankcalendar.homeModules.default ];
 
       home-manager.users.${username} = {
@@ -33,12 +35,9 @@
 
         home.packages = [ pkgs.jq ];
 
-        xdg.configFile."DankMaterialShell/plugins/dankCalendarAgenda".source = dankCalendarAgenda;
-
         systemd.user.services.dms.Unit = {
           After = [ "dcal.service" ];
           Wants = [ "dcal.service" ];
-          X-Restart-Triggers = [ dankCalendarAgenda ];
         };
       };
     };

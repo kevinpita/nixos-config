@@ -1,6 +1,6 @@
 {
   flake.modules.nixos.hyprland =
-    { pkgs, username, ... }:
+    { pkgs, ... }:
     let
       calculatorPlugin = pkgs.fetchFromGitHub {
         owner = "rochacbruno";
@@ -10,9 +10,6 @@
       };
     in
     {
-      home-manager.users.${username} = {
-        xdg.configFile."DankMaterialShell/plugins/Calculator".source = calculatorPlugin;
-        systemd.user.services.dms.Unit.X-Restart-Triggers = [ calculatorPlugin ];
-      };
+      programs.nixos-hyprland.dmsPlugins.Calculator = calculatorPlugin;
     };
 }

@@ -25,7 +25,7 @@ Local plugin source, helper commands, and upstream patches are installed through
 
 ## Adding or changing a plugin
 
-Use `plugins/` for a local DMS feature. Its matching module under `modules/hyprland/` installs the plugin and supplies helper executables or service integration. A directory here alone does not install a plugin. Keep external command dependencies in Nix rather than relying on whatever happens to be in the shell's PATH.
+Use `plugins/` for a local DMS feature. Its matching module under `modules/hyprland/` registers the plugin in `programs.nixos-hyprland.dmsPlugins` and supplies helper executables or service integration. The option links the plugin and restarts DMS when it changes. A directory here alone does not install a plugin. Keep external command dependencies in Nix rather than relying on whatever happens to be in the shell's PATH.
 
 Use `patches/` only for changes to upstream packaged behavior. The module that applies a patch owns its build integration. Recheck patches when updating DMS, because upstream source changes can make them fail to apply.
 

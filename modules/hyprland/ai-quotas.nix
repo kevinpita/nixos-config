@@ -27,6 +27,8 @@
       '';
     in
     {
+      programs.nixos-hyprland.dmsPlugins.aiOverviewControl = aiOverviewControl;
+
       sops = lib.mkIf (!ciMode) {
         secrets.kimi = { };
         templates."ai-quotas.env" = {
@@ -43,15 +45,13 @@
         ];
 
         xdg.configFile."DankMaterialShell/plugins/aiOverviewControl" = {
-          source = aiOverviewControl;
           recursive = true;
           force = true;
         };
 
-        systemd.user.services.dms = {
-          Unit.X-Restart-Triggers = [ aiOverviewControl ];
-          Service.EnvironmentFile = lib.mkIf (!ciMode) config.sops.templates."ai-quotas.env".path;
-        };
+        systemd.user.services.dms.Service.EnvironmentFile = lib.mkIf (
+          !ciMode
+        ) config.sops.templates."ai-quotas.env".path;
       };
     };
 }
