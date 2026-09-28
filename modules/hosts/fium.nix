@@ -1,17 +1,27 @@
 { config, ... }:
+let
+  inherit (config.flake.modules.nixos)
+    hermes-vm
+    kubernetes-server
+    moshi
+    nix-cache-server
+    selfhosted
+    selfhosted-secrets
+    ;
+in
 {
   flake.modules.nixos."hosts/fium" =
-    { ... }:
+    { config, ... }:
     {
       imports = [
         ../../hosts/fium/disko-config.nix
         ../../hosts/fium/hardware-configuration.nix
-        config.flake.modules.nixos.hermes-vm
-        config.flake.modules.nixos.kubernetes-server
-        config.flake.modules.nixos.moshi
-        config.flake.modules.nixos.nix-cache-server
-        config.flake.modules.nixos.selfhosted
-        config.flake.modules.nixos.selfhosted-secrets
+        hermes-vm
+        kubernetes-server
+        moshi
+        nix-cache-server
+        selfhosted
+        selfhosted-secrets
       ];
 
       nixCache.publicKey = "fium-cache-1:Aeu01Pv7XdRgBN33KuV5B/DXzeAwpo5nLwd3Kh79fVc=";
@@ -28,6 +38,7 @@
 
       services.openssh = {
         enable = true;
+        openFirewall = false;
         settings = {
           PasswordAuthentication = false;
           KbdInteractiveAuthentication = false;
@@ -57,6 +68,7 @@
         forceImportRoot = false;
       };
       networking = {
+        firewall.interfaces.${config.services.tailscale.interfaceName}.allowedTCPPorts = [ 22 ];
         hostId = "44dc8051";
         networkmanager.enable = false;
         useDHCP = false;
