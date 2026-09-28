@@ -202,6 +202,8 @@
               Service = {
                 Type = "dbus";
                 BusName = "org.freedesktop.Notifications";
+                # Qt's PipeWire backend asks rtkit for realtime on every sound, flooding the journal.
+                Environment = [ "QT_AUDIO_BACKEND=pulseaudio" ];
                 ExecStart = "${lib.getExe pkgs.dms-shell} run --session";
                 ExecReload = "${lib.getExe' pkgs.procps "pkill"} -USR1 -x dms";
                 Restart = "on-failure";
