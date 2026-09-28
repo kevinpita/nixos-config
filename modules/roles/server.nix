@@ -1,7 +1,7 @@
 { config, ... }:
 {
   flake.modules.nixos.server =
-    { username, ... }:
+    { ... }:
     {
       imports = with config.flake.modules.nixos; [
         base
@@ -13,7 +13,5 @@
       ];
 
       host.roles = [ "server" ];
-
-      users.users.${username}.linger = true;
     };
 }

@@ -6,9 +6,6 @@
         # AWS clients and authentication
         aws-iam-authenticator
         awscli2
-
-        # Infrastructure provisioning
-        terraform
       ];
     };
 }

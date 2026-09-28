@@ -20,8 +20,6 @@
       };
     in
     {
-      services.gnome.gnome-keyring.enable = true;
-
       home-manager.sharedModules = [ inputs.dankcalendar.homeModules.default ];
 
       home-manager.users.${username} = {

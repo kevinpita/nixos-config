@@ -1,15 +1,17 @@
 {
-  flake.modules.nixos.mosh = {
-    programs.mosh = {
-      enable = true;
-      openFirewall = false;
-    };
+  flake.modules.nixos.mosh =
+    { config, ... }:
+    {
+      programs.mosh = {
+        enable = true;
+        openFirewall = false;
+      };
 
-    networking.firewall.interfaces.tailscale0.allowedUDPPortRanges = [
-      {
-        from = 60000;
-        to = 61000;
-      }
-    ];
-  };
+      networking.firewall.interfaces.${config.services.tailscale.interfaceName}.allowedUDPPortRanges = [
+        {
+          from = 60000;
+          to = 61000;
+        }
+      ];
+    };
 }
