@@ -137,7 +137,7 @@
         }
         {
           alert = "MonitoringExporterDown";
-          expr = ''up{job=~"node|zfs",host="${config.networking.hostName}"} == 0 or up{job="smartctl",host=~"fium|minidesk"} == 0'';
+          expr = ''up{job=~"node|smartctl",host=~"fium|minidesk"} == 0 or up{job="zfs"} == 0'';
           for = "5m";
           labels.severity = "critical";
           annotations = {
