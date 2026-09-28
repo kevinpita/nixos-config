@@ -1,6 +1,11 @@
 {
   flake.modules.nixos.base =
-    { hostname, pkgs, ... }:
+    {
+      hostname,
+      lib,
+      pkgs,
+      ...
+    }:
     {
       environment.systemPackages = with pkgs; [
         curl
@@ -12,7 +17,7 @@
       networking = {
         hostName = hostname;
         networkmanager = {
-          enable = true;
+          enable = lib.mkDefault true;
           settings.connectivity = {
             enabled = true;
             uri = "http://nmcheck.gnome.org/check_network_status.txt";

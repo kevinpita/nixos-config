@@ -1,7 +1,7 @@
 { config, ... }:
 {
   flake.modules.nixos."hosts/fium" =
-    { lib, ... }:
+    { ... }:
     {
       imports = [
         ../../hosts/fium/disko-config.nix
@@ -20,13 +20,9 @@
         tailscaleIPv4 = "100.85.41.60";
       };
 
-      boot.loader = {
-        efi.canTouchEfiVariables = lib.mkForce false;
-        grub = {
-          efiSupport = lib.mkForce false;
-          devices = lib.mkForce [ "/dev/disk/by-id/ata-SanDisk_SDSSDH3_500G_2105F6451107" ];
-          theme = lib.mkForce null;
-        };
+      boot.loader.grub = {
+        efiSupport = false;
+        theme = null;
       };
 
       services.openssh = {
@@ -61,7 +57,7 @@
       };
       networking = {
         hostId = "44dc8051";
-        networkmanager.enable = lib.mkForce false;
+        networkmanager.enable = false;
         useDHCP = false;
         interfaces.eno1.ipv4.addresses = [
           {

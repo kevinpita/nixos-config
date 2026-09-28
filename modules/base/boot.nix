@@ -3,6 +3,7 @@
     {
       config,
       inputs,
+      lib,
       pkgs,
       ...
     }:
@@ -12,14 +13,15 @@
           # Keep the menu up long enough to pick another OS on dual-boot hosts.
           # Single-boot hosts only need it for rollbacks.
           timeout = if config.boot.loader.grub.useOSProber then 5 else 1;
-          efi.canTouchEfiVariables = true;
+          efi.canTouchEfiVariables = config.boot.loader.grub.efiSupport;
           grub = {
             configurationLimit = 5;
             default = "saved";
-            devices = [ "nodev" ];
-            efiSupport = true;
+            # BIOS hosts get their disk from disko's EF02 partition.
+            devices = lib.mkIf config.boot.loader.grub.efiSupport [ "nodev" ];
+            efiSupport = lib.mkDefault true;
             enable = true;
-            theme = inputs.nixos-grub-themes.packages.${pkgs.stdenv.hostPlatform.system}.nixos;
+            theme = lib.mkDefault inputs.nixos-grub-themes.packages.${pkgs.stdenv.hostPlatform.system}.nixos;
           };
         };
       };
