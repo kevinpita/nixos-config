@@ -1,14 +1,22 @@
-{ config, lib, ... }:
+{ config, ... }:
 let
-  monitoredHosts = lib.filterAttrs (
-    _: host: host.config.services.prometheus.exporters.node.enable
-  ) config.flake.nixosConfigurations;
-  zfsHosts = lib.filterAttrs (
-    _: host: host.config.services.prometheus.exporters.zfs.enable
-  ) config.flake.nixosConfigurations;
-  cominHosts = lib.filterAttrs (
-    _: host: host.config.services.comin.enable or false
-  ) config.flake.nixosConfigurations;
+  hosts = config.flake.nixosConfigurations;
+
+  # Each job scrapes every host where its exporter is enabled.
+  exporterJobs = {
+    node.exporter = host: host.services.prometheus.exporters.node;
+    zfs.exporter = host: host.services.prometheus.exporters.zfs;
+    smartctl = {
+      exporter = host: host.services.prometheus.exporters.smartctl;
+      scrape_interval = "1m";
+      scrape_timeout = "30s";
+    };
+    podman.exporter = host: host.services.podman-exporter or { enable = false; };
+    comin.exporter = host: {
+      enable = host.services.comin.enable or false;
+      inherit (host.services.comin.exporter) port;
+    };
+  };
 in
 {
   flake.modules.nixos.selfhosted =
@@ -38,59 +46,31 @@ in
           retentionTime = "30d";
           extraFlags = [ "--storage.tsdb.retention.size=5GB" ];
           globalConfig.scrape_interval = "30s";
-          scrapeConfigs = [
-            {
-              job_name = "node";
-              static_configs = lib.mapAttrsToList (_: host: {
-                targets = [
-                  "${host.config.networking.hostName}.${tailnetDomain}:${toString host.config.services.prometheus.exporters.node.port}"
+          scrapeConfigs =
+            lib.mapAttrsToList (
+              job: settings:
+              removeAttrs settings [ "exporter" ]
+              // {
+                job_name = job;
+                static_configs = lib.pipe hosts [
+                  (lib.filterAttrs (_: host: (settings.exporter host.config).enable))
+                  (lib.mapAttrsToList (
+                    _: host: {
+                      targets = [
+                        "${host.config.networking.hostName}.${tailnetDomain}:${toString (settings.exporter host.config).port}"
+                      ];
+                      labels.host = host.config.networking.hostName;
+                    }
+                  ))
                 ];
-                labels.host = host.config.networking.hostName;
-              }) monitoredHosts;
-            }
-            {
-              job_name = "zfs";
-              static_configs = lib.mapAttrsToList (_: host: {
-                targets = [
-                  "${host.config.networking.hostName}.${tailnetDomain}:${toString host.config.services.prometheus.exporters.zfs.port}"
-                ];
-                labels.host = host.config.networking.hostName;
-              }) zfsHosts;
-            }
-            {
-              job_name = "smartctl";
-              scrape_interval = "1m";
-              scrape_timeout = "30s";
-              static_configs = lib.mapAttrsToList (_: host: {
-                targets = [
-                  "${host.config.networking.hostName}.${tailnetDomain}:${toString host.config.services.prometheus.exporters.smartctl.port}"
-                ];
-                labels.host = host.config.networking.hostName;
-              }) monitoredHosts;
-            }
-            {
-              job_name = "podman";
-              static_configs = lib.mapAttrsToList (_: host: {
-                targets = [
-                  "${host.config.networking.hostName}.${tailnetDomain}:${toString host.config.services.podman-exporter.port}"
-                ];
-                labels.host = host.config.networking.hostName;
-              }) monitoredHosts;
-            }
-            {
-              job_name = "comin";
-              static_configs = lib.mapAttrsToList (_: host: {
-                targets = [
-                  "${host.config.networking.hostName}.${tailnetDomain}:${toString host.config.services.comin.exporter.port}"
-                ];
-                labels.host = host.config.networking.hostName;
-              }) cominHosts;
-            }
-            {
-              job_name = "prometheus";
-              static_configs = [ { targets = [ "127.0.0.1:${toString prometheus.port}" ]; } ];
-            }
-          ];
+              }
+            ) exporterJobs
+            ++ [
+              {
+                job_name = "prometheus";
+                static_configs = [ { targets = [ "127.0.0.1:${toString prometheus.port}" ]; } ];
+              }
+            ];
         };
 
         services.grafana = {
