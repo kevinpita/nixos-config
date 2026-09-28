@@ -12,7 +12,7 @@
         substituteInPlace "$out/PiSessionsWidget.qml" \
           --replace-fail '@pi-session-status@' '${piSessionStatus}/bin/pi-session-status'
       '';
-      piSessionStatus = pkgs.callPackage ../../packages/pi-session-status/package.nix { };
+      piSessionStatus = pkgs.pi-session-status;
     in
     {
       programs.nixos-hyprland.dmsPlugins.piSessions = piSessionsPlugin;

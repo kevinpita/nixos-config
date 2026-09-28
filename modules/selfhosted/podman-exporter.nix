@@ -9,7 +9,7 @@
     }:
     let
       cfg = config.services.podman-exporter;
-      exporter = pkgs.callPackage ../../packages/prometheus-podman-exporter/package.nix { };
+      exporter = pkgs.prometheus-podman-exporter;
       startExporter = pkgs.writeShellApplication {
         name = "start-podman-exporter";
         runtimeInputs = [

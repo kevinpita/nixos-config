@@ -21,10 +21,10 @@
         pgbot
 
         # Blockchain nodes
-        (callPackage ../../packages/exrpd/package.nix { })
+        exrpd
 
         # Code review canvas
-        (callPackage ../../packages/whiteboard/package.nix { })
+        whiteboard
       ];
 
       # Whiteboard Desktop installs its agent CLI shim in ~/.local/bin.

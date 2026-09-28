@@ -33,7 +33,6 @@
   flake.modules.nixos.workstation =
     {
       config,
-      inputs,
       pkgs,
       ...
     }:
@@ -43,9 +42,7 @@
           enable = true;
           theme = "nixos-grub";
           themePackages = [
-            (pkgs.callPackage ../../packages/plymouth-nixos-grub/package.nix {
-              grubTheme = inputs.nixos-grub-themes.packages.${pkgs.stdenv.hostPlatform.system}.nixos;
-            })
+            pkgs.plymouth-nixos-grub
           ];
           font = "${pkgs.ubuntu-classic}/share/fonts/truetype/ubuntu/Ubuntu-R.ttf";
         };

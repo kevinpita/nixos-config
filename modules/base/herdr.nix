@@ -8,7 +8,7 @@
       ...
     }:
     let
-      autoTitle = pkgs.callPackage ../../packages/herdr-auto-title/package.nix { };
+      autoTitle = pkgs.herdr-auto-title;
 
       startAutoTitle = pkgs.writeShellScript "herdr-start-auto-title" ''
         export XDG_RUNTIME_DIR="''${XDG_RUNTIME_DIR:-/run/user/$UID}"

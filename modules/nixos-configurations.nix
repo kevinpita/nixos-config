@@ -30,6 +30,8 @@ let
     inputs.tuicr-nix.overlays.default
 
     inputs.ink-nix.overlays.default
+
+    config.flake.overlays.default
   ];
 
   pkgs = import inputs.nixpkgs {
