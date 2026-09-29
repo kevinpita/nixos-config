@@ -97,7 +97,6 @@
           # Web browsers
           brave
           chromium
-          firefox
           google-chrome
         ];
 
