@@ -1,0 +1,177 @@
+diff --git a/docs/next/website/src/data/config-reference.json b/docs/next/website/src/data/config-reference.json
+index 36afe33..51b3056 100644
+--- a/docs/next/website/src/data/config-reference.json
++++ b/docs/next/website/src/data/config-reference.json
+@@ -905,6 +905,12 @@
+           "default": "true",
+           "description": "Automatically copy text selected by mouse drag or double-click. When disabled, Ctrl+C or a host-forwarded Cmd+C copies and clears the retained selection."
+         },
++        {
++          "key": "ui.focus_follows_mouse",
++          "type": "boolean",
++          "default": "false",
++          "description": "Focus the pane under the mouse pointer when it moves, like a tiling window manager."
++        },
+         {
+           "key": "ui.host_cursor",
+           "type": "enum",
+diff --git a/src/client/shell/config.rs b/src/client/shell/config.rs
+index 2d16b00..45b57d4 100644
+--- a/src/client/shell/config.rs
++++ b/src/client/shell/config.rs
+@@ -130,6 +130,7 @@ impl ClientShellConfig {
+             toast_delay_seconds: config.ui.toast.delay_seconds,
+             toast_position: config.ui.toast.herdr.position,
+             copy_on_select: config.ui.copy_on_select,
++            focus_follows_mouse: config.ui.focus_follows_mouse,
+             clipboard_toast_enabled: config.ui.toast.clipboard.enabled,
+             clipboard_toast_position: config.ui.toast.clipboard.position,
+             theme_name: theme_runtime.manual_name.clone(),
+@@ -332,6 +333,7 @@ impl ClientShellConfig {
+                 self.toast_delay_seconds = ui.toast.delay_seconds;
+                 self.toast_position = ui.toast.herdr.position;
+                 self.copy_on_select = ui.copy_on_select;
++                self.focus_follows_mouse = ui.focus_follows_mouse;
+                 self.clipboard_toast_enabled = ui.toast.clipboard.enabled;
+                 self.clipboard_toast_position = ui.toast.clipboard.position;
+                 self.prompt_new_tab_name = ui.prompt_new_tab_name;
+diff --git a/src/client/shell/mouse.rs b/src/client/shell/mouse.rs
+index 0b9326d..e3258e1 100644
+--- a/src/client/shell/mouse.rs
++++ b/src/client/shell/mouse.rs
+@@ -2250,6 +2250,24 @@ impl ClientShellState {
+             MouseEventKind::Up(MouseButton::Left | MouseButton::Middle)
+             | MouseEventKind::Drag(MouseButton::Left | MouseButton::Middle) => {}
+             MouseEventKind::Moved => {
++                if self.config.focus_follows_mouse {
++                    if let Some(hit) = self
++                        .hits
++                        .panes
++                        .iter()
++                        .find(|hit| super::contains(hit.rect, point))
++                    {
++                        if self.focused_pane_id().as_deref() != Some(hit.pane_id.as_str()) {
++                            let pane_id = hit.pane_id.clone();
++                            self.push_endpoint_method(
++                                crate::api::schema::Method::PaneFocus(
++                                    crate::api::schema::PaneTarget { pane_id },
++                                ),
++                                outcome,
++                            );
++                        }
++                    }
++                }
+                 if let Some(hit) = self
+                     .hits
+                     .panes
+diff --git a/src/client/shell/state.rs b/src/client/shell/state.rs
+index 901c5a2..e740e82 100644
+--- a/src/client/shell/state.rs
++++ b/src/client/shell/state.rs
+@@ -30,6 +30,7 @@ pub(crate) struct ClientShellConfig {
+     pub(super) toast_delay_seconds: u64,
+     pub(super) toast_position: crate::config::ToastHerdrPosition,
+     pub(super) copy_on_select: bool,
++    pub(super) focus_follows_mouse: bool,
+     pub(super) clipboard_toast_enabled: bool,
+     pub(super) clipboard_toast_position: crate::config::ToastClipboardPosition,
+     pub(super) theme_name: String,
+diff --git a/src/client/shell/tests/mouse_selection.rs b/src/client/shell/tests/mouse_selection.rs
+index ae4168c..dd32d01 100644
+--- a/src/client/shell/tests/mouse_selection.rs
++++ b/src/client/shell/tests/mouse_selection.rs
+@@ -1159,3 +1159,39 @@ fn context_menu_keyboard_and_outside_click_are_client_owned() {
+     assert!(outside.repaint);
+     assert!(state.overlay.is_none());
+ }
++
++fn hover_actions(focus_follows_mouse: bool, focused_pane_id: &str) -> Vec<ClientShellAction> {
++    let mut config = Config::default();
++    config.ui.focus_follows_mouse = focus_follows_mouse;
++    let mut state = ClientShellState::new(ClientShellConfig::from_config(&config));
++    let mut snapshot = snapshot();
++    snapshot.focused_pane_id = Some(focused_pane_id.into());
++    state.set_snapshot(Box::new(snapshot));
++    state.set_pane_surface(surface());
++    state.compose(106, 20).expect("pane frame");
++    let pane = state.hits.panes[0].clone();
++    state
++        .handle_raw_events(vec![RawInputEvent::Mouse(MouseEvent {
++            kind: MouseEventKind::Moved,
++            column: pane.inner_rect.x + 1,
++            row: pane.inner_rect.y,
++            modifiers: KeyModifiers::empty(),
++        })])
++        .actions
++}
++
++#[test]
++fn focus_follows_mouse_focuses_hovered_pane() {
++    assert!(matches!(
++        &hover_actions(true, "pane_2")[..],
++        [ClientShellAction::Endpoint { request, .. }]
++            if matches!(&request.method,
++                crate::api::schema::Method::PaneFocus(target) if target.pane_id == "pane_1")
++    ));
++}
++
++#[test]
++fn focus_follows_mouse_skips_focused_pane_and_is_off_by_default() {
++    assert!(hover_actions(true, "pane_1").is_empty());
++    assert!(hover_actions(false, "pane_2").is_empty());
++}
+diff --git a/src/config/model.rs b/src/config/model.rs
+index 6ef6274..b7ca047 100644
+--- a/src/config/model.rs
++++ b/src/config/model.rs
+@@ -916,6 +916,8 @@ pub struct UiConfig {
+     pub mouse_capture: bool,
+     /// Copy text selected with the mouse. Default: true.
+     pub copy_on_select: bool,
++    /// Focus the pane under the mouse pointer when it moves. Default: false.
++    pub focus_follows_mouse: bool,
+     /// Host cursor policy. Default: auto.
+     pub host_cursor: HostCursorModeConfig,
+     /// Modifier that lets right-click gestures pass through to pane apps. Empty disables it.
+@@ -1166,6 +1168,7 @@ impl Default for UiConfig {
+             mobile_width_threshold: DEFAULT_MOBILE_WIDTH_THRESHOLD,
+             mouse_capture: true,
+             copy_on_select: true,
++            focus_follows_mouse: false,
+             host_cursor: HostCursorModeConfig::Auto,
+             right_click_passthrough_modifier: RightClickPassthroughModifierConfig::default(),
+             redraw_on_focus_gained: true,
+@@ -1715,6 +1718,19 @@ copy_on_select = false
+         assert!(!config.ui.copy_on_select);
+     }
+ 
++    #[test]
++    fn focus_follows_mouse_default_off_and_parse() {
++        let default_config = Config::default();
++        assert!(!default_config.ui.focus_follows_mouse);
++
++        let toml = r#"
++[ui]
++focus_follows_mouse = true
++"#;
++        let config: Config = toml::from_str(toml).unwrap();
++        assert!(config.ui.focus_follows_mouse);
++    }
++
+     #[test]
+     fn right_click_passthrough_modifier_defaults_off_and_parses() {
+         let default_config = Config::default();
+diff --git a/src/main.rs b/src/main.rs
+index 8cfe9b0..2e28aac 100644
+--- a/src/main.rs
++++ b/src/main.rs
+@@ -258,6 +258,9 @@ const DEFAULT_CONFIG: &str = r##"# herdr configuration
+ # or Cmd+C when the host forwards it, copies and clears it.
+ # copy_on_select = true
+ 
++# Focus the pane under the mouse pointer when it moves, like a tiling window manager.
++# focus_follows_mouse = false
++
+ # Host cursor policy: "auto", "native", or "drawn".
+ # "auto" draws Herdr's own cursor on native Windows builds and WSL to avoid ConPTY cursor flicker, and uses the native terminal cursor elsewhere.
+ # "native" always uses the outer terminal cursor. "drawn" always draws Herdr's cursor as terminal cell content.

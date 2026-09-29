@@ -107,7 +107,10 @@
 
         programs.herdr = {
           enable = true;
-          package = pkgs.herdr;
+          # Adds ui.focus_follows_mouse; drop once herdr ships it upstream.
+          package = pkgs.herdr.overrideAttrs (old: {
+            patches = (old.patches or [ ]) ++ [ ./herdr-focus-follows-mouse.patch ];
+          });
           extraPackages = with pkgs; [
             fzf
             git
@@ -122,6 +125,7 @@
           settings = {
             theme.name = "dracula";
             ui = {
+              focus_follows_mouse = true;
               show_agent_labels_on_pane_borders = true;
               sound.enabled = false;
             };
