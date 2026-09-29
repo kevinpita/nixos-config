@@ -106,6 +106,13 @@ hl.bind(mainMod .. " + M", function()
         hl.dispatch(hl.dsp.exec_cmd("uwsm app -- sone"))
     end
 end)
+hl.bind(mainMod .. " + N", function()
+    if hl.get_window("class:^(heynote|Heynote)$") then
+        hl.dispatch(hl.dsp.workspace.toggle_special("notes"))
+    else
+        hl.dispatch(hl.dsp.exec_cmd("uwsm app -- heynote"))
+    end
+end)
 hl.bind(mainMod .. " + O", focus_or_launch("class:^(obsidian)$", "uwsm app -- obsidian"))
 hl.bind(mainMod .. " + S", focus_or_launch("class:^(slack|Slack)$", "uwsm app -- slack"))
 hl.bind(mainMod .. " + T", focus_or_launch("class:^(org.telegram.desktop|TelegramDesktop)$", "uwsm app -- Telegram"))
@@ -114,7 +121,7 @@ hl.bind(mainMod .. " + Q", hl.dsp.window.close())
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen({ mode = "fullscreen", action = "toggle" }))
 hl.bind(mainMod .. " + SHIFT + Space", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + L", hl.dsp.exec_cmd(dms .. "lock lock"))
-hl.bind(mainMod .. " + N", hl.dsp.exec_cmd(dms .. "notifications toggle"))
+hl.bind(mainMod .. " + SHIFT + N", hl.dsp.exec_cmd(dms .. "notifications toggle"))
 hl.bind(mainMod .. " + V", hl.dsp.exec_cmd(dms .. "clipboard toggle"))
 hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("omasnap"))
 
@@ -274,6 +281,15 @@ hl.window_rule({
     name = "sone-scratchpad",
     match = { class = "^(sone)$" },
     workspace = "special:music",
+    float = true,
+    size = "monitor_w*0.75 monitor_h*0.75",
+    center = true,
+})
+
+hl.window_rule({
+    name = "heynote-scratchpad",
+    match = { class = "^(heynote|Heynote)$" },
+    workspace = "special:notes",
     float = true,
     size = "monitor_w*0.75 monitor_h*0.75",
     center = true,
