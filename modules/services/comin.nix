@@ -30,6 +30,16 @@
             branches.main.name = "main";
           }
         ];
+        # Deploy only commits signed by a key registered on the GitHub account.
+        sshAllowedSignersPath = toString (
+          pkgs.writeText "comin-allowed-signers" ''
+            gitkevin@pm.me ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBX+ddd0ggth5BzrXK0txLvhv5CJ/YmEoIKTxMMu0UPl
+            gitkevin@pm.me ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICmyCKJkx6origo1A7JAEy8KSEqnDf2F8bMICLf2khIK
+            gitkevin@pm.me ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDfbHR9tJn6nhBhWadyR5U8wNIOxmgz8ZyN07FUvXpvF
+            gitkevin@pm.me ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICu5mC/cYIUBzI38YXIb8GNTQo1maEHGJEEbdthkVngT
+            gitkevin@pm.me ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPnec7ynN2CfIXOy8cfeRt6j2ICZtxPwel6btoQ9nZo4
+          ''
+        );
       };
 
       # Persist the timestamp across Comin restarts and export it through node-exporter.
