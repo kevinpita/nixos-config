@@ -83,14 +83,6 @@
             ".pi/agent/extensions/pi-fast".source = extensions + "/pi-fast";
             ".pi/agent/extensions/session-status".source = extensions + "/session-status";
             ".pi/agent/extensions/split-session".source = extensions + "/split-session";
-            ".pi/agent/extensions/web-workflows.ts".source =
-              pkgs.replaceVars ../pi/extensions/web-workflows.ts
-                {
-                  patch = "${pkgs.gnupatch}/bin/patch";
-                  workflowPatch = ../pi/dynamic-workflows/inherit-web-tools.patch;
-                  webTools = ../pi/dynamic-workflows/web-tools.js;
-                  webToolsTypes = ../pi/dynamic-workflows/web-tools.d.ts;
-                };
 
             ".pi/agent/extensions/subagent/config.json" = {
               force = true;
@@ -213,11 +205,7 @@
                   "npm:pi-intercom"
                   "npm:pi-jev-context"
                   "npm:pi-schedule-prompt"
-                  # web-workflows.ts loads both factories to share the web tools.
-                  {
-                    source = "npm:pi-web-access";
-                    extensions = [ ];
-                  }
+                  "npm:pi-web-access"
                   {
                     source = "npm:pi-subagents";
                     prompts = [
@@ -230,10 +218,7 @@
                   "npm:pi-open-tui"
                   "npm:pi-simplify"
                   "npm:pi-colours"
-                  {
-                    source = "npm:@quintinshaw/pi-dynamic-workflows";
-                    extensions = [ ];
-                  }
+                  "npm:@quintinshaw/pi-dynamic-workflows"
                 ];
               };
             };

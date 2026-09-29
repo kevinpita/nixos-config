@@ -10,19 +10,15 @@ This folder owns the Pi configuration content shipped with these systems. It is 
 | `skills/` | Reusable task guidance and its supporting references. Extend the existing skill when it already owns the task. |
 | `prompts/` | Reusable prompt text for tasks the user starts explicitly |
 | `themes/` | Pi color themes. The selected theme is set in `modules/pi.nix`. |
-| `extensions/` | The local web/workflow integration bridge, not general extension development |
-| `dynamic-workflows/` | The compatibility patch and web-tool support used by that bridge |
 | `scripts/` | Session maintenance code packaged and scheduled through Nix |
 
-The skills, prompts, and themes directories are deployed as directories. Local extension files are selected explicitly in `modules/pi.nix`, so adding one here may also need a module change. Keep shared skill content here rather than duplicating it for each configured client.
+The skills, prompts, and themes directories are deployed as directories. Keep shared skill content here rather than duplicating it for each configured client.
 
 ## Configuration or extension code?
 
 Change `modules/pi.nix` for defaults, package selection, extension settings, or which files are installed. Change this folder for the content of those files. Changes to the main custom extensions belong in `~/nixos-pi`, consumed through the `pi-extensions` flake input. The `pi-flake` input provides the Pi runtime.
 
 For local extension development, override `pi-extensions` with `path:$HOME/nixos-pi` in a check or build. For normal deployment, publish the extension changes and update that flake input. A local clone alone does not change what the locked configuration installs.
-
-The workflow bridge is a deliberate local exception. Change it only for the integration between web tools and workflow agents. Its [existing guide](dynamic-workflows/README.md) explains patch application, update behavior, and what needs verification after an upstream change.
 
 ## Applying changes
 
