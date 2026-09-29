@@ -99,8 +99,15 @@ hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd("uwsm app -- ghostty"))
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd("uwsm app -- brave"))
 hl.bind(mainMod .. " + C", hl.dsp.exec_cmd("uwsm app -- google-chrome-stable --new-window about:blank"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd("uwsm app -- nautilus --new-window"))
-hl.bind(mainMod .. " + M", focus_or_launch("class:^(com.mitchellh.ghostty.minidesk)$", "uwsm app -- ghostty --class=com.mitchellh.ghostty.minidesk -e herdr-minidesk"))
-hl.bind(mainMod .. " + S", focus_or_launch("class:^(Slack)$", "uwsm app -- slack"))
+hl.bind(mainMod .. " + M", function()
+    if hl.get_window("class:^(sone)$") then
+        hl.dispatch(hl.dsp.workspace.toggle_special("music"))
+    else
+        hl.dispatch(hl.dsp.exec_cmd("uwsm app -- sone"))
+    end
+end)
+hl.bind(mainMod .. " + O", focus_or_launch("class:^(obsidian)$", "uwsm app -- obsidian"))
+hl.bind(mainMod .. " + S", focus_or_launch("class:^(slack|Slack)$", "uwsm app -- slack"))
 hl.bind(mainMod .. " + T", focus_or_launch("class:^(org.telegram.desktop|TelegramDesktop)$", "uwsm app -- Telegram"))
 hl.bind(mainMod .. " + Space", hl.dsp.exec_cmd("omasnap"))
 hl.bind(mainMod .. " + Q", hl.dsp.window.close())
@@ -262,6 +269,15 @@ hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
 hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
 hl.bind("Print", hl.dsp.exec_cmd("omasnap"))
+
+hl.window_rule({
+    name = "sone-scratchpad",
+    match = { class = "^(sone)$" },
+    workspace = "special:music",
+    float = true,
+    size = "monitor_w*0.75 monitor_h*0.75",
+    center = true,
+})
 
 hl.layer_rule({
     match = { namespace = "^omasnap$" },
