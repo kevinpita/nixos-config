@@ -59,6 +59,13 @@
           platforms = lib.platforms.linux;
         };
       };
+      sharePicker = pkgs.hyprland-preview-share-picker.overrideAttrs (old: {
+        # Window captures are already upright, so rotating them by the monitor transform turns windows on rotated monitors sideways.
+        postPatch = (old.postPatch or "") + ''
+          substituteInPlace src/views/windows.rs \
+            --replace-fail "img = img.transform(transform.into());" ""
+        '';
+      });
       superDoubleTap = pkgs.writeShellApplication {
         name = "super-double-tap";
         runtimeInputs = with pkgs; [
@@ -219,6 +226,104 @@
                 config.lib.file.mkOutOfStoreSymlink "${cfg.configDirectory}/settings.json";
               "DankMaterialShell/.firstlaunch".text = "";
               "DankMaterialShell/.changelog-1.5".text = "";
+              "hypr/xdph.conf".text = ''
+                screencopy {
+                  allow_token_by_default = true
+                  cursor_mode = 2
+                  custom_picker_binary = ${lib.getExe sharePicker}
+                }
+              '';
+              "hyprland-preview-share-picker/config.yaml".text = ''
+                stylesheets: [style.css]
+                default_page: outputs
+                hide_token_restore: true
+                window:
+                  width: 1000
+                  height: 560
+                image:
+                  widget_size: 190
+                windows:
+                  clicks: 1
+                  min_per_row: 4
+                  max_per_row: 4
+                  spacing: 12
+                outputs:
+                  clicks: 1
+                  spacing: 12
+                  show_label: true
+                region:
+                  command: ${lib.getExe pkgs.slurp} -f '%o@%x,%y,%w,%h'
+              '';
+              "hyprland-preview-share-picker/style.css".text = ''
+                * {
+                  font-family: Inter, sans-serif;
+                  color: #cdd6f4;
+                }
+                .window {
+                  background: #1e1e2e;
+                  border: 1px solid #45475a;
+                  border-radius: 16px;
+                }
+                .window * {
+                  background: none;
+                  border-color: transparent;
+                  box-shadow: none;
+                }
+                .notebook > header {
+                  padding: 12px 12px 0;
+                }
+                .page {
+                  padding: 16px;
+                }
+                flowboxchild, flowboxchild:focus, .card:focus {
+                  outline: none;
+                  padding: 0;
+                }
+                .notebook > header tab {
+                  padding: 6px 16px;
+                  border-radius: 999px;
+                  border: none;
+                  box-shadow: none;
+                }
+                .notebook > header tab:checked {
+                  background: #313244;
+                }
+                .tab-label {
+                  font-weight: 600;
+                }
+                .card {
+                  padding: 10px;
+                  border-radius: 12px;
+                  background: #181825;
+                  border: 2px solid transparent;
+                  transition: all 120ms ease;
+                }
+                .card:hover {
+                  background: #313244;
+                  border-color: #cba6f7;
+                }
+                .card-loading {
+                  opacity: 0.5;
+                }
+                .image {
+                  border-radius: 8px;
+                }
+                .image-label {
+                  margin-top: 8px;
+                  font-size: 13px;
+                  color: #bac2de;
+                }
+                .region-button {
+                  margin: 24px;
+                  padding: 12px 24px;
+                  border-radius: 12px;
+                  background: #313244;
+                  border: none;
+                }
+                .region-button:hover {
+                  background: #45475a;
+                }
+              '';
             };
           };
       };
