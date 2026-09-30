@@ -7,7 +7,8 @@
         codex
       ];
 
-      home-manager.users.${username}.programs.zsh.shellAliases.codex = "codex --approve-for-me";
+      home-manager.users.${username}.programs.zsh.shellAliases.codex =
+        "codex --dangerously-bypass-approvals-and-sandbox";
     };
 
 }
