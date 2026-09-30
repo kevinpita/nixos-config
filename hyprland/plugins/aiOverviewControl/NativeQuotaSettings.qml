@@ -18,8 +18,8 @@ PluginSettings {
         settingKey: "providerSelection"
         label: "Tracked providers"
         description: "Comma-separated provider IDs. The popout shows every provider in this list."
-        placeholder: "codex,claude,kimi"
-        defaultValue: "codex,claude,kimi"
+        placeholder: "codex,claude,zai"
+        defaultValue: "codex,claude,zai"
     }
 
     StringSetting {

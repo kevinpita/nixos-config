@@ -1,9 +1,6 @@
 {
   flake.modules.nixos.hyprland =
     {
-      ciMode,
-      config,
-      lib,
       pkgs,
       username,
       ...
@@ -21,6 +18,7 @@
         chmod -R u+w "$out"
         cp ${../../hyprland/plugins/aiOverviewControl/NativeQuotaWidget.qml} "$out/NativeQuotaWidget.qml"
         cp ${../../hyprland/plugins/aiOverviewControl/NativeQuotaSettings.qml} "$out/NativeQuotaSettings.qml"
+        install -m 0755 ${../../hyprland/plugins/aiOverviewControl/get-zcode-usage} "$out/providers/get-zcode-usage"
         substituteInPlace "$out/plugin.json" \
           --replace-fail '"component": "./AiOverviewControlWidget.qml"' '"component": "./NativeQuotaWidget.qml"' \
           --replace-fail '"settings": "./AiOverviewControlSettings.qml"' '"settings": "./NativeQuotaSettings.qml"'
@@ -29,29 +27,18 @@
     {
       programs.nixos-hyprland.dmsPlugins.aiOverviewControl = aiOverviewControl;
 
-      sops = lib.mkIf (!ciMode) {
-        secrets.kimi = { };
-        templates."ai-quotas.env" = {
-          owner = username;
-          content = "KIMI_API_KEY=${config.sops.placeholder.kimi}\n";
-        };
-      };
-
       home-manager.users.${username} = {
         home.packages = with pkgs; [
           bash
           curl
           jq
+          nodejs
         ];
 
         xdg.configFile."DankMaterialShell/plugins/aiOverviewControl" = {
           recursive = true;
           force = true;
         };
-
-        systemd.user.services.dms.Service.EnvironmentFile = lib.mkIf (
-          !ciMode
-        ) config.sops.templates."ai-quotas.env".path;
       };
     };
 }

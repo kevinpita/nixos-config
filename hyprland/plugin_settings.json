@@ -1,9 +1,9 @@
 {
   "aiOverviewControl": {
     "enabled": true,
-    "providerSelection": "codex,claude,kimi",
+    "providerSelection": "codex,claude,zai",
     "pillMode": "top",
-    "barWindowOverrides": "codex:highest,claude:highest,kimi:highest",
+    "barWindowOverrides": "codex:highest,claude:highest,zai:highest",
     "densityMode": "compact",
     "pillProviders": "codex"
   },

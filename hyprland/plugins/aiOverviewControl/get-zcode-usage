@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# Feeds the upstream quota collector the Z.AI coding-plan key that zcode keeps
+# in its local credential store. zcode encrypts
+# ~/.zcode/v2/credentials.json at rest with a key derived from the OS user, so
+# the API key is recovered in memory on each fetch and never stored elsewhere.
+# Mirrors zcode's adapters/src/auth/credential-cipher.ts.
+set -uo pipefail
+
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+upstream="$script_dir/get-provider-usage"
+credentials_file="${ZCODE_CREDENTIALS_FILE:-$HOME/.zcode/v2/credentials.json}"
+
+zai_key=""
+if command -v node >/dev/null 2>&1 && [ -f "$credentials_file" ]; then
+    zai_key="$(
+        ZCODE_CREDENTIALS_FILE="$credentials_file" node <<'EOF'
+const { createDecipheriv, createHash } = require("node:crypto");
+const { homedir, platform, userInfo } = require("node:os");
+const fs = require("node:fs");
+
+const credentials = JSON.parse(
+    fs.readFileSync(process.env.ZCODE_CREDENTIALS_FILE, "utf-8"),
+);
+const entry = Object.keys(credentials)
+    .filter(
+        (name) =>
+            /^account-provider:coding-plan:.*:api-key$/.test(name) &&
+            name.includes("zai"),
+    )
+    .pop();
+const value = entry && credentials[entry];
+if (typeof value !== "string" || !value.startsWith("enc:v1:")) {
+    process.exit(0);
+}
+
+const secret =
+    process.env.ZCODE_CREDENTIAL_SECRET?.trim() ||
+    `zcode-credential-fallback:${platform()}:${homedir()}:${userInfo().username}`;
+const [iv, tag, cipher] = value.slice("enc:v1:".length).split(".");
+const decipher = createDecipheriv(
+    "aes-256-gcm",
+    createHash("sha256").update(secret).digest(),
+    Buffer.from(iv, "base64url"),
+);
+decipher.setAuthTag(Buffer.from(tag, "base64url"));
+process.stdout.write(
+    Buffer.concat([
+        decipher.update(Buffer.from(cipher, "base64url")),
+        decipher.final(),
+    ]),
+);
+EOF
+    )" || zai_key=""
+fi
+
+if [ -n "$zai_key" ]; then
+    export ZAI_API_KEY="$zai_key"
+fi
+exec bash "$upstream" "$@"

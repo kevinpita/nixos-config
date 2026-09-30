@@ -21,7 +21,7 @@ PluginComponent {
     property string lastUpdated: ""
     property int clockTick: 0
 
-    readonly property string providerSelection: String(pluginData.providerSelection || "codex,claude,kimi")
+    readonly property string providerSelection: String(pluginData.providerSelection || "codex,claude,zai")
     readonly property var selectedProviderIds: {
         const selected = parseCsv(providerSelection);
         return selected.length > 0 ? selected : ["codex"];
@@ -38,7 +38,7 @@ PluginComponent {
         const value = parseInt(pluginData.refreshInterval || "120000");
         return Number.isFinite(value) && value >= 30000 ? value : 120000;
     }
-    readonly property string providerUsageScript: pluginDirectory + "/providers/get-provider-usage"
+    readonly property string providerUsageScript: pluginDirectory + "/providers/get-zcode-usage"
     readonly property string copilotUsageScript: pluginDirectory + "/providers/get-copilot-usage"
     readonly property var successfulProviders: providers.filter(provider => provider && provider.usage && !provider.error)
     readonly property var orderedProviders: selectedProviderIds.map(providerId => providerById(providerId) || ({
@@ -74,14 +74,13 @@ PluginComponent {
             codex: "Codex",
             claude: "Claude",
             copilot: "Copilot",
-            kimi: "Kimi",
             gemini: "Gemini",
             cursor: "Cursor",
             openrouter: "OpenRouter",
             deepseek: "DeepSeek",
             opencode: "OpenCode",
             xai: "xAI",
-            zai: "Z.AI"
+            zai: "zcode"
         };
         const name = names[providerId];
         if (name) {
@@ -318,7 +317,7 @@ PluginComponent {
 
     Process {
         id: collectorCheck
-        command: ["sh", "-c", "[ -x \"$1\" ] && command -v bash >/dev/null && command -v jq >/dev/null && command -v curl >/dev/null", "sh", root.providerUsageScript]
+        command: ["sh", "-c", "[ -x \"$1\" ] && command -v bash >/dev/null && command -v jq >/dev/null && command -v curl >/dev/null && command -v node >/dev/null", "sh", root.providerUsageScript]
         onExited: exitCode => {
             root.binaryReady = exitCode === 0;
             if (root.binaryReady) {
