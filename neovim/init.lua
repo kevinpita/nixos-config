@@ -49,6 +49,12 @@ vim.o.timeoutlen = 300
 vim.o.completeopt = "menu,preview,noselect"
 vim.o.termguicolors = true
 
+-- Set fold defaults before file loading. Enabling them in FileType can leave
+-- Neovim's fold cache uninitialized until J parses a partly joined buffer.
+vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+vim.o.foldmethod = "expr"
+vim.o.foldlevel = 99
+
 if vim.env.HERDR_ENV == "1" and not vim.env.WAYLAND_DISPLAY and not vim.env.DISPLAY then
   local osc52 = require("vim.ui.clipboard.osc52")
   local function paste_from_unnamed_register()
@@ -174,9 +180,6 @@ nixInfo.lze.load({
           return false
         end
         vim.treesitter.start(buf, lang)
-        vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
-        vim.wo.foldmethod = "expr"
-        vim.o.foldlevel = 99
         vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
         return true
       end
