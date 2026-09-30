@@ -11,6 +11,7 @@
       final.callPackage ../packages/prometheus-podman-exporter/package.nix
         { };
     whiteboard = final.callPackage ../packages/whiteboard/package.nix { };
+    zcode = final.callPackage ../packages/zcode/package.nix { };
   };
 
   perSystem =
