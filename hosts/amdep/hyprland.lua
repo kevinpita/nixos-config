@@ -1,6 +1,9 @@
 local mainMonitor = "desc:ASUSTek COMPUTER INC VG27A M5LMQS167257"
 local secondaryMonitor = "desc:ASUSTek COMPUTER INC VG27A M5LMQS167247"
 
+-- Keep workspace banks stable when Hyprland assigns new monitor IDs after reconnecting a screen.
+workspaceMonitorBanks = { ["DP-1"] = 0, ["DP-2"] = 1 }
+
 hl.monitor({
     output = "",
     mode = "preferred",

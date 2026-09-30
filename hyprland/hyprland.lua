@@ -60,14 +60,15 @@ hl.gesture({
 local workspaceCount = 10
 local workspacesPerMonitor = 5
 
-local function workspace_id(monitor_id, slot)
-    return monitor_id * workspacesPerMonitor + slot
+local function workspace_id(monitor, slot)
+    local bank = workspaceMonitorBanks and workspaceMonitorBanks[monitor.name] or monitor.id
+    return bank * workspacesPerMonitor + slot
 end
 
 local function configure_monitor_workspaces(monitor)
     for slot = 1, workspacesPerMonitor do
         hl.workspace_rule({
-            workspace = tostring(workspace_id(monitor.id, slot)),
+            workspace = tostring(workspace_id(monitor, slot)),
             monitor = monitor.name,
             persistent = true,
             default = slot == 1,
@@ -191,18 +192,18 @@ local function drag_workspace(target_id)
     hl.dispatch(hl.dsp.focus({ workspace = target_id }))
 end
 
-local function monitor_workspace_ids(monitor_id)
+local function monitor_workspace_ids(monitor)
     local workspace_ids = {}
-    local first_workspace_id = workspace_id(monitor_id, 1)
-    local last_workspace_id = workspace_id(monitor_id, workspacesPerMonitor)
+    local first_workspace_id = workspace_id(monitor, 1)
+    local last_workspace_id = workspace_id(monitor, workspacesPerMonitor)
     for _, workspace in ipairs(hl.get_workspaces()) do
-        local monitor = workspace.monitor
+        local workspace_monitor = workspace.monitor
         if
             not workspace.special
             and workspace.id >= first_workspace_id
             and workspace.id <= last_workspace_id
-            and monitor
-            and monitor.id == monitor_id
+            and workspace_monitor
+            and workspace_monitor.id == monitor.id
         then
             table.insert(workspace_ids, workspace.id)
         end
@@ -222,8 +223,7 @@ local function adjacent_workspace(offset)
         and current.id == workspaceDrag.target_id
         and current_monitor.id == workspaceDrag.monitor_id
     local current_id = drag_is_active and workspaceDrag.target_id or current.id
-    local monitor_id = drag_is_active and workspaceDrag.monitor_id or current_monitor.id
-    local workspace_ids = monitor_workspace_ids(monitor_id)
+    local workspace_ids = monitor_workspace_ids(current_monitor)
 
     for index, workspace_id in ipairs(workspace_ids) do
         if workspace_id == current_id then
