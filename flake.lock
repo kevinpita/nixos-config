@@ -431,11 +431,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790885389,
-        "narHash": "sha256-VVcLR3YAQKulWfjGPyi54itTm5ZeozgE1kaEYIC6Te4=",
+        "lastModified": 1790890133,
+        "narHash": "sha256-DNgg04fRMvMtKIngvV4okcSvcmMWXEbAeuvsFemBkFI=",
         "owner": "kevinpita",
         "repo": "ilofan",
-        "rev": "3efad9eb6d84fce77c08fea4c8d0275439a33282",
+        "rev": "071b639dc93ca38e9385e778aeb3a1532d8738af",
         "type": "github"
       },
       "original": {
