@@ -166,7 +166,9 @@
         inherit (rule) annotations labels;
         inherit (rule) for;
         noDataState = "OK";
-        execErrState = "Error";
+        # Evaluation failures are monitoring errors, not evidence of a host fault.
+        # Preserve existing alerts until a successful evaluation updates them.
+        execErrState = "KeepLast";
         data = [
           {
             refId = "A";
