@@ -134,18 +134,6 @@
               };
             };
 
-            ".pi/agent/jev-context.json" = {
-              force = true;
-              text = builtins.toJSON {
-                enabled = false;
-                threshold = 0.8;
-                buffer = 5;
-                cache = true;
-                model = "jev-latest";
-                timeoutMs = 60000;
-              };
-            };
-
             ".pi/agent/pi-fast.json" = {
               force = true;
               text = builtins.toJSON { enabledByDefault = false; };
@@ -201,7 +189,6 @@
                   "npm:@juicesharp/rpiv-todo"
                   "npm:pi-cd"
                   "npm:pi-intercom"
-                  "npm:pi-jev-context"
                   "npm:pi-schedule-prompt"
                   "npm:pi-web-access"
                   {
