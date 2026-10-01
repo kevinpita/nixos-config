@@ -8,12 +8,6 @@
     {
       security.rtkit.enable = true;
 
-      # LE Audio (ISO sockets) so headsets like Pixel Buds Pro 2 keep music and mic on one link.
-      hardware.bluetooth.settings.General = {
-        Experimental = true;
-        KernelExperimental = true;
-      };
-
       hardware.keyboard.qmk = {
         enable = true;
         keychronSupport = true;
@@ -27,37 +21,9 @@
           alsa.support32Bit = true;
           pulse.enable = true;
           jack.enable = true;
-          # Default devices follow a fixed order instead of the last manual choice:
-          # Bluetooth headset (sink 1010, virtual source 2010) > EPOS > other ALSA devices.
-          wireplumber.extraConfig."51-default-device-order" = {
-            "wireplumber.profiles".main = {
-              "hooks.default-nodes.find-selected" = "disabled";
-              "hooks.default-nodes.state" = "disabled";
-            };
-            "monitor.alsa.rules" =
-              map
-                (rule: {
-                  matches = [ { "node.name" = rule.name; } ];
-                  actions.update-props."priority.session" = rule.priority;
-                })
-                [
-                  {
-                    name = "~alsa_output.*";
-                    priority = 500;
-                  }
-                  {
-                    name = "~alsa_input.*";
-                    priority = 1500;
-                  }
-                  {
-                    name = "~alsa_output.*EPOS.*";
-                    priority = 1000;
-                  }
-                  {
-                    name = "~alsa_input.*EPOS.*";
-                    priority = 2000;
-                  }
-                ];
+          # Keep Bluetooth headsets on A2DP when an app opens the mic.
+          wireplumber.extraConfig."51-bluetooth-a2dp"."wireplumber.settings" = {
+            "bluetooth.autoswitch-to-headset-profile" = false;
           };
         };
         xserver.xkb = {
