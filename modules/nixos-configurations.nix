@@ -19,8 +19,6 @@ let
       inherit (inputs.nixpkgs-pgbot.legacyPackages.${system}) pgbot;
     })
 
-    inputs.herdr-nix.overlays.default
-
     inputs.bast-nix.overlays.default
 
     inputs.ku-nix.overlays.default

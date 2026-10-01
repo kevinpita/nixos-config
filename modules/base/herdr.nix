@@ -107,10 +107,7 @@
 
         programs.herdr = {
           enable = true;
-          # Adds ui.focus_follows_mouse; drop once herdr ships it upstream.
-          package = pkgs.herdr.overrideAttrs (old: {
-            patches = (old.patches or [ ]) ++ [ ./herdr-focus-follows-mouse.patch ];
-          });
+          package = pkgs.herdr;
           extraPackages = with pkgs; [
             fzf
             git
