@@ -132,6 +132,11 @@
       url = "github:kevinpita/tuicr-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    ilofan = {
+      url = "github:kevinpita/ilofan";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./modules);

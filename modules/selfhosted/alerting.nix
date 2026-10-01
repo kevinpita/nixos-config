@@ -139,8 +139,48 @@
           };
         }
         {
+          alert = "IloFanControlFault";
+          expr = ''ilofan_control_fault{job="ilofan"} == 1'';
+          for = "2m";
+          labels.severity = "critical";
+          annotations = {
+            summary = "Fan control fault on {{ $labels.host }}";
+            description = "ilofan could not confirm a fan write for 2 minutes. The fans may not follow the curve. Check ilofan status.";
+          };
+        }
+        {
+          alert = "IloFanThermalDanger";
+          expr = ''ilofan_level{job="ilofan"} == 2'';
+          for = "1m";
+          labels.severity = "critical";
+          annotations = {
+            summary = "Thermal danger on {{ $labels.host }}";
+            description = "A sensor is at its danger threshold, missing, unhealthy, or unreadable. ilofan requests 100 % fans.";
+          };
+        }
+        {
+          alert = "IloFanThermalWarning";
+          expr = ''ilofan_level{job="ilofan"} == 1'';
+          for = "5m";
+          labels.severity = "warning";
+          annotations = {
+            summary = "Thermal warning on {{ $labels.host }}";
+            description = "A sensor has been above its warning threshold for 5 minutes. ilofan keeps raising the fans.";
+          };
+        }
+        {
+          alert = "IloFanReadStale";
+          expr = ''time() - ilofan_last_read_timestamp_seconds{job="ilofan"} > 120'';
+          for = "2m";
+          labels.severity = "critical";
+          annotations = {
+            summary = "No iLO sensor reads on {{ $labels.host }}";
+            description = "ilofan has not read the iLO sensors for over 2 minutes. Fan control is acting on danger defaults.";
+          };
+        }
+        {
           alert = "MonitoringExporterDown";
-          expr = ''up{job="node",host=~"${servers}"} == 0 or up{job=~"smartctl|zfs",host="${storageHost}"} == 0'';
+          expr = ''up{job="node",host=~"${servers}"} == 0 or up{job=~"smartctl|zfs|ilofan",host="${storageHost}"} == 0'';
           for = "5m";
           labels.severity = "critical";
           annotations = {

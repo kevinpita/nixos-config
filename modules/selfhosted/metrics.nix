@@ -12,6 +12,10 @@ let
       scrape_timeout = "30s";
     };
     podman.exporter = host: host.services.podman-exporter or { enable = false; };
+    ilofan.exporter = host: {
+      enable = host.services.ilofan.enable or false;
+      port = 9877;
+    };
     comin.exporter = host: {
       enable = host.services.comin.enable or false;
       inherit (host.services.comin.exporter) port;

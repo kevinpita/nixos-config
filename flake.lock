@@ -424,6 +424,26 @@
         "type": "github"
       }
     },
+    "ilofan": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790885389,
+        "narHash": "sha256-VVcLR3YAQKulWfjGPyi54itTm5ZeozgE1kaEYIC6Te4=",
+        "owner": "kevinpita",
+        "repo": "ilofan",
+        "rev": "3efad9eb6d84fce77c08fea4c8d0275439a33282",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kevinpita",
+        "repo": "ilofan",
+        "type": "github"
+      }
+    },
     "import-tree": {
       "locked": {
         "lastModified": 1788467110,
@@ -618,11 +638,11 @@
     "nixos-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1790609127,
-        "narHash": "sha256-QDJEP0iePx/n5mXCs701buiMiEThwmiNXd617SE3YaA=",
+        "lastModified": 1790885852,
+        "narHash": "sha256-GB1AMcVc6uyiNkl+a2l/zdB3gavE0Q/5juOfvgXIAtM=",
         "ref": "refs/heads/main",
-        "rev": "13c6c33d5fa94e84a06c1088c3cb5a379f5dba69",
-        "revCount": 38,
+        "rev": "ffa19cf890ff8132dc5aebd8b8595003c0524339",
+        "revCount": 39,
         "type": "git",
         "url": "ssh://git@github.com/kevinpita/nixos-secrets"
       },
@@ -854,6 +874,7 @@
         "flake-parts": "flake-parts_2",
         "herdr-nix": "herdr-nix",
         "home-manager": "home-manager_2",
+        "ilofan": "ilofan",
         "import-tree": "import-tree",
         "ink-nix": "ink-nix",
         "kevinpita-nixpkgs": "kevinpita-nixpkgs",
