@@ -23,6 +23,7 @@
             "log"
             "make"
             "nix"
+            "ocaml"
             "proto"
             "rainbow-csv"
             "solidity"
