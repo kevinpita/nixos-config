@@ -794,11 +794,11 @@
     "pi-extensions": {
       "flake": false,
       "locked": {
-        "lastModified": 1790119650,
-        "narHash": "sha256-bQy1iFftJCSVWi+iXlSwwkebll2PF4pNH/EXd8/IXLw=",
+        "lastModified": 1790937557,
+        "narHash": "sha256-tsFuT9+3i+04v/jourFVZ+UuN1tfPOy1N9NF3vFPSd4=",
         "owner": "kevinpita",
         "repo": "nixos-pi",
-        "rev": "d1cabb18d7e2b5f9d19d4746c29fb5b0c434caef",
+        "rev": "62cc118d819c74a737679514b7ed19115d87d04a",
         "type": "github"
       },
       "original": {
