@@ -143,7 +143,7 @@
               force = true;
               text = builtins.toJSON {
                 lastChangelogVersion = piPackage.version;
-                defaultProvider = "openai-codex";
+                defaultProvider = "openai";
                 defaultModel = "gpt-6.1-sol";
                 defaultThinkingLevel = "medium";
                 ayu.checkpoint.enabled = true;
