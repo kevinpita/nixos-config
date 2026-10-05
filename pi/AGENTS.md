@@ -7,6 +7,12 @@
 - Do not use em dashes.
 - Always use ASCII arrows `<-` and `->` instead of Unicode left or right-pointing arrows.
 
+## Model selection
+
+- For requests to use GLM 5.3 without an explicit variant, use the exact model ID `zai/glm-5.3` in all tool calls, workflow agents, and model settings. This includes requests written as `glm-5.3` or `glm5-3`.
+- Use `zai/glm-5.3-flash` only when the user explicitly requests the flash variant.
+- Never select `zai/glm-5.3-highspeed`. The user's subscription does not include it. Do not use a bare or fuzzy GLM model ID as a fallback.
+
 ## Subagents
 
 - Use subagents only when explicitly asked.
