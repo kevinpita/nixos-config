@@ -10,6 +10,7 @@
         config.flake.modules.nixos.desktop
         config.flake.modules.nixos.herdr-ssh-client
         config.flake.modules.nixos.qemu
+        config.flake.modules.nixos.reverse-engineering
       ];
 
       hardware.bluetooth.enable = true;

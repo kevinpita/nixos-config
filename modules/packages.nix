@@ -8,6 +8,7 @@
       patches = (old.patches or [ ]) ++ [ ./base/herdr-focus-follows-mouse.patch ];
     });
     herdr-auto-title = final.callPackage ../packages/herdr-auto-title/package.nix { };
+    mcp-reva = final.callPackage ../packages/mcp-reva/package.nix { };
     pi-session-status = final.callPackage ../packages/pi-session-status/package.nix { };
     plymouth-nixos-grub = final.callPackage ../packages/plymouth-nixos-grub/package.nix {
       grubTheme = inputs.nixos-grub-themes.packages.${final.stdenv.hostPlatform.system}.nixos;

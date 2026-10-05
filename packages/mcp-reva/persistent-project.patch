@@ -1,0 +1,31 @@
+diff -ru a/src/reva_cli/launcher.py b/src/reva_cli/launcher.py
+--- a/src/reva_cli/launcher.py	2026-10-05 16:38:00.941984339 +0200
++++ b/src/reva_cli/launcher.py	2026-10-05 16:38:07.375777120 +0200
+@@ -4,6 +4,7 @@
+ Handles PyGhidra initialization, ReVa server startup, and project management.
+ """
+ 
++import os
+ import sys
+ from typing import Optional
+ from pathlib import Path
+@@ -72,12 +73,16 @@
+ 
+             # Stdio mode: ephemeral projects in temp directory (session-scoped, auto-cleanup)
+             # Keeps working directory clean - no .reva creation in cwd
+-            self.temp_project_dir = Path(tempfile.mkdtemp(prefix="reva_project_"))
+             project_manager = ProjectManager()
+             project_name = project_manager.get_project_name()
+ 
+-            # Use temp directory for the project (not .reva/projects)
+-            projects_dir = self.temp_project_dir
++            # REVA_PROJECT_DIR selects a persistent project that is never cleaned up.
++            if os.environ.get("REVA_PROJECT_DIR"):
++                projects_dir = Path(os.environ["REVA_PROJECT_DIR"])
++                project_name = os.environ.get("REVA_PROJECT_NAME", project_name)
++            else:
++                self.temp_project_dir = Path(tempfile.mkdtemp(prefix="reva_project_"))
++                projects_dir = self.temp_project_dir
+ 
+             # Convert to Java File objects
+             java_project_location = File(str(projects_dir))
