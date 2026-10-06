@@ -4,10 +4,14 @@
     {
       environment.systemPackages = [ pkgs.tuicr ];
 
-      home-manager.users.${username}.xdg.configFile."tuicr/config.toml".text = ''
-        single_file_view = true
-        show_reviewed = false
-      '';
+      home-manager.users.${username} = {
+        programs.zsh.shellAliases.review = "tuicr";
+
+        xdg.configFile."tuicr/config.toml".text = ''
+          single_file_view = true
+          show_reviewed = false
+        '';
+      };
     };
 
   flake.modules.nixos.git =
