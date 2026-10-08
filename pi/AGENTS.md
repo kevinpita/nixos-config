@@ -23,6 +23,10 @@
 - Ask the user questions with the harness's structured question tool when one is available.
 - For long shell work, use `bash` with temporary log files.
 
+## Commits
+
+- Use Conventional Commit messages with a subject line only, no body.
+
 ## Programming instructions
 
 ### Before implementation
