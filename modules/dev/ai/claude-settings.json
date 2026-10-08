@@ -34,16 +34,9 @@
   "enabledPlugins": {
     "gopls-lsp@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true,
-    "whiteboard@devfast": true,
     "pstack@pstack-claude": true
   },
   "extraKnownMarketplaces": {
-    "devfast": {
-      "source": {
-        "source": "github",
-        "repo": "devdotfast/whiteboard"
-      }
-    },
     "pstack-claude": {
       "source": {
         "source": "github",

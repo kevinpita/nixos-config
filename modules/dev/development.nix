@@ -23,11 +23,9 @@
         # Blockchain nodes
         exrpd
 
-        # Code review canvas
-        whiteboard
       ];
 
-      # Whiteboard Desktop installs its agent CLI shim in ~/.local/bin.
+      # Desktop apps such as Orca IDE install CLI shims in ~/.local/bin.
       environment.localBinInPath = true;
 
       home-manager.users.${username} = {
