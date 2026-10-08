@@ -25,11 +25,107 @@
         ];
         text = builtins.readFile ../pi/scripts/pi-session-maintenance.sh;
       };
+      # Work AWS credentials are present in the environment, model calls must
+      # never be billed to that account through Bedrock.
+      ompProviderPolicy = (pkgs.formats.yaml { }).generate "omp-provider-policy.yml" {
+        disabledProviders = [
+          "amazon-bedrock"
+          "bedrock-mantle"
+        ];
+      };
+      # The default preset with `status` after `model`, where the
+      # provider-status extension renders the active provider id.
+      ompStatusLine = (pkgs.formats.yaml { }).generate "omp-status-line.yml" {
+        statusLine = {
+          preset = "custom";
+          leftSegments = [
+            "pi"
+            "vim"
+            "model"
+            "status"
+            "mode"
+            "collab"
+            "stream"
+            "path"
+            "git"
+            "pr"
+            "context_pct"
+            "cost"
+          ];
+          rightSegments = [ "session_name" ];
+          # Extension statuses already render in the `status` segment.
+          showHookStatus = false;
+          segmentOptions = {
+            model.showThinkingLevel = true;
+            path = {
+              abbreviate = true;
+              maxLength = 40;
+              stripWorkPrefix = true;
+            };
+            git = {
+              showBranch = true;
+              showStaged = true;
+              showUnstaged = true;
+              showUntracked = true;
+            };
+          };
+        };
+      };
+      ompBasePackage = inputs.oh-my-pi.packages.${system}.default;
+      # pstack is a Claude Code plugin; omp loads that format through
+      # --plugin-dir. Its poteto-mode scripts install commander into their own
+      # directory on first run, which a store path cannot allow, so the
+      # dependency is vendored here.
+      pstackCommander = pkgs.fetchurl {
+        url = "https://registry.npmjs.org/commander/-/commander-14.0.0.tgz";
+        hash = "sha512-2uM9rYjPvyq39NwLRqaiLtWHyDC1FvryJDa2ATTVims5YAS4PupsEQsDvP14FqhFr0P49CYDugi59xaxJlTXRA==";
+      };
+      pstackPlugin = pkgs.runCommand "pstack-plugin" { } ''
+        cp -r ${inputs.pstack}/plugins/pstack "$out"
+        chmod -R u+w "$out"
+        scripts="$out/skills/poteto-mode/scripts"
+        if ! grep -qF '"commander": ["commander@14.0.0"' "$scripts/bun.lock"; then
+          echo "pstack changed its commander version; update pstackCommander" >&2
+          exit 1
+        fi
+        mkdir -p "$scripts/node_modules/commander"
+        tar -xzf ${pstackCommander} -C "$scripts/node_modules/commander" --strip-components=1
+        # bootstrap.ts skips `bun install` when this key matches.
+        { cat "$scripts/package.json"; printf '\0'; cat "$scripts/bun.lock"; } \
+          | sha256sum | cut -d' ' -f1 > "$scripts/node_modules/.poteto-mode-tools-install-key"
+      '';
+      # PI_CONFIG_FILES layers above ~/.omp/agent/config.yml, so runtime
+      # settings edits cannot re-enable the providers or change the status line.
+      ompPackage = pkgs.symlinkJoin {
+        name = "omp-${ompBasePackage.version}";
+        paths = [ ompBasePackage ];
+        nativeBuildInputs = [ pkgs.makeWrapper ];
+        postBuild = ''
+          wrapProgram "$out/bin/omp" \
+            --prefix PI_CONFIG_FILES : ${ompProviderPolicy} \
+            --prefix PI_CONFIG_FILES : ${ompStatusLine} \
+            --add-flags "--plugin-dir ${pstackPlugin}"
+        '';
+      };
+      # pstack ships its own bro skill for Claude Code and omp.
+      skillsWithoutBro = lib.fileset.toSource {
+        root = ../pi/skills;
+        fileset = lib.fileset.difference ../pi/skills ../pi/skills/bro;
+      };
+      piDisableBedrock = ".pi/agent/extensions/disable-bedrock.ts";
     in
     {
-      imports = [ inputs.pi-flake.nixosModules.default ];
+      imports = [
+        inputs.pi-flake.nixosModules.default
+        inputs.oh-my-pi.nixosModules.default
+      ];
 
       programs.nix-ld.enable = true;
+
+      programs.omp = {
+        enable = true;
+        package = ompPackage;
+      };
 
       services.pi-coding-agent = {
         enable = true;
@@ -63,6 +159,24 @@
             ".pi/agent/skills".source = ../pi/skills;
 
             ".pi/agent/AGENTS.md".source = ../pi/AGENTS.md;
+            ".omp/agent/AGENTS.md".source = ../pi/AGENTS.md;
+            # omp has no model-change event, so poll the live model to keep
+            # the status line current after /model switches.
+            ".omp/agent/extensions/provider-status.ts".text = ''
+              export default function (pi) {
+                let shown;
+                const update = (ctx) => {
+                  const provider = ctx.models.current()?.provider;
+                  if (provider === shown) return;
+                  shown = provider;
+                  ctx.ui.setStatus("provider", provider);
+                };
+                pi.on("session_start", async (_event, ctx) => {
+                  update(ctx);
+                  ctx.setInterval(() => update(ctx), 1000);
+                });
+              }
+            '';
 
             ".config/rpiv-ask-user-question/config.json" = {
               force = true;
@@ -73,6 +187,14 @@
               force = true;
               text = builtins.toJSON { maxWidgetLines = 5; };
             };
+
+            # Pi has no provider switch; an empty model list removes every
+            # Bedrock model even when ambient AWS credentials exist.
+            ${piDisableBedrock}.text = ''
+              export default function (pi) {
+                pi.registerProvider("amazon-bedrock", { models: [] });
+              }
+            '';
 
             ".pi/agent/extensions/auto-compact.ts".source = extensions + "/auto-compact.ts";
             ".pi/agent/extensions/copy-code/index.ts".source = extensions + "/copy-code/index.ts";
@@ -158,10 +280,12 @@
                 enableSkillCommands = true;
                 theme = "pi-dark";
                 tuiMode = "regular";
-                # Children load only the web provider, not parent UI extensions
-                # such as pi-colours. Agent tool allowlists still apply.
+                # Children load only the web provider and the Bedrock block,
+                # not parent UI extensions such as pi-colours. Agent tool
+                # allowlists still apply.
                 subagents.defaultExtensions = [
                   "${config.home.homeDirectory}/.pi/agent/npm/node_modules/pi-web-access/index.ts"
+                  "${config.home.homeDirectory}/${piDisableBedrock}"
                 ];
                 subagents.agentOverrides = {
                   scout = {
@@ -216,14 +340,12 @@
               source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.pi/agent/skills";
             };
 
-            # The pstack Claude plugin ships its own bro skill.
             ".claude/skills" = {
               force = true;
-              source = lib.fileset.toSource {
-                root = ../pi/skills;
-                fileset = lib.fileset.difference ../pi/skills ../pi/skills/bro;
-              };
+              source = skillsWithoutBro;
             };
+
+            ".omp/agent/skills".source = skillsWithoutBro;
 
             ".codex/skills" = {
               force = true;

@@ -108,6 +108,16 @@
       inputs.home-manager.follows = "home-manager";
     };
 
+    oh-my-pi = {
+      url = "github:can1357/oh-my-pi";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    pstack = {
+      url = "github:michael-denyer/pstack-claude";
+      flake = false;
+    };
+
     dankcalendar = {
       url = "github:AvengeMedia/dankcalendar";
       inputs.nixpkgs.follows = "nixpkgs";

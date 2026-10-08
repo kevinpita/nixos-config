@@ -6,8 +6,8 @@ This folder owns the Pi configuration content shipped with these systems. It is 
 
 | Path | Change it for |
 | --- | --- |
-| `AGENTS.md` | Shared instructions deployed as the user's Pi instructions and global Claude Code instructions (`~/.claude/CLAUDE.md`). Project-specific rules belong in the relevant project's instruction file. |
-| `skills/` | Reusable task guidance and its supporting references. Extend the existing skill when it already owns the task. |
+| `AGENTS.md` | Shared instructions deployed as the user's Pi instructions, oh-my-pi instructions (`~/.omp/agent/AGENTS.md`), and global Claude Code instructions (`~/.claude/CLAUDE.md`). Project-specific rules belong in the relevant project's instruction file. |
+| `skills/` | Reusable task guidance and its supporting references, also deployed to oh-my-pi (`~/.omp/agent/skills`) and Claude Code. Extend the existing skill when it already owns the task. |
 | `prompts/` | Reusable prompt text for tasks the user starts explicitly |
 | `themes/` | Pi color themes. The selected theme is set in `modules/pi.nix`. |
 | `scripts/` | Session maintenance code packaged and scheduled through Nix |
@@ -16,7 +16,7 @@ The skills, prompts, and themes directories are deployed as directories. Keep sh
 
 ## Configuration or extension code?
 
-Change `modules/pi.nix` for defaults, package selection, extension settings, or which files are installed. Change this folder for the content of those files. Changes to the main custom extensions belong in `~/nixos-pi`, consumed through the `pi-extensions` flake input. The `pi-flake` input provides the Pi runtime.
+Change `modules/pi.nix` for defaults, package selection, extension settings, or which files are installed. Change this folder for the content of those files. Changes to the main custom extensions belong in `~/nixos-pi`, consumed through the `pi-extensions` flake input. The `pi-flake` input provides the Pi runtime and `oh-my-pi` provides omp. The `pstack` input pins the pstack plugin that omp loads; Claude Code installs its own copy from its marketplace.
 
 For local extension development, override `pi-extensions` with `path:$HOME/nixos-pi` in a check or build. For normal deployment, publish the extension changes and update that flake input. A local clone alone does not change what the locked configuration installs.
 
