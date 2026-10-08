@@ -33,7 +33,6 @@
   },
   "enabledPlugins": {
     "gopls-lsp@claude-plugins-official": true,
-    "superpowers@claude-plugins-official": true,
     "pstack@pstack-claude": true
   },
   "extraKnownMarketplaces": {

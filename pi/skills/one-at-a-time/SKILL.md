@@ -1,7 +1,6 @@
 ---
 name: one-at-a-time
-description: Walk through a list one point per message, waiting for my comment on each.
-disable-model-invocation: true
+description: Walk through a list one point per message, waiting for the user's comment on each. Use when the user asks to go point by point, one at a time, one by one, or to explain or review a list, plan, or set of findings step by step.
 ---
 
 Walk the user through a list one **point** per message, so they can read and comment on each before the next arrives.
