@@ -6,7 +6,7 @@ This folder owns the Pi configuration content shipped with these systems. It is 
 
 | Path | Change it for |
 | --- | --- |
-| `AGENTS.md` | Shared instructions deployed as the user's Pi instructions. Project-specific rules belong in the relevant project's instruction file. |
+| `AGENTS.md` | Shared instructions deployed as the user's Pi instructions and global Claude Code instructions (`~/.claude/CLAUDE.md`). Project-specific rules belong in the relevant project's instruction file. |
 | `skills/` | Reusable task guidance and its supporting references. Extend the existing skill when it already owns the task. |
 | `prompts/` | Reusable prompt text for tasks the user starts explicitly |
 | `themes/` | Pi color themes. The selected theme is set in `modules/pi.nix`. |

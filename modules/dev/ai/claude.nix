@@ -21,6 +21,8 @@
       home-manager.users.${username} =
         { config, lib, ... }:
         {
+          home.file.".claude/CLAUDE.md".source = ../../../pi/AGENTS.md;
+
           home.file.".claude/hooks/herdr-agent-state.sh".source =
             "${herdrClaudeIntegration}/.claude/hooks/herdr-agent-state.sh";
 
