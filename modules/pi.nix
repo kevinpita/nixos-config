@@ -96,6 +96,9 @@
       '';
       # PI_CONFIG_FILES layers above ~/.omp/agent/config.yml, so runtime
       # settings edits cannot re-enable the providers or change the status line.
+      # omp cannot see the outer terminal through herdr, so it shows image
+      # placeholders. herdr forwards Kitty graphics to Ghostty. Unicode
+      # placeholders stay off because herdr stretches them (herdr#4858).
       ompPackage = pkgs.symlinkJoin {
         name = "omp-${ompBasePackage.version}";
         paths = [ ompBasePackage ];
@@ -104,6 +107,7 @@
           wrapProgram "$out/bin/omp" \
             --prefix PI_CONFIG_FILES : ${ompProviderPolicy} \
             --prefix PI_CONFIG_FILES : ${ompStatusLine} \
+            --run 'if [ "''${TERM_PROGRAM-}" = herdr ]; then export PI_FORCE_IMAGE_PROTOCOL="''${PI_FORCE_IMAGE_PROTOCOL-kitty}" PI_KITTY_PLACEHOLDERS="''${PI_KITTY_PLACEHOLDERS-0}"; fi' \
             --add-flags "--plugin-dir ${pstackPlugin}"
         '';
       };
