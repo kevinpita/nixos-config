@@ -6,7 +6,8 @@ This folder owns the Pi configuration content shipped with these systems. It is 
 
 | Path | Change it for |
 | --- | --- |
-| `AGENTS.md` | Shared instructions deployed as the user's Pi instructions, oh-my-pi instructions (`~/.omp/agent/AGENTS.md`), and global Claude Code instructions (`~/.claude/CLAUDE.md`). Project-specific rules belong in the relevant project's instruction file. |
+| `AGENTS.md` | Harness-neutral instructions deployed to Pi (`~/.pi/agent/AGENTS.md`), oh-my-pi (`~/.omp/agent/AGENTS.md`), and Claude Code (`~/.claude/CLAUDE.md`). Keep tool and agent names out of this file. Project-specific rules belong in the relevant project's instruction file. |
+| `AGENTS.pi.md` | Pi-only instructions, such as Pi tool and subagent names. `modules/pi.nix` appends it to the shared file for Pi only. |
 | `skills/` | Reusable task guidance and its supporting references, also deployed to oh-my-pi (`~/.omp/agent/skills`) and Claude Code. Extend the existing skill when it already owns the task. |
 | `prompts/` | Reusable prompt text for tasks the user starts explicitly |
 | `themes/` | Pi color themes. The selected theme is set in `modules/pi.nix`. |

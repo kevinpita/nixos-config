@@ -1,4 +1,4 @@
-# Pi instructions
+# Agent instructions
 
 ## Writing instructions
 
@@ -16,11 +16,11 @@
 ## Subagents
 
 - Use subagents only when explicitly asked.
-- Requests for Claude to do a task mean the `claude-code` subagent, or `claude-code-writer` for file edits.
+- Call harness-specific agents only by the names that the current harness provides. If a requested agent is not available, say so. Do not substitute another harness or CLI.
 
 ## Tools
 
-- Use `ask_user_question` for user questions when available, including guidance that refers to `interview`.
+- Ask the user questions with the harness's structured question tool when one is available.
 - For long shell work, use `bash` with temporary log files.
 
 ## Programming instructions

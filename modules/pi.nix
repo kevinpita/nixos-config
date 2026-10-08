@@ -158,7 +158,8 @@
           home.file = {
             ".pi/agent/skills".source = ../pi/skills;
 
-            ".pi/agent/AGENTS.md".source = ../pi/AGENTS.md;
+            ".pi/agent/AGENTS.md".text =
+              builtins.readFile ../pi/AGENTS.md + "\n" + builtins.readFile ../pi/AGENTS.pi.md;
             ".omp/agent/AGENTS.md".source = ../pi/AGENTS.md;
             # omp has no model-change event, so poll the live model to keep
             # the status line current after /model switches.
