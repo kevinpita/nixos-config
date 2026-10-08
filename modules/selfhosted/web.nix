@@ -3,7 +3,6 @@
     {
       config,
       lib,
-      pkgs,
       ciMode,
       ...
     }:
@@ -49,18 +48,23 @@
           }
         ];
 
+        security.acme = {
+          acceptTerms = true;
+          certs.${cfg.domain} = {
+            domain = "*.${cfg.domain}";
+            dnsProvider = "cloudflare";
+            dnsResolver = "1.1.1.1:53";
+            environmentFile =
+              if ciMode then
+                "/run/secrets/rendered/acme-cloudflare.env"
+              else
+                config.sops.templates."acme-cloudflare.env".path;
+          };
+        };
+
         services.caddy = {
           enable = true;
           openFirewall = false;
-          package = pkgs.caddy.withPlugins {
-            plugins = [ "github.com/caddy-dns/cloudflare@v0.2.4" ];
-            hash = "sha256-Oirb6ZtU/c6C/SfICWpfBAEGDTepWShPQdWW0LlhF20=";
-          };
-          environmentFile =
-            if ciMode then
-              "/run/secrets/rendered/caddy-cloudflare.env"
-            else
-              config.sops.templates."caddy-cloudflare.env".path;
           globalConfig = ''
             default_bind ${cfg.tailscaleIPv4}
             auto_https disable_redirects
@@ -72,58 +76,54 @@
                 redir https://{host}{uri} permanent
               '';
             };
-            "*.${cfg.domain}".extraConfig = ''
-              tls {
-                dns cloudflare {env.CLOUDFLARE_API_TOKEN}
-                resolvers 1.1.1.1 1.0.0.1
-              }
+            "*.${cfg.domain}" = {
+              useACMEHost = cfg.domain;
+              extraConfig = ''
+                @grafana host ${grafanaDomain}
+                handle @grafana {
+                  reverse_proxy 127.0.0.1:${toString config.services.grafana.settings.server.http_port}
+                }
 
-              @grafana host ${grafanaDomain}
-              handle @grafana {
-                reverse_proxy 127.0.0.1:${toString config.services.grafana.settings.server.http_port}
-              }
-
-              @argo host ${argoDomain}
-              handle @argo {
-                @grpc header_regexp Content-Type "^application/grpc([+;]|$)"
-                reverse_proxy @grpc {
-                  dynamic a argocd-server.argocd.svc.cluster.local 80 {
-                    resolvers 10.43.0.10:53
-                    versions ipv4
+                @argo host ${argoDomain}
+                handle @argo {
+                  @grpc header_regexp Content-Type "^application/grpc([+;]|$)"
+                  reverse_proxy @grpc {
+                    dynamic a argocd-server.argocd.svc.cluster.local 80 {
+                      resolvers 10.43.0.10:53
+                      versions ipv4
+                    }
+                    transport http {
+                      versions h2c 2
+                    }
                   }
-                  transport http {
-                    versions h2c 2
+                  reverse_proxy {
+                    dynamic a argocd-server.argocd.svc.cluster.local 80 {
+                      resolvers 10.43.0.10:53
+                      versions ipv4
+                    }
+                    transport http {
+                      versions 1.1
+                    }
                   }
                 }
-                reverse_proxy {
-                  dynamic a argocd-server.argocd.svc.cluster.local 80 {
-                    resolvers 10.43.0.10:53
-                    versions ipv4
-                  }
-                  transport http {
-                    versions 1.1
-                  }
-                }
-              }
 
-              handle {
-                reverse_proxy {
-                  dynamic a private-ingress.ingress.svc.cluster.local 80 {
-                    resolvers 10.43.0.10:53
-                    versions ipv4
+                handle {
+                  reverse_proxy {
+                    dynamic a private-ingress.ingress.svc.cluster.local 80 {
+                      resolvers 10.43.0.10:53
+                      versions ipv4
+                    }
                   }
                 }
-              }
-            '';
+              '';
+            };
           };
         };
 
         sops = lib.mkIf (!ciMode) {
-          secrets.cloudflare-api-token.restartUnits = [ "caddy.service" ];
-          templates."caddy-cloudflare.env" = {
-            content = "CLOUDFLARE_API_TOKEN=${config.sops.placeholder.cloudflare-api-token}\n";
-            restartUnits = [ "caddy.service" ];
-          };
+          secrets.cloudflare-api-token = { };
+          templates."acme-cloudflare.env".content =
+            "CLOUDFLARE_DNS_API_TOKEN=${config.sops.placeholder.cloudflare-api-token}\n";
         };
 
         systemd.services.caddy = {
