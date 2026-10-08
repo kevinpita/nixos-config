@@ -80,6 +80,7 @@ in
         services.grafana = {
           enable = true;
           openFirewall = false;
+          declarativePlugins = [ pkgs.grafanaPlugins.prometheus ];
           settings = {
             security = {
               admin_password = "$__file{${grafana.dataDir}/admin-password}";
