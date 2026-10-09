@@ -18,7 +18,6 @@
         chmod -R u+w "$out"
         cp ${../../hyprland/plugins/aiOverviewControl/NativeQuotaWidget.qml} "$out/NativeQuotaWidget.qml"
         cp ${../../hyprland/plugins/aiOverviewControl/NativeQuotaSettings.qml} "$out/NativeQuotaSettings.qml"
-        install -m 0755 ${../../hyprland/plugins/aiOverviewControl/get-zcode-usage} "$out/providers/get-zcode-usage"
         substituteInPlace "$out/plugin.json" \
           --replace-fail '"component": "./AiOverviewControlWidget.qml"' '"component": "./NativeQuotaWidget.qml"' \
           --replace-fail '"settings": "./AiOverviewControlSettings.qml"' '"settings": "./NativeQuotaSettings.qml"'
@@ -32,7 +31,6 @@
           bash
           curl
           jq
-          nodejs
         ];
 
         xdg.configFile."DankMaterialShell/plugins/aiOverviewControl" = {

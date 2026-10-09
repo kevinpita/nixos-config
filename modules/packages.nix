@@ -16,7 +16,6 @@
     prometheus-podman-exporter =
       final.callPackage ../packages/prometheus-podman-exporter/package.nix
         { };
-    zcode = final.callPackage ../packages/zcode/package.nix { };
   };
 
   perSystem =

@@ -38,7 +38,7 @@ PluginComponent {
         const value = parseInt(pluginData.refreshInterval || "120000");
         return Number.isFinite(value) && value >= 30000 ? value : 120000;
     }
-    readonly property string providerUsageScript: pluginDirectory + "/providers/get-zcode-usage"
+    readonly property string providerUsageScript: pluginDirectory + "/providers/get-provider-usage"
     readonly property string copilotUsageScript: pluginDirectory + "/providers/get-copilot-usage"
     readonly property var successfulProviders: providers.filter(provider => provider && provider.usage && !provider.error)
     readonly property var orderedProviders: selectedProviderIds.map(providerId => providerById(providerId) || ({
@@ -80,7 +80,7 @@ PluginComponent {
             deepseek: "DeepSeek",
             opencode: "OpenCode",
             xai: "xAI",
-            zai: "zcode"
+            zai: "Z.AI"
         };
         const name = names[providerId];
         if (name) {
@@ -317,7 +317,7 @@ PluginComponent {
 
     Process {
         id: collectorCheck
-        command: ["sh", "-c", "[ -x \"$1\" ] && command -v bash >/dev/null && command -v jq >/dev/null && command -v curl >/dev/null && command -v node >/dev/null", "sh", root.providerUsageScript]
+        command: ["sh", "-c", "[ -x \"$1\" ] && command -v bash >/dev/null && command -v jq >/dev/null && command -v curl >/dev/null", "sh", root.providerUsageScript]
         onExited: exitCode => {
             root.binaryReady = exitCode === 0;
             if (root.binaryReady) {

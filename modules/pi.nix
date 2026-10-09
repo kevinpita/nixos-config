@@ -356,11 +356,6 @@
               force = true;
               source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.pi/agent/skills";
             };
-
-            ".zcode/skills" = {
-              force = true;
-              source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.pi/agent/skills";
-            };
           };
 
           systemd.user = {
