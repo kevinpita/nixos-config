@@ -2,12 +2,14 @@
 {
   flake.modules.nixos.ai =
     {
+      config,
       lib,
       pkgs,
       username,
       ...
     }:
     let
+      repo = config.programs.nh.flake;
       system = pkgs.stdenv.hostPlatform.system;
       piEnv = {
         PI_SKIP_VERSION_CHECK = "1";
@@ -157,8 +159,18 @@
       };
 
       home-manager.users.${username} =
-        { config, ... }:
+        { config, lib, ... }:
         {
+          # Direct symlink to the repo file so omp settings edits on any host
+          # land in the working tree as a git diff. Logins stay in the per-host
+          # ~/.omp/agent/agent.db. See claude.nix for why this is not
+          # mkOutOfStoreSymlink.
+          home.activation.linkOmpConfig = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+            run ln -sfn $VERBOSE_ARG \
+              "${repo}/pi/omp-config.yml" \
+              "${config.home.homeDirectory}/.omp/agent/config.yml"
+          '';
+
           home.file = {
             ".pi/agent/skills".source = ../pi/skills;
 

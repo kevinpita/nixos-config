@@ -1,0 +1,15 @@
+modelRoles:
+  default: anthropic/claude-opus-5-5:medium
+  advisor: openai-codex/gpt-6.1-sol:medium
+symbolPreset: nerd
+composer:
+  shape: band
+theme:
+  dark: titanium
+setupVersion: 2
+browser:
+  headless: true
+advisor:
+  enabled: true
+dev:
+  autoqaConsent: denied
