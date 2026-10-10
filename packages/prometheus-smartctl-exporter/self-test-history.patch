@@ -184,7 +184,7 @@
 +		t.Run(tc.name, func(t *testing.T) {
 +			for range 2 {
 +				ch := make(chan prometheus.Metric, 8)
-+				smart := NewSMARTctl(slog.Default(), gjson.Parse(tc.json), ch)
++				smart := NewSMARTctl(slog.Default(), gjson.Parse(tc.json), ch, Device{})
 +				smart.mineSmartStatus()
 +				close(ch)
 +				found := false
@@ -281,7 +281,7 @@
 +	} {
 +		t.Run(tc.name, func(t *testing.T) {
 +			ch := make(chan prometheus.Metric, 128)
-+			smart := NewSMARTctl(slog.Default(), gjson.Parse(tc.data), ch)
++			smart := NewSMARTctl(slog.Default(), gjson.Parse(tc.data), ch, Device{})
 +			smart.Collect()
 +			close(ch)
 +			found := false
