@@ -73,6 +73,10 @@
           };
         };
       };
+      # Nix owns the omp version, so `omp update` cannot apply.
+      ompNoUpdateCheck = (pkgs.formats.yaml { }).generate "omp-no-update-check.yml" {
+        startup.checkUpdate = false;
+      };
       ompBasePackage = inputs.oh-my-pi.packages.${system}.default;
       # pstack is a Claude Code plugin; omp loads that format through
       # --plugin-dir. Its poteto-mode scripts install commander into their own
@@ -97,7 +101,8 @@
           | sha256sum | cut -d' ' -f1 > "$scripts/node_modules/.poteto-mode-tools-install-key"
       '';
       # PI_CONFIG_FILES layers above ~/.omp/agent/config.yml, so runtime
-      # settings edits cannot re-enable the providers or change the status line.
+      # settings edits cannot re-enable the providers or the update check, or
+      # change the status line.
       # omp cannot see the outer terminal through herdr, so it shows image
       # placeholders. herdr forwards Kitty graphics to Ghostty. Unicode
       # placeholders stay off because herdr stretches them (herdr#4858).
@@ -109,6 +114,7 @@
           wrapProgram "$out/bin/omp" \
             --prefix PI_CONFIG_FILES : ${ompProviderPolicy} \
             --prefix PI_CONFIG_FILES : ${ompStatusLine} \
+            --prefix PI_CONFIG_FILES : ${ompNoUpdateCheck} \
             --run 'if [ "''${TERM_PROGRAM-}" = herdr ]; then export PI_FORCE_IMAGE_PROTOCOL="''${PI_FORCE_IMAGE_PROTOCOL-kitty}" PI_KITTY_PLACEHOLDERS="''${PI_KITTY_PLACEHOLDERS-0}"; fi' \
             --add-flags "--plugin-dir ${pstackPlugin}"
         '';
