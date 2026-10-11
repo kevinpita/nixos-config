@@ -1,6 +1,28 @@
+defaultThinkingLevel: medium
+modelProviderOrder:
+  - anthropic
+  - openai-codex
+  - zai
 modelRoles:
   default: anthropic/claude-opus-5-5:medium
+  smol: anthropic/claude-opus-5-5:low
+  slow: anthropic/claude-opus-5-5:xhigh
+  vision: openai-codex/gpt-6.1-sol:xhigh
+  plan: anthropic/claude-opus-5-5:xhigh
+  commit: '@smol'
+  tiny: '@smol'
+  memory: '@smol'
+  task: anthropic/claude-opus-5-5:medium
   advisor: openai-codex/gpt-6.1-sol:medium
+  image: openai-codex/gpt-image-2
+  judge: anthropic/claude-opus-5-5:high
+  glm: zai/glm-5.3:high
+  security: '@glm'
+task:
+  agentModelOverrides:
+    scout: '@smol'
+    reviewer: '@advisor'
+    security-reviewer: '@security'
 symbolPreset: nerd
 composer:
   shape: band

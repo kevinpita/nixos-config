@@ -177,6 +177,7 @@
             ".pi/agent/AGENTS.md".text =
               builtins.readFile ../pi/AGENTS.md + "\n" + builtins.readFile ../pi/AGENTS.pi.md;
             ".omp/agent/AGENTS.md".source = ../pi/AGENTS.md;
+            ".omp/agent/agents".source = ../pi/omp-agents;
             # omp has no model-change event, so poll the live model to keep
             # the status line current after /model switches.
             ".omp/agent/extensions/provider-status.ts".text = ''
