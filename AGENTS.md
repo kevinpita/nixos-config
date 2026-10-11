@@ -11,5 +11,5 @@
 - When adding or changing a feature that could benefit from a Grafana dashboard, ask whether the user wants one before adding it.
 - After changes, check whether related documentation needs updating and fix anything made inaccurate.
 - Keep documentation focused on purpose, ownership, and stable conventions. Leave changing defaults and shortcut lists in the code.
-- Draw documentation diagrams as SVG files in `docs/diagrams/`, in the transit-map style of `docs/diagrams/install.svg`: coloured lines, station circles, its light and dark palette, and a `<title>`. Embed them with `<img>` and matching alt text.
+- Draw documentation diagrams with the `transit-diagram` skill and store them in `docs/diagrams/`.
 - Use Conventional Commit messages when asked to commit.

@@ -3,13 +3,19 @@
   <style>
     text { font: 13px system-ui, -apple-system, "Segoe UI", sans-serif; fill: #1f2328; }
     .note { font-size: 11px; fill: #59636e; }
+    .term { font-weight: 600; }
     .line { fill: none; stroke-width: 6; stroke-linecap: round; }
-    .existing { stroke: #a371f7; }
-    .new { stroke: #3fb950; }
-    .main { stroke: #2f81f7; }
+    .feeder { fill: none; stroke-width: 4; stroke-linecap: round; }
     .stop { fill: #ffffff; stroke-width: 3; }
     .hub { stroke: #1f2328; }
     .optional { stroke-dasharray: 3 3; }
+    .link { stroke-dasharray: 2 10; }
+    .purple { stroke: #a371f7; }
+    .green { stroke: #3fb950; }
+    .blue { stroke: #2f81f7; }
+    .orange { stroke: #fb8f44; }
+    .red { stroke: #f85149; }
+    .gray { stroke: #8c959f; }
     @media (prefers-color-scheme: dark) {
       text { fill: #e6edf3; }
       .note { fill: #9198a1; }
@@ -18,34 +24,31 @@
     }
   </style>
 
-  <path class="line existing" d="M60 115 C110 115, 110 60, 160 60 L380 60 C430 60, 450 115, 500 115"/>
-  <path class="line new" d="M60 115 C110 115, 110 170, 160 170 L380 170 C430 170, 450 115, 500 115"/>
-  <path class="line main" d="M500 115 L860 115"/>
+  <path class="line purple" d="M60 115 C110 115, 110 60, 160 60 L380 60 C430 60, 450 115, 500 115"/>
+  <path class="line green" d="M60 115 C110 115, 110 170, 160 170 L380 170 C430 170, 450 115, 500 115"/>
+  <path class="line blue" d="M500 115 L860 115"/>
 
   <circle class="stop hub" cx="60" cy="115" r="10"/>
-  <circle class="stop existing" cx="200" cy="60" r="8"/>
-  <circle class="stop existing" cx="340" cy="60" r="8"/>
-  <circle class="stop new" cx="200" cy="170" r="8"/>
-  <circle class="stop new" cx="340" cy="170" r="8"/>
+  <circle class="stop purple" cx="200" cy="60" r="8"/>
+  <circle class="stop purple" cx="340" cy="60" r="8"/>
+  <circle class="stop green" cx="200" cy="170" r="8"/>
+  <circle class="stop green" cx="340" cy="170" r="8"/>
   <circle class="stop hub" cx="500" cy="115" r="10"/>
-  <circle class="stop main optional" cx="620" cy="115" r="8"/>
+  <circle class="stop blue optional" cx="620" cy="115" r="8"/>
   <circle class="stop hub" cx="740" cy="115" r="10"/>
-  <circle class="stop main optional" cx="860" cy="115" r="8"/>
+  <circle class="stop blue optional" cx="860" cy="115" r="8"/>
 
-  <g text-anchor="middle">
-    <text x="60" y="148">Boot installer</text>
-    <text x="200" y="40">Check host files</text>
-    <text x="340" y="40">Restore age key</text>
-    <text x="200" y="200">Create host files</text>
-    <text x="340" y="200">New key + secrets</text>
-    <text x="500" y="148">Build &amp; commit</text>
-    <text x="620" y="148">Tailscale key</text>
-    <text class="note" x="620" y="165">servers, optional</text>
-    <text x="740" y="148">nixos-anywhere</text>
-    <text x="860" y="148">Clone checkout</text>
-    <text class="note" x="860" y="165">desktops</text>
-  </g>
-
+  <text text-anchor="middle" x="60" y="148">Boot installer</text>
+  <text text-anchor="middle" x="200" y="40">Check host files</text>
+  <text text-anchor="middle" x="340" y="40">Restore age key</text>
+  <text text-anchor="middle" x="200" y="200">Create host files</text>
+  <text text-anchor="middle" x="340" y="200">New key + secrets</text>
+  <text text-anchor="middle" x="500" y="148">Build &amp; commit</text>
+  <text text-anchor="middle" x="620" y="148">Tailscale key</text>
+  <text text-anchor="middle" x="740" y="148">nixos-anywhere</text>
+  <text text-anchor="middle" x="860" y="148">Clone checkout</text>
+  <text class="note" text-anchor="middle" x="620" y="165">servers, optional</text>
+  <text class="note" text-anchor="middle" x="860" y="165">desktops</text>
   <rect x="600" y="22" width="18" height="5" rx="2" fill="#a371f7"/>
   <text class="note" x="624" y="29">existing host</text>
   <rect x="720" y="22" width="18" height="5" rx="2" fill="#3fb950"/>
