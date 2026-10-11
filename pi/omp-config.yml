@@ -15,7 +15,7 @@ modelRoles:
   task: anthropic/claude-opus-5-5:medium
   advisor: openai-codex/gpt-6.1-sol:medium
   image: openai-codex/gpt-image-2
-  judge: anthropic/claude-opus-5-5:high
+  judge: '@smol'
   glm: zai/glm-5.3:high
   security: '@glm'
 task:
