@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 315" role="img" aria-labelledby="title">
+  <title id="title">Host composition: base feeds the desktop and server role lines. The desktop line passes workstation and desktop and ends at amdep and t14g6. The server line passes server and kubernetes-server and ends at fium, with a branch to minidesk. Feature aspects join at workstation, desktop, and fium.</title>
+  <style>
+    text { font: 13px system-ui, -apple-system, "Segoe UI", sans-serif; fill: #1f2328; }
+    .note { font-size: 11px; fill: #59636e; }
+    .term { font-weight: 600; }
+    .line { fill: none; stroke-width: 6; stroke-linecap: round; }
+    .feeder { fill: none; stroke-width: 4; stroke-linecap: round; }
+    .stop { fill: #ffffff; stroke-width: 3; }
+    .hub { stroke: #1f2328; }
+    .optional { stroke-dasharray: 3 3; }
+    .link { stroke-dasharray: 2 10; }
+    .purple { stroke: #a371f7; }
+    .green { stroke: #3fb950; }
+    .blue { stroke: #2f81f7; }
+    .orange { stroke: #fb8f44; }
+    .red { stroke: #f85149; }
+    .gray { stroke: #8c959f; }
+    @media (prefers-color-scheme: dark) {
+      text { fill: #e6edf3; }
+      .note { fill: #9198a1; }
+      .stop { fill: #0d1117; }
+      .hub { stroke: #e6edf3; }
+    }
+  </style>
+
+  <path class="line purple" d="M60 150 C110 150, 110 90, 160 90 L820 90"/>
+  <path class="line purple" d="M480 90 C530 90, 530 40, 580 40 L820 40"/>
+  <path class="line green" d="M60 150 C110 150, 110 210, 160 210 L820 210"/>
+  <path class="line green" d="M300 210 C350 210, 350 260, 400 260 L620 260"/>
+  <path class="feeder gray" d="M240 34 L240 82"/>
+  <path class="feeder gray" d="M420 34 L420 82"/>
+  <path class="feeder gray" d="M820 282 L820 218"/>
+
+  <circle cx="240" cy="34" r="5" fill="#8c959f"/>
+  <circle cx="420" cy="34" r="5" fill="#8c959f"/>
+  <circle cx="820" cy="282" r="5" fill="#8c959f"/>
+  <circle class="stop hub" cx="60" cy="150" r="10"/>
+  <circle class="stop purple" cx="240" cy="90" r="8"/>
+  <circle class="stop purple" cx="420" cy="90" r="8"/>
+  <circle class="stop hub" cx="820" cy="40" r="10"/>
+  <circle class="stop hub" cx="820" cy="90" r="10"/>
+  <circle class="stop green" cx="240" cy="210" r="8"/>
+  <circle class="stop green" cx="480" cy="210" r="8"/>
+  <circle class="stop hub" cx="820" cy="210" r="10"/>
+  <circle class="stop hub" cx="620" cy="260" r="10"/>
+
+  <text x="44" y="155" text-anchor="end">base</text>
+  <text x="240" y="120" text-anchor="middle">workstation</text>
+  <text x="420" y="120" text-anchor="middle">desktop</text>
+  <text x="240" y="24" text-anchor="middle">dev · ui · cloud · net</text>
+  <text x="420" y="24" text-anchor="middle">hyprland</text>
+  <text class="term" x="838" y="45">amdep</text>
+  <text class="term" x="838" y="95">t14g6</text>
+  <text x="240" y="192" text-anchor="middle">server</text>
+  <text x="480" y="192" text-anchor="middle">kubernetes-server</text>
+  <text class="term" x="838" y="215">fium</text>
+  <text class="term" x="638" y="265">minidesk</text>
+  <text x="820" y="302" text-anchor="middle">selfhosted · nix-cache</text>
+  <rect x="40" y="295" width="18" height="5" rx="2" fill="#a371f7"/>
+  <text class="note" x="64" y="302">desktop role</text>
+  <rect x="150" y="295" width="18" height="5" rx="2" fill="#3fb950"/>
+  <text class="note" x="174" y="302">server role</text>
+  <rect x="255" y="295" width="18" height="5" rx="2" fill="#8c959f"/>
+  <text class="note" x="279" y="302">features</text>
+</svg>

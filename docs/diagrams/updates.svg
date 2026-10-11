@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 300" role="img" aria-labelledby="title">
+  <title id="title">Update flow: a daily timer updates inputs, builds every workstation, and pushes a signed lock. Servers deploy it with Comin and workstations pull it. A failed build or a changed lock on main discards the update. Every 10 minutes the cache host prebuilds new main commits for workstations.</title>
+  <style>
+    text { font: 13px system-ui, -apple-system, "Segoe UI", sans-serif; fill: #1f2328; }
+    .note { font-size: 11px; fill: #59636e; }
+    .term { font-weight: 600; }
+    .line { fill: none; stroke-width: 6; stroke-linecap: round; }
+    .feeder { fill: none; stroke-width: 4; stroke-linecap: round; }
+    .stop { fill: #ffffff; stroke-width: 3; }
+    .hub { stroke: #1f2328; }
+    .optional { stroke-dasharray: 3 3; }
+    .link { stroke-dasharray: 2 10; }
+    .purple { stroke: #a371f7; }
+    .green { stroke: #3fb950; }
+    .blue { stroke: #2f81f7; }
+    .orange { stroke: #fb8f44; }
+    .red { stroke: #f85149; }
+    .gray { stroke: #8c959f; }
+    @media (prefers-color-scheme: dark) {
+      text { fill: #e6edf3; }
+      .note { fill: #9198a1; }
+      .stop { fill: #0d1117; }
+      .hub { stroke: #e6edf3; }
+    }
+  </style>
+
+  <path class="line blue" d="M60 110 L820 110"/>
+  <path class="line blue" d="M580 110 C640 110, 640 184, 700 184 L820 184"/>
+  <path class="line red" d="M380 110 C430 110, 430 50, 480 50"/>
+  <path class="line orange" d="M60 250 L600 250 C650 250, 650 196, 700 196 L820 196"/>
+
+  <circle class="stop hub" cx="60" cy="110" r="10"/>
+  <circle class="stop blue" cx="220" cy="110" r="8"/>
+  <circle class="stop blue" cx="380" cy="110" r="8"/>
+  <circle class="stop hub" cx="540" cy="110" r="10"/>
+  <circle class="stop hub" cx="820" cy="110" r="10"/>
+  <circle class="stop red" cx="480" cy="50" r="8"/>
+  <circle class="stop hub" cx="60" cy="250" r="10"/>
+  <circle class="stop orange" cx="380" cy="250" r="8"/>
+  <rect class="stop hub" x="810" y="174" width="20" height="32" rx="10"/>
+
+  <text x="60" y="140" text-anchor="middle">Daily timer</text>
+  <text x="220" y="140" text-anchor="middle">Update inputs</text>
+  <text x="380" y="140" text-anchor="middle">Build workstations</text>
+  <text x="540" y="140" text-anchor="middle">Push signed lock</text>
+  <text class="term" x="838" y="115">Servers</text>
+  <text class="note" x="838" y="132">Comin deploys main</text>
+  <text class="term" x="498" y="55">Discard update</text>
+  <text class="note" x="498" y="72">a build failed or main changed the lock</text>
+  <text x="60" y="280" text-anchor="middle">Push to main</text>
+  <text x="380" y="280" text-anchor="middle">Prebuild every 10 minutes</text>
+  <text class="term" x="838" y="194">Workstations</text>
+  <text class="note" x="838" y="211">git pull + just switch</text>
+  <rect x="40" y="18" width="18" height="5" rx="2" fill="#2f81f7"/>
+  <text class="note" x="64" y="25">daily lock update</text>
+  <rect x="175" y="18" width="18" height="5" rx="2" fill="#fb8f44"/>
+  <text class="note" x="199" y="25">prebuild of new main</text>
+</svg>

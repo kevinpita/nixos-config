@@ -10,12 +10,16 @@ This folder owns the Pi configuration content shipped with these systems. It is 
 | `omp-config.yml` | oh-my-pi settings shared by all hosts. `~/.omp/agent/config.yml` links to this file, so settings changes in omp edit it in place. Commit and pull to share them. |
 | `AGENTS.pi.md` | Pi-only instructions, such as Pi tool and subagent names. `modules/pi.nix` appends it to the shared file for Pi only. |
 | `omp-agents/` | oh-my-pi worker definitions deployed to `~/.omp/agent/agents`. Their `model` frontmatter selects a role from `omp-config.yml`. |
-| `skills/` | Reusable task guidance and its supporting references, also deployed to oh-my-pi (`~/.omp/agent/skills`) and Claude Code. Extend the existing skill when it already owns the task. |
+| `skills/` | Reusable task guidance and its supporting references, also deployed to oh-my-pi (`~/.omp/agent/skills`), Claude Code, Codex, and Antigravity. Extend the existing skill when it already owns the task. |
 | `prompts/` | Reusable prompt text for tasks the user starts explicitly |
 | `themes/` | Pi color themes. The selected theme is set in `modules/pi.nix`. |
 | `scripts/` | Session maintenance code packaged and scheduled through Nix |
 
-The skills, prompts, and themes directories are deployed as directories. Keep shared skill content here rather than duplicating it for each configured client.
+The skills, prompts, and themes directories are deployed as directories. Keep shared skill content here rather than duplicating it for each configured client. oh-my-pi and Claude Code get the skills without `bro`, because pstack ships its own.
+
+<p align="center">
+  <img src="../docs/diagrams/pi.svg" alt="Pi deployment: AGENTS.md goes to Pi with AGENTS.pi.md appended, to oh-my-pi, and to Claude Code. skills/ goes to ~/.pi/agent/skills, which Codex and Antigravity link to, and without bro to oh-my-pi and Claude Code. omp-config.yml is a writable link from ~/.omp/agent/config.yml." width="100%">
+</p>
 
 ## Model routing
 

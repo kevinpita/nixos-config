@@ -20,6 +20,10 @@ Hyprland reads Lua directly from `~/nixos-config`. DMS settings and plugin prefe
 
 Local plugin source, helper commands, and upstream patches are installed through Nix. Editing those files does not replace the running packaged copy. Rebuild with `just switch` from the repository root and restart the relevant component if needed.
 
+<p align="center">
+  <img src="../docs/diagrams/hyprland.svg" alt="The Nix-generated Hyprland entry loads the host Lua, then the shared Lua, live from the checkout. DankMaterialShell reads settings JSON through writable links and receives plugins and patches through Nix after just switch." width="100%">
+</p>
+
 > [!IMPORTANT]
 > A Nix generation rollback does not restore live Lua or JSON files. Restore their Git contents separately if you need to undo a desktop change.
 

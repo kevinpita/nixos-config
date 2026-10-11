@@ -5,6 +5,10 @@ Run commands from `~/nixos-config` on a machine with Nix flakes and SSH access t
 > [!CAUTION]
 > Disko can erase the selected disks. Back up data and the host's age key. To update an installed host instead, use `just switch`.
 
+<p align="center">
+  <img src="docs/diagrams/install.svg" alt="Install paths: existing hosts check their files and restore the age key, new hosts create files, a key, and secrets. Both then build and commit, add an optional Tailscale key on servers, run nixos-anywhere, and clone the checkout on desktops." width="100%">
+</p>
+
 ## 1. Boot the installer
 
 Boot the [NixOS minimal ISO](https://nixos.org/download/), connect to the network, set a root password with `sudo passwd root`, and find the address with `ip a`. Confirm that `ssh root@<ip>` works.
