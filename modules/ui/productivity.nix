@@ -6,9 +6,13 @@
         home.packages = [
           pkgs.heynote
           pkgs.obsidian
+          pkgs.sioyek
         ];
 
-        xdg.mimeApps.defaultApplications."x-scheme-handler/notion" = "notion-app-enhanced.desktop";
+        xdg.mimeApps.defaultApplications = {
+          "application/pdf" = "sioyek.desktop";
+          "x-scheme-handler/notion" = "notion-app-enhanced.desktop";
+        };
       };
     };
 }
