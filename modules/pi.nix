@@ -77,6 +77,11 @@
       ompNoUpdateCheck = (pkgs.formats.yaml { }).generate "omp-no-update-check.yml" {
         startup.checkUpdate = false;
       };
+      # Python eval needs an interpreter on every host, including servers
+      # without the development aspect.
+      ompPython = (pkgs.formats.yaml { }).generate "omp-python.yml" {
+        python.interpreter = lib.getExe pkgs.python3;
+      };
       ompBasePackage = inputs.oh-my-pi.packages.${system}.default;
       # pstack is a Claude Code plugin; omp loads that format through
       # --plugin-dir. Its poteto-mode scripts install commander into their own
@@ -115,6 +120,7 @@
             --prefix PI_CONFIG_FILES : ${ompProviderPolicy} \
             --prefix PI_CONFIG_FILES : ${ompStatusLine} \
             --prefix PI_CONFIG_FILES : ${ompNoUpdateCheck} \
+            --prefix PI_CONFIG_FILES : ${ompPython} \
             --run 'if [ "''${TERM_PROGRAM-}" = herdr ]; then export PI_FORCE_IMAGE_PROTOCOL="''${PI_FORCE_IMAGE_PROTOCOL-kitty}" PI_KITTY_PLACEHOLDERS="''${PI_KITTY_PLACEHOLDERS-0}"; fi' \
             --add-flags "--plugin-dir ${pstackPlugin}"
         '';
