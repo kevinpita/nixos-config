@@ -95,18 +95,73 @@ local function focus_or_launch(selector, command)
     end
 end
 
+local musicWorkspace = "special:music"
+local soneSelector = "class:^(sone)$"
+
+local function is_sone(window)
+    return window.class == "sone"
+end
+
+local function move_to_regular_workspace(window, follow)
+    local target = window.monitor and window.monitor.active_workspace
+    if target then
+        hl.dispatch(hl.dsp.window.move({ workspace = target, window = window, follow = follow }))
+    end
+end
+
+-- The music overlay holds only Sone. Windows that spawn while it has focus
+-- go to the regular workspace below it, and the overlay closes.
+hl.on("window.open", function(window)
+    if window.workspace and window.workspace.name == musicWorkspace and not is_sone(window) then
+        move_to_regular_workspace(window, true)
+    end
+end)
+
+-- Sone can leave the overlay, for example with a window move bind. Return it
+-- before the toggle so the toggle always acts on the window.
+local function toggle_music()
+    local sone = hl.get_window(soneSelector)
+    if not sone then
+        hl.dispatch(hl.dsp.exec_cmd("uwsm app -- sone"))
+        return
+    end
+
+    local music = hl.get_workspace(musicWorkspace)
+    if music then
+        for _, window in ipairs(hl.get_workspace_windows(music)) do
+            if not is_sone(window) then
+                move_to_regular_workspace(window, false)
+            end
+        end
+    end
+
+    if sone.workspace and sone.workspace.name ~= musicWorkspace then
+        local wasVisible = sone.workspace.visible
+        hl.dispatch(hl.dsp.window.move({ workspace = musicWorkspace, window = sone, follow = false }))
+        if wasVisible then
+            return
+        end
+    end
+
+    hl.dispatch(hl.dsp.workspace.toggle_special("music"))
+end
+
+local function toggle_scratch()
+    local scratch = hl.get_workspace("special:scratch")
+    local isEmpty = not scratch or scratch.windows == 0
+    hl.dispatch(hl.dsp.workspace.toggle_special("scratch"))
+    if isEmpty then
+        hl.dispatch(hl.dsp.exec_cmd("uwsm app -- ghostty"))
+    end
+end
+
 hl.bind(mainMod .. " + SUPER_L", hl.dsp.exec_cmd("super-double-tap"), { release = true })
 hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd("uwsm app -- ghostty"))
+hl.bind(mainMod .. " + SHIFT + Return", toggle_scratch)
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd("uwsm app -- brave"))
 hl.bind(mainMod .. " + C", hl.dsp.exec_cmd("uwsm app -- google-chrome-stable --new-window about:blank"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd("uwsm app -- nautilus --new-window"))
-hl.bind(mainMod .. " + M", function()
-    if hl.get_window("class:^(sone)$") then
-        hl.dispatch(hl.dsp.workspace.toggle_special("music"))
-    else
-        hl.dispatch(hl.dsp.exec_cmd("uwsm app -- sone"))
-    end
-end)
+hl.bind(mainMod .. " + M", toggle_music)
 hl.bind(mainMod .. " + N", function()
     if hl.get_window("class:^(heynote|Heynote)$") then
         hl.dispatch(hl.dsp.workspace.toggle_special("notes"))
