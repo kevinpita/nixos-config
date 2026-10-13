@@ -5,9 +5,9 @@ description: Help the user understand the current topic visually with inline tex
 
 Help the user understand the current topic of conversation visually. Skip the preamble and keep prose brief. Pick the smallest view that makes the key point clear.
 
-## Output directly in Pi
+## Output directly in omp
 
-Default to diagrams in the chat response, readable in Pi without a browser or extension. Use compact boxes, trees, and ASCII arrows in `text` fences. Keep diagrams narrow, and split dense diagrams into smaller views. When running as a subagent, return the diagram in the response so the parent can include it in chat.
+Default to diagrams in the chat response, readable in omp without a browser or extension. Use compact boxes, trees, and ASCII arrows in `text` fences. Keep diagrams narrow, and split dense diagrams into smaller views. When running as a subagent, return the diagram in the response so the parent can include it in chat.
 
 ```text
 [User request]
@@ -16,7 +16,7 @@ Default to diagrams in the chat response, readable in Pi without a browser or ex
 [Agent loads show-me]
       |
       v
-[Diagram in Pi chat]
+[Diagram in omp chat]
 ```
 
 ## Choose a readable format
@@ -79,7 +79,7 @@ src/
 └── transport/      # sends API requests
 ```
 
-- Show component interaction, control flow, or data flow with text diagrams in Pi. Use Mermaid only when the user requests its source or the output surface is known to render it:
+- Show component interaction, control flow, or data flow with text diagrams in omp. Use Mermaid only when the user requests its source or the output surface is known to render it:
 
 ```mermaid
 sequenceDiagram

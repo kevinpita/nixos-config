@@ -148,8 +148,8 @@ open_pull_request() {
 		if [[ -z "$tab_id" || -z "$pane_id" ]]; then
 			failure_count=1
 		else
-			herdr tab rename "$tab_id" pi >>"$log_file" 2>&1 || failure_count=1
-			herdr pane run "$pane_id" pi >>"$log_file" 2>&1 || failure_count=1
+			herdr tab rename "$tab_id" omp >>"$log_file" 2>&1 || failure_count=1
+			herdr pane run "$pane_id" omp >>"$log_file" 2>&1 || failure_count=1
 
 			lazygit_json="$(
 				herdr tab create \

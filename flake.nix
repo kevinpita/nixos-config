@@ -73,16 +73,6 @@
       flake = false;
     };
 
-    claude-code = {
-      url = "github:sadjow/claude-code-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    codex-cli-nix = {
-      url = "github:sadjow/codex-cli-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     kevinpita-nixpkgs.url = "github:kevinpita/nixpkgs/helm-tui-init";
 
     nixpkgs-pgbot.url = "github:kevinpita/nixpkgs/pgbot-init";
@@ -95,17 +85,6 @@
     bast-nix = {
       url = "github:kevinpita/bast-nix";
       inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    pi-extensions = {
-      url = "github:kevinpita/nixos-pi";
-      flake = false;
-    };
-
-    pi-flake = {
-      url = "github:ChauDucToan/pi-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.home-manager.follows = "home-manager";
     };
 
     oh-my-pi = {

@@ -8,11 +8,11 @@ disable-model-invocation: true
 
 Usage: `/skill:thermo-loop changes on current branch`, or supply another review scope.
 
-The main session owns scope, decisions, and completion. Invocation authorizes native Pi subagents for review, approved fixes, and verification. Every child starts with explicit fresh context. Reviewers and verifiers are read-only. Each child receives only its stage instructions, not this whole loop.
+The main session owns scope, decisions, and completion. Invocation authorizes `task` subagents for review, approved fixes, and verification. Every child starts with explicit fresh context. Reviewers and verifiers are read-only. Each child receives only its stage instructions, not this whole loop.
 
 ## 1. Establish the review contract
 
-Read the installed `pi-subagents` skill and its execution guidance before dispatch. Discover executable native Pi agents with suitable tool boundaries. At each approval boundary, return findings to the main session and use `ask_user_question`. Wait for the user's answer before dispatching approved work. If the question tool is unavailable, pause rather than substituting automatic approval.
+Discover the available agents and pick ones with suitable tool boundaries. At each approval boundary, return findings to the main session and use `ask`. Wait for the user's answer before dispatching approved work. If the question tool is unavailable, pause rather than substituting automatic approval.
 
 Use [Thermo-Nuclear Code Quality Review](../thermo-nuclear-code-quality-review/SKILL.md) as the review criteria. Supply that file explicitly to review children as reference material. Its suggestions confer no edit authority.
 
@@ -42,7 +42,7 @@ Require findings with locations, concrete evidence, impact, a simpler direction,
 
 Compare findings with the decision record. Suppress ignored repeats and report their count. Present remaining findings with stable IDs and brief explanations.
 
-Use `ask_user_question`, in supported batches, to offer Fix, Ignore for this invocation, or Explain/investigate. Explain unclear findings with code evidence, consequences, and trade-offs, then ask again. An unanswered or cancelled question leaves the finding undecided.
+Use `ask`, in supported batches, to offer Fix, Ignore for this invocation, or Explain/investigate. Explain unclear findings with code evidence, consequences, and trade-offs, then ask again. An unanswered or cancelled question leaves the finding undecided.
 
 For a multi-selection list, confirm explicitly that unselected findings should be ignored before recording that decision. Approval applies to the problem and its acceptance criteria, not arbitrary changes suggested by a reviewer.
 
@@ -52,7 +52,7 @@ For a multi-selection list, confirm explicitly that unselected findings should b
 
 When fixes are approved, read [Fix and verify](references/fix-and-verify.md). Dispatch new fresh-context writers and independent verifiers using that contract. Group findings that share an owner and solution, and process separate groups sequentially.
 
-Retry only REWORK results automatically within the original approval. Pause for user guidance after the initial fix and one retry both return REWORK for the same finding. For BLOCKED, report the blocker and use `ask_user_question` to request the missing information or authorization before proceeding. Broader scope or changed acceptance criteria requires new approval. New unrelated findings return to step 4.
+Retry only REWORK results automatically within the original approval. Pause for user guidance after the initial fix and one retry both return REWORK for the same finding. For BLOCKED, report the blocker and use `ask` to request the missing information or authorization before proceeding. Broader scope or changed acceptance criteria requires new approval. New unrelated findings return to step 4.
 
 **Done:** every approved finding has a verified result for the current code. Later edits invalidate results they affect.
 

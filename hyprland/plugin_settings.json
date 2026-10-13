@@ -24,9 +24,6 @@
   "emojiLauncher": {
     "enabled": true
   },
-  "piSessions": {
-    "enabled": true
-  },
   "timeManager": {
     "enabled": true,
     "displayMode": "time"

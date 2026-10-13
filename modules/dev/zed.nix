@@ -38,12 +38,6 @@
           ];
           userSettings = {
             agent_servers = {
-              claude-acp = {
-                type = "registry";
-              };
-              codex-acp = {
-                type = "registry";
-              };
               gemini = {
                 type = "registry";
               };

@@ -55,8 +55,8 @@
         + builtins.readFile ./herdr-open.sh;
       };
 
-      openPiTab = pkgs.writeShellApplication {
-        name = "herdr-open-pi-tab";
+      openOmpTab = pkgs.writeShellApplication {
+        name = "herdr-open-omp-tab";
         runtimeInputs = [
           pkgs.herdr
           pkgs.jq
@@ -69,9 +69,9 @@
               jq -r '[.result.pane.workspace_id, (.result.pane.foreground_cwd // .result.pane.cwd)] | @tsv'
           )
 
-          tab_json="$(herdr tab create --workspace "$workspace_id" --cwd "$cwd" --label pi --focus)"
+          tab_json="$(herdr tab create --workspace "$workspace_id" --cwd "$cwd" --label omp --focus)"
           pane_id="$(printf '%s' "$tab_json" | jq -r '.result.root_pane.pane_id')"
-          herdr pane run "$pane_id" pi
+          herdr pane run "$pane_id" omp
         '';
       };
 
@@ -156,8 +156,8 @@
                 {
                   key = "prefix+o";
                   type = "shell";
-                  command = "${openPiTab}/bin/herdr-open-pi-tab";
-                  description = "open Pi in a new tab";
+                  command = "${openOmpTab}/bin/herdr-open-omp-tab";
+                  description = "open omp in a new tab";
                 }
                 {
                   key = "prefix+alt+p";

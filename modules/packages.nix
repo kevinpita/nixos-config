@@ -9,7 +9,6 @@
     });
     herdr-auto-title = final.callPackage ../packages/herdr-auto-title/package.nix { };
     mcp-reva = final.callPackage ../packages/mcp-reva/package.nix { };
-    pi-session-status = final.callPackage ../packages/pi-session-status/package.nix { };
     plymouth-nixos-grub = final.callPackage ../packages/plymouth-nixos-grub/package.nix {
       grubTheme = inputs.nixos-grub-themes.packages.${final.stdenv.hostPlatform.system}.nixos;
     };
@@ -19,10 +18,8 @@
   };
 
   perSystem =
-    { pkgs, system, ... }:
+    { pkgs, ... }:
     {
-      packages = config.flake.overlays.default pkgs pkgs // {
-        inherit (inputs.pi-flake.packages.${system}) pi-coding-agent;
-      };
+      packages = config.flake.overlays.default pkgs pkgs;
     };
 }

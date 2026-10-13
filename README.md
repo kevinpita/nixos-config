@@ -2,7 +2,7 @@
 
 My NixOS desktops, servers, and development environment. Built on [nixos-unstable](https://github.com/NixOS/nixpkgs), [Home Manager](https://github.com/nix-community/home-manager), and [flake-parts](https://flake.parts/).
 
-Desktops use Hyprland and DankMaterialShell. The repo also contains Neovim configuration, Pi settings and skills, container tools, and self-hosted services.
+Desktops use Hyprland and DankMaterialShell. The repo also contains Neovim configuration, omp settings and skills, container tools, and self-hosted services.
 
 This is a personal configuration, not a starter template. It targets `x86_64-linux`, uses the account `kevin`, and depends on private secrets and work configuration. Desktop settings expect a checkout at `~/nixos-config`.
 
@@ -36,7 +36,8 @@ Hosts can also import individual features, such as `development` on `minidesk`.
 | [`hosts/`](hosts/) | Hardware, disk layouts, and host-specific desktop files |
 | [`hyprland/`](hyprland/) | Desktop configuration, DMS settings, plugins, and patches |
 | [`neovim/`](neovim/) | Neovim Lua configuration and Nix wrapper |
-| [`pi/`](pi/) | Pi skills, prompts, themes, and maintenance files |
+| [`agents/`](agents/) | Harness-independent agent instructions and skills |
+| [`omp/`](omp/) | omp settings and worker definitions |
 | [`packages/`](packages/) | Local helper packages |
 | [`lib/`](lib/) | Shared Nix helpers |
 | [`justfile`](justfile) | `just switch` to build and activate the current host |
@@ -56,5 +57,5 @@ Servers deploy `main` automatically with [Comin](modules/services/comin.nix). Th
 - [Install a machine](INSTALL.md): new hosts, reinstalls, secrets, and first-boot setup.
 - [System configuration](modules/README.md): aspects, roles, and where a change belongs.
 - [Machine-specific files](hosts/README.md): hardware and disk layouts.
-- [Desktop configuration](hyprland/README.md), [Neovim](neovim/README.md), [Pi configuration](pi/README.md), and [local packages](packages/README.md).
+- [Desktop configuration](hyprland/README.md), [Neovim](neovim/README.md), [agent instructions and skills](agents/README.md), [omp configuration](omp/README.md), and [local packages](packages/README.md).
 - [Public CI](.github/workflows/nix-config-check.yml): checks with dummy private inputs.

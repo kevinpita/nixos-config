@@ -10,10 +10,6 @@ let
   system = "x86_64-linux";
 
   overlays = [
-    inputs.claude-code.overlays.default
-
-    inputs.codex-cli-nix.overlays.default
-
     (_final: _prev: {
       inherit (inputs.kevinpita-nixpkgs.legacyPackages.${system}) helm-tui;
       inherit (inputs.nixpkgs-pgbot.legacyPackages.${system}) pgbot;
