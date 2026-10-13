@@ -7,7 +7,7 @@ This folder owns the oh-my-pi (omp) harness configuration. `modules/omp.nix` sel
 | Path | Change it for |
 | --- | --- |
 | `config.yml` | omp settings shared by all hosts. `~/.omp/agent/config.yml` links to this file, so settings changes in omp edit it in place. Commit and pull to share them. |
-| `agents/` | omp worker definitions deployed to `~/.omp/agent/agents`. Their `model` frontmatter selects a role from `config.yml`. |
+| `agents/` | omp worker definitions. `~/.omp/agent/agents` links to this folder, so agents that omp creates or edits land here. Their `model` frontmatter selects a role from `config.yml`. |
 
 ## Model routing
 

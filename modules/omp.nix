@@ -128,20 +128,22 @@
       home-manager.users.${username} =
         { config, lib, ... }:
         {
-          # Direct symlink to the repo file so omp settings edits on any host
-          # land in the working tree as a git diff. Logins stay in the per-host
-          # ~/.omp/agent/agent.db. mkOutOfStoreSymlink does not work here: it
-          # links through the Nix store, and an in-place rewrite next to the
-          # first hop fails with EROFS.
+          # Direct symlinks to repo paths so omp settings and agent edits on
+          # any host land in the working tree as a git diff. Logins stay in
+          # the per-host ~/.omp/agent/agent.db. mkOutOfStoreSymlink does not
+          # work here: it links through the Nix store, and an in-place
+          # rewrite next to the first hop fails with EROFS.
           home.activation.linkOmpConfig = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
             run ln -sfn $VERBOSE_ARG \
               "${repo}/omp/config.yml" \
               "${config.home.homeDirectory}/.omp/agent/config.yml"
+            run ln -sfn $VERBOSE_ARG \
+              "${repo}/omp/agents" \
+              "${config.home.homeDirectory}/.omp/agent/agents"
           '';
 
           home.file = {
             ".omp/agent/AGENTS.md".source = ../agents/AGENTS.md;
-            ".omp/agent/agents".source = ../omp/agents;
             ".omp/agent/skills".source = skillsWithoutBro;
             # omp has no model-change event, so poll the live model to keep
             # the status line current after /model switches.
