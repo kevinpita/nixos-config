@@ -1,12 +1,4 @@
 {
-  "aiOverviewControl": {
-    "enabled": true,
-    "providerSelection": "codex,claude,zai",
-    "pillMode": "top",
-    "barWindowOverrides": "codex:highest,claude:highest,zai:highest",
-    "densityMode": "compact",
-    "pillProviders": "codex"
-  },
   "calculator": {
     "enabled": true,
     "trigger": "="

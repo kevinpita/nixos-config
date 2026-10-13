@@ -109,7 +109,6 @@
         "notificationButton",
         "dankCalendarAgenda",
         "timeManager",
-        "aiOverviewControl",
         "dockerManager",
         "battery",
         {
@@ -191,7 +190,6 @@
         "systemTray",
         "notificationButton",
         "dankCalendarAgenda",
-        "aiOverviewControl",
         "battery",
         {
           "id": "idleInhibitor",
