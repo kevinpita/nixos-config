@@ -16,10 +16,6 @@
   "emojiLauncher": {
     "enabled": true
   },
-  "timeManager": {
-    "enabled": true,
-    "displayMode": "time"
-  },
   "workspaceFinder": {
     "enabled": true
   }

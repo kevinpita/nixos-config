@@ -108,7 +108,6 @@
         "systemTray",
         "notificationButton",
         "dankCalendarAgenda",
-        "timeManager",
         "dockerManager",
         "battery",
         {

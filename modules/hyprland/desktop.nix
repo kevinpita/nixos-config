@@ -189,6 +189,7 @@
               '';
 
             home.packages = with pkgs; [
+              gnome-clocks
               inter
               libnotify
               microphoneMute
