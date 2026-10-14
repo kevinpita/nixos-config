@@ -13,6 +13,10 @@
 
       services.comin = {
         enable = true;
+        # Accept force-pushed main heads. The signature check below still applies.
+        package = inputs.comin.packages.${pkgs.stdenv.hostPlatform.system}.comin.overrideAttrs (old: {
+          patches = (old.patches or [ ]) ++ [ ../../packages/comin/allow-force-push.patch ];
+        });
         exporter.openFirewall = false;
         postDeploymentCommand = lib.getExe (
           pkgs.writeShellApplication {

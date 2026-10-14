@@ -1,0 +1,22 @@
+--- a/internal/repository/git.go
++++ b/internal/repository/git.go
+@@ -57,19 +57,10 @@
+ }
+ 
+ func getHeadFromRemoteAndBranch(r repository, remoteName, branchName, currentMainCommitId string) (newHead plumbing.Hash, msg string, err error) {
+-	var currentMainHash *plumbing.Hash
+ 	head := getRemoteCommitHash(r, remoteName, branchName)
+ 	if head == nil {
+ 		return newHead, "", fmt.Errorf("the branch '%s/%s' doesn't exist", remoteName, branchName)
+ 	}
+-	if currentMainCommitId != "" {
+-		c := plumbing.NewHash(currentMainCommitId)
+-		currentMainHash = &c
+-	}
+-
+-	if err = hasNotBeenHardReset(r, branchName, currentMainHash, head); err != nil {
+-		return
+-	}
+ 
+ 	commitObject, err := r.Repository.CommitObject(*head)
+ 	if err != nil {
