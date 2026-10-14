@@ -95,6 +95,8 @@
       # omp cannot see the outer terminal through herdr, so it shows image
       # placeholders. herdr forwards Kitty graphics to Ghostty. Unicode
       # placeholders stay off because herdr stretches them (herdr#4858).
+      # In-place resize keeps omp off the alternate screen during herdr
+      # resizes (flicker test, unset with PI_TUI_RESIZE_IN_PLACE=0).
       ompPackage = pkgs.symlinkJoin {
         name = "omp-${ompBasePackage.version}";
         paths = [ ompBasePackage ];
@@ -105,7 +107,7 @@
             --prefix PI_CONFIG_FILES : ${ompStatusLine} \
             --prefix PI_CONFIG_FILES : ${ompNoUpdateCheck} \
             --prefix PI_CONFIG_FILES : ${ompPython} \
-            --run 'if [ "''${TERM_PROGRAM-}" = herdr ]; then export PI_FORCE_IMAGE_PROTOCOL="''${PI_FORCE_IMAGE_PROTOCOL-kitty}" PI_KITTY_PLACEHOLDERS="''${PI_KITTY_PLACEHOLDERS-0}"; fi' \
+            --run 'if [ "''${TERM_PROGRAM-}" = herdr ]; then export PI_FORCE_IMAGE_PROTOCOL="''${PI_FORCE_IMAGE_PROTOCOL-kitty}" PI_KITTY_PLACEHOLDERS="''${PI_KITTY_PLACEHOLDERS-0}" PI_TUI_RESIZE_IN_PLACE="''${PI_TUI_RESIZE_IN_PLACE-1}"; fi' \
             --add-flags "--plugin-dir ${pstackPlugin}"
         '';
       };
