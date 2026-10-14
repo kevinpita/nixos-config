@@ -32,6 +32,11 @@
         };
       };
 
+      # GTK 4.20+ on Wayland leaves dead keys and Compose to an input method.
+      # No input method runs here, so the GTK built-in handling is required
+      # for the deadtilde layout in GTK 4 apps such as Ghostty.
+      environment.sessionVariables.GTK_IM_MODULE = "simple";
+
       home-manager.users.${username} = {
         fonts.fontconfig.enable = true;
         home.packages = with pkgs; [
