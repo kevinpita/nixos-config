@@ -136,7 +136,7 @@ in
             }
             # Comin deploys only commits signed by an allowed key.
             commit_lock() {
-              git -c user.name=nix-cache-update -c user.email=gitkevin@pm.me \
+              git -c user.name="Kevin Pita" -c user.email=gitkevin@pm.me \
                 -c gpg.format=ssh -c user.signingkey=/home/${username}/.ssh/id_ed25519_sign \
                 commit --quiet --gpg-sign --message "chore: update flake.lock" -- flake.lock
             }
