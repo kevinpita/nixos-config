@@ -1,160 +1,35 @@
---- a/metrics.go
-+++ b/metrics.go
-@@ -18,6 +18,18 @@
- )
- 
- var (
-+	metricDeviceSelfTestAge = prometheus.NewDesc(
-+		"smartctl_device_self_test_age_seconds",
-+		"Powered-on seconds since the latest recorded self-test ended, excluding tests still running.",
-+		[]string{"device", "result"},
-+		nil,
-+	)
-+	metricDeviceSmartStatusReadTime = prometheus.NewDesc(
-+		"smartctl_device_smart_status_read_time_seconds",
-+		"Unix time of the SMART health read, retained with cached results.",
-+		[]string{"device"},
-+		nil,
-+	)
- 	metricSmartctlVersion = prometheus.NewDesc(
- 		"smartctl_version",
- 		"smartctl version",
---- a/readjson.go
-+++ b/readjson.go
-@@ -14,6 +14,7 @@
- package main
- 
- import (
-+	stdjson "encoding/json"
- 	"fmt"
- 	"log/slog"
- 	"os"
-@@ -78,8 +79,32 @@
- 	jsonOk := jsonIsOk(logger, json)
- 	logger.Debug("Collected S.M.A.R.T. json data", "device", device, "duration", time.Since(start))
- 	if rcOk && jsonOk {
--		jsonCache.Store(device, JSONCache{JSON: json, LastCollect: time.Now()})
--	}
-+		jsonCache.Store(device, JSONCache{JSON: withSelfTestLog(logger, device, json), LastCollect: time.Now()})
+--- /dev/null
++++ b/describe_test.go
+@@ -0,0 +1,29 @@
++package main
++
++import (
++	"log/slog"
++	"testing"
++
++	"github.com/prometheus/client_golang/prometheus"
++	"github.com/tidwall/gjson"
++)
++
++// The registry rejects the whole scrape if one collected metric is not described.
++func TestCollectedMetricsAreDescribed(t *testing.T) {
++	descs := make(chan *prometheus.Desc, 128)
++	(&SMARTctlManagerCollector{}).Describe(descs)
++	close(descs)
++	described := map[string]bool{}
++	for desc := range descs {
++		described[desc.String()] = true
++	}
++	ch := make(chan prometheus.Metric, 128)
++	smart := NewSMARTctl(slog.Default(), gjson.Parse(`{"power_on_time":{"hours":100},"smart_status":{"passed":true},"local_time":{"time_t":1600000000},"ata_smart_self_test_log":{"standard":{"table":[{"status":{"value":0},"lifetime_hours":75}]}}}`), ch, Device{})
++	smart.Collect()
++	close(ch)
++	for metric := range ch {
++		if !described[metric.Desc().String()] {
++			t.Errorf("collected metric is not described: %s", metric.Desc())
++		}
 +	}
 +}
-+
-+// Query the log separately: unsupported self-tests must not discard valid health.
-+func withSelfTestLog(logger *slog.Logger, device Device, health gjson.Result) gjson.Result {
-+	out, _ := exec.Command(*smartctlPath, "--json", "--log=selftest", "--nocheck="+*smartctlPowerModeCheck, "--device="+device.Type, device.Name).Output()
-+	log := parseJSON(string(out))
-+	status := log.Get("smartctl.exit_status")
-+	if !status.Exists() || !resultCodeIsOk(logger, device, status.Int()) || !jsonIsOk(logger, log) {
-+		return health
-+	}
-+	var merged map[string]stdjson.RawMessage
-+	if err := stdjson.Unmarshal([]byte(health.Raw), &merged); err != nil || merged == nil {
-+		return health
-+	}
-+	for _, key := range []string{"ata_smart_self_test_log", "nvme_self_test_log"} {
-+		if value := log.Get(key); value.Exists() {
-+			merged[key] = stdjson.RawMessage(value.Raw)
-+		}
-+	}
-+	out, err := stdjson.Marshal(merged)
-+	if err != nil {
-+		return health
-+	}
-+	return parseJSON(string(out))
- }
- 
- func readSMARTctlDevices(logger *slog.Logger) gjson.Result {
---- a/smartctl.go
-+++ b/smartctl.go
-@@ -99,6 +99,7 @@
- 	smart.mineDeviceStatistics()
- 	smart.mineDeviceErrorLog()
- 	smart.mineDeviceSelfTestLog()
-+	smart.mineSelfTestAge()
- 	smart.mineDeviceERC()
- 	smart.mineSmartStatus()
- 
-@@ -476,6 +477,15 @@
- 			smartStatus.Get("passed").Float(),
- 			smart.device.device,
- 		)
-+		// Use the cached smartctl timestamp, not the time of this scrape.
-+		if readTime := smart.json.Get("local_time.time_t"); readTime.Exists() {
-+			smart.ch <- prometheus.MustNewConstMetric(
-+				metricDeviceSmartStatusReadTime,
-+				prometheus.GaugeValue,
-+				readTime.Float(),
-+				smart.device.device,
-+			)
-+		}
- 	}
- }
- 
-@@ -543,6 +553,64 @@
- 	}
- }
- 
-+func (smart *SMARTctl) mineSelfTestAge() {
-+	hours := smart.json.Get("power_on_time.hours")
-+	if !hours.Exists() || hours.Float() < 0 {
-+		return
-+	}
-+	nvme := smart.json.Get("nvme_self_test_log").Exists()
-+	table := smart.json.Get("nvme_self_test_log.table")
-+	if !nvme {
-+		// ATA log timestamps wrap at 65536 hours. Do not guess an epoch.
-+		if hours.Float() >= 65536 {
-+			return
-+		}
-+		table = smart.json.Get("ata_smart_self_test_log.extended.table")
-+		if len(table.Array()) == 0 {
-+			table = smart.json.Get("ata_smart_self_test_log.standard.table")
-+		}
-+	}
-+	// smartctl returns the newest entries first. Do not replace a recent
-+	// failure or abort with an older successful result.
-+	for _, entry := range table.Array() {
-+		status := entry.Get("status.value")
-+		ended := entry.Get("lifetime_hours")
-+		if nvme {
-+			status = entry.Get("self_test_result.value")
-+			ended = entry.Get("power_on_hours")
-+		}
-+		if !status.Exists() {
-+			continue
-+		}
-+		code := status.Int()
-+		if !nvme {
-+			code >>= 4
-+		}
-+		if code == 15 { // ATA still running, or unused NVMe entry.
-+			continue
-+		}
-+		if !ended.Exists() || ended.Float() < 0 || ended.Float() > hours.Float() {
-+			return
-+		}
-+		result := "Unknown"
-+		if code == 0 {
-+			result = "Passed"
-+		} else if (!nvme && code >= 3 && code <= 8) || (nvme && code >= 5 && code <= 7) {
-+			result = "Failed"
-+		} else if (!nvme && (code == 1 || code == 2)) || (nvme && ((code >= 1 && code <= 4) || code == 8 || code == 9)) {
-+			result = "Aborted"
-+		}
-+		smart.ch <- prometheus.MustNewConstMetric(
-+			metricDeviceSelfTestAge,
-+			prometheus.GaugeValue,
-+			(hours.Float()-ended.Float())*3600,
-+			smart.device.device,
-+			result,
-+		)
-+		return
-+	}
-+}
-+
- func (smart *SMARTctl) mineDeviceSelfTestLog() {
- 	for logType, status := range smart.json.Get("ata_smart_self_test_log").Map() {
- 		smart.ch <- prometheus.MustNewConstMetric(
 --- /dev/null
 +++ b/freshness_test.go
 @@ -0,0 +1,50 @@
@@ -208,6 +83,82 @@
 +		})
 +	}
 +}
+--- a/main.go
++++ b/main.go
+@@ -85,6 +85,8 @@
+ 	ch <- metricDeviceErrorLogCount
+ 	ch <- metricDeviceSelfTestLogCount
+ 	ch <- metricDeviceSelfTestLogErrorCount
++	ch <- metricDeviceSelfTestAge
++	ch <- metricDeviceSmartStatusReadTime
+ 	ch <- metricDeviceERCSeconds
+ 	ch <- metricSCSIGrownDefectList
+ 	ch <- metricReadErrorsCorrectedByRereadsRewrites
+--- a/metrics.go
++++ b/metrics.go
+@@ -18,6 +18,18 @@
+ )
+ 
+ var (
++	metricDeviceSelfTestAge = prometheus.NewDesc(
++		"smartctl_device_self_test_age_seconds",
++		"Powered-on seconds since the latest recorded self-test ended, excluding tests still running.",
++		[]string{"device", "result"},
++		nil,
++	)
++	metricDeviceSmartStatusReadTime = prometheus.NewDesc(
++		"smartctl_device_smart_status_read_time_seconds",
++		"Unix time of the SMART health read, retained with cached results.",
++		[]string{"device"},
++		nil,
++	)
+ 	metricSmartctlVersion = prometheus.NewDesc(
+ 		"smartctl_version",
+ 		"smartctl version",
+--- a/readjson.go
++++ b/readjson.go
+@@ -14,6 +14,7 @@
+ package main
+ 
+ import (
++	stdjson "encoding/json"
+ 	"fmt"
+ 	"log/slog"
+ 	"os"
+@@ -77,8 +78,32 @@
+ 	jsonOk := jsonIsOk(logger, json)
+ 	logger.Debug("Collected S.M.A.R.T. json data", "device", device, "duration", time.Since(start))
+ 	if rcOk && jsonOk {
+-		jsonCache.Store(device, JSONCache{JSON: json, LastCollect: time.Now()})
++		jsonCache.Store(device, JSONCache{JSON: withSelfTestLog(logger, device, json), LastCollect: time.Now()})
++	}
++}
++
++// Query the log separately: unsupported self-tests must not discard valid health.
++func withSelfTestLog(logger *slog.Logger, device Device, health gjson.Result) gjson.Result {
++	out, _ := exec.Command(*smartctlPath, "--json", "--log=selftest", "--nocheck="+*smartctlPowerModeCheck, "--device="+device.Type, device.Name).Output()
++	log := parseJSON(string(out))
++	status := log.Get("smartctl.exit_status")
++	if !status.Exists() || !resultCodeIsOk(logger, device, status.Int()) || !jsonIsOk(logger, log) {
++		return health
+ 	}
++	var merged map[string]stdjson.RawMessage
++	if err := stdjson.Unmarshal([]byte(health.Raw), &merged); err != nil || merged == nil {
++		return health
++	}
++	for _, key := range []string{"ata_smart_self_test_log", "nvme_self_test_log"} {
++		if value := log.Get(key); value.Exists() {
++			merged[key] = stdjson.RawMessage(value.Raw)
++		}
++	}
++	out, err := stdjson.Marshal(merged)
++	if err != nil {
++		return health
++	}
++	return parseJSON(string(out))
+ }
+ 
+ func readSMARTctlDevices(logger *slog.Logger) gjson.Result {
 --- /dev/null
 +++ b/selftest_history_test.go
 @@ -0,0 +1,98 @@
@@ -309,3 +260,94 @@
 +		})
 +	}
 +}
+--- a/smartctl.go
++++ b/smartctl.go
+@@ -99,6 +99,7 @@
+ 	smart.mineDeviceStatistics()
+ 	smart.mineDeviceErrorLog()
+ 	smart.mineDeviceSelfTestLog()
++	smart.mineSelfTestAge()
+ 	smart.mineDeviceERC()
+ 	smart.mineSmartStatus()
+ 
+@@ -477,6 +478,15 @@
+ 			smartStatus.Get("passed").Float(),
+ 			smart.device.device,
+ 		)
++		// Use the cached smartctl timestamp, not the time of this scrape.
++		if readTime := smart.json.Get("local_time.time_t"); readTime.Exists() {
++			smart.ch <- prometheus.MustNewConstMetric(
++				metricDeviceSmartStatusReadTime,
++				prometheus.GaugeValue,
++				readTime.Float(),
++				smart.device.device,
++			)
++		}
+ 	}
+ }
+ 
+@@ -544,6 +554,64 @@
+ 	}
+ }
+ 
++func (smart *SMARTctl) mineSelfTestAge() {
++	hours := smart.json.Get("power_on_time.hours")
++	if !hours.Exists() || hours.Float() < 0 {
++		return
++	}
++	nvme := smart.json.Get("nvme_self_test_log").Exists()
++	table := smart.json.Get("nvme_self_test_log.table")
++	if !nvme {
++		// ATA log timestamps wrap at 65536 hours. Do not guess an epoch.
++		if hours.Float() >= 65536 {
++			return
++		}
++		table = smart.json.Get("ata_smart_self_test_log.extended.table")
++		if len(table.Array()) == 0 {
++			table = smart.json.Get("ata_smart_self_test_log.standard.table")
++		}
++	}
++	// smartctl returns the newest entries first. Do not replace a recent
++	// failure or abort with an older successful result.
++	for _, entry := range table.Array() {
++		status := entry.Get("status.value")
++		ended := entry.Get("lifetime_hours")
++		if nvme {
++			status = entry.Get("self_test_result.value")
++			ended = entry.Get("power_on_hours")
++		}
++		if !status.Exists() {
++			continue
++		}
++		code := status.Int()
++		if !nvme {
++			code >>= 4
++		}
++		if code == 15 { // ATA still running, or unused NVMe entry.
++			continue
++		}
++		if !ended.Exists() || ended.Float() < 0 || ended.Float() > hours.Float() {
++			return
++		}
++		result := "Unknown"
++		if code == 0 {
++			result = "Passed"
++		} else if (!nvme && code >= 3 && code <= 8) || (nvme && code >= 5 && code <= 7) {
++			result = "Failed"
++		} else if (!nvme && (code == 1 || code == 2)) || (nvme && ((code >= 1 && code <= 4) || code == 8 || code == 9)) {
++			result = "Aborted"
++		}
++		smart.ch <- prometheus.MustNewConstMetric(
++			metricDeviceSelfTestAge,
++			prometheus.GaugeValue,
++			(hours.Float()-ended.Float())*3600,
++			smart.device.device,
++			result,
++		)
++		return
++	}
++}
++
+ func (smart *SMARTctl) mineDeviceSelfTestLog() {
+ 	for logType, status := range smart.json.Get("ata_smart_self_test_log").Map() {
+ 		smart.ch <- prometheus.MustNewConstMetric(
