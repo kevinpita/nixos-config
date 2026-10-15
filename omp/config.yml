@@ -16,6 +16,8 @@ modelRoles:
   advisor: openai-codex/gpt-6.1-sol:medium
   image: openai-codex/gpt-image-2
   judge: '@smol'
+  opus: anthropic/claude-opus-5-5:medium
+  gpt: openai-codex/gpt-6.1-sol:medium
   glm: zai/glm-5.3:high
   security: '@glm'
 task:

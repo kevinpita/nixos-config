@@ -17,6 +17,7 @@
 
 - Use subagents only when explicitly asked.
 - Call harness-specific agents only by the names that the current harness provides. If a requested agent is not available, say so. Do not substitute another harness or CLI.
+- When the harness provides the `opus`, `glm`, and `gpt` agents, map the bare words "opus", "glm", and "gpt" in a subagent request to the agent with that name. For a request with more than one of these names, such as "a swarm of opus, glm, and gpt", spawn workers on each named agent in one batch. Split the workers evenly unless the user gives counts.
 
 ## Tools
 
