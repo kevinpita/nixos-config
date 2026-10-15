@@ -153,6 +153,10 @@
           home.file = {
             ".omp/agent/AGENTS.md".source = ../agents/AGENTS.md;
             ".omp/agent/skills".source = skillsWithoutBro;
+            # Reports omp agent state to herdr. Same file that
+            # `herdr integration install omp` writes, pinned to the herdr package.
+            ".omp/agent/extensions/herdr-omp-agent-state.ts".source =
+              "${pkgs.herdr}/share/herdr/integrations/omp/herdr-agent-state.ts";
             # omp has no model-change event, so poll the live model to keep
             # the status line current after /model switches.
             ".omp/agent/extensions/provider-status.ts".text = ''
