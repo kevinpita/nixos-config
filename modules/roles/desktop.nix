@@ -18,6 +18,7 @@
       security
       tailscale
       ui
+      vscode
       work-cloud
       work-servers
       zed
