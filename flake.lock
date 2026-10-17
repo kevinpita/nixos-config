@@ -872,11 +872,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1792186358,
-        "narHash": "sha256-TokvIBhXICvJDnxn0iBOLNKR8FQ9tNTGepKhi/Ig5Z8=",
+        "lastModified": 1792273708,
+        "narHash": "sha256-FHVtNXZsOO7ytSzbejb/ELB0tgWevHRtmN24t/nveV8=",
         "owner": "can1357",
         "repo": "oh-my-pi",
-        "rev": "96894a6147d8cc64b7e00ad3a7d7178fd93b9531",
+        "rev": "200e7d2c6ebb2e187b167f807b9f68f779c0bf4b",
         "type": "github"
       },
       "original": {
@@ -920,11 +920,11 @@
     "pstack": {
       "flake": false,
       "locked": {
-        "lastModified": 1792190804,
-        "narHash": "sha256-kOPmFj3TyHoidbrhqlfhHVBuZ+YMD7Po04rW+QjbpVk=",
+        "lastModified": 1792235396,
+        "narHash": "sha256-YYxYF6eWFwCkwvHXtwftLgry+LZZlTa7/RozH25Y3uQ=",
         "owner": "michael-denyer",
         "repo": "pstack-claude",
-        "rev": "1439b9771ec03d50e3b615e46e6aab45b6a3a1db",
+        "rev": "7bad1ebc26faa268806bfbb84e5af55d178b68e4",
         "type": "github"
       },
       "original": {
