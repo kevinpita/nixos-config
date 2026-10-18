@@ -6,6 +6,7 @@
       lib,
       pkgs,
       username,
+      ciMode,
       ...
     }:
     let
@@ -133,6 +134,16 @@
         package = ompPackage;
       };
 
+      # The NaN API key for the nan provider in models.yml below.
+      sops.secrets = lib.optionalAttrs (!ciMode) {
+        "nan-key" = {
+          sopsFile = "${inputs.nixos-secrets}/secrets/common.yaml";
+          owner = username;
+          mode = "0400";
+          path = "/home/${username}/.config/nan/api-key";
+        };
+      };
+
       home-manager.users.${username} =
         { config, lib, ... }:
         {
@@ -174,6 +185,47 @@
                 });
               }
             '';
+
+            # NaN cluster (https://nan.builders/docs), OpenAI-compatible.
+            # The key stays out of the store and the repo: omp reads it from
+            # ~/.config/nan/api-key when a request needs it. Usage counts
+            # against the membership quota, so cost is 0.
+            ".omp/agent/models.yml".source = (pkgs.formats.yaml { }).generate "omp-models.yml" {
+              providers.nan =
+                let
+                  nanModel =
+                    id: name: extra:
+                    {
+                      inherit id name;
+                      reasoning = true;
+                      input = [
+                        "text"
+                        "image"
+                      ];
+                      contextWindow = 1048576;
+                      maxTokens = 32768;
+                      cost = {
+                        input = 0;
+                        output = 0;
+                        cacheRead = 0;
+                        cacheWrite = 0;
+                      };
+                    }
+                    // extra;
+                in
+                {
+                  baseUrl = "https://api.nan.builders/v1";
+                  api = "openai-completions";
+                  apiKey = "!cat ${config.xdg.configHome}/nan/api-key";
+                  authHeader = true;
+                  compat.supportsDeveloperRole = true;
+                  models = [
+                    (nanModel "deepseek-v4-flash" "DeepSeek V4 Flash (NaN)" { })
+                    # The id is not in the catalog, so name the tokenizer.
+                    (nanModel "glm5.3-flash" "GLM 5.3 Flash (NaN)" { tokenizer = "glm5"; })
+                  ];
+                };
+            };
 
             ".gemini/antigravity-cli/skills" = {
               force = true;
