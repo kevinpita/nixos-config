@@ -397,6 +397,26 @@
         "type": "github"
       }
     },
+    "forklab": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1792409768,
+        "narHash": "sha256-A74kZ655CYN9rBK8vh2y9pRPMxHj9wgIzZYtZFEFdwE=",
+        "owner": "kevinpita",
+        "repo": "forklab",
+        "rev": "f1bca4889e0682559a6f97ac333b608c15937c7c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kevinpita",
+        "repo": "forklab",
+        "type": "github"
+      }
+    },
     "herdr-nix": {
       "inputs": {
         "flake-utils": "flake-utils_2",
@@ -872,11 +892,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1792357872,
-        "narHash": "sha256-q97BOSWoagYsF6Eb2aM3cb5n/bx++MoAuSMTHQrmMXU=",
+        "lastModified": 1792406380,
+        "narHash": "sha256-i+gT5svY7GaOBrM+Zz5t4NwMFKIx3HF+MAH+h2WFtog=",
         "owner": "can1357",
         "repo": "oh-my-pi",
-        "rev": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
+        "rev": "5d72f5d3f49a802e51d04c810002eb1830440172",
         "type": "github"
       },
       "original": {
@@ -941,6 +961,7 @@
         "dankcalendar": "dankcalendar",
         "disko": "disko",
         "flake-parts": "flake-parts_2",
+        "forklab": "forklab",
         "herdr-nix": "herdr-nix",
         "home-manager": "home-manager_2",
         "ilofan": "ilofan",
@@ -1241,11 +1262,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792152791,
-        "narHash": "sha256-J3sKT3dVyCXlblkgzWc41cUZ4ezZbR5XZzfvETkAH78=",
+        "lastModified": 1792408455,
+        "narHash": "sha256-WR3+1y5ot/cA0F+3oflwL+dOuSxNix9l6NGGSE4dhb4=",
         "owner": "BirdeeHub",
         "repo": "nix-wrapper-modules",
-        "rev": "6bc32f5cc67ee0f1bfb246c47b4b2c53ba1bc014",
+        "rev": "8d1e3915e539bbedffc0bc3d4c531544a46e97c4",
         "type": "github"
       },
       "original": {

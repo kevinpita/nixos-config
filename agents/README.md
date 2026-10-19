@@ -18,6 +18,8 @@ Harness settings and files that use harness-specific syntax belong in the folder
 | omp | `~/.omp/agent/AGENTS.md` | `~/.omp/agent/skills`, without `bro` because pstack ships its own |
 | Antigravity | not installed | `~/.gemini/antigravity-cli/skills` |
 
+Both harnesses also get the `forklab` skill. The forklab package ships that skill, so it stays at the same version as the installed CLI. Change it in the forklab repository.
+
 ## Applying changes
 
 Run `just switch` from the repository root to deploy changes, then restart the harness to load them. Edit the source here rather than the installed files.

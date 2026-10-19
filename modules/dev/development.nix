@@ -20,8 +20,9 @@
         postgresql
         pgbot
 
-        # Blockchain nodes
+        # Blockchain nodes and local labs
         exrpd
+        forklab
 
       ];
 

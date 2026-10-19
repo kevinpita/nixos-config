@@ -25,6 +25,8 @@ let
 
     inputs.ink-nix.overlays.default
 
+    inputs.forklab.overlays.default
+
     config.flake.overlays.default
   ];
 

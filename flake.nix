@@ -126,6 +126,11 @@
       url = "github:kevinpita/ilofan";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    forklab = {
+      url = "github:kevinpita/forklab";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./modules);

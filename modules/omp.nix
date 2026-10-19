@@ -123,6 +123,13 @@
         root = ../agents/skills;
         fileset = lib.fileset.difference ../agents/skills ../agents/skills/bro;
       };
+      # forklab ships its skill in its package.
+      withForklabSkill =
+        skills:
+        pkgs.runCommand "agent-skills" { } ''
+          mkdir "$out"
+          ln -s ${skills}/* ${pkgs.forklab}/share/forklab/.agents/skills/forklab "$out"/
+        '';
     in
     {
       imports = [ inputs.oh-my-pi.nixosModules.default ];
@@ -163,7 +170,7 @@
 
           home.file = {
             ".omp/agent/AGENTS.md".source = ../agents/AGENTS.md;
-            ".omp/agent/skills".source = skillsWithoutBro;
+            ".omp/agent/skills".source = withForklabSkill skillsWithoutBro;
             # Reports omp agent state to herdr. Same file that
             # `herdr integration install omp` writes, pinned to the herdr package.
             ".omp/agent/extensions/herdr-omp-agent-state.ts".source =
@@ -259,7 +266,7 @@
 
             ".gemini/antigravity-cli/skills" = {
               force = true;
-              source = ../agents/skills;
+              source = withForklabSkill ../agents/skills;
             };
           };
         };
