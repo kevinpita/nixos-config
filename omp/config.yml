@@ -19,6 +19,9 @@ modelRoles:
   opus: anthropic/claude-opus-5-5:medium
   gpt: openai-codex/gpt-6.1-sol:medium
   glm: zai/glm-5.3:high
+  fable: anthropic/claude-fable-5-1:xhigh
+  glm-flash: nan/glm5.3-flash:high
+  deepseek: nan/deepseek-v4-flash:high
   security: '@glm'
 task:
   agentModelOverrides:
