@@ -9,25 +9,25 @@ modelRoles:
   slow: anthropic/claude-opus-5-5:xhigh
   vision: openai-codex/gpt-6.1-sol:xhigh
   plan: anthropic/claude-opus-5-5:xhigh
-  commit: '@smol'
-  tiny: '@smol'
-  memory: '@smol'
+  commit: "@smol"
+  tiny: "@smol"
+  memory: "@smol"
   task: anthropic/claude-opus-5-5:medium
-  advisor: openai-codex/gpt-6.1-sol:medium
+  advisor: openai-codex/gpt-6.1-sol:xhigh
   image: openai-codex/gpt-image-2
-  judge: '@smol'
+  judge: "@smol"
   opus: anthropic/claude-opus-5-5:medium
   gpt: openai-codex/gpt-6.1-sol:medium
   glm: zai/glm-5.3:high
   fable: anthropic/claude-fable-5-1:xhigh
   glm-flash: nan/glm5.3-flash:high
   deepseek: nan/deepseek-v4-flash:high
-  security: '@glm'
+  security: "@glm"
 task:
   agentModelOverrides:
-    scout: '@smol'
-    reviewer: '@advisor'
-    security-reviewer: '@security'
+    scout: "@smol"
+    reviewer: "@advisor"
+    security-reviewer: "@security"
 symbolPreset: nerd
 composer:
   shape: band

@@ -7,23 +7,6 @@
 - Do not use em dashes.
 - Always use ASCII arrows `<-` and `->` instead of Unicode left or right-pointing arrows.
 
-## Model selection
-
-- For requests to use GLM 5.3 without an explicit variant, use the exact model ID `zai/glm-5.3` in all tool calls, workflow agents, and model settings. This includes requests written as `glm-5.3` or `glm5-3`.
-- Use `zai/glm-5.3-flash` only when the user explicitly requests the flash variant.
-- Never select `zai/glm-5.3-highspeed`. The user's subscription does not include it. Do not use a bare or fuzzy GLM model ID as a fallback.
-
-## Subagents
-
-- Use subagents only when explicitly asked.
-- Call harness-specific agents only by the names that the current harness provides. If a requested agent is not available, say so. Do not substitute another harness or CLI.
-- When the harness provides the `opus`, `glm`, and `gpt` agents, map the bare words "opus", "glm", and "gpt" in a subagent request to the agent with that name. For a request with more than one of these names, such as "a swarm of opus, glm, and gpt", spawn workers on each named agent in one batch. Split the workers evenly unless the user gives counts.
-
-## Tools
-
-- Ask the user questions with the harness's structured question tool when one is available.
-- For long shell work, use `bash` with temporary log files.
-
 ## Commits
 
 - Use Conventional Commit messages with a subject line only, no body.
