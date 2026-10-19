@@ -8,6 +8,7 @@ This folder owns the oh-my-pi (omp) harness configuration. `modules/omp.nix` sel
 | --- | --- |
 | `config.yml` | omp settings shared by all hosts. `~/.omp/agent/config.yml` links to this file, so settings changes in omp edit it in place. Commit and pull to share them. |
 | `agents/` | omp worker definitions. `~/.omp/agent/agents` links to this folder, so agents that omp creates or edits land here. Their `model` frontmatter selects a role from `config.yml`. |
+| `WATCHDOG.yml` | The advisor roster: each advisor's name, model, effort, and default on/off state. `~/.omp/agent/WATCHDOG.yml` links to this file, so `/advisor configure` at user scope edits it in place. |
 
 ## Model routing
 

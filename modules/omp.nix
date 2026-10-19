@@ -164,6 +164,9 @@
               "${repo}/omp/config.yml" \
               "${config.home.homeDirectory}/.omp/agent/config.yml"
             run ln -sfn $VERBOSE_ARG \
+              "${repo}/omp/WATCHDOG.yml" \
+              "${config.home.homeDirectory}/.omp/agent/WATCHDOG.yml"
+            run ln -sfn $VERBOSE_ARG \
               "${repo}/omp/agents" \
               "${config.home.homeDirectory}/.omp/agent/agents"
           '';
