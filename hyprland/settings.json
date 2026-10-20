@@ -109,6 +109,7 @@
         "notificationButton",
         "dankCalendarAgenda",
         "dockerManager",
+        "tailnetPorts",
         "battery",
         {
           "id": "idleInhibitor",
@@ -189,6 +190,7 @@
         "systemTray",
         "notificationButton",
         "dankCalendarAgenda",
+        "tailnetPorts",
         "battery",
         {
           "id": "idleInhibitor",

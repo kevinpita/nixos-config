@@ -16,6 +16,9 @@
   "emojiLauncher": {
     "enabled": true
   },
+  "tailnetPorts": {
+    "enabled": true
+  },
   "workspaceFinder": {
     "enabled": true
   }

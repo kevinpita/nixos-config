@@ -1,0 +1,13 @@
+{
+  "id": "tailnetPorts",
+  "name": "Tailnet Ports",
+  "description": "Browse listening ports on tailnet devices and forward them to localhost over SSH",
+  "version": "1.0.0",
+  "author": "Kevin Pita",
+  "type": "widget",
+  "capabilities": ["dankbar-widget"],
+  "component": "./TailnetPortsWidget.qml",
+  "icon": "settings_ethernet",
+  "requires_dms": ">=1.5.0",
+  "permissions": []
+}
