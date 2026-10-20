@@ -31,7 +31,7 @@
             background-opacity = 0.95;
             term = "xterm-ghostty";
             shell-integration = "zsh";
-            shell-integration-features = "cursor,sudo,title";
+            shell-integration-features = "cursor,sudo,title,ssh-terminfo";
           };
         };
 
