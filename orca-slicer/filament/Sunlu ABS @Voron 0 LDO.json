@@ -1,0 +1,28 @@
+{
+	"from": "User",
+	"inherits": "Generic ABS @System",
+	"name": "Sunlu ABS @Voron 0 LDO",
+	"filament_settings_id": [
+		"Sunlu ABS @Voron 0 LDO"
+	],
+	"version": "2.4.0.2",
+	"nozzle_temperature": ["250"],
+	"nozzle_temperature_initial_layer": ["250"],
+	"hot_plate_temp": ["100"],
+	"hot_plate_temp_initial_layer": ["100"],
+	"textured_plate_temp": ["100"],
+	"textured_plate_temp_initial_layer": ["100"],
+	"eng_plate_temp": ["100"],
+	"eng_plate_temp_initial_layer": ["100"],
+	"filament_flow_ratio": ["0.94"],
+	"filament_max_volumetric_speed": ["11"],
+	"fan_min_speed": ["0"],
+	"fan_max_speed": ["0"],
+	"close_fan_the_first_x_layers": ["3"],
+	"overhang_fan_speed": ["0"],
+	"during_print_exhaust_fan_speed": ["0"],
+	"complete_print_exhaust_fan_speed": ["0"],
+	"fan_cooling_layer_time": ["20"],
+	"slow_down_layer_time": ["15"],
+	"slow_down_min_speed": ["15"]
+}
