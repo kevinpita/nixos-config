@@ -34,5 +34,6 @@
 	"travel_jerk": "0",
 	"accel_to_decel_enable": "0",
 	"travel_speed": "200",
-	"exclude_object": "1"
+	"exclude_object": "1",
+	"brim_type": "no_brim"
 }

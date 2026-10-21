@@ -15,16 +15,16 @@
 		"20"
 	],
 	"fan_max_speed": [
-		"0"
+		"40"
 	],
 	"fan_min_speed": [
-		"0"
+		"15"
 	],
 	"filament_extruder_variant": [
 		"Direct Drive Standard"
 	],
 	"filament_flow_ratio": [
-		"0.94"
+		"0.96"
 	],
 	"filament_max_volumetric_speed": [
 		"10"
@@ -54,7 +54,7 @@
 		"245"
 	],
 	"overhang_fan_speed": [
-		"0"
+		"60"
 	],
 	"pressure_advance": [
 		"0.04"
