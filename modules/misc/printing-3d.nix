@@ -4,7 +4,18 @@
     {
       home-manager.users.${username} = {
         home.packages = with pkgs; [
-          orca-slicer
+          # Orca 2.4.2 segfaults rendering plate thumbnails when WebKitGTK 2.54 leaves its GL
+          # context current (OrcaSlicer#15810). Remove after the next Orca release, which includes the fix (#15873).
+          (symlinkJoin {
+            name = "orca-slicer";
+            paths = [ orca-slicer ];
+            buildInputs = [ makeWrapper ];
+            postBuild = ''
+              wrapProgram $out/bin/orca-slicer \
+                --set WEBKIT_DISABLE_DMABUF_RENDERER 1 \
+                --set GALLIUM_THREAD 0
+            '';
+          })
           prusa-slicer
           super-slicer-beta
         ];
