@@ -70,12 +70,17 @@
       # Upstream's release profile uses fat LTO with one codegen unit, which
       # links pi-natives on a single core. Use the settings of upstream's `ci`
       # profile (used for its Docker images) to build in parallel.
-      ompBasePackage = inputs.oh-my-pi.packages.${system}.default.overrideAttrs (old: {
-        env = old.env // {
-          CARGO_PROFILE_RELEASE_LTO = "thin";
-          CARGO_PROFILE_RELEASE_CODEGEN_UNITS = "16";
-        };
-      });
+      # withWaylandScreencast builds pi-natives with `wayland-pipewire`, which
+      # computer use needs to capture the screen on Hyprland.
+      ompBasePackage =
+        (inputs.oh-my-pi.packages.${system}.default.override { withWaylandScreencast = true; })
+        .overrideAttrs
+          (old: {
+            env = old.env // {
+              CARGO_PROFILE_RELEASE_LTO = "thin";
+              CARGO_PROFILE_RELEASE_CODEGEN_UNITS = "16";
+            };
+          });
       # pstack is a Claude Code plugin; omp loads that format through
       # --plugin-dir. Its poteto-mode scripts install commander into their own
       # directory on first run, which a store path cannot allow, so the
