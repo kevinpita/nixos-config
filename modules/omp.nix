@@ -158,6 +158,14 @@ in
           mkdir "$out"
           ln -s ${skills}/* ${pkgs.forklab}/share/forklab/.agents/skills/forklab "$out"/
         '';
+      # Skills that use omp-specific tools and agents live in omp/skills and
+      # go to omp only.
+      withOmpSkills =
+        skills:
+        pkgs.runCommand "omp-skills" { } ''
+          mkdir "$out"
+          ln -s ${skills}/* ${../omp/skills}/* "$out"/
+        '';
     in
     {
       imports = [
@@ -270,7 +278,9 @@ in
 
           home.file = {
             ".omp/agent/AGENTS.md".source = ../agents/AGENTS.md;
-            ".omp/agent/skills".source = withForklabSkill skillsWithoutBro;
+            ".omp/agent/skills".source = withOmpSkills (withForklabSkill skillsWithoutBro);
+            # Blocks git push while the review-loop skill runs.
+            ".omp/agent/extensions/review-loop-guard.ts".source = ../omp/extensions/review-loop-guard.ts;
             # Reports omp agent state to herdr. Same file that
             # `herdr integration install omp` writes, pinned to the herdr package.
             ".omp/agent/extensions/herdr-omp-agent-state.ts".source =
