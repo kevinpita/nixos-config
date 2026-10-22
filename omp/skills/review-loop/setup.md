@@ -23,9 +23,9 @@ Ask one question at a time with `ask`. Build each picker from facts you collecte
 ## Questions, in order
 
 1. **Target.** Options: `Current branch <name> vs <default>` (when not on the default branch), each open PR as `PR #<n>: <title>` (the PR of the current branch first), `Last commit <sha> <subject>`, `Commit range...`. Other: a branch, a PR number or URL, or a SHA.
-1. **Base**, for a branch, PR, or range target. Options: the default branch, the PR base branch, the upstream branch. Pin `git merge-base <base> HEAD` as the base SHA. A single commit target pins `<sha>^`.
-1. **Checkout**, only when the target is not the checked-out branch. Fixes need it checked out locally. Options: `Check it out here` (`gh pr checkout <n>` or `git switch <branch>`), `Stop`.
 1. **Dirty tree**, only when `git status --porcelain` is not empty. Fix commits need a clean main checkout. Options: `Commit as WIP first`, `Stash`, `Stop`.
+1. **Checkout**, only when the target is not the checked-out branch. Fixes need it checked out locally. Options: `Check it out here` (`gh pr checkout <n>` or `git switch <branch>`), `Stop`.
+1. **Base**, for a branch, PR, or range target. Options: the default branch, the PR base branch, the upstream branch. After the checkout, pin `git merge-base <base> HEAD` as the base SHA. A single commit target pins `<sha>^`.
 1. **Mode.** `Human`: you are asked when a finding needs a choice, and you always give the reason. `Auto`: judge models decide and record their reasons. You are asked only when they stay split after 3 exchanges.
 1. **Reviewers** (`multi: true`). Recommend Opus + GPT.
 1. **Validators** (`multi: true`). Recommend Opus + GPT.
