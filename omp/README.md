@@ -18,6 +18,10 @@ A session model switch does not change explicit worker assignments. Role aliases
 
 Keep providers available for manual selection when only their default routes change. Provider blocks belong in `modules/omp.nix`, separate from role assignments. Custom providers go into the generated `~/.omp/agent/models.yml`. Their API keys stay outside the repository: the `nan` provider reads its key from `~/.config/nan/api-key`, which sops-nix writes from `nan-key` in the `nixos-secrets` file `secrets/common.yaml`.
 
+## Logins
+
+One host can set `omp.authBroker.enable` to run `omp auth-broker serve` as a system service. That host keeps the logins in its `~/.omp/agent/agent.db` and refreshes the OAuth tokens. The broker listens only on `127.0.0.1:8765`, and Tailscale Serve publishes that port on the tailnet, so no other network can reach it. The wrapper on every other host sets `OMP_AUTH_BROKER_URL` to the MagicDNS name of the broker host, so omp on those hosts ignores its local logins. Sign in on the broker host. All hosts read the shared bearer token from `~/.omp/auth-broker.token`, which sops-nix writes from `omp-auth-broker-token` in the `nixos-secrets` file `secrets/common.yaml`.
+
 ## Configuration or package?
 
 Change `modules/omp.nix` for the package, wrapper settings that runtime edits must not override, or which files are installed. Change this folder for the content of those files. The `oh-my-pi` flake input provides omp. The `pstack` input pins the pstack plugin that omp loads.

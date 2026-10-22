@@ -21,6 +21,9 @@
       virtualisation.podman.dockerCompat = lib.mkForce false;
       virtualisation.docker.rootless.enable = true;
 
+      # The other hosts read their omp logins from this host.
+      omp.authBroker.enable = true;
+
       boot.kernelPackages = pkgs.linuxPackages_latest;
     };
 }

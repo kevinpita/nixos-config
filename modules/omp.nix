@@ -1,4 +1,13 @@
-{ inputs, ... }:
+{
+  config,
+  inputs,
+  lib,
+  ...
+}:
+let
+  authBrokerPort = 8765;
+  hosts = lib.attrValues config.flake.nixosConfigurations;
+in
 {
   flake.modules.nixos.ai =
     {
@@ -6,12 +15,23 @@
       lib,
       pkgs,
       username,
+      tailnetDomain,
       ciMode,
       ...
     }:
     let
       repo = config.programs.nh.flake;
       system = pkgs.stdenv.hostPlatform.system;
+      # The broker host owns the logins in its agent.db. Every other host
+      # reads them from the broker over the tailnet.
+      authBrokerHost = lib.findSingle (
+        host: host.config.omp.authBroker.enable or false
+      ) null (throw "Only one host can enable omp.authBroker.") hosts;
+      authBrokerUrl =
+        if authBrokerHost == null || config.omp.authBroker.enable then
+          null
+        else
+          "http://${authBrokerHost.config.networking.hostName}.${tailnetDomain}:${toString authBrokerPort}";
       # Work AWS credentials are present in the environment, model calls must
       # never be billed to that account through Bedrock.
       ompProviderPolicy = (pkgs.formats.yaml { }).generate "omp-provider-policy.yml" {
@@ -119,6 +139,9 @@
             --prefix PI_CONFIG_FILES : ${ompStatusLine} \
             --prefix PI_CONFIG_FILES : ${ompNoUpdateCheck} \
             --prefix PI_CONFIG_FILES : ${ompPython} \
+            ${
+              lib.optionalString (authBrokerUrl != null) "--set-default OMP_AUTH_BROKER_URL ${authBrokerUrl}"
+            } \
             --run 'if [ "''${TERM_PROGRAM-}" = herdr ]; then export PI_FORCE_IMAGE_PROTOCOL="''${PI_FORCE_IMAGE_PROTOCOL-kitty}" PI_KITTY_PLACEHOLDERS="''${PI_KITTY_PLACEHOLDERS-0}"; fi' \
             --add-flags "--plugin-dir ${pstackPlugin}"
         '';
@@ -137,7 +160,12 @@
         '';
     in
     {
-      imports = [ inputs.oh-my-pi.nixosModules.default ];
+      imports = [
+        inputs.oh-my-pi.nixosModules.default
+        {
+          options.omp.authBroker.enable = lib.mkEnableOption "the omp auth broker for the other hosts on the tailnet";
+        }
+      ];
 
       programs.nix-ld.enable = true;
 
@@ -146,22 +174,86 @@
         package = ompPackage;
       };
 
-      # The NaN API key for the nan provider in models.yml below.
-      sops.secrets = lib.optionalAttrs (!ciMode) {
-        "nan-key" = {
-          sopsFile = "${inputs.nixos-secrets}/secrets/common.yaml";
-          owner = username;
-          mode = "0400";
-          path = "/home/${username}/.config/nan/api-key";
+      # Runs as the user so it serves the logins in ~/.omp/agent/agent.db.
+      # It listens on loopback only. Tailscale Serve publishes the port to the
+      # tailnet and sends the peer address in X-Forwarded-For. The bearer token
+      # in the sops secret below protects every route except the health check.
+      systemd.services.omp-auth-broker = lib.mkIf config.omp.authBroker.enable {
+        description = "omp auth broker";
+        wantedBy = [ "multi-user.target" ];
+        after = [ "network.target" ];
+        environment.HOME = "/home/${username}";
+        serviceConfig = {
+          User = username;
+          ExecStart = "${ompPackage}/bin/omp auth-broker serve --bind=127.0.0.1:${toString authBrokerPort} --trust-proxy-headers";
+          Restart = "on-failure";
         };
       };
+
+      # Serve matches the Host header, so clients must use the MagicDNS name.
+      # nixpkgs services.tailscale.serve configures Tailscale Services, which
+      # need a tagged node, so this sets a plain node Serve instead.
+      systemd.services.omp-auth-broker-serve = lib.mkIf config.omp.authBroker.enable {
+        description = "Publish the omp auth broker on the tailnet";
+        wantedBy = [ "multi-user.target" ];
+        after = [
+          "tailscaled.service"
+          "tailscaled-autoconnect.service"
+          "tailscaled-set.service"
+        ];
+        wants = [ "tailscaled.service" ];
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+          ExecStart = "${lib.getExe config.services.tailscale.package} serve --bg --http=${toString authBrokerPort} http://127.0.0.1:${toString authBrokerPort}";
+          ExecStop = "${lib.getExe config.services.tailscale.package} serve --http=${toString authBrokerPort} off";
+          # tailscaled can start before the node is logged in.
+          Restart = "on-failure";
+          RestartSec = "30s";
+        };
+      };
+
+      # sops-nix creates missing parents of the token path as root. Create
+      # ~/.omp first so a fresh host does not get a root-owned omp directory.
+      system.activationScripts = lib.mkIf (!ciMode && authBrokerHost != null) {
+        ompConfigDir = lib.stringAfter [ "users" "groups" ] ''
+          if [ ! -e /home/${username}/.omp ]; then
+            install -d -o ${username} -g ${config.users.users.${username}.group} /home/${username}/.omp
+          fi
+        '';
+        setupSecrets.deps = [ "ompConfigDir" ];
+      };
+
+      sops.secrets = lib.optionalAttrs (!ciMode) (
+        {
+          # The NaN API key for the nan provider in models.yml below.
+          "nan-key" = {
+            sopsFile = "${inputs.nixos-secrets}/secrets/common.yaml";
+            owner = username;
+            mode = "0400";
+            path = "/home/${username}/.config/nan/api-key";
+          };
+        }
+        # The broker and its clients read the shared bearer token from the
+        # default token path.
+        // lib.optionalAttrs (authBrokerHost != null) {
+          "omp-auth-broker-token" = {
+            sopsFile = "${inputs.nixos-secrets}/secrets/common.yaml";
+            owner = username;
+            mode = "0600";
+            path = "/home/${username}/.omp/auth-broker.token";
+            restartUnits = lib.optional config.omp.authBroker.enable "omp-auth-broker.service";
+          };
+        }
+      );
 
       home-manager.users.${username} =
         { config, lib, ... }:
         {
           # Direct symlinks to repo paths so omp settings and agent edits on
           # any host land in the working tree as a git diff. Logins stay in
-          # the per-host ~/.omp/agent/agent.db. mkOutOfStoreSymlink does not
+          # ~/.omp/agent/agent.db on the auth broker host, or on each host
+          # when no host runs the broker. mkOutOfStoreSymlink does not
           # work here: it links through the Nix store, and an in-place
           # rewrite next to the first hop fails with EROFS.
           home.activation.linkOmpConfig = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
