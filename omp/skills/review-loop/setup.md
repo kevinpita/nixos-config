@@ -16,7 +16,6 @@ Ask one question at a time with `ask`. Build each picker from facts you collecte
 | --- | --- | --- | --- |
 | `opus` | Claude Opus 5.5 | `rl-read-opus` | `rl-fix-opus` |
 | `gpt` | GPT-6.1 Sol | `rl-read-gpt` | `rl-fix-gpt` |
-| `fable` | Claude Fable 5.1 | `rl-read-fable` | `rl-fix-fable` |
 | `glm` | GLM-5.3 | `rl-read-glm` | `rl-fix-glm` |
 | `deepseek` | DeepSeek V4 Flash | `rl-read-deepseek` | `rl-fix-deepseek` |
 
@@ -30,7 +29,7 @@ Ask one question at a time with `ask`. Build each picker from facts you collecte
 1. **Reviewers** (`multi: true`). Recommend Opus + GPT.
 1. **Validators** (`multi: true`). Recommend Opus + GPT.
 1. **Fixers** (`multi: true`). Recommend Opus + GPT. Each fixer works in its own git worktree.
-1. **Judges** (`multi: true`), auto mode only. Recommend Opus + Fable.
+1. **Judges** (`multi: true`), auto mode only. Recommend Opus + GPT.
 1. **Squash scope.** `Loop fixes only`: squash the loop's fix commits into one commit on top of the start HEAD. `Whole branch`: squash everything since the base SHA into one commit.
 1. **Focus.** Options: `No extra focus`, plus 2-3 focus areas you infer from the diff. Other: free text.
 1. **Confirm.** Show every answer, the base SHA, the start HEAD, and the agents per stage. Options: `Start`, `Change an answer`. For a change, ask which answer, then ask that question again.
