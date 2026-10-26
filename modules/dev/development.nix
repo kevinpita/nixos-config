@@ -12,6 +12,8 @@
         gnumake
         go
         gotest
+        # Node.js 22 meets REA's engine range. nixpkgs Node 24 is older than its ^24.22.1 minimum, and its scripts fail on Node 26.
+        nodejs_22
         python3
 
         # Database and messaging clients
