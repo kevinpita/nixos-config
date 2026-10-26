@@ -13,9 +13,9 @@
     {
       nixpkgs.overlays = [
         (_: prev: {
-          dms-shell = prev.dms-shell.overrideAttrs (old: {
+          dux-shell = prev.dux-shell.overrideAttrs (old: {
             postPatch = (old.postPatch or "") + ''
-              battery_popout=../quickshell/Modules/DankBar/Popouts/BatteryPopout.qml
+              battery_popout=../quickshell/Modules/DBar/Popouts/BatteryPopoutContent.qml
               chmod u+w "$(dirname "$battery_popout")" "$battery_popout"
               patch -d .. -p1 < ${../../hyprland/patches/battery-popout.patch}
               substituteInPlace "$battery_popout" \

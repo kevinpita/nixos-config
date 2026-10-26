@@ -13,7 +13,7 @@
           from time import sleep
 
           brightness_file = Path("/sys/class/leds/tpacpi::kbd_backlight/brightness")
-          dms = "${lib.getExe pkgs.dms-shell}"
+          dms = "${lib.getExe pkgs.dux-shell}"
           percentages = {0: "0", 1: "51", 2: "100"}
 
           def read_level():

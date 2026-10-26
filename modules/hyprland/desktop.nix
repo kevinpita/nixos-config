@@ -90,7 +90,7 @@
 
           if (( now >= previous && now - previous <= 400 )); then
             rm -f "$state_file"
-            exec ${lib.getExe config.programs.dms-shell.package} ipc call spotlight toggle
+            exec ${lib.getExe config.programs.dux-shell.package} ipc call spotlight toggle
           fi
 
           printf '%s\n' "$now" > "$state_file"
@@ -99,7 +99,7 @@
       microphoneMute = pkgs.writeShellApplication {
         name = "microphone-mute";
         text = ''
-          result="$(${lib.getExe config.programs.dms-shell.package} ipc call audio micmute)"
+          result="$(${lib.getExe config.programs.dux-shell.package} ipc call audio micmute)"
           case "$result" in
             "Microphone muted") brightness=100 ;;
             "Microphone unmuted") brightness=0 ;;
@@ -108,7 +108,7 @@
 
           shopt -s nullglob
           for led_path in /sys/class/leds/*::micmute; do
-            ${lib.getExe config.programs.dms-shell.package} brightness set \
+            ${lib.getExe config.programs.dux-shell.package} brightness set \
               "leds:''${led_path##*/}" "$brightness" >/dev/null
           done
         '';
@@ -165,7 +165,7 @@
         # boot jobs are still queued, delaying autologin for no benefit.
         systemd.services.greetd.serviceConfig.Type = lib.mkForce "simple";
 
-        programs.dms-shell = {
+        programs.dux-shell = {
           enable = true;
           systemd.enable = false;
         };
@@ -212,7 +212,7 @@
                 BusName = "org.freedesktop.Notifications";
                 # Qt's PipeWire backend asks rtkit for realtime on every sound, flooding the journal.
                 Environment = [ "QT_AUDIO_BACKEND=pulseaudio" ];
-                ExecStart = "${lib.getExe pkgs.dms-shell} run --session";
+                ExecStart = "${lib.getExe pkgs.dux-shell} run --session";
                 ExecReload = "${lib.getExe' pkgs.procps "pkill"} -USR1 -x dms";
                 Restart = "on-failure";
                 RestartSec = "1.23s";
