@@ -143,7 +143,9 @@ in
               lib.optionalString (authBrokerUrl != null) "--set-default OMP_AUTH_BROKER_URL ${authBrokerUrl}"
             } \
             --run 'if [ "''${TERM_PROGRAM-}" = herdr ]; then export PI_FORCE_IMAGE_PROTOCOL="''${PI_FORCE_IMAGE_PROTOCOL-kitty}" PI_KITTY_PLACEHOLDERS="''${PI_KITTY_PLACEHOLDERS-0}"; fi' \
-            --add-flags "--plugin-dir ${pstackPlugin}"
+            ${lib.concatMapStringsSep " " (dir: "--add-flags \"--plugin-dir ${dir}\"") (
+              [ pstackPlugin ] ++ config.omp.pluginDirs
+            )}
         '';
       };
       # pstack ships its own bro skill.
@@ -192,6 +194,13 @@ in
         inputs.oh-my-pi.nixosModules.default
         {
           options.omp.authBroker.enable = lib.mkEnableOption "the omp auth broker for the other hosts on the tailnet";
+          # Other aspects add skills and MCP servers here. ~/.omp/agent/skills
+          # is one read-only store link and mcp.json stays user-writable.
+          options.omp.pluginDirs = lib.mkOption {
+            type = lib.types.listOf lib.types.package;
+            default = [ ];
+            description = "Local plugin directories passed to omp with --plugin-dir.";
+          };
         }
       ];
 

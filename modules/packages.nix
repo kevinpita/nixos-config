@@ -15,6 +15,7 @@
     prometheus-podman-exporter =
       final.callPackage ../packages/prometheus-podman-exporter/package.nix
         { };
+    rea = final.callPackage ../packages/rea/package.nix { };
   };
 
   perSystem =

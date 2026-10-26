@@ -26,7 +26,7 @@ A new file is discovered automatically, but a new aspect must still be selected 
 | `virtualization/` | Virtual machines and system containers |
 | `misc/` | Private work integration and specialized features that do not fit another category |
 | `neovim.nix` | Wiring the [Neovim package](../neovim/README.md) into system and flake outputs |
-| `omp.nix` | omp package, wrapper settings, and deployed files |
+| `omp.nix` | omp package, wrapper settings, and deployed files. Other aspects add omp skills and MCP servers through `omp.pluginDirs`. |
 
 The folder name does not decide which machines receive settings. The aspect name and its callers do. A file can define a feature or contribute directly to an existing role.
 

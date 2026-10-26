@@ -1,18 +1,28 @@
 {
   flake.modules.nixos.reverse-engineering =
-    { pkgs, ... }:
+    { lib, pkgs, ... }:
+    let
+      # Gives omp REA's MCP server and its reverse-engineer-anything skill.
+      reaOmpPlugin = pkgs.runCommand "rea-omp-plugin" { } ''
+        mkdir -p "$out/.claude-plugin" "$out/skills"
+        echo '{"name": "rea", "version": "${pkgs.rea.version}"}' > "$out/.claude-plugin/plugin.json"
+        ln -s ${pkgs.rea.skill} "$out/skills/reverse-engineer-anything"
+        cat > "$out/.mcp.json" <<'EOF'
+        {"mcpServers": {"rea": {"command": "${lib.getExe pkgs.rea}", "args": ["mcp"]}}}
+        EOF
+      '';
+    in
     {
-      # mcp-reva runs Ghidra headless as an MCP server; its Ghidra bundles the matching ReVa extension.
       environment.systemPackages = [
+        # mcp-reva runs Ghidra headless as an MCP server; its Ghidra bundles the matching ReVa extension.
         pkgs.mcp-reva
         pkgs.mcp-reva.ghidra
+        # REA brings its own Ghidra, JDK, and Node. ilspycmd decompiles .NET assemblies to C#.
+        pkgs.rea
+        pkgs.ilspycmd
       ];
 
-      # REA (morluto/rea) uses Ghidra headless from GHIDRA_INSTALL_DIR and needs a full JDK 21+.
-      environment.variables.GHIDRA_INSTALL_DIR = "${pkgs.ghidra}/lib/ghidra";
-      programs.java = {
-        enable = true;
-        package = pkgs.openjdk21;
-      };
+      # Requires the ai aspect, which declares omp.pluginDirs.
+      omp.pluginDirs = [ reaOmpPlugin ];
     };
 }
