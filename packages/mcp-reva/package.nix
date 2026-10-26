@@ -30,15 +30,22 @@ python3Packages.buildPythonApplication {
   dependencies = with python3Packages; [
     httpx
     httpx-sse
-    mcp
+    # The ReVa bridge uses the mcp 1.x client API (streamablehttp_client), removed in mcp 2.
+    mcp_1
     pyghidra
   ];
 
   makeWrapperArgs = [
-    "--set GHIDRA_INSTALL_DIR ${ghidra}/lib/ghidra"
+    "--set"
+    "GHIDRA_INSTALL_DIR"
+    "${ghidra}/lib/ghidra"
     # nixpkgs Ghidra finds extensions through NIX_GHIDRAHOME, not the install dir.
-    "--set NIX_GHIDRAHOME ${ghidraWithReva}/lib/ghidra/Ghidra"
-    "--set JAVA_HOME ${openjdk21}"
+    "--set"
+    "NIX_GHIDRAHOME"
+    "${ghidraWithReva}/lib/ghidra/Ghidra"
+    "--set"
+    "JAVA_HOME"
+    "${openjdk21}"
   ];
 
   # ghidra-python runs PyGhidra scripts against the same Ghidra, for project setup outside MCP.
@@ -51,7 +58,10 @@ python3Packages.buildPythonApplication {
       --set JAVA_HOME ${openjdk21}
   '';
 
-  pythonImportsCheck = [ "reva_cli" ];
+  pythonImportsCheck = [
+    "reva_cli"
+    "reva_cli.stdio_bridge"
+  ];
 
   passthru.ghidra = ghidraWithReva;
 }
