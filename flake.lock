@@ -531,6 +531,22 @@
         "type": "github"
       }
     },
+    "interface-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1792934776,
+        "narHash": "sha256-FMU9evyJOFx4NsAN1flSGSUmbkKbkK17dZGi5RPceig=",
+        "owner": "jakubkrehel",
+        "repo": "skills",
+        "rev": "592aedc44d7d5b3e29740984252902f3e5402a1c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jakubkrehel",
+        "repo": "skills",
+        "type": "github"
+      }
+    },
     "jmulticard-src": {
       "flake": false,
       "locked": {
@@ -964,6 +980,7 @@
         "ilofan": "ilofan",
         "import-tree": "import-tree",
         "ink-nix": "ink-nix",
+        "interface-skills": "interface-skills",
         "kevinpita-nixpkgs": "kevinpita-nixpkgs",
         "ku-nix": "ku-nix",
         "lazyrsync-nix": "lazyrsync-nix",

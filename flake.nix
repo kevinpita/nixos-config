@@ -97,6 +97,11 @@
       flake = false;
     };
 
+    interface-skills = {
+      url = "github:jakubkrehel/skills";
+      flake = false;
+    };
+
     dankcalendar = {
       url = "github:AvengeMedia/dankcalendar";
       inputs.nixpkgs.follows = "nixpkgs";

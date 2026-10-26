@@ -166,6 +166,26 @@ in
           mkdir "$out"
           ln -s ${skills}/* ${../omp/skills}/* "$out"/
         '';
+      # Interface design skills from jakubkrehel/skills.
+      interfaceSkills = map (name: "${inputs.interface-skills}/skills/${name}") [
+        "better-accessibility"
+        "better-colors"
+        "better-interface"
+        "better-layout"
+        "better-typography"
+        "better-ui"
+        "better-writing"
+        "break"
+        "interface-review"
+        "teardown"
+        "variant"
+      ];
+      withInterfaceSkills =
+        skills:
+        pkgs.runCommand "interface-skills" { } ''
+          mkdir "$out"
+          ln -s ${skills}/* ${lib.escapeShellArgs interfaceSkills} "$out"/
+        '';
     in
     {
       imports = [
@@ -278,7 +298,9 @@ in
 
           home.file = {
             ".omp/agent/AGENTS.md".source = ../agents/AGENTS.md;
-            ".omp/agent/skills".source = withOmpSkills (withForklabSkill skillsWithoutBro);
+            ".omp/agent/skills".source = withInterfaceSkills (
+              withOmpSkills (withForklabSkill skillsWithoutBro)
+            );
             # Blocks git push while the review-loop skill runs.
             ".omp/agent/extensions/review-loop-guard.ts".source = ../omp/extensions/review-loop-guard.ts;
             # Reports omp agent state to herdr. Same file that
