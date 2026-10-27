@@ -312,6 +312,8 @@ in
             );
             # Blocks git push while the review-loop skill runs.
             ".omp/agent/extensions/review-loop-guard.ts".source = ../omp/extensions/review-loop-guard.ts;
+            # /send and /receive move resumable sessions between hosts over SSH.
+            ".omp/agent/extensions/session-relay.ts".source = ../omp/extensions/session-relay.ts;
             # Reports omp agent state to herdr. Same file that
             # `herdr integration install omp` writes, pinned to the herdr package.
             ".omp/agent/extensions/herdr-omp-agent-state.ts".source =
