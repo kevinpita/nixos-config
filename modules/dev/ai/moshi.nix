@@ -2,13 +2,13 @@
   flake.modules.nixos.moshi =
     { pkgs, username, ... }:
     let
-      moshiHook = pkgs.stdenvNoCC.mkDerivation {
+      moshiHook = pkgs.stdenvNoCC.mkDerivation (finalAttrs: {
         pname = "moshi-hook";
-        version = "0.3.19";
+        version = "0.4.38";
 
         src = pkgs.fetchurl {
-          url = "https://cdn.getmoshi.app/hook/v0.3.19/moshi-hook_Linux_x86_64.tar.gz";
-          hash = "sha256-yUzj3luOe20bnxLVAaldsEfwG/Mra4N+KaQikmfuedQ=";
+          url = "https://cdn.getmoshi.app/hook/v${finalAttrs.version}/moshi-hook_Linux_x86_64.tar.gz";
+          hash = "sha256-bjtGFmwQ+j2rsARB8YBSeU3B2vyDHCu8oo4RutYNd1M=";
         };
 
         sourceRoot = ".";
@@ -29,7 +29,7 @@
           platforms = [ "x86_64-linux" ];
           mainProgram = "moshi-hook";
         };
-      };
+      });
     in
     {
       environment.systemPackages = [ moshiHook ];
@@ -41,6 +41,8 @@
             StartLimitIntervalSec = 0;
           };
           Service = {
+            # The binary is in the read-only Nix store. Nix owns updates.
+            ExecStartPre = "${moshiHook}/bin/moshi-hook set auto-update off";
             ExecStart = "${moshiHook}/bin/moshi-hook serve --gateway-listen 127.0.0.1:24543";
             Environment = "PATH=%h/.nix-profile/bin:/etc/profiles/per-user/${username}/bin:/run/current-system/sw/bin";
             Restart = "on-failure";
