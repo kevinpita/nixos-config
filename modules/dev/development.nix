@@ -36,6 +36,9 @@
           # Nix language tools
           nixd
           nixfmt
+
+          # AI code review CLI
+          open-code-review
         ];
 
         programs = {
