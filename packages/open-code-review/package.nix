@@ -1,8 +1,10 @@
 {
   lib,
+  stdenv,
   buildGoModule,
   fetchFromGitHub,
   git,
+  installShellFiles,
 }:
 
 buildGoModule (finalAttrs: {
@@ -27,12 +29,21 @@ buildGoModule (finalAttrs: {
     "-X main.GitCommit=${finalAttrs.src.tag}"
   ];
 
+  nativeBuildInputs = [ installShellFiles ];
+
   # Upstream tests create Git repositories.
   nativeCheckInputs = [ git ];
 
   # Upstream docs and the npm package call the binary `ocr`.
   postInstall = ''
     ln -s opencodereview "$out/bin/ocr"
+  ''
+  + lib.optionalString (stdenv.buildPlatform.canExecute stdenv.hostPlatform) ''
+    export HOME=$TMPDIR
+    installShellCompletion --cmd ocr \
+      --bash <($out/bin/ocr completion bash) \
+      --zsh <($out/bin/ocr completion zsh) \
+      --fish <($out/bin/ocr completion fish)
   '';
 
   meta = {
