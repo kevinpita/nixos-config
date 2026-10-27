@@ -18,6 +18,7 @@
         runtimeInputs = with pkgs; [
           brave
           coreutils
+          dux-shell
           google-chrome
         ];
         text = ''
@@ -60,7 +61,16 @@
           dow=$(date +%u)
           hm=$(date +%H%M)
           if (( dow >= 1 && dow <= 5 && 10#$hm >= 800 && 10#$hm < 1830 )); then
-            exec google-chrome-stable "$@"
+            # Work hours: ask, with Chrome preselected. Exit 1 = cancelled, 2 = shell down.
+            status=0
+            choice=$(printf '%s\n' Chrome Brave \
+              | dms dmenu -p "Open with" --mesg "''${url:-new window}" \
+                  --no-custom --select Chrome --format i --disable-history) || status=$?
+            case "$status:$choice" in
+              0:1) exec brave "$@" ;;
+              1:*) exit 0 ;;
+              *)   exec google-chrome-stable "$@" ;;
+            esac
           else
             exec brave "$@"
           fi
