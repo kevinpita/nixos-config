@@ -7,11 +7,13 @@
 #   srv  (server)       has no authorized key on ws, so it cannot SSH back
 #
 # Scenarios:
-#   1. ws /send srv x1 --snapshot; srv /receive x1 in an empty cwd: header
-#      id kept, cwd rewritten, sender paths stripped, message entries
-#      intact, workdir restored into the cwd. A non-empty cwd is refused.
-#   2. round trip: srv /send local back; ws /receive srv back replaces the
-#      original ws copy (one copy of the id remains, carrying the srv turn).
+#   1. ws /send srv x1 --snapshot; srv /receive x1 in an empty cwd: a fork
+#      (new id, parentSession = the ws session) with the cwd rewritten,
+#      local-only header fields dropped, message entries intact, and the
+#      workdir restored into the cwd. A non-empty cwd is refused. The ws
+#      session stays as it was.
+#   2. round trip: srv continues and stages a fork; ws /receive srv back adds
+#      it next to the original, which stays untouched.
 #   3. srv cannot SSH to ws.
 #
 # omp runs in print mode with the command as the positional argument, so
@@ -102,7 +104,7 @@ with open(path, 'a') as f:
 PY"
 }
 
-# session_meta <inst> <jsonl-path>: "<id> <cwd> <stray-sender-fields> <message-count> <message-ids>"
+# session_meta <inst> <jsonl-path>: "<id> <parent|-> <cwd> <stray-local-fields|-> <message-count> <message-ids>"
 session_meta() {
 	vm "$1" /home/debian "python3 - '$2' <<'PY'
 import json, sys
@@ -112,12 +114,23 @@ for line in open(sys.argv[1]):
     obj = json.loads(line)
     if obj.get('type') == 'session' and hdr is None: hdr = obj
     elif obj.get('type') == 'message': ids.append(obj['id'])
-stray = [k for k in ('additionalDirectories', 'seanceSource', 'parentSession') if k in hdr]
-print(hdr['id'], hdr['cwd'], ','.join(stray) or '-', len(ids), ','.join(ids))
+stray = [k for k in ('additionalDirectories', 'seanceSource', 'providerPromptCacheKey', 'taskPromptCacheKey') if k in hdr]
+print(hdr['id'], hdr.get('parentSession') or '-', hdr['cwd'], ','.join(stray) or '-', len(ids), ','.join(ids))
 PY"
 }
 
-copies_of() { vm "$1" /home/debian "find $BUCKETS -name '*_$2.jsonl'"; }
+# sessions_in <inst> <cwd>: session files whose header cwd is <cwd>, sorted.
+sessions_in() {
+	vm "$1" /home/debian "python3 - '$2' <<'PY'
+import glob, json, os, sys
+for path in sorted(glob.glob(os.path.expanduser('~/.omp/agent/sessions/*/*.jsonl'))):
+    for line in open(path):
+        obj = json.loads(line) if line.strip() else {}
+        if obj.get('type') == 'session':
+            if obj.get('cwd') == sys.argv[1]: print(path)
+            break
+PY"
+}
 
 # ---------------------------------------------------------------------------
 log "provision instances on incusbr0"
@@ -157,30 +170,36 @@ relay_cmd "$WS" /home/debian/work "$SID" "/send $SRV_IP x1 --snapshot"
 vm "$SRV" /home/debian "test -f ~/.omp/relay/x1.bundle.tgz"
 
 relay_cmd_expect_error "$SRV" /home/debian/full "/receive x1" "is not empty"
-[ -z "$(copies_of "$SRV" "$SID")" ] || fail "refused receive still installed a session"
+[ -z "$(sessions_in "$SRV" /home/debian/full)" ] || fail "refused receive still installed a session"
 
 relay_cmd "$SRV" /home/debian/landing "-" "/receive x1"
-SRV_COPY="$(copies_of "$SRV" "$SID")"
-[ "$(printf '%s\n' "$SRV_COPY" | wc -l)" = 1 ] || fail "expected one srv copy, got: $SRV_COPY"
-read -r id cwd stray count _ <<<"$(session_meta "$SRV" "$SRV_COPY")"
-[ "$id" = "$SID" ] || fail "id: got $id"
+SRV_COPY="$(sessions_in "$SRV" /home/debian/landing)"
+[ -n "$SRV_COPY" ] && [ "$(printf '%s\n' "$SRV_COPY" | wc -l)" = 1 ] || fail "expected one srv session, got: '$SRV_COPY'"
+read -r FORK parent cwd stray count _ <<<"$(session_meta "$SRV" "$SRV_COPY")"
+[ "$FORK" != "$SID" ] || fail "srv got the original id, not a fork"
+[ "$parent" = "$SID" ] || fail "fork parent: got $parent"
 [ "$cwd" = /home/debian/landing ] || fail "cwd: got $cwd"
-[ "$stray" = - ] || fail "sender-local header fields kept: $stray"
+[ "$stray" = - ] || fail "local-only header fields kept: $stray"
 [ "$count" = 2 ] || fail "message entries: got $count"
 vm "$SRV" /home/debian "grep -qx seed-content-$WS landing/seed.txt" || fail "workdir not restored into landing"
+[ "$(sessions_in "$WS" /home/debian/work)" = "$WS_SRC" ] || fail "ws gained sessions on send"
+read -r id _ _ _ count _ <<<"$(session_meta "$WS" "$WS_SRC")"
+[ "$id" = "$SID" ] && [ "$count" = 2 ] || fail "ws original changed: $id $count"
 log "scenario 1 ok"
 
 # ---------------------------------------------------------------------------
-log "scenario 2: round trip srv -> ws replaces the ws copy"
+log "scenario 2: round trip srv -> ws lands next to the original"
 append_turn "$SRV" "$SRV_COPY" srv-turn
-relay_cmd "$SRV" /home/debian/landing "$SID" "/send local back"
-relay_cmd "$WS" /home/debian/work "-" "/receive $SRV_IP back"
-WS_COPY="$(copies_of "$WS" "$SID")"
-[ "$(printf '%s\n' "$WS_COPY" | wc -l)" = 1 ] || fail "expected one ws copy after replace, got: $WS_COPY"
-read -r id cwd _ _ ids <<<"$(session_meta "$WS" "$WS_COPY")"
-[ "$id" = "$SID" ] || fail "round trip id: got $id"
-[ "$cwd" = /home/debian/work ] || fail "round trip cwd: got $cwd"
-case ",$ids," in *,srv-turn,*) ;; *) fail "ws copy lacks the srv turn: $ids" ;; esac
+relay_cmd "$SRV" /home/debian/landing "$FORK" "/send local back"
+relay_cmd "$WS" /home/debian/work "$SID" "/receive $SRV_IP back"
+WS_ALL="$(sessions_in "$WS" /home/debian/work)"
+[ "$(printf '%s\n' "$WS_ALL" | wc -l)" = 2 ] || fail "expected original + returned fork on ws, got: $WS_ALL"
+read -r _ _ _ _ count _ <<<"$(session_meta "$WS" "$WS_SRC")"
+[ "$count" = 2 ] || fail "ws original changed by the return: $count messages"
+read -r _ parent cwd _ _ ids <<<"$(session_meta "$WS" "$(printf '%s\n' "$WS_ALL" | grep -v "$SID")")"
+[ "$parent" = "$FORK" ] || fail "returned fork parent: got $parent"
+[ "$cwd" = /home/debian/work ] || fail "returned fork cwd: got $cwd"
+case ",$ids," in *,srv-turn,*) ;; *) fail "returned fork lacks the srv turn: $ids" ;; esac
 log "scenario 2 ok"
 
 # ---------------------------------------------------------------------------

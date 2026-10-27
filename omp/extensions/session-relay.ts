@@ -1,18 +1,18 @@
 /**
- * session-relay: move resumable omp sessions between machines over SSH.
+ * session-relay: copy resumable omp sessions between machines over SSH.
  *
- * `/send <host|local> <name> [--snapshot]` moves this terminal to a new
- * session, then packs the session it left and pushes it to
- * `<host>:~/.omp/relay/<name>.bundle.tgz` (or stages it in the local
- * `~/.omp/relay/` for `local`). `/receive [host] <name>` installs a bundle,
- * pulled from `<host>` when given, and switches this terminal to it.
+ * `/send <host|local> <name> [--snapshot]` forks the current session and
+ * pushes the fork to `<host>:~/.omp/relay/<name>.bundle.tgz` (or stages it in
+ * the local `~/.omp/relay/` for `local`). This terminal stays in the original
+ * session. `/receive [host] <name>` installs a bundle, pulled from `<host>`
+ * when given, and switches this terminal to it.
  * Servers cannot SSH to workstations, so the receiving side does the
  * fetching: a server stages with `/send local`, a workstation pulls.
  *
- * Session packing and unpacking is omp's own `omp session pack|unpack`
- * implementation (session/session-transfer): it carries artifacts and
- * blobs, rewrites the header cwd, and replaces an older local copy of the
- * same session or lands a diverged one as a fork.
+ * Forking, packing and unpacking are omp's own implementations
+ * (SessionManager.forkFrom and `omp session pack|unpack`): they carry
+ * artifacts and blobs and rewrite the header cwd. Each send makes a new
+ * session id whose `parentSession` is the session it was forked from.
  *
  * Bundles are gzipped tars:
  *   session.tar   omp session archive (packSession)
@@ -21,6 +21,7 @@
  */
 
 import type { ExtensionAPI } from "@oh-my-pi/pi-coding-agent";
+import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
 import { packSession, unpackSession, type UnpackMode, type UnpackSessionResult } from "@oh-my-pi/pi-coding-agent/session/session-transfer";
 import { spawn } from "node:child_process";
 import fs from "node:fs";
@@ -120,9 +121,13 @@ async function sshPullFile(dest: string, remotePath: string, localPath: string):
 	child.stderr.on("data", (d) => (stderr += d));
 	const out = fs.createWriteStream(localPath);
 	// Settle the write outcome up front so an early write error is never unhandled.
+	// A failed write stops draining ssh's stdout, so stop ssh too or it blocks forever.
 	const written = Promise.withResolvers<Error | undefined>();
 	out.on("finish", () => written.resolve(undefined));
-	out.on("error", written.resolve);
+	out.on("error", (err) => {
+		child.kill();
+		written.resolve(err);
+	});
 	child.stdout.pipe(out);
 	const exited = Promise.withResolvers<number>();
 	child.on("close", (code) => exited.resolve(code ?? -1));
@@ -148,25 +153,26 @@ function parseArgs(args: string): { flags: Set<string>; positional: string[] } {
 }
 
 /**
- * Copy the session file and its artifacts into `dir` without the header
- * fields that point into the sender's filesystem: workspace roots, the
- * seance artifact source, and the parent session id. Returns the copy.
+ * Fork `sessionFile` into `dir` and drop the header fields that only mean
+ * something on this machine: workspace roots and local prompt-cache keys.
+ * The fork keeps `parentSession`, the id of the session it came from.
  */
-function copyWithoutSenderPaths(sessionFile: string, dir: string): string {
-	const copy = path.join(dir, path.basename(sessionFile));
-	const artifacts = sessionFile.slice(0, -".jsonl".length);
-	if (fs.existsSync(artifacts)) fs.cpSync(artifacts, copy.slice(0, -".jsonl".length), { recursive: true });
-	const lines = fs.readFileSync(sessionFile, "utf8").split("\n");
+async function forkForTransfer(sessionFile: string, cwd: string, dir: string): Promise<string> {
+	const fork = await SessionManager.forkFrom(sessionFile, cwd, dir, undefined, { repairInterruptedTail: true, suppressBreadcrumb: true });
+	const forkFile = fork.getSessionFile();
+	await fork.close();
+	if (!forkFile) throw new Error("the fork has no session file");
+	const lines = fs.readFileSync(forkFile, "utf8").split("\n");
 	for (let index = 0; index < Math.min(lines.length, 3); index++) {
 		if (!lines[index].trim()) continue;
 		const parsed: unknown = JSON.parse(lines[index]);
 		if (typeof parsed !== "object" || parsed === null || !("type" in parsed) || parsed.type !== "session") continue;
-		const { additionalDirectories: _dirs, seanceSource: _seance, parentSession: _parent, ...header } = parsed as Record<string, unknown>;
+		const { additionalDirectories: _dirs, providerPromptCacheKey: _provider, taskPromptCacheKey: _task, ...header } = parsed as Record<string, unknown>;
 		lines[index] = JSON.stringify(header);
-		fs.writeFileSync(copy, lines.join("\n"));
-		return copy;
+		fs.writeFileSync(forkFile, lines.join("\n"));
+		return forkFile;
 	}
-	throw new Error(`no session header in ${sessionFile}`);
+	throw new Error(`no session header in ${forkFile}`);
 }
 
 /** Write the bundle for `sessionFile` into `workDir` and return the archive path. */
@@ -179,10 +185,10 @@ async function buildBundle(
 	snapshot: boolean,
 ): Promise<{ archivePath: string; manifest: RelayManifest }> {
 	const bundleDir = path.join(workDir, "bundle");
-	const cleanDir = path.join(workDir, "clean");
+	const forkDir = path.join(workDir, "fork");
 	fs.mkdirSync(bundleDir, { recursive: true });
-	fs.mkdirSync(cleanDir);
-	const packed = await packSession(copyWithoutSenderPaths(sessionFile, cleanDir), path.join(bundleDir, "session.tar"));
+	fs.mkdirSync(forkDir);
+	const packed = await packSession(await forkForTransfer(sessionFile, cwd, forkDir), path.join(bundleDir, "session.tar"));
 	if (packed.missingBlobs.length > 0) {
 		ctx.ui.notify(`${packed.missingBlobs.length} referenced blob(s) are missing locally; those images will not load on the receiver`, "warning");
 	}
@@ -207,7 +213,7 @@ export default function sessionRelay(pi: ExtensionAPI) {
 	pi.setLabel("session-relay");
 
 	pi.registerCommand("send", {
-		description: "Pack the current session and push it to a host over SSH (or stage it with `local`)",
+		description: "Fork the current session and push the fork to a host over SSH (or stage it with `local`)",
 		handler: async (args, ctx) => {
 			const { flags, positional } = parseArgs(args);
 			const [host, name] = positional;
@@ -221,12 +227,12 @@ export default function sessionRelay(pi: ExtensionAPI) {
 			if (!sessionFile || !(fs.statSync(sessionFile, { throwIfNoEntry: false })?.size ?? 0)) {
 				fail(ctx, "nothing to send: this session is not saved yet");
 			}
-			const sessionId = ctx.sessionManager.getSessionId();
-			// Leave the session before packing. omp appends to the current session
-			// until it leaves it (session_exit on quit, for example), and any entry
-			// added after the pack makes a later return land as a fork.
-			const left = await ctx.newSession();
-			if (left.cancelled) fail(ctx, "send cancelled: could not leave the current session");
+			// Entries reach the file through an async queue. Flush so the fork has
+			// the last turn. The read-only type hides flush; the runtime object has it.
+			if (!("flush" in ctx.sessionManager) || typeof ctx.sessionManager.flush !== "function") {
+				fail(ctx, "send failed: this omp version does not expose a session flush, so the fork could miss the last turn");
+			}
+			await ctx.sessionManager.flush();
 
 			const workDir = fs.mkdtempSync(path.join(os.tmpdir(), "omp-relay-"));
 			try {
@@ -237,14 +243,14 @@ export default function sessionRelay(pi: ExtensionAPI) {
 					const tmpPath = `${stagingPath}.tmp.${process.pid}`;
 					fs.copyFileSync(archivePath, tmpPath);
 					fs.renameSync(tmpPath, stagingPath);
-					ctx.ui.notify(`staged session "${name}" (${manifest.sessionId}) in ${stagingPath}; this terminal is now in a new session`, "info");
+					ctx.ui.notify(`staged a fork of this session as "${name}" (${manifest.sessionId}) in ${stagingPath}`, "info");
 				} else {
 					const push = await sshPushFile(host, archivePath, remoteBundlePath(name));
 					if (push.code !== 0) throw procError(`ssh push to ${host} failed`, push);
-					ctx.ui.notify(`sent session "${name}" (${manifest.sessionId}) to ${host}; this terminal is now in a new session`, "info");
+					ctx.ui.notify(`sent a fork of this session as "${name}" (${manifest.sessionId}) to ${host}`, "info");
 				}
 			} catch (err) {
-				fail(ctx, `send failed: ${err instanceof Error ? err.message : String(err)}. The session is unchanged; /resume ${sessionId} to continue it`);
+				fail(ctx, `send failed: ${err instanceof Error ? err.message : String(err)}`);
 			} finally {
 				fs.rmSync(workDir, { recursive: true, force: true });
 			}
