@@ -1,0 +1,12 @@
+{
+	"name": "titanium-focus",
+	"colors": {
+		"assistantMessageText": "brightAluminum",
+		"thinkingText": "#6b7280",
+		"mdCode": "#5fd7a0",
+		"mdCodeBlockBorder": "#4a5058",
+		"mdQuoteBorder": "#4a5058",
+		"mdHr": "#4a5058",
+		"mdListBullet": "deepBlue"
+	}
+}

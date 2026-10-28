@@ -6,13 +6,23 @@
 - Avoid semicolons in prose.
 - Do not use em dashes.
 - Always use ASCII arrows `<-` and `->` instead of Unicode left or right-pointing arrows.
-- Prefer short, direct answers. Put the answer first.
+- Prefer short, direct answers.
 - Use a small example when it makes the point easier to understand. Prefer an example to a long explanation.
+
+## Answer layout
+
+- Write the answer in the first one or two sentences. Put reasons and details after it.
+- Do not restate the question and do not tell the steps you did, unless the user asks.
+- If the answer is longer than about 20 lines, divide it into sections with `##` headings. Each heading names its topic, for example `## Cause` or `## Fix`.
+- Put the choices that the user must make in a last section, `## Your decisions`, as a numbered list.
+- Use bold only for the few words that the reader must not miss.
+- Use a table to compare three or more items on the same attributes.
+- Keep a diagram to approximately 8 nodes or fewer. For a simple sequence of steps, use a numbered list.
 
 ## Advisor notes
 
 - If an advisor note arrives after your final answer, do not make decisions for the user. If the user must choose, stop and wait for the user.
-- If an advisor note makes you continue after a final answer, your last message must be self-contained. Write the full answer again with the correction included, also the parts that did not change. Do not write only the correction or a reference to the earlier answer.
+- If an advisor note makes you continue after a final answer, your last message must be self-contained. Start it with a `---` line and the heading `# Revised answer`. Below the heading, write one line that starts with `Changed:` and tells what changed. Then write the full answer again with the correction included, also the parts that did not change. Do not write only the correction or a reference to the earlier answer.
 - If an advisor note arrives with a user message, answer the user first. Add a short correction only if the note changes your earlier answer.
 
 ## Commits

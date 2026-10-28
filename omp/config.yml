@@ -32,7 +32,7 @@ symbolPreset: nerd
 composer:
   shape: band
 theme:
-  dark: titanium
+  dark: titanium-focus
 setupVersion: 2
 browser:
   headless: true

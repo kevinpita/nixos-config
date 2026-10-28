@@ -336,6 +336,17 @@ in
               }
             '';
 
+            # titanium with brighter answer text and dimmer thinking. The
+            # overrides in omp/themes layer over the upstream theme, so other
+            # titanium changes still arrive with omp updates.
+            ".omp/agent/themes/titanium-focus.json".source =
+              (pkgs.formats.json { }).generate "titanium-focus.json"
+                (
+                  lib.recursiveUpdate (lib.importJSON "${inputs.oh-my-pi}/packages/tui/src/theme/defaults/titanium.json") (
+                    lib.importJSON ../omp/themes/titanium-focus.json
+                  )
+                );
+
             # Throughput on the status line. omp records per-message timing
             # (duration, ttft) but never shows a rate, and has no model-change
             # event, so derive it here: last response, then the session mean,
