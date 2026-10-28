@@ -314,6 +314,8 @@ in
             ".omp/agent/extensions/review-loop-guard.ts".source = ../omp/extensions/review-loop-guard.ts;
             # /send and /receive move resumable sessions between hosts over SSH.
             ".omp/agent/extensions/session-relay.ts".source = ../omp/extensions/session-relay.ts;
+            # ctrl+l and /focus show only the latest answer.
+            ".omp/agent/extensions/focus-view.ts".source = ../omp/extensions/focus-view.ts;
             # Reports omp agent state to herdr. Same file that
             # `herdr integration install omp` writes, pinned to the herdr package.
             ".omp/agent/extensions/herdr-omp-agent-state.ts".source =

@@ -40,3 +40,4 @@ advisor:
   enabled: true
 dev:
   autoqaConsent: denied
+hideThinkingBlock: false

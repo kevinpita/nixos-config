@@ -38,6 +38,8 @@
             term = "xterm-ghostty";
             shell-integration = "zsh";
             shell-integration-features = "cursor,sudo,title,ssh-env,ssh-terminfo";
+            # Pass ctrl+shift+o to omp, which uses it to hide tool activity.
+            keybind = [ "ctrl+shift+o=unbind" ];
           };
         };
       };
