@@ -37,6 +37,12 @@
       # User services start at boot only with lingering.
       users.users.${username}.linger = true;
 
+      # Serve listens on the tailnet address in the host stack, so the
+      # firewall filters its port on the Tailscale interface.
+      networking.firewall.interfaces.${config.services.tailscale.interfaceName}.allowedTCPPorts = [
+        port
+      ];
+
       # Serve matches the Host header, so clients must use the MagicDNS name.
       # The phone app needs HTTPS to install and to receive push alerts.
       systemd.services.ovis-serve = {
