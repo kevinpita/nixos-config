@@ -37,13 +37,9 @@
             background-opacity = 0.95;
             term = "xterm-ghostty";
             shell-integration = "zsh";
-            shell-integration-features = "cursor,sudo,title,ssh-terminfo";
+            shell-integration-features = "cursor,sudo,title,ssh-env,ssh-terminfo";
           };
         };
-
-        programs.zsh.initContent = ''
-          copyterm() { infocmp -x xterm-ghostty | ssh "$1" -- tic -x -; }
-        '';
       };
     };
 }
