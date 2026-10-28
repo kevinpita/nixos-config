@@ -14,7 +14,6 @@
       config.flake.modules.nixos.herdr-ssh-client
       config.flake.modules.nixos.incus
       config.flake.modules.nixos.reverse-engineering
-      config.flake.modules.nixos.vmware
     ];
 
     boot.kernelPackages = pkgs.linuxPackages_latest;
