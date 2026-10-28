@@ -92,6 +92,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Temporary: nixos-unstable still has Ghostty 1.3.1. The ghostty module
+    # fails evaluation when nixpkgs reaches 1.4.0. Then remove this input.
+    ghostty.url = "github:ghostty-org/ghostty/v1.4.0";
+
     pstack = {
       url = "github:michael-denyer/pstack-claude";
       flake = false;
