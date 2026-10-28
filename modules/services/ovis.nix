@@ -16,17 +16,26 @@
       # Tailscale Serve is its only ingress, so this disables its Portal tunnel.
       # The nodes are tagged and have no owner login, so the owner is named here.
       # Other logins are refused. Tagged nodes must pair.
-      home-manager.users.${username}.programs.herdr.plugins.ovis = {
-        source = pkgs.ovis;
-        configFiles.env.text = ''
-          HOST=127.0.0.1
-          PORT=${toString port}
-          OVIS_TAILSCALE_SERVE_ONLY=1
-          OVIS_TAILSCALE_HTTPS_PORT=${toString port}
-          OVIS_TAILSCALE_OWNER=kevinpigar@gmail.com
-          OVIS_TELEMETRY=0
-        '';
+      home-manager.users.${username}.programs.herdr = {
+        # A boot-time server keeps Ovis up without an SSH session. The service
+        # owns the default session, so it fails while a manually started
+        # server still runs.
+        server.enable = true;
+        plugins.ovis = {
+          source = pkgs.ovis;
+          configFiles.env.text = ''
+            HOST=127.0.0.1
+            PORT=${toString port}
+            OVIS_TAILSCALE_SERVE_ONLY=1
+            OVIS_TAILSCALE_HTTPS_PORT=${toString port}
+            OVIS_TAILSCALE_OWNER=kevinpigar@gmail.com
+            OVIS_TELEMETRY=0
+          '';
+        };
       };
+
+      # User services start at boot only with lingering.
+      users.users.${username}.linger = true;
 
       # Serve matches the Host header, so clients must use the MagicDNS name.
       # The phone app needs HTTPS to install and to receive push alerts.
