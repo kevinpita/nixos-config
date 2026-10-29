@@ -116,6 +116,7 @@
   flake.modules.nixos.herdr-ssh-client =
     {
       lib,
+      pkgs,
       username,
       hostsWithRole,
       tailnetDomain,
@@ -123,16 +124,53 @@
     }:
     let
       servers = hostsWithRole "server";
+
+      # hc keeps machines in its state with the remote core's id, so they
+      # are added through hc, not written as a file. Machines added by hand
+      # stay. A server that is down is tried again later.
+      addMachines = pkgs.writeShellApplication {
+        name = "herdr-core-add-machines";
+        runtimeInputs = with pkgs; [
+          bash
+          coreutils
+          herdr-core
+          jq
+          openssh
+        ];
+        text = ''
+          known=$(hc machine ls --json)
+          failed=0
+          for name in ${lib.escapeShellArgs servers}; do
+            if jq -e --arg name "$name" '.machines[] | select(.name == $name)' <<<"$known" >/dev/null; then
+              continue
+            fi
+            hc machine add "$name" --name "$name" </dev/null || failed=1
+          done
+          exit "$failed"
+        '';
+      };
     in
     {
       home-manager.users.${username} = {
-        programs.herdr.machines = lib.genAttrs servers (name: {
-          target = name;
-        });
         programs.ssh.settings = lib.genAttrs servers (name: {
           HostName = "${name}.${tailnetDomain}";
           User = username;
         });
+
+        systemd.user.services.herdr-core-machines = {
+          Unit = {
+            Description = "Add the servers to herdr-core as machines";
+            After = [ "network-online.target" ];
+            StartLimitIntervalSec = 0;
+          };
+          Service = {
+            Type = "oneshot";
+            ExecStart = lib.getExe addMachines;
+            Restart = "on-failure";
+            RestartSec = "5min";
+          };
+          Install.WantedBy = [ "default.target" ];
+        };
       };
     };
 }

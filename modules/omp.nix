@@ -318,10 +318,6 @@ in
             ".omp/agent/extensions/focus-view.ts".source = ../omp/extensions/focus-view.ts;
             # kubectl context and namespace, for kubie sessions.
             ".omp/agent/extensions/k8s-status.ts".source = ../omp/extensions/k8s-status.ts;
-            # Reports omp agent state to herdr. Same file that
-            # `herdr integration install omp` writes, pinned to the herdr package.
-            ".omp/agent/extensions/herdr-omp-agent-state.ts".source =
-              "${pkgs.herdr}/share/herdr/integrations/omp/herdr-agent-state.ts";
             # omp has no model-change event, so poll the live model to keep
             # the status line current after /model switches.
             ".omp/agent/extensions/provider-status.ts".text = ''
@@ -426,6 +422,12 @@ in
               force = true;
               source = withForklabSkill ../agents/skills;
             };
+          };
+
+          # Reports omp agent state to the herdr TUI. Same file that
+          # `herdr integration install omp` writes, pinned to the TUI package.
+          home.file.".omp/agent/extensions/herdr-omp-agent-state.ts" = lib.mkIf config.programs.herdr.enable {
+            source = "${config.programs.herdr.package}/share/herdr/integrations/omp/herdr-agent-state.ts";
           };
         };
     };

@@ -55,7 +55,7 @@ vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 vim.o.foldmethod = "expr"
 vim.o.foldlevel = 99
 
-if vim.env.HERDR_ENV == "1" and not vim.env.WAYLAND_DISPLAY and not vim.env.DISPLAY then
+if (vim.env.HERDR_ENV == "1" or vim.env.HC_TERMINAL_ID) and not vim.env.WAYLAND_DISPLAY and not vim.env.DISPLAY then
   local osc52 = require("vim.ui.clipboard.osc52")
   local function paste_from_unnamed_register()
     return { vim.fn.getreg('"', 1, true), vim.fn.getregtype('"') }

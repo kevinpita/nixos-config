@@ -1,5 +1,7 @@
+# The herdr TUI runs on servers. Workstations use the herdr app and herdr-core
+# (herdr-core.nix) instead.
 {
-  flake.modules.nixos.base =
+  flake.modules.nixos.server =
     {
       inputs,
       lib,
@@ -39,26 +41,10 @@
         hash = "sha256-unoP8GUAULiOBTrS/+noCed/VOw6yqBObqHmit17xy0=";
       };
 
-      openFile = pkgs.writeShellApplication {
-        name = "open";
-        runtimeInputs = with pkgs; [
-          coreutils
-          curl
-          python3
-          systemd
-          tailscale
-          xdg-utils
-        ];
-        text = ''
-          preview_server=${./herdr-open-server.py}
-        ''
-        + builtins.readFile ./herdr-open.sh;
-      };
-
       openOmpTab = pkgs.writeShellApplication {
         name = "herdr-open-omp-tab";
         runtimeInputs = [
-          pkgs.herdr
+          pkgs.herdr-tui
           pkgs.jq
         ];
         text = ''
@@ -82,7 +68,7 @@
           pkgs.gh
           pkgs.git
           pkgs.gum
-          pkgs.herdr
+          pkgs.herdr-tui
           pkgs.jq
           pkgs.util-linux
           pkgs.worktrunk
@@ -91,11 +77,6 @@
       };
     in
     {
-      environment.systemPackages = [
-        pkgs.bun
-        openFile
-      ];
-
       home-manager.users.${username} = {
         imports = [ inputs.herdr-nix.homeModules.default ];
 
@@ -107,7 +88,7 @@
 
         programs.herdr = {
           enable = true;
-          package = pkgs.herdr;
+          package = pkgs.herdr-tui;
           extraPackages = with pkgs; [
             fzf
             git
@@ -191,17 +172,43 @@
 
         home.activation.reloadHerdrConfig = inputs.home-manager.lib.hm.dag.entryAfter [ "reloadSystemd" ] ''
           if [[ -z "''${DRY_RUN_CMD:-}" ]]; then
-            ${pkgs.herdr}/bin/herdr server reload-config >/dev/null 2>&1 || true
+            ${pkgs.herdr-tui}/bin/herdr server reload-config >/dev/null 2>&1 || true
 
             # Herdr does not run plugin startup hooks when config is reloaded.
             while IFS= read -r socket; do
               HERDR_SOCKET_PATH="$socket" ${startAutoTitle}
             done < <(
-              ${pkgs.herdr}/bin/herdr session list --json |
+              ${pkgs.herdr-tui}/bin/herdr session list --json |
                 ${pkgs.jq}/bin/jq -r '.sessions[] | select(.running) | .socket_path'
             )
           fi
         '';
       };
+    };
+
+  flake.modules.nixos.base =
+    { pkgs, ... }:
+    let
+      openFile = pkgs.writeShellApplication {
+        name = "open";
+        runtimeInputs = with pkgs; [
+          coreutils
+          curl
+          python3
+          systemd
+          tailscale
+          xdg-utils
+        ];
+        text = ''
+          preview_server=${./herdr-open-server.py}
+        ''
+        + builtins.readFile ./herdr-open.sh;
+      };
+    in
+    {
+      environment.systemPackages = [
+        pkgs.bun
+        openFile
+      ];
     };
 }

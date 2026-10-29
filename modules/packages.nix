@@ -2,8 +2,9 @@
 {
   flake.overlays.default = final: _prev: {
     exrpd = final.callPackage ../packages/exrpd/package.nix { };
-    # All Herdr callers use the same patched package.
-    herdr = (final.callPackage "${inputs.herdr-nix}/package.nix" { }).overrideAttrs (old: {
+    inherit (inputs.herdr-nix.overlays.default final _prev) herdr herdr-core;
+    # All herdr TUI callers use the same patched package.
+    herdr-tui = (inputs.herdr-nix.overlays.default final _prev).herdr-tui.overrideAttrs (old: {
       # Adds ui.focus_follows_mouse; drop once herdr ships it upstream.
       patches = (old.patches or [ ]) ++ [ ./base/herdr-focus-follows-mouse.patch ];
     });
