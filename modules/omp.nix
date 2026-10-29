@@ -316,6 +316,8 @@ in
             ".omp/agent/extensions/session-relay.ts".source = ../omp/extensions/session-relay.ts;
             # ctrl+l and /focus show only the latest answer.
             ".omp/agent/extensions/focus-view.ts".source = ../omp/extensions/focus-view.ts;
+            # kubectl context and namespace, for kubie sessions.
+            ".omp/agent/extensions/k8s-status.ts".source = ../omp/extensions/k8s-status.ts;
             # Reports omp agent state to herdr. Same file that
             # `herdr integration install omp` writes, pinned to the herdr package.
             ".omp/agent/extensions/herdr-omp-agent-state.ts".source =

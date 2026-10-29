@@ -9,6 +9,15 @@
 - Prefer short, direct answers.
 - Use a small example when it makes the point easier to understand. Prefer an example to a long explanation.
 
+## Kubernetes
+
+- "k" means Kubernetes. In the user's zsh, `k` is an alias for `kubectl`.
+- The user uses kubie to select the context and the namespace. The agent shell inherits the kubie session (`KUBIE_ACTIVE=1`, `KUBECONFIG` points to the kubie file).
+- The `k` alias does not exist in the agent's non-interactive shell. Run `kubectl` in tool calls.
+- In commands for the user, write `k` instead of `kubectl`.
+- Do not add `-n`, `--namespace`, `--context`, or `--kubeconfig` to commands, unless the user asks for a different namespace or context. This applies to commands that you run and to commands that you give to the user.
+- If the user names a context or namespace, it is possibly already active. To verify, run `kubectl config current-context` and `kubectl config view --minify -o jsonpath='{..namespace}'`.
+
 ## Answer layout
 
 - Write the answer in the first one or two sentences. Put reasons and details after it.
