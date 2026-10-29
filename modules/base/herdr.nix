@@ -123,6 +123,10 @@
             theme.name = "dracula";
             ui = {
               focus_follows_mouse = true;
+              # The scrollbar column exists only on the main screen. omp
+              # switches between the main and alternate screen, so each switch
+              # resized its pane by one column and made Ghostty flicker.
+              pane_scrollbars = false;
               show_agent_labels_on_pane_borders = true;
               sound.enabled = false;
             };
