@@ -161,6 +161,7 @@ hl.bind(mainMod .. " + SHIFT + Return", toggle_scratch)
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd("uwsm app -- brave"))
 hl.bind(mainMod .. " + C", hl.dsp.exec_cmd("uwsm app -- google-chrome-stable --new-window about:blank"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd("uwsm app -- nautilus --new-window"))
+hl.bind(mainMod .. " + H", focus_or_launch("class:^(herdr-app)$", "uwsm app -- herdr-app"))
 hl.bind(mainMod .. " + M", toggle_music)
 hl.bind(mainMod .. " + N", function()
     if hl.get_window("class:^(heynote|Heynote)$") then
