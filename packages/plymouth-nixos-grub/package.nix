@@ -16,7 +16,7 @@ stdenvNoCC.mkDerivation {
   buildPhase = ''
     runHook preBuild
     bash make-backgrounds.sh ${grubTheme}/background.png \
-      ${ubuntu-classic}/share/fonts/truetype/ubuntu backgrounds
+      ${ubuntu-classic}/share/fonts/truetype backgrounds
     runHook postBuild
   '';
 

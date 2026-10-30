@@ -44,7 +44,7 @@
           themePackages = [
             pkgs.plymouth-nixos-grub
           ];
-          font = "${pkgs.ubuntu-classic}/share/fonts/truetype/ubuntu/Ubuntu-R.ttf";
+          font = "${pkgs.ubuntu-classic}/share/fonts/truetype/Ubuntu-R.ttf";
         };
 
         # Keep kernel and systemd status messages from drawing over the splash.
