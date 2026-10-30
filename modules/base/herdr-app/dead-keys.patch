@@ -1,0 +1,83 @@
+diff --git a/src/terminal.rs b/src/terminal.rs
+index cc3d9fb..0d04893 100644
+--- a/src/terminal.rs
++++ b/src/terminal.rs
+@@ -471,6 +471,18 @@ impl TerminalView {
+         if !k.key.starts_with("shift") && !k.key.starts_with("control") && !k.key.starts_with("alt") {
+             self.grid.borrow_mut().vt.clear_selection();
+         }
++        #[cfg(target_os = "linux")]
++        {
++            let mut g = self.grid.borrow_mut();
++            let had_mark = g.marked.is_some();
++            if dead_key_pending(&mut g.marked, ev) {
++                cx.stop_propagation();
++                return;
++            }
++            if had_mark {
++                cx.notify();
++            }
++        }
+         let bytes = key_bytes(&mut self.grid.borrow_mut().vt, ev);
+         if let Some(bytes) = bytes {
+             self.send(&bytes);
+@@ -722,6 +734,21 @@ fn is_icon(text: &str) -> bool {
+     matches!((chars.next(), chars.next()), (Some(c), None) if matches!(c as u32, 0xE000..=0xF8FF | 0xF0000..=0x10FFFD))
+ }
+ 
++/// A Linux dead key marks its accent before its key event, which has no
++/// text: the accent waits for the next key, so that event types nothing.
++/// The next key carries the composed text but leaves the mark: it is cleared.
++#[cfg(target_os = "linux")]
++fn dead_key_pending(marked: &mut Option<String>, ev: &KeyDownEvent) -> bool {
++    if marked.is_none() {
++        return false;
++    }
++    if ev.keystroke.key_char.is_none() {
++        return true;
++    }
++    *marked = None;
++    false
++}
++
+ /// A one-cell emoji. The emoji font draws it two cells wide, so it covers
+ /// the next character unless it is fitted to its cell (U+1F579).
+ fn narrow_emoji(c: &vt::Cell) -> bool {
+@@ -1447,6 +1474,8 @@ mod tests {
+         assert_eq!(shown_title("\u{2717} build"), "\u{2717} build");
+     }
+ 
++    #[cfg(target_os = "linux")]
++    use super::dead_key_pending;
+     use super::key_bytes;
+     use crate::vt::Vt;
+     use gpui::{KeyDownEvent, Keystroke, Modifiers};
+@@ -1491,6 +1520,28 @@ mod tests {
+         }
+     }
+ 
++    #[test]
++    #[cfg(target_os = "linux")]
++    fn dead_keys_type_only_the_composed_text() {
++        // GPUI on Linux: the dead ^ of es (the US "[" key) marks "^" and
++        // arrives without text. Space then arrives with the composed "^".
++        for setup in [b"".as_slice(), b"\x1b[>1u"] {
++            let mut vt = Vt::new(20, 3);
++            vt.write(setup);
++            let mut marked = Some("^".to_owned());
++            let mut typed = Vec::new();
++            for ev in [press("[", None), press("asciicircum", Some("^"))] {
++                if !dead_key_pending(&mut marked, &ev) {
++                    typed.extend(key_bytes(&mut vt, &ev).unwrap_or_default());
++                }
++            }
++            assert_eq!(String::from_utf8_lossy(&typed), "^", "mode={setup:?}");
++            assert_eq!(marked, None, "mode={setup:?}");
++            // Without a pending accent, the key types as before.
++            assert!(!dead_key_pending(&mut marked, &press("[", None)));
++        }
++    }
++
+     #[cfg(target_os = "macos")]
+     static OPTION_AS_ALT_TEST_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+ 
