@@ -2,7 +2,7 @@
   flake.modules.nixos.reverse-engineering =
     { lib, pkgs, ... }:
     let
-      # Gives omp REA's MCP server and its reverse-engineer-anything skill.
+      # Gives `omp --rea` REA's MCP server and its reverse-engineer-anything skill.
       reaOmpPlugin = pkgs.runCommand "rea-omp-plugin" { } ''
         mkdir -p "$out/.claude-plugin" "$out/skills"
         echo '{"name": "rea", "version": "${pkgs.rea.version}"}' > "$out/.claude-plugin/plugin.json"
@@ -22,7 +22,7 @@
         pkgs.ilspycmd
       ];
 
-      # Requires the ai aspect, which declares omp.pluginDirs.
-      omp.pluginDirs = [ reaOmpPlugin ];
+      # Requires the ai aspect, which declares omp.optInPluginDirs.
+      omp.optInPluginDirs.rea = reaOmpPlugin;
     };
 }

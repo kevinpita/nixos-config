@@ -123,6 +123,30 @@ in
         { cat "$scripts/package.json"; printf '\0'; cat "$scripts/bun.lock"; } \
           | sha256sum | cut -d' ' -f1 > "$scripts/node_modules/.poteto-mode-tools-install-key"
       '';
+      # `omp --<name>` adds the plugin directory that omp.optInPluginDirs.<name>
+      # names for that run. The wrapper removes the flag before omp parses it.
+      # Arguments after `--` are message text and stay unchanged.
+      ompOptInPlugins = ''
+        n=$#
+        literal=
+        for ((i = 0; i < n; i++)); do
+          arg=$1
+          shift
+          if [ -n "$literal" ]; then
+            set -- "$@" "$arg"
+            continue
+          fi
+          case $arg in
+          --) literal=1; set -- "$@" "$arg" ;;
+          ${lib.concatLines (
+            lib.mapAttrsToList (
+              name: dir: "--${name}) set -- \"$@\" --plugin-dir ${dir} ;;"
+            ) config.omp.optInPluginDirs
+          )}
+          *) set -- "$@" "$arg" ;;
+          esac
+        done
+      '';
       # PI_CONFIG_FILES layers above ~/.omp/agent/config.yml, so runtime
       # settings edits cannot re-enable the providers or the update check, or
       # change the status line.
@@ -143,9 +167,10 @@ in
               lib.optionalString (authBrokerUrl != null) "--set-default OMP_AUTH_BROKER_URL ${authBrokerUrl}"
             } \
             --run 'if [ "''${TERM_PROGRAM-}" = herdr ]; then export PI_FORCE_IMAGE_PROTOCOL="''${PI_FORCE_IMAGE_PROTOCOL-kitty}" PI_KITTY_PLACEHOLDERS="''${PI_KITTY_PLACEHOLDERS-0}"; fi' \
-            ${lib.concatMapStringsSep " " (dir: "--add-flags \"--plugin-dir ${dir}\"") (
-              [ pstackPlugin ] ++ config.omp.pluginDirs
-            )}
+            ${
+              lib.optionalString (config.omp.optInPluginDirs != { }) "--run ${lib.escapeShellArg ompOptInPlugins}"
+            } \
+            --add-flags "--plugin-dir ${pstackPlugin}"
         '';
       };
       # pstack ships its own bro skill.
@@ -194,12 +219,12 @@ in
         inputs.oh-my-pi.nixosModules.default
         {
           options.omp.authBroker.enable = lib.mkEnableOption "the omp auth broker for the other hosts on the tailnet";
-          # Other aspects add skills and MCP servers here. ~/.omp/agent/skills
+          # Aspects add optional skills and MCP servers here. ~/.omp/agent/skills
           # is one read-only store link and mcp.json stays user-writable.
-          options.omp.pluginDirs = lib.mkOption {
-            type = lib.types.listOf lib.types.package;
-            default = [ ];
-            description = "Local plugin directories passed to omp with --plugin-dir.";
+          options.omp.optInPluginDirs = lib.mkOption {
+            type = lib.types.attrsOf lib.types.package;
+            default = { };
+            description = "Local plugin directories that `omp --<name>` passes to omp with --plugin-dir.";
           };
         }
       ];
