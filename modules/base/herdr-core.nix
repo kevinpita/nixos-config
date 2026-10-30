@@ -23,16 +23,27 @@
       {
         environment.systemPackages = [ pkgs.herdr ];
 
-        # Adds omp to the app's "Start an agent" menu. omp is a pi fork, so it
-        # uses the shipped pi icon.
-        home-manager.users.${username}.xdg.configFile."herdr-app/programs.json".text = builtins.toJSON {
-          programs.omp = {
-            name = "omp";
-            icon = "icons/pi.svg";
-            tint = true;
-            tile = "#1c1d21";
-            color = "#ffffff";
-            run = [ "omp" ];
+        home-manager.users.${username}.xdg.configFile = {
+          # Adds omp to the app's "Start an agent" menu. omp is a pi fork, so it
+          # uses the shipped pi icon.
+          "herdr-app/programs.json".text = builtins.toJSON {
+            programs.omp = {
+              name = "omp";
+              icon = "icons/pi.svg";
+              tint = true;
+              tile = "#1c1d21";
+              color = "#ffffff";
+              run = [ "omp" ];
+            };
+          };
+
+          # Ctrl+B then G opens lazygit in a dialog, like prefix+g in the TUI.
+          # The app writes jsconfig.json and .d.ts files into each mod folder,
+          # so the folder stays writable and only its files are links.
+          "herdr-app/keys.json".source = ./herdr-app/keys.json;
+          "herdr-app/mods/lazygit-popup" = {
+            source = ./herdr-app/mods/lazygit-popup;
+            recursive = true;
           };
         };
       };
