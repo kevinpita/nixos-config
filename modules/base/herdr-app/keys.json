@@ -58,7 +58,8 @@
     "ctrl-shift-l": "layout.switch",
     "f2": "tab.rename",
     "shift-f2": "space.rename",
-    "ctrl-b g": "mod.open:lazygit-popup"
+    "ctrl-b g": "mod.open:lazygit-popup",
+    "ctrl-b p": "mod.open:branch-picker"
   },
   "terminal": {
     "ctrl-backspace": "send:\u0017",

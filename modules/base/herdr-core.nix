@@ -69,6 +69,7 @@
             };
 
             # Ctrl+B then G opens lazygit in a dialog, like prefix+g in the TUI.
+            # Ctrl+B then P opens the branch and PR picker.
             # The app writes jsconfig.json and .d.ts files into each mod folder,
             # so the folder stays writable and only its files are links.
             "herdr-app/keys.json".source = ./herdr-app/keys.json;
@@ -76,8 +77,12 @@
               source = ./herdr-app/mods/lazygit-popup;
               recursive = true;
             };
+            "herdr-app/mods/branch-picker" = {
+              source = ./herdr-app/mods/branch-picker;
+              recursive = true;
+            };
             # A copy of the shipped main layout whose tab bar, tabs-quick, adds
-            # terminal and omp buttons after the last tab. Herdr replaces
+            # terminal, omp and branch picker buttons after the last tab. Herdr replaces
             # shipped layouts and mods on start, so the copy has its own names.
             # Click state lives in layouts/.state, so the layout file can be a link.
             "herdr-app/layouts/main-quick.json".source = ./herdr-app/layouts/main-quick.json;

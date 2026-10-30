@@ -1,5 +1,6 @@
 // A copy of Herdr's shipped `tabs` mod (herdr-app 0.1.8). After the last tab
-// it adds quick buttons that open a terminal or omp in a new tab.
+// it adds quick buttons that open a terminal or omp in a new tab, and one that
+// opens the branch and PR picker.
 import { View, div, svg, image } from "gpui-kit";
 import { h_flex } from "gpui-base";
 import { spaces, panes, run, openOverlay, theme, window, shared, layout, settings } from "herdr";
@@ -96,7 +97,8 @@ export default class Tabs extends View {
       .on_scroll_wheel(e => { if (Math.abs(e.delta.y) >= 1) run(e.delta.y > 0 ? "tab.prev" : "tab.next"); })
       .child(h_flex().id("tab-scroll").flex_1().min_w(0).h_full().items_center().gap(3).overflow_x_scrollbar().children(shown.map(item))
         .child(button("quick-terminal", svg("icons/shell.svg").size(14), () => run("tab.new", { space: space?.id })))
-        .child(button("quick-omp", svg("icons/pi.svg").size(14), () => run("tab.new", { name: "omp", space: space?.id, argv: ["omp"] }))))
+        .child(button("quick-omp", svg("icons/pi.svg").size(14), () => run("tab.new", { name: "omp", space: space?.id, argv: ["omp"] })))
+        .child(button("quick-branches", svg("mods/branch-picker/pr.svg").size(14), () => run("mod.open", { name: "branch-picker" })).tooltip("Branches & pull requests")))
       .child(button("tab-new", "+", () => openOverlay({ mod: "new-menu", kind: "popup", width: 250, height: 512 })))
       .when(enabled.includes("files"), el => el.child(panelButton("files", "Files", "mods/files/file.svg")))
       .when(enabled.includes("changes"), el => el.child(panelButton("changes", "Changes", "mods/changes/changes.svg")))
