@@ -179,14 +179,14 @@ in
         root = ../agents/skills;
         fileset = lib.fileset.difference ../agents/skills ../agents/skills/bro;
       };
-      # forklab and herdr-core ship their skills in their packages.
+      # forklab ships its skill in its package. agents/skills/herdr replaces the
+      # skill that herdr-core ships.
       withPackagedSkills =
         skills:
         pkgs.runCommand "agent-skills" { } ''
           mkdir "$out"
           ln -s ${skills}/* \
             ${pkgs.forklab}/share/forklab/.agents/skills/forklab \
-            ${pkgs.herdr-core}/share/herdr-core/skills/herdr-core \
             "$out"/
         '';
       # Skills that use omp-specific tools and agents live in omp/skills and

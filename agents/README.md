@@ -20,6 +20,8 @@ Harness settings and files that use harness-specific syntax belong in the folder
 
 Both harnesses also get the `forklab` skill. The forklab package ships that skill, so it stays at the same version as the installed CLI. Change it in the forklab repository.
 
+The herdr-core package also ships a skill, but neither harness gets it. The `herdr` skill here replaces it, so that agents put work for the user in the Herdr window. That skill points to the `hc --skill` and `herdr-app --skill` manuals, which stay at the same version as the installed tools.
+
 omp also gets selected interface design skills from [`jakubkrehel/skills`](https://github.com/jakubkrehel/skills). The `interface-skills` flake input pins that repository, and `modules/omp.nix` lists which skill folders to link. Antigravity does not get them. Run `nix flake update interface-skills` to get a newer version.
 
 ## Applying changes
