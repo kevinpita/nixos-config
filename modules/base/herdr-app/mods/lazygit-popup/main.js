@@ -1,7 +1,7 @@
 // Opens lazygit in a dialog over the tab, in the focused pane's folder and on
 // its machine. The dialog closes when lazygit exits.
 import { View, div } from "gpui-kit";
-import { spaces, panes, focused, hc, props, run, openOverlay, closeOverlay, notify } from "herdr";
+import { spaces, panes, focused, hc, props, openOverlay, closeOverlay, notify } from "herdr";
 
 function location() {
   const space = spaces().find((s) => s.active), f = focused();
@@ -20,9 +20,12 @@ export default class LazygitPopup extends View {
       const r = await hc([...args, "--", "lazygit"]).catch((e) => ({ code: 1, stderr: String(e) }));
       const address = r.code === 0 ? JSON.parse(r.stdout).address : null;
       if (!address) {
+        closeOverlay(props().overlay);
         notify({ title: "lazygit did not start", body: r.stderr?.trim() || r.stdout, level: "error" });
         return;
       }
+      // mod.json opens this launcher as a window, which does not take the
+      // keyboard. So the dialog's terminal gets it, not the pane under it.
       openOverlay({
         kind: "dialog",
         modal: true,
