@@ -1,0 +1,93 @@
+diff --git a/src/terminal.rs b/src/terminal.rs
+index e02d91d..cc3d9fb 100644
+--- a/src/terminal.rs
++++ b/src/terminal.rs
+@@ -722,6 +722,12 @@ fn is_icon(text: &str) -> bool {
+     matches!((chars.next(), chars.next()), (Some(c), None) if matches!(c as u32, 0xE000..=0xF8FF | 0xF0000..=0x10FFFD))
+ }
+ 
++/// A one-cell emoji. The emoji font draws it two cells wide, so it covers
++/// the next character unless it is fitted to its cell (U+1F579).
++fn narrow_emoji(c: &vt::Cell) -> bool {
++    !c.wide && (c.text.contains('\u{FE0F}') || c.text.chars().next().is_some_and(|ch| matches!(ch as u32, 0x1F000..=0x1FAFF)))
++}
++
+ /// What a key press sends to the program: the key described to libghostty,
+ /// which encodes it once, in the mode the program asked for (as Ghostty does).
+ fn key_bytes(vt: &mut vt::Vt, ev: &KeyDownEvent) -> Option<Vec<u8>> {
+@@ -839,6 +845,14 @@ fn cell_font(bold: bool, italic: bool) -> Font {
+     f
+ }
+ 
++/// For emoji cells: the emoji font before the system fallbacks, where
++/// DejaVu Sans draws some emoji in black and white.
++fn emoji_font(bold: bool, italic: bool) -> Font {
++    let mut f = cell_font(bold, italic);
++    f.fallbacks = Some(FontFallbacks::from_fonts(vec!["Noto Color Emoji".into()]));
++    f
++}
++
+ pub fn cell_size(window: &Window) -> Size<Pixels> {
+     let ts = window.text_system();
+     let f = cell_font(false, false);
+@@ -916,7 +930,8 @@ fn row_ops(row: &[vt::Cell], cell: Size<Pixels>, window: &mut Window) -> Vec<Row
+             continue;
+         }
+         let mut text = if c.text.is_empty() { " ".to_owned() } else { c.text.clone() };
+-        if !c.wide {
++        let lone = narrow_emoji(c);
++        if !c.wide && !lone {
+             while x < row.len() {
+                 let d = &row[x];
+                 let same = !d.wide
+@@ -927,7 +942,7 @@ fn row_ops(row: &[vt::Cell], cell: Size<Pixels>, window: &mut Window) -> Vec<Row
+                     && d.underline == c.underline
+                     && d.strike == c.strike;
+                 // A missing icon breaks the run too; the next outer pass draws it as text.
+-                if !same || (d.text.is_empty() && !d.underline && !d.strike) || crate::sprites::is_sprite(&d.text) || is_icon(&d.text) {
++                if !same || (d.text.is_empty() && !d.underline && !d.strike) || crate::sprites::is_sprite(&d.text) || is_icon(&d.text) || narrow_emoji(d) {
+                     break;
+                 }
+                 text.push_str(if d.text.is_empty() { " " } else { &d.text });
+@@ -939,14 +954,24 @@ fn row_ops(row: &[vt::Cell], cell: Size<Pixels>, window: &mut Window) -> Vec<Row
+         }
+         let run = TextRun {
+             len: text.len(),
+-            font: cell_font(c.bold, c.italic),
++            font: if c.wide || lone { emoji_font(c.bold, c.italic) } else { cell_font(c.bold, c.italic) },
+             color,
+             background_color: None,
+             underline: c.underline.then(|| UnderlineStyle { thickness: px(1.0), color: Some(color), wavy: false }),
+             strikethrough: c.strike.then(|| StrikethroughStyle { thickness: px(1.0), color: Some(color) }),
+         };
++        let size = px(crate::settings::font_size());
++        if lone {
++            // Fitted to its one cell, as Ghostty does, so it does not cover the next character.
++            let natural = window.text_system().shape_line(text.clone().into(), size, &[run.clone()], None);
++            if natural.width > cell.width && natural.runs.iter().flat_map(|r| &r.glyphs).any(|g| g.is_emoji) {
++                let line = window.text_system().shape_line(text.into(), size * (cell.width / natural.width), &[run], None);
++                ops.push(RowOp::Text { x: start, line });
++                continue;
++            }
++        }
+         let force = (!c.wide).then_some(cell.width);
+-        let line = window.text_system().shape_line(text.into(), px(crate::settings::font_size()), &[run], force);
++        let line = window.text_system().shape_line(text.into(), size, &[run], force);
+         ops.push(RowOp::Text { x: start, line });
+     }
+     ops
+diff --git a/vendor/gpui-pre-wgpu/src/cosmic_text_system.rs b/vendor/gpui-pre-wgpu/src/cosmic_text_system.rs
+index 0e4e3b1..30f9064 100644
+--- a/vendor/gpui-pre-wgpu/src/cosmic_text_system.rs
++++ b/vendor/gpui-pre-wgpu/src/cosmic_text_system.rs
+@@ -418,8 +418,10 @@ impl CosmicTextSystemState {
+                 "Segoe Fluent Icons",
+             ];
+ 
++            // An emoji font has no 'm' but is a valid fallback.
+             if font.as_swash().charmap().map('m') == 0
+                 && !allowed_bad_font_names.contains(&postscript_name.as_str())
++                && !check_is_known_emoji_font(&postscript_name)
+             {
+                 self.font_system.db_mut().remove_face(font.id());
+                 continue;

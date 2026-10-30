@@ -2,7 +2,11 @@
 {
   flake.overlays.default = final: _prev: {
     exrpd = final.callPackage ../packages/exrpd/package.nix { };
-    inherit (inputs.herdr-nix.overlays.default final _prev) herdr herdr-core;
+    inherit (inputs.herdr-nix.overlays.default final _prev) herdr-core;
+    # The patch draws emoji in color and fits one-cell emoji to their cell.
+    herdr = (inputs.herdr-nix.overlays.default final _prev).herdr.overrideAttrs (old: {
+      patches = (old.patches or [ ]) ++ [ ./base/herdr-app/emoji.patch ];
+    });
     mcp-reva = final.callPackage ../packages/mcp-reva/package.nix { };
     open-code-review = final.callPackage ../packages/open-code-review/package.nix { };
     plymouth-nixos-grub = final.callPackage ../packages/plymouth-nixos-grub/package.nix {
