@@ -76,6 +76,15 @@
               source = ./herdr-app/mods/lazygit-popup;
               recursive = true;
             };
+            # A copy of the shipped main layout whose tab bar, tabs-quick, adds
+            # terminal and omp buttons after the last tab. Herdr replaces
+            # shipped layouts and mods on start, so the copy has its own names.
+            # Click state lives in layouts/.state, so the layout file can be a link.
+            "herdr-app/layouts/main-quick.json".source = ./herdr-app/layouts/main-quick.json;
+            "herdr-app/mods/tabs-quick" = {
+              source = ./herdr-app/mods/tabs-quick;
+              recursive = true;
+            };
           };
         };
       };
