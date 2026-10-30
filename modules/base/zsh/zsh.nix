@@ -62,7 +62,11 @@
 
             gittime = ''git commit --amend --date="$(date -Iseconds)" --no-edit'';
             switch = "just --justfile ${config.programs.nh.flake}/justfile switch";
-            update = "cd ${config.programs.nh.flake} && nix flake update";
+            # Reuses the gh login so GitHub API calls are authenticated without storing the token.
+            update = ''
+              cd ${config.programs.nh.flake} && \
+              NIX_CONFIG="$(gh auth token 2>/dev/null | sed 's/^/access-tokens = github.com=/')" nix flake update
+            '';
 
             update-git = ''
               update && \
