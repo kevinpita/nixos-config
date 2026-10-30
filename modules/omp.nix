@@ -145,11 +145,9 @@ in
       # PI_CONFIG_FILES layers above ~/.omp/agent/config.yml, so runtime
       # settings edits cannot re-enable the providers or the update check, or
       # change the status line.
-      # omp cannot see the outer terminal through herdr, so it shows image
-      # placeholders. herdr forwards Kitty graphics to Ghostty. Unicode
-      # placeholders stay off because herdr stretches them (herdr#4858).
-      # herdr-core panes (HC_TERMINAL_ID) claim TERM_PROGRAM=ghostty, but the
-      # herdr app skips virtual placements, so placeholders draw as boxes.
+      # herdr-core terminals (HC_TERMINAL_ID) claim TERM_PROGRAM=ghostty, but
+      # the herdr app skips Kitty virtual placements, so Unicode placeholders
+      # draw as boxes. Plain Kitty graphics work.
       ompPackage = pkgs.symlinkJoin {
         name = "omp-${ompBasePackage.version}";
         paths = [ ompBasePackage ];
@@ -163,7 +161,7 @@ in
             ${
               lib.optionalString (authBrokerUrl != null) "--set-default OMP_AUTH_BROKER_URL ${authBrokerUrl}"
             } \
-            --run 'if [ "''${TERM_PROGRAM-}" = herdr ] || [ -n "''${HC_TERMINAL_ID-}" ]; then export PI_FORCE_IMAGE_PROTOCOL="''${PI_FORCE_IMAGE_PROTOCOL-kitty}" PI_KITTY_PLACEHOLDERS="''${PI_KITTY_PLACEHOLDERS-0}"; fi' \
+            --run 'if [ -n "''${HC_TERMINAL_ID-}" ]; then export PI_FORCE_IMAGE_PROTOCOL="''${PI_FORCE_IMAGE_PROTOCOL-kitty}" PI_KITTY_PLACEHOLDERS="''${PI_KITTY_PLACEHOLDERS-0}"; fi' \
             ${
               lib.optionalString (config.omp.optInPluginDirs != { }) "--run ${lib.escapeShellArg ompOptInPlugins}"
             } \
@@ -447,12 +445,6 @@ in
               force = true;
               source = withPackagedSkills ../agents/skills;
             };
-          };
-
-          # Reports omp agent state to the herdr TUI. Same file that
-          # `herdr integration install omp` writes, pinned to the TUI package.
-          home.file.".omp/agent/extensions/herdr-omp-agent-state.ts" = lib.mkIf config.programs.herdr.enable {
-            source = "${config.programs.herdr.package}/share/herdr/integrations/omp/herdr-agent-state.ts";
           };
         };
     };

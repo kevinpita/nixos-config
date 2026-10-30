@@ -8,7 +8,7 @@ fi
 
 # An hc terminal on a server has no SSH_CONNECTION (the core runs as a user
 # service) and no display. On a workstation it has the session's display.
-if [[ ${HERDR_ENV:-} != 1 && -z ${SSH_CONNECTION:-} ]] &&
+if [[ -z ${SSH_CONNECTION:-} ]] &&
 	[[ -z ${HC_TERMINAL_ID:-} || -n ${WAYLAND_DISPLAY:-}${DISPLAY:-} ]]; then
 	exec xdg-open "$1"
 fi
