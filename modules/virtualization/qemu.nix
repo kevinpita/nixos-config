@@ -26,9 +26,6 @@
       ];
 
       environment.systemPackages = with pkgs; [
-        # Guest images and inspection
-        libguestfs
-
         # Networking
         bridge-utils
         dnsmasq
