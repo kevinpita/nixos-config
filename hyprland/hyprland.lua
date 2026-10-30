@@ -31,8 +31,8 @@ hl.config({
         enabled = true,
     },
     input = {
-        kb_layout = "es",
-        kb_variant = "deadtilde",
+        -- ~/.config/xkb/symbols/es-caret from modules/ui/desktop.nix.
+        kb_layout = "es-caret",
         resolve_binds_by_sym = true,
         follow_mouse = 1,
         touchpad = {

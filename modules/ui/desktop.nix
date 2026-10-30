@@ -39,6 +39,17 @@
 
       home-manager.users.${username} = {
         fonts.fontconfig.enable = true;
+        # Hyprland uses this layout. It is es(deadtilde) with a plain ^ on
+        # Shift, so ^ before a digit or a letter does not compose to ¹ or x̂.
+        # xkbcommon finds user layouts in ~/.config/xkb.
+        xdg.configFile."xkb/symbols/es-caret".text = ''
+          default partial alphanumeric_keys
+          xkb_symbols "basic" {
+              include "es(deadtilde)"
+              name[Group1] = "Spanish (dead tilde, plain caret)";
+              key <AD11> { [ dead_grave, asciicircum, bracketleft, dead_caron ] };
+          };
+        '';
         home.packages = with pkgs; [
           # Clipboard
           wl-clipboard
