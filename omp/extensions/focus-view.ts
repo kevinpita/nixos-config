@@ -32,7 +32,15 @@ interface RunState {
 }
 
 type Block = { type: string; text?: string };
-type Entry = { type: string; message?: { role: string; content: unknown; stopReason?: string } };
+type Entry = {
+	type: string;
+	customType?: string;
+	message?: { role: string; content: unknown; stopReason?: string };
+};
+
+// The heading that AGENTS.md asks for, after an optional `---` line, when an
+// advisor note makes the agent rewrite its answer.
+const REVISED_ANSWER = /^(?:-{3,}\s*\n\s*)?#\s+Revised answer\b/i;
 
 interface Turn {
 	prompt: string;
@@ -53,25 +61,33 @@ function textOf(content: unknown): string {
 
 /**
  * One turn per user prompt. Its answer is the last assistant message with
- * text and no tool calls before the next prompt. When an advisor note makes
- * the agent write again, that rewrite is the last message, so it replaces
- * the answer that the note corrected (AGENTS.md asks for a full rewrite).
+ * text and no tool calls before the next prompt. After an advisor note, a
+ * later message replaces the answer only when it starts with the revised
+ * answer heading, so a short reply to the note does not hide the answer.
  */
 function turnsOf(ctx: ExtensionContext): Turn[] {
 	const turns: Turn[] = [];
 	let turn: Turn | undefined;
+	let afterNote = false;
 	for (const entry of ctx.sessionManager.getBranch() as Entry[]) {
+		if (entry.type === "custom_message" && entry.customType === "advisor") {
+			afterNote = true;
+			continue;
+		}
 		const message = entry.message;
 		if (entry.type !== "message" || !message) continue;
 		if (message.role === "user") {
 			turn = { prompt: textOf(message.content), answer: undefined, stopReason: undefined };
 			turns.push(turn);
+			afterNote = false;
 		}
 		if (!turn || message.role !== "assistant") continue;
 		turn.stopReason = message.stopReason;
 		const blocks = Array.isArray(message.content) ? (message.content as Block[]) : [];
 		const text = textOf(message.content);
-		if (text && !blocks.some(block => block.type === "toolCall")) turn.answer = text;
+		if (!text || blocks.some(block => block.type === "toolCall")) continue;
+		if (afterNote && turn.answer && !REVISED_ANSWER.test(text)) continue;
+		turn.answer = text;
 	}
 	return turns;
 }
