@@ -92,10 +92,16 @@ in
       # native Rust build to thin LTO with 16 codegen units.
       # withWaylandScreencast builds pi-natives with `wayland-pipewire`, which
       # computer use needs to capture the screen on Hyprland.
-      ompBasePackage = inputs.oh-my-pi.packages.${system}.default.override {
-        withWaylandScreencast = true;
-        withFatLto = false;
-      };
+      # The patch draws composer chip thumbnails with a Kitty direct placement
+      # when Unicode placeholders are off, as in herdr panes.
+      ompBasePackage =
+        (inputs.oh-my-pi.packages.${system}.default.override {
+          withWaylandScreencast = true;
+          withFatLto = false;
+        }).overrideAttrs
+          (old: {
+            patches = (old.patches or [ ]) ++ [ ../packages/omp/attachment-chip-direct-placement.patch ];
+          });
       # pstack is a Claude Code plugin; omp loads that format through
       # --plugin-dir. Its poteto-mode scripts install commander into their own
       # directory on first run, which a store path cannot allow, so the

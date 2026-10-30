@@ -1,0 +1,280 @@
+diff --git a/packages/tui/src/components/image.ts b/packages/tui/src/components/image.ts
+index bb517e0..763f481 100644
+--- a/packages/tui/src/components/image.ts
++++ b/packages/tui/src/components/image.ts
+@@ -243,6 +243,8 @@ export class ImageBudget {
+ 	#placementGeometry = new Map<number, ImageDimensions>();
+ 	/** Ids whose owner replaced them for good ({@link release}); retired once no frame shows them. */
+ 	#released = new Set<number>();
++	/** Direct placements owned by live UI chrome, not the transcript ({@link markTransient}). */
++	#transient = new Set<number>();
+ 
+ 	constructor(cap: number = DEFAULT_MAX_INLINE_IMAGES, requestRender: () => void = () => {}) {
+ 		this.#cap = normalizeCap(cap);
+@@ -524,6 +526,19 @@ export class ImageBudget {
+ 		return ids;
+ 	}
+ 
++	/** Mark `imageId`'s placement (placement id = image id) as UI chrome that the TUI removes when it stops. */
++	markTransient(imageId: number): void {
++		this.#transient.add(imageId);
++	}
++
++	/** Transient placement ids to delete when the TUI stops; clears the set. */
++	takeTransientIds(): readonly number[] {
++		if (this.#transient.size === 0) return EMPTY_IDS;
++		const ids = [...this.#transient];
++		this.#transient.clear();
++		return ids;
++	}
++
+ 	/** All image ids believed to be loaded in any screen's store; clears tracking. */
+ 	takeAllTransmittedIds(): readonly number[] {
+ 		const ids = new Set<number>();
+diff --git a/packages/tui/src/prompt/attachment-chips.ts b/packages/tui/src/prompt/attachment-chips.ts
+index f68b1fc..3b3336e 100644
+--- a/packages/tui/src/prompt/attachment-chips.ts
++++ b/packages/tui/src/prompt/attachment-chips.ts
+@@ -2,7 +2,6 @@ import type { ImageContent } from "@oh-my-pi/pi-ai";
+ import {
+ 	type Component,
+ 	getImageDimensions,
+-	getKittyGraphics,
+ 	type ImageBudget,
+ 	ImageProtocol,
+ 	renderImage,
+@@ -40,8 +39,8 @@ interface ImageContentWithPng extends ImageContent {
+ 
+ /**
+  * The composer attachment band: one rounded card per staged attachment, rendered directly above
+- * the prompt box. Image and video cards show a live thumbnail (Kitty Unicode placeholders — the only
+- * protocol whose output is plain text cells and therefore composable inside a border row) with
++ * the prompt box. Image and video cards show a live thumbnail (Kitty Unicode placeholders, or a
++ * Kitty direct placement anchored inside the card when placeholders are off) with
+  * the pixel dimensions as the bottom caption; text-paste cards show the leading snippet with a
+  * `+N lines` / `N chars` caption. The top caption is the same `<icon> #N` token that sits in
+  * the editor buffer, in the same identity color. Cards that no longer fit the terminal width
+@@ -113,7 +112,20 @@ export class AttachmentChipsBand implements Component {
+ 		return described;
+ 	}
+ 
++	/** Image keys this render anchored as direct placements. */
++	#placed = new Set<string>();
++
+ 	render(width: number): readonly string[] {
++		const previous = this.#placed;
++		this.#placed = new Set();
++		const rows = this.#renderCards(width);
++		// Rewriting the card's text cells does not remove a direct placement, so a card that
++		// left the band releases its image; the budget deletes it once no frame shows it.
++		for (const key of previous) if (!this.#placed.has(key)) this.budget.release(key);
++		return rows;
++	}
++
++	#renderCards(width: number): string[] {
+ 		const chips = this.editor.composerChips();
+ 		if (chips.length === 0) return [];
+ 		const rows = ["", "", "", "", "", ""];
+@@ -178,21 +190,20 @@ export class AttachmentChipsBand implements Component {
+ 		return dims;
+ 	}
+ 
+-	/** 12x4 thumbnail as Kitty Unicode-placeholder cell rows, centered; any other protocol (or a
+-	 *  budget-suppressed image) falls back to a centered icon — direct placements, SIXEL, and
+-	 *  iTerm2 output cursor-addressed sequences that cannot be composed into a border row. */
++	/** 12x4 thumbnail, centered: Kitty Unicode-placeholder cell rows, or blank rows carrying a Kitty
++	 *  direct placement when placeholders are off. Any other protocol (or a budget-suppressed image)
++	 *  falls back to a centered icon: SIXEL and iTerm2 have no stable id to re-place on repaint. */
+ 	#imageInterior(
+ 		image: ImageContent,
+ 		dims: { width: number; height: number } | null,
+ 		kind: "image" | "video",
+ 	): string[] {
+-		if (dims && TERMINAL.imageProtocol === ImageProtocol.Kitty && getKittyGraphics().unicodePlaceholders) {
++		if (dims && TERMINAL.imageProtocol === ImageProtocol.Kitty) {
+ 			const display = this.#kittyDisplayImage(image);
+ 			if (display) {
+ 				const budget = this.budget;
+-				const imageId = budget.acquireId(
+-					`chip:${display.mimeType}:${display.data.length}:${display.data.slice(0, 32)}`,
+-				);
++				const key = `chip:${display.mimeType}:${display.data.length}:${display.data.slice(0, 32)}`;
++				const imageId = budget.acquireId(key);
+ 				// observe() keeps chip thumbnails inside the shared live-graphics budget so a
+ 				// paste-heavy session cannot pile up placements the way unbudgeted images would.
+ 				if (!budget.observe(imageId)) {
+@@ -208,6 +219,11 @@ export class AttachmentChipsBand implements Component {
+ 					);
+ 					if (result?.transmit) budget.enqueueTransmit(imageId, result.transmit);
+ 					if (result?.lines) return this.#centerGrid(result.lines);
++					if (result?.sequence && result.columns) {
++						this.#placed.add(key);
++						budget.markTransient(imageId);
++						return this.#directPlacement(result.sequence, result.columns, result.rows);
++					}
+ 				}
+ 			}
+ 		}
+@@ -250,6 +266,19 @@ export class AttachmentChipsBand implements Component {
+ 		return rows;
+ 	}
+ 
++	/** Blank content area whose image's last row carries the direct placement: save the cursor,
++	 *  climb to the image's first row, place (`C=1` keeps the cursor), restore. The stable
++	 *  placement id makes each repaint move the existing placement instead of stacking one. */
++	#directPlacement(sequence: string, columns: number, rows: number): string[] {
++		const blank = " ".repeat(INNER_COLS);
++		const out = Array.from({ length: INNER_ROWS }, () => blank);
++		const leftPad = Math.floor((INNER_COLS - columns) / 2);
++		const lift = rows > 1 ? `\x1b[${rows - 1}A` : "";
++		const lastRow = Math.floor((INNER_ROWS - rows) / 2) + rows - 1;
++		out[lastRow] = `${" ".repeat(leftPad)}\x1b7${lift}${sequence}\x1b8${" ".repeat(INNER_COLS - leftPad)}`;
++		return out;
++	}
++
+ 	/** Leading 4 rows x 12 cols of the pasted text, muted. */
+ 	#textInterior(entry: TextAttachment): string[] {
+ 		// Only the leading rows are drawn; don't split a multi-KB paste every frame.
+diff --git a/packages/tui/src/terminal-capabilities.ts b/packages/tui/src/terminal-capabilities.ts
+index 1725543..9805065 100644
+--- a/packages/tui/src/terminal-capabilities.ts
++++ b/packages/tui/src/terminal-capabilities.ts
+@@ -1338,7 +1338,7 @@ export function renderImage(
+ 	base64Data: string,
+ 	imageDimensions: ImageDimensions,
+ 	options: ImageRenderOptions = {},
+-): { sequence?: string; lines?: string[]; rows: number; transmit?: string } | null {
++): { sequence?: string; lines?: string[]; rows: number; columns?: number; transmit?: string } | null {
+ 	if (!TERMINAL.imageProtocol) {
+ 		return null;
+ 	}
+@@ -1376,7 +1376,7 @@ export function renderImage(
+ 				columns: fit.columns,
+ 				rows: fit.rows,
+ 			});
+-			return { sequence, rows: fit.rows, transmit };
++			return { sequence, rows: fit.rows, columns: fit.columns, transmit };
+ 		}
+ 		// No stable id (e.g. no budget): self-contained transmit-and-display.
+ 		const sequence = encodeKitty(base64Data, {
+diff --git a/packages/tui/src/tui.ts b/packages/tui/src/tui.ts
+index a5e0deb..b0e2d97 100644
+--- a/packages/tui/src/tui.ts
++++ b/packages/tui/src/tui.ts
+@@ -2714,6 +2714,12 @@ export class TUI extends Container {
+ 		// image data lives, so a delete-by-id here blanks every transcript image
+ 		// the instant the session exits. The terminal enforces its own store quota
+ 		// (and live-session ghosts are already bounded by the inline-image budget).
++		// Composer chip thumbnails are draft UI, not transcript: drop their placements.
++		if (TERMINAL.imageProtocol === ImageProtocol.Kitty) {
++			for (const id of this.#imageBudget.takeTransientIds()) {
++				this.terminal.write(encodeKittyDeletePlacement(id, id));
++			}
++		}
+ 		this.#clearSixelProbeState();
+ 		this.#stopped = true;
+ 		this.#started = false;
+diff --git a/packages/tui/test/attachment-chips.test.ts b/packages/tui/test/attachment-chips.test.ts
+index e1ea271..fd6dab5 100644
+--- a/packages/tui/test/attachment-chips.test.ts
++++ b/packages/tui/test/attachment-chips.test.ts
+@@ -127,6 +127,63 @@ describe("AttachmentChipsBand — Kitty placeholder thumbnails", () => {
+ 			setCellDimensions(originalCellDims);
+ 		}
+ 	});
++	it("anchors a direct placement inside the card when Unicode placeholders are off", () => {
++		const mutable = TERMINAL as unknown as { imageProtocol: ImageProtocol | null };
++		const originalProtocol = TERMINAL.imageProtocol;
++		const originalCellDims = { ...getCellDimensions() };
++		mutable.imageProtocol = ImageProtocol.Kitty;
++		setKittyGraphics({ unicodePlaceholders: false });
++		setCellDimensions({ widthPx: 10, heightPx: 21 });
++		try {
++			const { editor, band } = makeBand();
++			editor.pendingImages.push({ type: "image", data: TINY_PNG, mimeType: "image/png" });
++			editor.insertAtom(chipLabel("image", 1), "[Image #1, 2x2]");
++			const rows = band.render(80);
++			// 2x2 px scales to an 8x4-cell fit: the placement rides the last interior row
++			// (frame row 4), two cells in, and climbs three rows to the image's top.
++			expect(rows[4]).toMatch(
++				/\x1b\[39m {2}\x1b7\x1b\[3A\x1b_Ga=p,q=2,C=1,i=\d+,p=\d+,c=8,r=4\x1b\\\x1b8 {10}\x1b/u,
++			);
++			for (const row of rows) {
++				expect(visibleWidth(row)).toBe(14);
++			}
++		} finally {
++			mutable.imageProtocol = originalProtocol;
++			setCellDimensions(originalCellDims);
++		}
++	});
++	it("deletes a direct-placed thumbnail once its card leaves the band", () => {
++		const mutable = TERMINAL as unknown as { imageProtocol: ImageProtocol | null };
++		const originalProtocol = TERMINAL.imageProtocol;
++		const originalCellDims = { ...getCellDimensions() };
++		mutable.imageProtocol = ImageProtocol.Kitty;
++		setKittyGraphics({ unicodePlaceholders: false });
++		setCellDimensions({ widthPx: 10, heightPx: 21 });
++		try {
++			const editor = new CustomEditor(getEditorTheme());
++			const budget = new ImageBudget(8);
++			const band = new AttachmentChipsBand(editor, budget, () => {});
++			const frame = () => {
++				budget.beginPass();
++				const rows = band.render(80);
++				budget.endPass();
++				budget.limitResidentImages();
++				budget.takeTransmits();
++				return { rows, purged: [...budget.takePurgeIds()] };
++			};
++			editor.pendingImages.push({ type: "image", data: TINY_PNG, mimeType: "image/png" });
++			editor.insertAtom(chipLabel("image", 1), "[Image #1, 2x2]");
++			const shown = frame();
++			const id = Number(/i=(\d+)/u.exec(shown.rows[4]!)?.[1]);
++			expect(shown.purged).toEqual([]);
++			// Overwriting the card's cells leaves a direct placement on screen; the image must go.
++			editor.setText("");
++			expect(frame().purged).toEqual([id]);
++		} finally {
++			mutable.imageProtocol = originalProtocol;
++			setCellDimensions(originalCellDims);
++		}
++	});
+ 	it("converts a non-PNG attachment before the Kitty transmit (f=100 accepts only PNG)", async () => {
+ 		const mutable = TERMINAL as unknown as { imageProtocol: ImageProtocol | null };
+ 		const originalProtocol = TERMINAL.imageProtocol;
+diff --git a/packages/tui/test/image-budget.test.ts b/packages/tui/test/image-budget.test.ts
+index 114a4c4..59ac767 100644
+--- a/packages/tui/test/image-budget.test.ts
++++ b/packages/tui/test/image-budget.test.ts
+@@ -1816,6 +1816,31 @@ describe("TUI inline-image budget", () => {
+ 		expect(writes.join("")).not.toContain("a=d,d=I");
+ 	});
+ 
++	it("deletes transient placements on stop but keeps transcript images", async () => {
++		const term = new VirtualTerminal(40, 12);
++		const writes: string[] = [];
++		const realWrite = term.write.bind(term);
++		vi.spyOn(term, "write").mockImplementation((data: string) => {
++			writes.push(data);
++			realWrite(data);
++		});
++
++		const tui = createTui(term);
++		tui.addChild(makeImage(tui.imageBudget, "transcript"));
++		const transcriptId = tui.imageBudget.acquireId("transcript");
++		const chipId = tui.imageBudget.acquireId("chip");
++		tui.imageBudget.markTransient(chipId);
++		tui.start();
++		await scheduler.settle(term);
++		writes.length = 0;
++
++		tui.stop();
++
++		const output = writes.join("");
++		expect(output).toContain(`a=d,d=i,i=${chipId},p=${chipId}`);
++		expect(output).not.toContain(`i=${transcriptId},`);
++	});
++
+ 	it("lets a full-width non-fullscreen overlay replace Unicode image placeholder rows", async () => {
+ 		const originalGraphics = { ...getKittyGraphics() };
+ 		const term = new VirtualTerminal(40, 12);
