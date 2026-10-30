@@ -175,12 +175,15 @@ in
         root = ../agents/skills;
         fileset = lib.fileset.difference ../agents/skills ../agents/skills/bro;
       };
-      # forklab ships its skill in its package.
-      withForklabSkill =
+      # forklab and herdr-core ship their skills in their packages.
+      withPackagedSkills =
         skills:
         pkgs.runCommand "agent-skills" { } ''
           mkdir "$out"
-          ln -s ${skills}/* ${pkgs.forklab}/share/forklab/.agents/skills/forklab "$out"/
+          ln -s ${skills}/* \
+            ${pkgs.forklab}/share/forklab/.agents/skills/forklab \
+            ${pkgs.herdr-core}/share/herdr-core/skills/herdr-core \
+            "$out"/
         '';
       # Skills that use omp-specific tools and agents live in omp/skills and
       # go to omp only.
@@ -330,7 +333,7 @@ in
           home.file = {
             ".omp/agent/AGENTS.md".source = ../agents/AGENTS.md;
             ".omp/agent/skills".source = withInterfaceSkills (
-              withOmpSkills (withForklabSkill skillsWithoutBro)
+              withOmpSkills (withPackagedSkills skillsWithoutBro)
             );
             # Blocks git push while the review-loop skill runs.
             ".omp/agent/extensions/review-loop-guard.ts".source = ../omp/extensions/review-loop-guard.ts;
@@ -442,7 +445,7 @@ in
 
             ".gemini/antigravity-cli/skills" = {
               force = true;
-              source = withForklabSkill ../agents/skills;
+              source = withPackagedSkills ../agents/skills;
             };
           };
 
