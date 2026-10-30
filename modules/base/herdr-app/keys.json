@@ -58,6 +58,7 @@
     "ctrl-shift-l": "layout.switch",
     "f2": "tab.rename",
     "shift-f2": "space.rename",
+    "ctrl-b enter": "tab.new",
     "ctrl-b g": "mod.open:lazygit-popup",
     "ctrl-b p": "mod.open:branch-picker"
   },

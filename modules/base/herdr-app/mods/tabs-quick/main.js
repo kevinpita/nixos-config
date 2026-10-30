@@ -1,6 +1,6 @@
 // A copy of Herdr's shipped `tabs` mod (herdr-app 0.1.8). After the last tab
-// it adds quick buttons that open a terminal or omp in a new tab, and one that
-// opens the branch and PR picker.
+// it adds quick buttons that open omp in a new tab and open the branch and PR
+// picker.
 import { View, div, svg, image } from "gpui-kit";
 import { h_flex } from "gpui-base";
 import { spaces, panes, run, openOverlay, theme, window, shared, layout, settings } from "herdr";
@@ -55,6 +55,9 @@ export default class Tabs extends View {
     const stop = (_e, cx) => cx.stop_propagation();
     const button = (id, label, action) => div().id(id).size(26).flex_none().flex().items_center().justify_center().rounded(6).text_color(t.dim).hover(s => s.bg(t.hover).text_color(t.foreground))
       .on_mouse_down("left", stop).on_click(action).child(label);
+    const quick = (id, icon, label, tip, action) => h_flex().id(id).h(29).px(10).gap(7).flex_none().items_center().rounded(7).text_size(12.8)
+      .border(1).border_color(t.border).text_color(t.muted).hover(s => s.bg(t.hover).text_color(t.foreground))
+      .on_mouse_down("left", stop).on_click(action).tooltip(tip).child(icon.size(14)).child(label);
     const item = (c, i) => {
       const program = panes().find(p => p.tab === c.id && p.program?.agent)?.program ?? panes().find(p => p.tab === c.id)?.program;
       const name = /^tb\d+$/.test(c.name) ? program?.name ?? "Terminal" : c.name;
@@ -96,9 +99,10 @@ export default class Tabs extends View {
       .on_mouse_up("left", () => { this.pressed = null; })
       .on_scroll_wheel(e => { if (Math.abs(e.delta.y) >= 1) run(e.delta.y > 0 ? "tab.prev" : "tab.next"); })
       .child(h_flex().id("tab-scroll").flex_1().min_w(0).h_full().items_center().gap(3).overflow_x_scrollbar().children(shown.map(item))
-        .child(button("quick-terminal", svg("icons/shell.svg").size(14), () => run("tab.new", { space: space?.id })))
-        .child(button("quick-omp", svg("icons/pi.svg").size(14), () => run("tab.new", { name: "omp", space: space?.id, argv: ["omp"] })))
-        .child(button("quick-branches", svg("mods/branch-picker/pr.svg").size(14), () => run("mod.open", { name: "branch-picker" })).tooltip("Branches & pull requests")))
+        .child(h_flex().flex_none().ml(8).gap(6).items_center()
+          .child(div().w(1).h(18).mr(2).bg(t.border))
+          .child(quick("quick-omp", image("my-icons/omp.svg"), "omp", "New omp tab", () => run("tab.new", { name: "omp", space: space?.id, argv: ["omp"] })))
+          .child(quick("quick-branches", svg("mods/workspace-chrome/git-compare.svg"), "PRs", "Branches & pull requests", () => run("mod.open", { name: "branch-picker" })))))
       .child(button("tab-new", "+", () => openOverlay({ mod: "new-menu", kind: "popup", width: 250, height: 512 })))
       .when(enabled.includes("files"), el => el.child(panelButton("files", "Files", "mods/files/file.svg")))
       .when(enabled.includes("changes"), el => el.child(panelButton("changes", "Changes", "mods/changes/changes.svg")))

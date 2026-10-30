@@ -55,19 +55,20 @@
           };
 
           xdg.configFile = {
-            # Adds omp to the app's "Start an agent" menu. omp is a pi fork, so it
-            # uses the shipped pi icon.
+            # Adds omp to the app's "Start an agent" menu, with the omp logo
+            # that herdrAppOmpIcon below copies in.
             "herdr-app/programs.json".text = builtins.toJSON {
               programs.omp = {
                 name = "omp";
-                icon = "icons/pi.svg";
-                tint = true;
+                icon = "my-icons/omp.svg";
+                tint = false;
                 tile = "#1c1d21";
                 color = "#ffffff";
                 run = [ "omp" ];
               };
             };
 
+            # Ctrl+B then Enter opens a terminal in a new tab.
             # Ctrl+B then G opens lazygit in a dialog, like prefix+g in the TUI.
             # Ctrl+B then P opens the branch and PR picker.
             # The app writes jsconfig.json and .d.ts files into each mod folder,
@@ -77,12 +78,15 @@
               source = ./herdr-app/mods/lazygit-popup;
               recursive = true;
             };
+            # Herdr draws no SVG that is a link into the Nix store, so the mods
+            # use the icons that Herdr ships, for example
+            # mods/workspace-chrome/git-compare.svg.
             "herdr-app/mods/branch-picker" = {
               source = ./herdr-app/mods/branch-picker;
               recursive = true;
             };
             # A copy of the shipped main layout whose tab bar, tabs-quick, adds
-            # terminal, omp and branch picker buttons after the last tab. Herdr replaces
+            # omp and branch picker buttons after the last tab. Herdr replaces
             # shipped layouts and mods on start, so the copy has its own names.
             # Click state lives in layouts/.state, so the layout file can be a link.
             "herdr-app/layouts/main-quick.json".source = ./herdr-app/layouts/main-quick.json;
@@ -90,6 +94,16 @@
               source = ./herdr-app/mods/tabs-quick;
               recursive = true;
             };
+          };
+
+          # Herdr draws no image that is a link or a /nix/store path, so the omp
+          # logo (assets/icon.svg from can1357/oh-my-pi) is a copy.
+          home.activation.herdrAppOmpIcon = {
+            after = [ "linkGeneration" ];
+            before = [ ];
+            data = ''
+              run install -Dm644 ${./herdr-app/omp.svg} "$HOME/.config/herdr-app/my-icons/omp.svg"
+            '';
           };
         };
       };

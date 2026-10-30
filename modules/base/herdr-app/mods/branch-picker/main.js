@@ -394,7 +394,7 @@ export default class BranchPicker extends View {
       .text_size(big ? 12 : 11)
       .font_semibold()
       .text_color("#ffffff")
-      .when(big, (el) => el.child(svg("mods/branch-picker/pr.svg").size(12).text_color("#ffffff")))
+      .when(big, (el) => el.child(svg("mods/workspace-chrome/git-compare.svg").size(12).text_color("#ffffff")))
       .child(big ? s.label : `PR #${pr.number}`);
   }
 
@@ -424,7 +424,7 @@ export default class BranchPicker extends View {
       .cursor_pointer()
       .when(selected, (el) => el.bg(t.selected))
       .when(!selected, (el) => el.hover((s) => s.bg(t.hover)))
-      .child(svg(row.pr ? "mods/branch-picker/pr.svg" : "mods/branch-picker/branch.svg").flex_none().size(16).text_color(row.pr ? stateOf(row.pr).color : t.dim))
+      .child(svg(row.pr ? "mods/workspace-chrome/git-compare.svg" : "mods/workspace-chrome/git-branch.svg").flex_none().size(16).text_color(row.pr ? stateOf(row.pr).color : t.dim))
       .child(
         v_flex()
           .flex_1()
@@ -505,7 +505,7 @@ export default class BranchPicker extends View {
       )
       .when(!pr, (el) =>
         el
-          .child(h_flex().gap(8).items_center().child(svg("mods/branch-picker/branch.svg").size(16).text_color(t.muted)).child(div().text_size(15).font_semibold().text_color(t.foreground).child(row.name)))
+          .child(h_flex().gap(8).items_center().child(svg("mods/workspace-chrome/git-branch.svg").size(16).text_color(t.muted)).child(div().text_size(15).font_semibold().text_color(t.foreground).child(row.name)))
           .child(
             h_flex()
               .gap(4)
@@ -560,7 +560,7 @@ export default class BranchPicker extends View {
           .pb(12)
           .gap(10)
           .items_center()
-          .child(svg("mods/branch-picker/branch.svg").size(18).text_color(t.accent))
+          .child(svg("mods/workspace-chrome/git-branch.svg").size(18).text_color(t.accent))
           .child(div().text_size(15).font_semibold().text_color(t.foreground).child("Branches & pull requests"))
           .child(div().text_size(13).text_color(t.dim).child(r ? r.name : ""))
           .child(div().flex_1())
@@ -657,7 +657,7 @@ export default class BranchPicker extends View {
               h_flex()
                 .gap(8)
                 .items_center()
-                .child(svg(this.pending?.pr ? "mods/branch-picker/pr.svg" : "mods/branch-picker/branch.svg").size(14).text_color(t.accent))
+                .child(svg(this.pending?.pr ? "mods/workspace-chrome/git-compare.svg" : "mods/workspace-chrome/git-branch.svg").size(14).text_color(t.accent))
                 .child(div().font_semibold().text_color(t.foreground).child(`New worktree for ${this.pending?.name ?? ""}`))
                 .child(div().flex_1())
                 .child(
