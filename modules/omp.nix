@@ -367,7 +367,7 @@ in
             ".omp/agent/themes/titanium-focus.json".source =
               (pkgs.formats.json { }).generate "titanium-focus.json"
                 (
-                  lib.recursiveUpdate (lib.importJSON "${inputs.oh-my-pi}/packages/tui/src/theme/defaults/titanium.json") (
+                  lib.recursiveUpdate (lib.importJSON "${inputs.oh-my-pi}/packages/tui/src/theme/defaults.json").titanium (
                     lib.importJSON ../omp/themes/titanium-focus.json
                   )
                 );
