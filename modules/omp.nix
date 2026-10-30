@@ -148,6 +148,8 @@ in
       # omp cannot see the outer terminal through herdr, so it shows image
       # placeholders. herdr forwards Kitty graphics to Ghostty. Unicode
       # placeholders stay off because herdr stretches them (herdr#4858).
+      # herdr-core panes (HC_TERMINAL_ID) claim TERM_PROGRAM=ghostty, but the
+      # herdr app skips virtual placements, so placeholders draw as boxes.
       ompPackage = pkgs.symlinkJoin {
         name = "omp-${ompBasePackage.version}";
         paths = [ ompBasePackage ];
@@ -161,7 +163,7 @@ in
             ${
               lib.optionalString (authBrokerUrl != null) "--set-default OMP_AUTH_BROKER_URL ${authBrokerUrl}"
             } \
-            --run 'if [ "''${TERM_PROGRAM-}" = herdr ]; then export PI_FORCE_IMAGE_PROTOCOL="''${PI_FORCE_IMAGE_PROTOCOL-kitty}" PI_KITTY_PLACEHOLDERS="''${PI_KITTY_PLACEHOLDERS-0}"; fi' \
+            --run 'if [ "''${TERM_PROGRAM-}" = herdr ] || [ -n "''${HC_TERMINAL_ID-}" ]; then export PI_FORCE_IMAGE_PROTOCOL="''${PI_FORCE_IMAGE_PROTOCOL-kitty}" PI_KITTY_PLACEHOLDERS="''${PI_KITTY_PLACEHOLDERS-0}"; fi' \
             ${
               lib.optionalString (config.omp.optInPluginDirs != { }) "--run ${lib.escapeShellArg ompOptInPlugins}"
             } \
