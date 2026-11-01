@@ -313,6 +313,13 @@
       # The per-user profile links only listed paths; theme-set reads the themes from there.
       environment.pathsToLink = [ "/share/desktop-themes" ];
 
+      # GTK reads the icon theme that theme-set writes to dconf only when it finds
+      # the org.gnome.desktop.interface schema. Without it, Qt's gtk3 platform theme
+      # falls back to Adwaita, which is not installed, and named tray icons break.
+      environment.sessionVariables.XDG_DATA_DIRS = [
+        (pkgs.glib.getSchemaDataDirPath pkgs.gsettings-desktop-schemas)
+      ];
+
       home-manager.users.${username} = {
         home.packages = [
           themes
