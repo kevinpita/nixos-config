@@ -69,7 +69,11 @@ inputs:
     after = [ "lze" ];
     lazy = true;
     data = with pkgs.vimPlugins; [
+      catppuccin-nvim
       gruvbox-nvim
+      mini-base16
+      nightfox-nvim
+      tokyonight-nvim
     ];
   };
 

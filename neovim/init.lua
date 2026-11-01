@@ -166,6 +166,26 @@ nixInfo.lze.load({
     colorscheme = "gruvbox",
   },
   {
+    "catppuccin-nvim",
+    auto_enable = true,
+    colorscheme = { "catppuccin", "catppuccin-latte", "catppuccin-frappe", "catppuccin-macchiato", "catppuccin-mocha" },
+  },
+  {
+    "nightfox.nvim",
+    auto_enable = true,
+    colorscheme = { "nightfox", "dayfox", "dawnfox", "duskfox", "nordfox", "terafox", "carbonfox" },
+  },
+  {
+    "tokyonight.nvim",
+    auto_enable = true,
+    colorscheme = { "tokyonight", "tokyonight-night", "tokyonight-storm", "tokyonight-moon", "tokyonight-day" },
+  },
+  {
+    "mini.base16",
+    auto_enable = true,
+    lazy = true,
+  },
+  {
     "nvim-web-devicons",
     auto_enable = true,
     lazy = false,
@@ -362,4 +382,24 @@ nixInfo.lze.load({
   },
 })
 
-vim.cmd.colorscheme("gruvbox")
+-- theme-set links the selected desktop theme into this directory.
+local theme_dir = (vim.env.XDG_STATE_HOME or vim.fn.expand("~/.local/state")) .. "/theme"
+local function apply_theme()
+  if not pcall(dofile, theme_dir .. "/current/neovim.lua") then
+    vim.cmd.colorscheme("gruvbox")
+  end
+end
+apply_theme()
+vim.fn.mkdir(theme_dir, "p")
+local theme_watcher = vim.uv.new_fs_event()
+if theme_watcher then
+  theme_watcher:start(
+    theme_dir,
+    {},
+    vim.schedule_wrap(function(_, filename)
+      if filename == "current" then
+        apply_theme()
+      end
+    end)
+  )
+end

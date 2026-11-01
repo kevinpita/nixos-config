@@ -33,7 +33,8 @@
           settings = {
             font-family = "JetBrains Mono Nerd Font";
             font-size = 20;
-            background = "#1d1f21";
+            # theme-set links the selected desktop theme here.
+            config-file = "?~/.local/state/theme/current/ghostty.conf";
             background-opacity = 0.95;
             term = "xterm-ghostty";
             shell-integration = "zsh";

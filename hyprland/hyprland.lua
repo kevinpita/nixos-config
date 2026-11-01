@@ -180,6 +180,7 @@ hl.bind(mainMod .. " + SHIFT + Space", hl.dsp.window.float({ action = "toggle" }
 hl.bind(mainMod .. " + L", hl.dsp.exec_cmd(dms .. "lock lock"))
 hl.bind(mainMod .. " + SHIFT + N", hl.dsp.exec_cmd(dms .. "notifications toggle"))
 hl.bind(mainMod .. " + V", hl.dsp.exec_cmd(dms .. "clipboard toggle"))
+hl.bind(mainMod .. " + CTRL + Space", hl.dsp.exec_cmd(dms .. "spotlight toggleQuery theme:"))
 hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("omasnap"))
 
 local directions = {
@@ -369,3 +370,5 @@ hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = tr
 hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
 hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true })
 pcall(require, "dms.layout")
+-- theme-set links the selected desktop theme here.
+pcall(dofile, (os.getenv("XDG_STATE_HOME") or (os.getenv("HOME") .. "/.local/state")) .. "/theme/current/hyprland.lua")

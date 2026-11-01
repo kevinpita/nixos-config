@@ -71,8 +71,9 @@
               font_size = 16;
             };
             theme = {
-              dark = "One Dark";
-              light = "One Light";
+              # DMS writes these from the selected theme.
+              dark = "DankShell Dark";
+              light = "DankShell Light";
               mode = "system";
             };
             ui_font_family = "JetBrainsMono Nerd Font Mono";

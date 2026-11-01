@@ -1,0 +1,16 @@
+{
+  "id": "themePicker",
+  "name": "Themes",
+  "description": "Switch the theme of the desktop, terminal, and editor",
+  "version": "1.0.0",
+  "author": "Kevin Pita",
+  "type": "launcher",
+  "capabilities": ["launcher"],
+  "component": "./ThemePickerLauncher.qml",
+  "icon": "palette",
+  "trigger": "theme:",
+  "viewMode": "tile",
+  "viewModeEnforced": true,
+  "requires_dms": ">=1.5.0",
+  "permissions": []
+}

@@ -19,6 +19,9 @@
   "tailnetPorts": {
     "enabled": true
   },
+  "themePicker": {
+    "enabled": true
+  },
   "workspaceFinder": {
     "enabled": true
   }
