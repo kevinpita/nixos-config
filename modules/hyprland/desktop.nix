@@ -113,14 +113,6 @@
           done
         '';
       };
-      tuigreetCommand = lib.escapeShellArgs [
-        (lib.getExe pkgs.tuigreet)
-        "--time"
-        "--remember"
-        "--asterisks"
-        "--cmd"
-        sessionCommand
-      ];
     in
     {
       options.programs.nixos-hyprland = {
@@ -151,9 +143,7 @@
 
         services.greetd = {
           enable = true;
-          useTextGreeter = true;
           settings = {
-            default_session.command = tuigreetCommand;
             initial_session = {
               command = sessionCommand;
               user = username;

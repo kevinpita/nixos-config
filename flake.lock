@@ -182,6 +182,22 @@
         "type": "github"
       }
     },
+    "dank-qml-common_2": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793444058,
+        "narHash": "sha256-YL9pm7n++0r6uXMQDg4CmB0++JGUezXIlgmp87KiUxM=",
+        "owner": "duxlabs-dev",
+        "repo": "dux-qml-common",
+        "rev": "934de22f3e246dff16ab06368582c5ae8cbdc304",
+        "type": "github"
+      },
+      "original": {
+        "owner": "duxlabs-dev",
+        "repo": "dux-qml-common",
+        "type": "github"
+      }
+    },
     "dankcalendar": {
       "inputs": {
         "dank-qml-common": "dank-qml-common",
@@ -220,6 +236,27 @@
       "original": {
         "owner": "nix-community",
         "repo": "disko",
+        "type": "github"
+      }
+    },
+    "dux-greeter": {
+      "inputs": {
+        "dank-qml-common": "dank-qml-common_2",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793444119,
+        "narHash": "sha256-tI3qbyqmtQ3DbwqkJeMLduxnfqLlAYN2+6oJ47Tgzn8=",
+        "owner": "duxlabs-dev",
+        "repo": "dux-greeter",
+        "rev": "45b82d84d947a2c6491d4f16a5d0a84ee379dfeb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "duxlabs-dev",
+        "repo": "dux-greeter",
         "type": "github"
       }
     },
@@ -1063,6 +1100,7 @@
         "comin": "comin",
         "dankcalendar": "dankcalendar",
         "disko": "disko",
+        "dux-greeter": "dux-greeter",
         "flake-parts": "flake-parts_2",
         "forklab": "forklab",
         "ghostty": "ghostty",

@@ -111,6 +111,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    dux-greeter = {
+      url = "github:duxlabs-dev/dux-greeter";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     ku-nix = {
       url = "github:kevinpita/ku-nix";
       inputs.nixpkgs.follows = "nixpkgs";
