@@ -458,5 +458,9 @@
   ],
   "dmsWindowsFloatingSeeded": [
     "hyprland"
-  ]
+  ],
+  "currentThemeName": "custom",
+  "currentThemeCategory": "custom",
+  "customThemeFile": "/etc/profiles/per-user/kevin/share/desktop-themes/gruvbox/dms-theme.json",
+  "iconThemeDark": "Yaru-olive"
 }
