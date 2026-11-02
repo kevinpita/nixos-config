@@ -296,6 +296,12 @@
           # herdr changes theme only on command. The window does not always
           # answer, and the lock must not wait long for it.
           timeout 2 herdr-app "do" app.theme --name "desktop-$1" >/dev/null || true
+          # Herdr reads a background image once per path until it restarts, so
+          # the panes show a new wallpaper after the next Herdr start. A real
+          # file is needed: Herdr draws no link into the Nix store. Herdr finds
+          # the format from the content, so a PNG wallpaper also works here.
+          install -D -m 644 "$(dms ipc call wallpaper get)" \
+            "''${XDG_CONFIG_HOME:-$HOME/.config}/herdr-app/backgrounds/desktop.jpg" || true
         '';
       };
 

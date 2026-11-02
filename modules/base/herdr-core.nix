@@ -89,6 +89,8 @@
             # omp and branch picker buttons after the last tab. Herdr replaces
             # shipped layouts and mods on start, so the copy has its own names.
             # Click state lives in layouts/.state, so the layout file can be a link.
+            # Its panes show backgrounds/desktop.jpg, the wallpaper that theme-set
+            # copies, through the terminals.
             "herdr-app/layouts/main-quick.json".source = ./herdr-app/layouts/main-quick.json;
             "herdr-app/mods/tabs-quick" = {
               source = ./herdr-app/mods/tabs-quick;
