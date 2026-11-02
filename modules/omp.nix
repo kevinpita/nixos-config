@@ -365,15 +365,14 @@ in
               }
             '';
 
-            # titanium with brighter answer text and dimmer thinking. The
-            # overrides in omp/themes layer over the upstream theme, so other
-            # titanium changes still arrive with omp updates. Desktop hosts
-            # replace it with the theme that theme-set selects.
+            # Hosts without a desktop show gruvbox. Desktop hosts link the
+            # theme that theme-set selects instead.
             ".omp/agent/themes/desktop.json".source = lib.mkDefault (
               (pkgs.formats.json { }).generate "desktop.json" (
-                lib.recursiveUpdate
-                  (lib.importJSON "${inputs.oh-my-pi}/packages/tui/src/theme/defaults.json").titanium
-                  (lib.importJSON ../omp/themes/titanium-focus.json // { name = "desktop"; })
+                let
+                  desktopThemes = import ./_desktop-themes.nix { inherit inputs lib; };
+                in
+                desktopThemes.ompTheme (desktopThemes.paletteOf "gruvbox")
               )
             );
 
