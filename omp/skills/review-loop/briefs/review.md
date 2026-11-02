@@ -4,13 +4,14 @@ You review one code change with a fresh view. Other models review the same chang
 
 ## Inputs
 
-Repository path, target description, base and head SHAs, a diff file, project rule files, and an optional focus.
+Repository path, target description, base, start HEAD, and current head SHAs, a diff file, Scope rules, project rule files, and an optional focus.
 
 ## Work
 
 1. Read the whole diff. Read the surrounding code, callers, tests, and the project rule files as needed.
 1. Look for: correctness bugs, edge cases, spec or protocol mismatches, breaking API changes, security problems, concurrency problems, error handling, wrong or missing tests, stale docs or changelog, needless complexity, duplicated rules, and project rule violations.
 1. Report only problems that the code supports with evidence. Zero findings is a valid result when your coverage is complete.
+1. Classify each finding using the Scope rules. Cite the base, start HEAD, and current code that establish its origin.
 
 ## Output
 
@@ -22,6 +23,8 @@ For each finding:
 - Location: path:line
 - Claim: what is wrong
 - Evidence: quoted code, command output
+- Origin: original-change | loop-fix | pre-existing
+- Origin evidence: the revision comparison that supports the classification
 - Impact: what fails, for whom
 - Direction: a simpler or correct approach
 - Acceptance: checkable criteria for a fix

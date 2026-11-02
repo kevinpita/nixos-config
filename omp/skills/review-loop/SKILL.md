@@ -18,12 +18,26 @@ The ledger is the single source of truth and your memory. It is `local://review-
 
 Sections:
 
-- **Setup**: every setup answer, pinned base SHA, start HEAD SHA, main checkout path.
+- **Setup**: every setup answer, pinned base SHA, start HEAD SHA, main checkout path, approved scope, and last authorized round (initially 5).
 - **Decisions**: every decision by the user or by the judges, with the reason in the decider's own words, the finding IDs it covers, and who decided. A reason says *why*, not only *what*.
-- **Findings**: one row per finding: `RL-<n>`, title, location, raised by (models), status, decision ref, fix commit, rounds seen. Status is one of `open`, `confirmed`, `rejected`, `needs-decision`, `approved`, `ignored`, `fixed`, `unresolved`.
+- **Findings**: one row per finding: `RL-<n>`, title, location, raised by (models), origin with evidence, status, decision ref, fix commit, rounds seen. Status is one of `open`, `confirmed`, `rejected`, `needs-decision`, `approved`, `ignored`, `fixed`, `unresolved`, `follow-up`.
 - **Rounds**: per round: HEAD SHA, agents spawned with their `agent://` IDs, counts per status, commits made.
 
 Match a new finding to an old one by underlying problem and scope, not by wording or line number. A changed failure or scope is a new finding.
+
+## Scope
+
+Classify each finding against the pinned base, start HEAD, and current HEAD:
+
+- `original-change`: the original target introduced or worsened the problem between the base and start HEAD.
+- `loop-fix`: a change after start HEAD introduced or worsened the problem, including a regression from an earlier fix.
+- `pre-existing`: the problem existed before the original target and neither the target nor a loop fix worsened it.
+
+After validation, keep confirmed `pre-existing` findings outside the approved scope as `follow-up`. Report them separately without fixing them or blocking completion. Only the user can expand scope. Record that approval and reason before returning an included finding to `confirmed`. Judges decide fixes within the approved scope, not whether to expand it.
+
+## Round limit
+
+Round numbers increase throughout the run, including after squash and final-review restarts. Setup authorizes rounds 1-5. Before starting a round beyond the last authorized round, ask the user to authorize up to 5 more and record the new ceiling. If approval is declined, report the remaining findings and run Stop.
 
 ## Consensus
 
@@ -41,8 +55,9 @@ Read [setup.md](setup.md) and follow it.
 
 ## 2. Review (round N)
 
+1. Apply the Round limit before starting this round.
 1. Write the current change to `local://review-loop/round-N/diff.patch` with `git diff <base SHA>..HEAD`, for every target kind. It includes the fix commits of earlier rounds. Record HEAD. For `Review only`, use the pinned head SHA in place of `HEAD`.
-1. Spawn one reviewer per review model in one `task` batch. Agent: `rl-read-<model>`. `context`: the full text of [briefs/review.md](briefs/review.md), the repository path, the target description, base and head SHAs, the diff path, the project rule files (for example `AGENTS.md`), and the user's focus. Every reviewer gets the same `task`.
+1. Spawn one reviewer per review model in one `task` batch. Agent: `rl-read-<model>`. `context`: the full text of [briefs/review.md](briefs/review.md), the Scope section above, the repository path, the target description, base, start HEAD, and current head SHAs, the diff path, the project rule files (for example `AGENTS.md`), and the user's focus. Every reviewer gets the same `task`.
 1. Run Consensus on the findings.
 1. Merge the results. Collapse duplicates and keep the models that raised each one.
 
@@ -54,6 +69,7 @@ For each merged finding:
 
 - It matches an `ignored` finding and the recorded reason still covers it -> drop it and count it.
 - It matches a `fixed` finding -> keep it and mark it `REGRESSION`.
+- It matches a `follow-up` finding, remains outside the approved scope, and has no new evidence -> keep it in the follow-up list without revalidating it.
 - A recorded reason is relevant but does not clearly cover it -> keep it and attach the reason, quoted, as an annotation.
 - It is new -> add it to the ledger as `open`.
 
@@ -61,9 +77,9 @@ For each merged finding:
 
 ## 4. Validate
 
-Spawn one validator per validation model in one batch. Agent: `rl-read-<model>`. `context`: the full text of [briefs/validate.md](briefs/validate.md), repository path, HEAD SHA, project rule files. `task`: the candidate findings with their annotations, labelled as claims. Run Consensus. Update each finding's status from the verdicts.
+Spawn one validator per validation model in one batch. Agent: `rl-read-<model>`. `context`: the full text of [briefs/validate.md](briefs/validate.md), the Scope section above, repository path, base, start HEAD, and current HEAD SHAs, approved scope, and project rule files. `task`: the candidate findings with their annotations, labelled as claims. Run Consensus. Update each finding's origin and status from the verdicts, then apply the Scope rules.
 
-**Done:** every candidate has one agreed verdict, or the user answered for it. `git status --porcelain` in the main checkout equals its state before the stage. For `Review only`, go to Report. Otherwise, if no finding is `confirmed` or `needs-decision`, go to step 8.
+**Done:** every candidate has one agreed verdict and origin, or the user answered for it. `git status --porcelain` in the main checkout equals its state before the stage. For `Review only`, go to Report. Otherwise, if no finding is `confirmed` or `needs-decision`, go to step 8.
 
 ## 5. Decide
 
@@ -91,7 +107,7 @@ Group `approved` findings that share an owner and a solution. Process the groups
 
 ## 7. Repeat
 
-Start step 2 with round N+1. After 5 rounds, `ask` before you start up to 5 more.
+Start step 2 with round N+1. Keep the round number and authorization ceiling from the ledger.
 
 ## 8. Squash and final review
 
@@ -100,6 +116,7 @@ Read [finish.md](finish.md) and follow it.
 ## Report (review only)
 
 1. Write `/tmp/review-loop/<repo>-<head short SHA>.md`. First line: `Merge: yes`, `yes with nits`, or `no`. Then one section per `confirmed` and `needs-decision` finding: what it is in one sentence, location, impact, the models that raised it, and the validators' options. Then a short list of `rejected` findings with the reason.
+1. Add a separate follow-up list for confirmed pre-existing findings outside the approved scope.
 1. Tell the user the verdict and the file path. Then walk the findings one at a time, most severe first: what it is, why it matters, and the proposed fix. Ask "Fix, skip, or explain more?" and record the answer in the ledger. Do not change any repository file.
 1. Go to Stop.
 

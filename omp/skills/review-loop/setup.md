@@ -37,6 +37,6 @@ Ask one question at a time with `ask`. Build each picker from facts you collecte
 
 ## After the confirmation
 
-1. Write the ledger Setup section, with the kind.
+1. Write the ledger Setup section, with the kind, the original target as the approved scope, and round 5 as the authorization ceiling. Start HEAD is the target's original head SHA. For `Review only`, use the pinned target head, not an unrelated main checkout's HEAD.
 1. `Review and fix` only: run `touch "$(git rev-parse --path-format=absolute --git-common-dir)/review-loop.active"` in the main checkout. The guard blocks pushes only in this repository and its worktrees. If the guard extension is missing, tell the user that pushes are not blocked by a hook in this session.
 1. `Review and fix` only: check that `git status --porcelain` is empty.
