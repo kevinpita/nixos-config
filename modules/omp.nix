@@ -98,6 +98,8 @@ in
       # (tui.mouse) or a link hint on a code block copies its exact source.
       # A closed ```markdown or ```md block shows a rendered Markdown preview,
       # with its inner code blocks highlighted, and still copies its source.
+      # With tui.mouse on, the wheel opens a scrollback page that omp draws
+      # itself, so a click on a scrolled-back code block still copies it.
       ompBasePackage =
         (inputs.oh-my-pi.packages.${system}.default.override {
           withWaylandScreencast = true;
@@ -109,6 +111,7 @@ in
               ../packages/omp/markdown-code-block-background.patch
               ../packages/omp/markdown-code-block-copy.patch
               ../packages/omp/markdown-code-block-preview.patch
+              ../packages/omp/transcript-scrollback.patch
             ];
           });
       # pstack is a Claude Code plugin; omp loads that format through

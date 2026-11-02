@@ -1,0 +1,278 @@
+diff --git a/packages/coding-agent/src/modes/controllers/input-controller.ts b/packages/coding-agent/src/modes/controllers/input-controller.ts
+index 27537ca..4320a26 100644
+--- a/packages/coding-agent/src/modes/controllers/input-controller.ts
++++ b/packages/coding-agent/src/modes/controllers/input-controller.ts
+@@ -857,6 +857,7 @@ export class InputController {
+ 		const event = parseSgrMouse(data);
+ 		if (!event) return undefined;
+ 		if (event.motion) this.#updateHoverHighlight(event.row);
++		else if (event.wheel === -1) this.ctx.openTranscriptScrollback();
+ 		else if (event.leftClick && !this.#activateClickedLink(event.row, event.col)) this.#focusClickedAgent(event.row);
+ 		return { consume: true };
+ 	}
+diff --git a/packages/coding-agent/src/modes/interactive-mode.ts b/packages/coding-agent/src/modes/interactive-mode.ts
+index 6cdcdea..a2fdd2f 100644
+--- a/packages/coding-agent/src/modes/interactive-mode.ts
++++ b/packages/coding-agent/src/modes/interactive-mode.ts
+@@ -280,6 +280,7 @@ import { type PlanReviewAnnotationState, PlanReviewOverlay } from "@oh-my-pi/pi-
+ import { PlanSaveOverlay, type PlanSaveOverlayResult } from "@oh-my-pi/pi-tui/overlays/plan-save-overlay";
+ import { ServedModelTracker } from "@oh-my-pi/pi-tui/chat/served-model-marker";
+ import { SessionInfoOverlay } from "@oh-my-pi/pi-tui/overlays/session-info-overlay";
++import { TranscriptScrollback } from "@oh-my-pi/pi-tui/overlays/transcript-scrollback";
+ import { JobsSheet } from "@oh-my-pi/pi-tui/overlays/jobs-panel";
+ import { SkillMessageComponent } from "@oh-my-pi/pi-tui/chat/skill-message";
+ import { StatusLineComponent } from "@oh-my-pi/pi-tui/status-line";
+@@ -1777,6 +1778,8 @@ export class InteractiveMode implements InteractiveModeContext {
+ 	#planReviewOverlayHandle: OverlayHandle | undefined;
+ 	#sessionInfoOverlayHandle: OverlayHandle | undefined;
+ 	#jobsSheetHandle: OverlayHandle | undefined;
++	/** The open transcript scrollback page, and the component that had focus before it. */
++	#scrollback: { view: TranscriptScrollback; handle: OverlayHandle; focus: Component | null } | undefined;
+ 	/** Re-renders the open jobs sheet so output tails and pids stay live. */
+ 	#jobsSheetTimer: NodeJS.Timeout | undefined;
+ 	#planReviewOwner: object | undefined;
+@@ -4397,15 +4400,57 @@ export class InteractiveMode implements InteractiveModeContext {
+ 	#copyCodeBlock(url: string): void {
+ 		const code = codeCopySource(url);
+ 		if (code === undefined) {
+-			this.showWarning("Code block is no longer available; use /copy");
++			this.#copyNotice("Code block is no longer available; use /copy", true);
+ 			return;
+ 		}
+ 		copyToClipboard(code).then(
+-			() => this.showStatus("Copied code block to clipboard"),
+-			(error: unknown) => this.showWarning(`Copy failed: ${error instanceof Error ? error.message : String(error)}`),
++			() => this.#copyNotice("Copied code block to clipboard", false),
++			(error: unknown) =>
++				this.#copyNotice(`Copy failed: ${error instanceof Error ? error.message : String(error)}`, true),
+ 		);
+ 	}
+ 
++	/** The scrollback page hides the status line, so a copy result shows in its footer too. */
++	#copyNotice(text: string, warning: boolean): void {
++		if (warning) this.showWarning(text);
++		else this.showStatus(text);
++		if (this.#scrollback) {
++			this.#scrollback.view.setNotice(text);
++			this.ui.requestRender();
++		}
++	}
++
++	openTranscriptScrollback(): void {
++		if (this.#scrollback) return;
++		const view = new TranscriptScrollback({
++			rows: width => this.chatContainer.render(width),
++			height: () => this.ui.terminal.rows,
++			activateLink: url => this.#activateLink(url),
++			onClose: () => this.#closeTranscriptScrollback(),
++		});
++		if (!view.canScroll(this.ui.terminal.columns)) return;
++		const focus = this.ui.getFocused();
++		const handle = this.ui.showOverlay(view, {
++			anchor: "top-left",
++			width: "100%",
++			maxHeight: "100%",
++			margin: 0,
++			fullscreen: true,
++		});
++		this.#scrollback = { view, handle, focus };
++		this.ui.setFocus(view);
++		this.ui.requestRender();
++	}
++
++	#closeTranscriptScrollback(): void {
++		const scrollback = this.#scrollback;
++		if (!scrollback) return;
++		this.#scrollback = undefined;
++		scrollback.handle.hide();
++		this.ui.setFocus(scrollback.focus);
++		this.ui.requestRender();
++	}
++
+ 	activateViewportLink(index: number, col: number): boolean {
+ 		const url = this.composer.viewportLinkAt(index, col)?.url;
+ 		return url !== undefined && this.#activateLink(url);
+diff --git a/packages/coding-agent/src/modes/types.ts b/packages/coding-agent/src/modes/types.ts
+index 0210002..48e018e 100644
+--- a/packages/coding-agent/src/modes/types.ts
++++ b/packages/coding-agent/src/modes/types.ts
+@@ -220,6 +220,11 @@ export interface InteractiveModeContext {
+ 	 * drawn there. Returns false when no extension link is under the click.
+ 	 */
+ 	activateViewportLink(index: number, col: number): boolean;
++	/**
++	 * Open the transcript scrollback page (the wheel with `tui.mouse` on): omp draws the scrolled
++	 * transcript, so clicks keep reaching its links. Does nothing when the transcript fits on screen.
++	 */
++	openTranscriptScrollback(): void;
+ 	/**
+ 	 * Enter keyboard link-hint mode: tag each extension link label on screen, or show a status when
+ 	 * none is drawn. Returns false, doing nothing, unless extension links are routed (a scheme
+diff --git a/packages/coding-agent/test/interactive-click-focus.test.ts b/packages/coding-agent/test/interactive-click-focus.test.ts
+index 7fe85f7..9e0e64e 100644
+--- a/packages/coding-agent/test/interactive-click-focus.test.ts
++++ b/packages/coding-agent/test/interactive-click-focus.test.ts
+@@ -423,6 +423,41 @@ describe("inline click-to-focus geometry", () => {
+ 		expect(await copied.promise).toBe(source);
+ 	});
+ 
++	it("scrolls the transcript with the wheel and copies a block scrolled off screen; scrolling past the bottom returns", async () => {
++		cfgTuiMouse.set(mode.settings, true);
++		const copied = Promise.withResolvers<string>();
++		vi.spyOn(clipboard, "copyToClipboard").mockImplementation(async text => copied.resolve(text));
++		await mode.init({ suppressWelcomeIntro: true });
++		void mode.getUserInput();
++		await term.waitForRender();
++
++		const source = "echo scrolled\nEOF";
++		const filler = Array.from({ length: 60 }, (_, i) => `Line ${i}.`).join("\n\n");
++		await showReply(`Run:\n\n\`\`\`sh\n${source}\n\`\`\`\n\n${filler}\n\nDone.`, "Done.");
++		const wheel = (button: 64 | 65) => term.sendInput(`\x1b[<${button};1;1M`);
++		const screen = () => plainRows(term.getViewport());
++		expect(screen().some(row => row.includes("echo scrolled"))).toBe(false);
++
++		for (let notch = 0; notch < 60 && !screen().some(row => row.trimEnd().endsWith("EOF")); notch++) {
++			wheel(64);
++			await term.waitForRender();
++		}
++		const viewport = screen();
++		const screenRow = viewport.findIndex(row => row.trimEnd().endsWith("EOF"));
++		expect(screenRow).toBeGreaterThanOrEqual(0);
++		term.sendInput(`\x1b[<0;${viewport[screenRow]!.indexOf("EOF") + 20};${screenRow + 1}M`);
++		expect(await copied.promise).toBe(source);
++		await term.waitForRender(() => screen().some(row => row.includes("Copied code block")));
++
++		// The first notch down clears the notice; the page closes once it passes the bottom.
++		for (let notch = 0; notch < 80 && (notch === 0 || screen().some(row => row.includes("Scrollback"))); notch++) {
++			wheel(65);
++			await term.waitForRender();
++		}
++		expect(screen().some(row => row.includes("Scrollback"))).toBe(false);
++		expect(screen().some(row => row.includes("Done."))).toBe(true);
++	});
++
+ 	it("picks an extension link by its hint tag with tui.mouse off; Esc cancels without picking", async () => {
+ 		cfgExtensionAssistantTextRenderers.set(mode.settings, true);
+ 		const { activated, firstActivation } = installDemoLinkExtension();
+diff --git a/packages/tui/src/overlays/transcript-scrollback.ts b/packages/tui/src/overlays/transcript-scrollback.ts
+new file mode 100644
+index 0000000..3246886
+--- /dev/null
++++ b/packages/tui/src/overlays/transcript-scrollback.ts
+@@ -0,0 +1,116 @@
++/**
++ * Wheel scrollback for the main transcript (`tui.mouse`).
++ *
++ * With mouse tracking on, the terminal hands wheel reports to omp instead of scrolling its own
++ * scrollback, and a click on a row the terminal has scrolled back reports only its screen row, so
++ * a click there cannot be traced to the row drawn under it. This fullscreen page draws the
++ * transcript itself, scrolled by the wheel and the arrow/page keys: every visible row is known,
++ * so a click reaches the extension link drawn under it, a code block's copy target included. It
++ * shows the transcript as it was when it opened; Esc, `q`, or scrolling past the bottom return
++ * to the live view.
++ */
++import { matchesKey } from "../keys";
++import { routeSgrMouseInput } from "../mouse";
++import { extensionLinkLabels } from "../render/extension-links";
++import { theme } from "../theme/theme";
++import type { Component } from "../tui";
++import { truncateToWidth } from "../utils";
++
++const WHEEL_ROWS = 3;
++
++export interface TranscriptScrollbackOptions {
++	/** The whole transcript at `width`, oldest row first. */
++	readonly rows: (width: number) => readonly string[];
++	/** Screen height; the page fills it, its last row a footer. */
++	readonly height: () => number;
++	/** Activate the extension link `url` under a click. Returns false when nothing handles it. */
++	readonly activateLink: (url: string) => boolean;
++	readonly onClose: () => void;
++}
++
++export class TranscriptScrollback implements Component {
++	#rows: readonly string[] = [];
++	#width = 0;
++	/** Rows hidden below the page, so a resize keeps the bottom in place. Opens one wheel notch up. */
++	#fromBottom = WHEEL_ROWS;
++	#notice: string | undefined;
++
++	constructor(private readonly options: TranscriptScrollbackOptions) {}
++
++	/** Whether the transcript at `width` is taller than the page, so there is something to scroll back to. */
++	canScroll(width: number): boolean {
++		this.#load(width);
++		return this.#rows.length > this.#body();
++	}
++
++	/** Show `text` in the footer until the next scroll. */
++	setNotice(text: string): void {
++		this.#notice = text;
++	}
++
++	render(width: number): readonly string[] {
++		if (width !== this.#width) this.#load(width);
++		const body = this.#body();
++		const top = this.#top();
++		const lines = this.#rows.slice(top, top + body);
++		while (lines.length < body) lines.push("");
++		const percent = Math.round((top / Math.max(1, this.#rows.length - body)) * 100);
++		const footer =
++			this.#notice ?? `Scrollback ${percent}%  wheel/Up/Down scroll  click a code block to copy  Esc returns`;
++		lines.push(theme.fg("dim", truncateToWidth(footer, width)));
++		return lines;
++	}
++
++	handleInput(data: string): void {
++		const mouse = routeSgrMouseInput(data, event => {
++			if (event.wheel !== null) this.#scroll(event.wheel * WHEEL_ROWS);
++			else if (event.leftClick) this.#click(event.row, event.col);
++			return true;
++		});
++		if (mouse) return;
++		const page = Math.max(1, this.#body() - 1);
++		if (matchesKey(data, "escape") || data === "q") this.options.onClose();
++		else if (matchesKey(data, "up")) this.#scroll(-1);
++		else if (matchesKey(data, "down")) this.#scroll(1);
++		else if (matchesKey(data, "pageUp")) this.#scroll(-page);
++		else if (matchesKey(data, "pageDown")) this.#scroll(page);
++		else if (matchesKey(data, "home")) this.#scroll(-this.#rows.length);
++		else if (matchesKey(data, "end")) this.options.onClose();
++	}
++
++	invalidate(): void {
++		this.#width = 0;
++	}
++
++	#load(width: number): void {
++		this.#width = width;
++		this.#rows = this.options.rows(width);
++	}
++
++	#body(): number {
++		return Math.max(1, this.options.height() - 1);
++	}
++
++	#top(): number {
++		return Math.max(0, this.#rows.length - this.#body() - this.#fromBottom);
++	}
++
++	/** Scroll `delta` rows down (negative: up); past the bottom returns to the live view. */
++	#scroll(delta: number): void {
++		this.#notice = undefined;
++		const next = this.#fromBottom - delta;
++		if (next < 0) {
++			this.options.onClose();
++			return;
++		}
++		this.#fromBottom = Math.min(next, Math.max(0, this.#rows.length - this.#body()));
++	}
++
++	#click(row: number, col: number): void {
++		if (row < 0 || row >= this.#body()) return;
++		const line = this.#rows[this.#top() + row];
++		if (line === undefined) return;
++		const label = extensionLinkLabels(line).find(label => col >= label.start && col < label.end);
++		if (label) this.options.activateLink(label.url);
++	}
++}
