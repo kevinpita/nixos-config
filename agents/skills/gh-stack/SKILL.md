@@ -5,6 +5,9 @@ description: >
   Use for stack creation, viewing, edits, push, submit, sync, rebase, merge, or checkout;
   when asked to split or isolate work for review; whenever a user mentions a stack,
   branch layers, dependent PRs, or gh stack; or when a stack is checked out.
+  Also use it for any rebase conflict: if `gh-stack-rebase-state` exists in
+  `git rev-parse --git-dir` or `git rev-parse --git-common-dir`, finish with
+  `gh stack rebase --continue`, never `git rebase --continue`.
 metadata:
   author: github
   version: 0.1.0
