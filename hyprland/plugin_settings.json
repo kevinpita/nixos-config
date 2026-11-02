@@ -16,6 +16,9 @@
   "emojiLauncher": {
     "enabled": true
   },
+  "screenRecord": {
+    "enabled": true
+  },
   "tailnetPorts": {
     "enabled": true
   },

@@ -1,0 +1,13 @@
+{
+  "id": "screenRecord",
+  "name": "Screen Record",
+  "description": "Record a screen region, then pick the quality and a name before saving",
+  "version": "1.0.0",
+  "author": "Kevin Pita",
+  "type": "daemon",
+  "capabilities": ["daemon"],
+  "component": "./ScreenRecordDaemon.qml",
+  "icon": "screen_record",
+  "requires_dms": ">=1.5.0",
+  "permissions": []
+}
