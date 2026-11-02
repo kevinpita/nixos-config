@@ -24,6 +24,14 @@ A session model switch does not change explicit worker assignments. Role aliases
 
 Keep providers available for manual selection when only their default routes change. Provider blocks belong in `modules/omp.nix`, separate from role assignments. Custom providers go into the generated `~/.omp/agent/models.yml`. Their API keys stay outside the repository: the `nan` provider reads its key from `~/.config/nan/api-key`, which sops-nix writes from `nan-key` in the `nixos-secrets` file `secrets/common.yaml`.
 
+## NaN usage
+
+`extensions/nan-usage.ts` adds NaN quota reports to `/usage` and `omp usage`. It reads the `nan` provider's model IDs and API-key reference from `~/.omp/agent/models.yml`, so inference and usage keep the same configuration.
+
+The extension uses the NaN dashboard's undocumented `https://cloud-api.nan.builders/api/usage/quota` endpoint. It reports base quotas for configured models and uses each model's period-end timestamp. Rolling windows appear only when the API supplies their usage and budget. Bonus tokens are not included in the base quotas.
+
+The extension works with the auth broker. If the broker has no NaN report, omp fetches the quota locally with the configured key.
+
 ## Logins
 
 One host can set `omp.authBroker.enable` to run `omp auth-broker serve` as a system service. That host keeps the logins in its `~/.omp/agent/agent.db` and refreshes the OAuth tokens. The broker listens only on `127.0.0.1:8765`, and Tailscale Serve publishes that port on the tailnet, so no other network can reach it. The wrapper on every other host sets `OMP_AUTH_BROKER_URL` to the MagicDNS name of the broker host, so omp on those hosts ignores its local logins. Sign in on the broker host. All hosts read the shared bearer token from `~/.omp/auth-broker.token`, which sops-nix writes from `omp-auth-broker-token` in the `nixos-secrets` file `secrets/common.yaml`.

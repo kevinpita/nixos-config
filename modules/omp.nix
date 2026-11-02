@@ -347,6 +347,7 @@ in
             ".omp/agent/extensions/focus-view.ts".source = ../omp/extensions/focus-view.ts;
             # kubectl context and namespace, for kubie sessions.
             ".omp/agent/extensions/k8s-status.ts".source = ../omp/extensions/k8s-status.ts;
+            ".omp/agent/extensions/nan-usage.ts".source = ../omp/extensions/nan-usage.ts;
             # omp has no model-change event, so poll the live model to keep
             # the status line current after /model switches.
             ".omp/agent/extensions/provider-status.ts".text = ''
