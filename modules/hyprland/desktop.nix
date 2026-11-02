@@ -59,13 +59,24 @@
           platforms = lib.platforms.linux;
         };
       };
-      sharePicker = pkgs.hyprland-preview-share-picker.overrideAttrs (old: {
-        # Window captures are already upright, so rotating them by the monitor transform turns windows on rotated monitors sideways.
-        postPatch = (old.postPatch or "") + ''
-          substituteInPlace src/views/windows.rs \
-            --replace-fail "img = img.transform(transform.into());" ""
-        '';
-      });
+      # 0.2.1 parses hyprctl JSON through hyprland-rs, which rejects the
+      # id-less workspace objects of Hyprland 0.57, so only the region page showed.
+      sharePicker = pkgs.hyprland-preview-share-picker.overrideAttrs (
+        finalAttrs: _: {
+          version = "0.3.0";
+          src = pkgs.fetchFromGitHub {
+            owner = "WhySoBad";
+            repo = "hyprland-preview-share-picker";
+            tag = "v${finalAttrs.version}";
+            fetchSubmodules = true;
+            hash = "sha256-Fg9u1lXJLMmQjHwHbt7oWXVK6o4ip01fpb5bqm5Q8sw=";
+          };
+          cargoDeps = pkgs.rustPlatform.fetchCargoVendor {
+            inherit (finalAttrs) src;
+            hash = "sha256-4nd0X6Ii6pbpQgzFCw2yXhl2+C5FyqDsHtbzKNpGW5o=";
+          };
+        }
+      );
       superDoubleTap = pkgs.writeShellApplication {
         name = "super-double-tap";
         runtimeInputs = with pkgs; [
