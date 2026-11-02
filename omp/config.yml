@@ -23,6 +23,13 @@ modelRoles:
   glm-flash: nan/glm5.3-flash:high
   deepseek: nan/deepseek-v4-flash:high
   security: "@glm"
+retry:
+  rateLimitWalksChain: true
+  fallbackChains:
+    default: [openai-codex/gpt-6.1-sol, zai/glm-5.3]
+    task: [openai-codex/gpt-6.1-sol, zai/glm-5.3]
+    advisor: [anthropic/claude-opus-5-5, zai/glm-5.3]
+    reviewer: [anthropic/claude-opus-5-5, zai/glm-5.3]
 task:
   agentModelOverrides:
     scout: "@smol"
