@@ -1,17 +1,6 @@
 --- a/src/terminal.rs
 +++ b/src/terminal.rs
-@@ -574,7 +574,9 @@
-             return;
-         }
-         let up = steps > 0;
--        if g.vt.mouse_tracking() {
-+        // On the primary screen the history is Herdr's scrollback, so the wheel
-+        // scrolls it even when the program tracks the mouse (omp draws inline).
-+        if g.vt.mouse_tracking() && g.vt.alt_screen() {
-             let ((x, y), size) = mouse_at(&g, ev.position);
-             let button = if up { GHOSTTY_MOUSE_BUTTON_FOUR } else { GHOSTTY_MOUSE_BUTTON_FIVE };
-             let mut out = Vec::new();
-@@ -599,19 +601,21 @@
+@@ -599,19 +599,21 @@
          cx.notify();
      }
  
