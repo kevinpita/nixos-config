@@ -10,12 +10,25 @@ A problem has three stages: understand it, choose a solution, implement it. Impl
 
 Skip stages 1 and 2 when the task has one clear goal and one clear way to do it, for example "find the root cause of X". Research that changes nothing needs no confirmation. If the user tells you to work without them, write down your assumptions, continue, and list the assumptions in your report.
 
+A question, an explain request, or a check request gets an answer or a report, not a change. Examples: "should we…?", "worth it?", "isn't X safer?", "check why", "verify". An acknowledgement such as "fair" or "ok" is not a request to act. Offer the change and wait. Before you act on a short reply such as "5 -> yes", restate it as the action you will take, and wait for confirmation unless the action is read-only.
+
 ## Writing instructions
 
 - Write in ASD-STE100 Simplified Technical English. If the user writes in another language, answer in that language, with short sentences, active voice, and one instruction per sentence. Write files, code comments, and commit messages in English unless the user asks for another language.
+- When you answer in Spanish, use Spanish from Spain.
 - In prose, end the sentence with a period where a semicolon or an em dash could go. Use a colon before a list or an explanation.
 - Always use ASCII arrows `<-` and `->` instead of Unicode left or right-pointing arrows.
 - Use a small example when it makes the point easier to understand. Prefer an example to a long explanation.
+- Apply these writing rules to your answers and commit messages. In repo files, follow the repo's existing style, and do not report a writing-rule finding on repo docs.
+- In a PR, issue, or comment body, do not hard-wrap lines. Follow the repo template, and keep the body as short as the nearest earlier PR of the same kind.
+
+## Environment
+
+- The host runs NixOS. If a tool is missing, run it with `nix shell nixpkgs#<tool> -c <command>`. Do not install it.
+- Command output is in Spanish. To parse it, run the command with `LC_ALL=C`, or check the exit code.
+- git uses difftastic as its external diff. To read or apply a patch, use `git --no-pager diff --no-ext-diff --no-color`.
+- `docker` talks to rootless Podman. Bind-mounted files get mapped uids.
+- `~/.omp/agent` is generated from `~/nixos-config`. Edit the files there: `agents/` for AGENTS.md and shared skills, `omp/` for omp config, agents, and omp-only skills (see `omp/README.md`). New files need `git add -N` before a Nix build sees them.
 
 ## Answer layout
 
@@ -43,6 +56,10 @@ Skip stages 1 and 2 when the task has one clear goal and one clear way to do it,
 - Use Conventional Commit messages with a subject line only, no body.
 - Commit only the changes that you made for the current task. Leave other changes in the working tree out of the commit.
 - Do not push until the user asks you to.
+- In a repo that uses pull requests, never commit on `main` or a release branch. Create a feature branch. "Prepare" means local only.
+- Do not edit PR titles or bodies, and do not post comments, until the user asks you to.
+- In a branch stack, commit each fix on the branch that introduced the code.
+- Before you say "not pushed", or before you amend, squash, or rebase, check `git status -sb` and the remote branch.
 
 ## Programming instructions
 
@@ -67,6 +84,7 @@ In stage 1 of "Work on a problem", use steps 1 and 2 to read the code before you
 - Identify the valid inputs, invalid inputs, and expected results.
 - For a bug fix in production code, add or use a regression test, as step 6 describes. Confirm that it detects the original failure before you change the code. A fix in a test, CI, or docs needs no new regression test.
 - Before you act on a review finding, or on a claim from a handoff or an earlier session, verify it against the code. Report which findings you accept and which you reject, with the reason.
+- For each risk, say first whether this change adds it or it exists today, and whether it needs deliberate misuse. A failure caused by an intended, documented action of a trusted actor, such as governance or an operator, is still a finding. Call a fix "hardening" only after you verify that supported inputs cannot reach the state. Judge a change against "same or better than today".
 
 ### During implementation
 
@@ -90,7 +108,7 @@ When adding or changing tests:
 - State the behavior being protected and an incorrect result the test should catch.
 - Test the real behavior of the change through the smallest path that can prove it. Add a higher-level test only when it can catch a different failure. Do not test trivial code, such as wiring, getters, or copied constants, unless the goal is to pin a behavior.
 - Keep tests in proportion to the change. A test must prove that the change works or prevent later drift, with the fewest lines that do this. Often one more assertion in an existing test is enough.
-- Read the relevant existing tests, fixtures, and helpers, and write new tests the same way. Put shared setup and data in the existing helpers, not in each test.
+- Before you write a test, open the 2 closest existing tests in the same package. Copy their name pattern, table shape, helpers, and assert style. In the report, name the test that you copied. Put shared setup and data in the existing helpers, not in each test.
 - Before you add a test, look for an existing test of the same behavior. If setup and assertions match, add the case to its table. If that test has no table yet, change it into a table test. Use a separate test only when setup or assertions differ.
 - For tests added or changed in this task, keep cases that protect distinct rules, boundaries, or failure modes. Boundary cases can remain useful even when their expected results match.
 
@@ -110,8 +128,14 @@ When adding or changing tests:
 - If the user names a context or namespace, it is possibly already active. To verify, run `kubectl config current-context` and `kubectl config view --minify -o jsonpath='{..namespace}'`.
 - Use only read-only commands on a cluster, for example `get`, `describe`, `logs`, `top`, and `helm diff`. Ask the user before a command that changes the cluster, for example `apply`, `patch`, `delete`, `scale`, `rollout restart`, `exec`, or `helm upgrade`.
 - Query a cluster only when the task needs live state. For questions about a repo or its config, read the repo.
+- If no kubie session is active (no current context, or `KUBECONFIG` is not set), stop and ask the user to start kubie. Do not use another kubeconfig or `--context`.
+- Ask the user before you read or decode Secret data.
 
 ## Live networks
 
 - Never send transactions or other writes to mainnet or testnet on your own. Test and prove on a local network.
 - Read-only queries to mainnet or testnet are OK when the task needs live state.
+
+## Public repos
+
+- In a public repo, do not reveal an undisclosed security issue in branch names, commits, PRs, or comments. Do not write private tracker references or private advisory IDs, and do not describe the bug, its trigger, or its impact. Use neutral wording, for example `chore: ...`. Ask before you make any new security detail public.
