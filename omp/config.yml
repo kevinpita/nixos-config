@@ -23,6 +23,9 @@ modelRoles:
   glm-flash: nan/glm5.3-flash:high
   deepseek: nan/deepseek-v4-flash:high
   security: "@glm"
+providers:
+  maxInFlightRequests:
+    nan: 10
 retry:
   rateLimitWalksChain: true
   fallbackChains:

@@ -22,6 +22,8 @@ This folder owns the oh-my-pi (omp) harness configuration. `modules/omp.nix` sel
 
 A session model switch does not change explicit worker assignments. Role aliases resolve at use time. An alias to `@default` can follow a session model switch, so use an explicit selector when a worker must stay on one model.
 
+`providers.maxInFlightRequests.nan` caps all Nan models together at 10 in-flight requests across local omp processes that share the config root. Other hosts do not share this limit. A model-specific provider limit can be lower.
+
 Keep providers available for manual selection when only their default routes change. Provider blocks belong in `modules/omp.nix`, separate from role assignments. Custom providers go into the generated `~/.omp/agent/models.yml`. Their API keys stay outside the repository: the `nan` provider reads its key from `~/.config/nan/api-key`, which sops-nix writes from `nan-key` in the `nixos-secrets` file `secrets/common.yaml`.
 
 ## NaN usage
