@@ -1,0 +1,127 @@
+diff --git a/packages/tui/src/components/markdown.ts b/packages/tui/src/components/markdown.ts
+index 79356f2..401bacd 100644
+--- a/packages/tui/src/components/markdown.ts
++++ b/packages/tui/src/components/markdown.ts
+@@ -59,6 +59,13 @@ import {
+ // codespan backtick. Normalize well-formed OSC 8 prefixes to the equivalent BEL
+ // terminator before lexing so the control sequence stays opaque to Markdown.
+ const OSC8_ST_PREFIX_REGEX = /(\x1b\]8;[^\x07\x1b]*)\x1b\\/g;
++/** One whole OSC 8 sequence, opening or closing. */
++const OSC8_SEQUENCE_REGEX = /\x1b\]8;[^\x07\x1b]*;[^\x07\x1b]*(?:\x07|\x1b\\)/g;
++/** Whether a closed code block with this fence language shows a rendered Markdown preview. */
++function isMarkdownPreviewLang(lang: string | undefined): boolean {
++	const name = lang?.toLowerCase();
++	return name === "markdown" || name === "md";
++}
+ 
+ function normalizeOsc8Terminators(text: string): string {
+ 	return text.replace(OSC8_ST_PREFIX_REGEX, "$1\x07");
+@@ -3678,6 +3685,7 @@ export class Markdown implements Component {
+ 		token: Token,
+ 		codeIndent: string,
+ 		copyTarget: ((label: string) => string) | undefined,
++		width: number,
+ 	): RenderedLine[] {
+ 		const literalCode = this.#codeBlockIndent === 0;
+ 		const bodyLines: RenderedLine[] = [];
+@@ -3690,7 +3698,17 @@ export class Markdown implements Component {
+ 		};
+ 
+ 		const streaming = this.transientRenderCache && !this.#renderingStablePrefix;
+-		if (this.#theme.highlightCode && (!streaming || this.#codeTokenHasClosingFence(token))) {
++		const closed = !streaming || this.#codeTokenHasClosingFence(token);
++		if (closed && isMarkdownPreviewLang(lang)) {
++			// A closed Markdown fence shows its rendered preview; the copy target still copies the source.
++			// The preview's own links would end the copy target mid-row, so they are dropped.
++			const preview = new Markdown(tokenText, 0, 0, this.#theme, this.#defaultTextStyle, this.#codeBlockIndent);
++			for (const row of preview.render(Math.max(1, width - codeIndent.length))) {
++				addBodyLine(row.replace(OSC8_SEQUENCE_REGEX, ""));
++			}
++			return bodyLines;
++		}
++		if (this.#theme.highlightCode && closed) {
+ 			// Finalized content — or a fence that closed mid-stream, which
+ 			// highlights through the same whole-block call the finalized render
+ 			// uses so cached stable rows byte-match it.
+@@ -4078,7 +4096,7 @@ export class Markdown implements Component {
+ 				const codeIndent = padding(this.#codeBlockIndent);
+ 				const copyTarget = this.#codeCopyTarget(token);
+ 				lines.push(renderedLine(this.#renderCodeHeader(token, copyTarget)));
+-				for (const bodyLine of this.#renderCodeBodyLines(token, codeIndent, copyTarget)) {
++				for (const bodyLine of this.#renderCodeBodyLines(token, codeIndent, copyTarget, width)) {
+ 					lines.push(bodyLine);
+ 				}
+ 				lines.push(renderedLine(this.#theme.codeBlockBorder("```")));
+@@ -4596,7 +4614,7 @@ export class Markdown implements Component {
+ 				const codeIndent = padding(this.#codeBlockIndent);
+ 				const copyTarget = this.#codeCopyTarget(token);
+ 				lines.push({ text: this.#renderCodeHeader(token, copyTarget), nested: false });
+-				for (const bodyLine of this.#renderCodeBodyLines(token, codeIndent, copyTarget)) {
++				for (const bodyLine of this.#renderCodeBodyLines(token, codeIndent, copyTarget, contentWidth)) {
+ 					lines.push({ ...bodyLine, nested: false });
+ 				}
+ 				lines.push({ text: this.#theme.codeBlockBorder("```"), nested: false });
+diff --git a/packages/tui/test/extension-links.test.ts b/packages/tui/test/extension-links.test.ts
+index dfaaa3a..7dea9a4 100644
+--- a/packages/tui/test/extension-links.test.ts
++++ b/packages/tui/test/extension-links.test.ts
+@@ -439,4 +439,25 @@ describe("extension link hints", () => {
+ 			composer.stop();
+ 		}
+ 	});
++
++	it("keeps a markdown preview one target that copies the source, inner links and fences included", () => {
++		const source = "# Steps\n\nSee [docs](https://example.com).\n\n```sh\necho hi\n```";
++		const hyperlinks = TERMINAL.hyperlinks;
++		let rows: readonly string[];
++		setTerminalHyperlinks(true);
++		try {
++			setExtensionLinks([CODE_COPY_SCHEME]);
++			rows = new Markdown(`\`\`\`\`md\n${source}\n\`\`\`\``, 1, 0, getMarkdownTheme(), undefined, 0).render(30);
++		} finally {
++			setTerminalHyperlinks(hyperlinks);
++		}
++
++		const labels = rows.map(row => extensionLinkLabels(row));
++		const body = labels.slice(1, -1);
++		expect(rows.map(plain)).toContain("Steps".padEnd(30));
++		for (const row of body) expect(row.map(({ start, end }) => [start, end])).toEqual([[0, 30]]);
++		const urls = new Set([labels[0]!, ...body].flat().map(label => label.url));
++		expect(urls.size).toBe(1);
++		expect(codeCopySource([...urls][0]!)).toBe(source);
++	});
+ });
+diff --git a/packages/tui/test/markdown.test.ts b/packages/tui/test/markdown.test.ts
+index d761508..9c4d86f 100644
+--- a/packages/tui/test/markdown.test.ts
++++ b/packages/tui/test/markdown.test.ts
+@@ -1139,6 +1139,29 @@ more text`,
+ 			expect(plainLines).toEqual([" ```sh", "cat <<'EOF'", "EOF", " ```"]);
+ 		});
+ 
++		it("renders a closed markdown fence as a preview with highlighted inner code", async () => {
++			const dark = await loadTheme("dark");
++			const theme: MarkdownTheme = {
++				...defaultMarkdownTheme,
++				highlightCode: (code, lang) => highlightCode(code, lang, dark),
++			};
++			const source = "````md\n# Steps\n\n- run **this**\n\n```sh\necho hi\n```\n````";
++			const lines = new Markdown(source, 1, 0, theme, undefined, 0).render(30);
++
++			expect(lines.map(line => stripVTControlCharacters(line).trimEnd())).toEqual([
++				" ```md",
++				"Steps",
++				"",
++				"- run this",
++				"",
++				"```sh",
++				"echo hi",
++				"```",
++				" ```",
++			]);
++			expect(lines.find(line => stripVTControlCharacters(line).startsWith("echo"))).toContain("\x1b[38;");
++		});
++
+ 		it("fills column-zero code body rows with the theme code background", async () => {
+ 			const dark = await loadTheme("dark");
+ 			const theme: MarkdownTheme = {
