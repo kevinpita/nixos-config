@@ -33,7 +33,7 @@ Classify each finding against the pinned base, start HEAD, and current HEAD:
 - `loop-fix`: a change after start HEAD introduced or worsened the problem, including a regression from an earlier fix.
 - `pre-existing`: the problem existed before the original target and neither the target nor a loop fix worsened it.
 
-After validation, keep confirmed `pre-existing` findings outside the approved scope as `follow-up`. Report them separately without fixing them or blocking completion. Only the user can expand scope. Record that approval and reason before returning an included finding to `confirmed`. Judges decide fixes within the approved scope, not whether to expand it.
+After validation, move `pre-existing` findings with a `confirmed` or `needs-decision` verdict outside the approved scope to `follow-up`. Preserve the validation verdict in the ledger. Report them separately without fixing them or blocking completion. Only the user can expand scope. Record that approval and reason before restoring an included finding's validation verdict. Judges decide fixes within the approved scope, not whether to expand it.
 
 ## Round limit
 
@@ -116,7 +116,7 @@ Read [finish.md](finish.md) and follow it.
 ## Report (review only)
 
 1. Write `/tmp/review-loop/<repo>-<head short SHA>.md`. First line: `Merge: yes`, `yes with nits`, or `no`. Then one section per `confirmed` and `needs-decision` finding: what it is in one sentence, location, impact, the models that raised it, and the validators' options. Then a short list of `rejected` findings with the reason.
-1. Add a separate follow-up list for confirmed pre-existing findings outside the approved scope.
+1. Add a separate follow-up list for pre-existing findings outside the approved scope, with their validation verdicts.
 1. Tell the user the verdict and the file path. Then walk the findings one at a time, most severe first: what it is, why it matters, and the proposed fix. Ask "Fix, skip, or explain more?" and record the answer in the ledger. Do not change any repository file.
 1. Go to Stop.
 
