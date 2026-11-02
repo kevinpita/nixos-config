@@ -1,6 +1,6 @@
 ---
 name: review-loop
-description: Multi-model review -> validate -> fix loop with fresh-context children, local commits, a final squash, and a final review.
+description: Multi-model review -> validate -> fix loop with fresh-context children, local commits, a final squash, and a final review. Also a review-only mode that reports findings without fixing.
 disable-model-invocation: true
 ---
 
@@ -37,11 +37,11 @@ A reason from the user is in the user's own words. Ask with one question whose `
 
 Read [setup.md](setup.md) and follow it.
 
-**Done:** the user confirmed the summary, the ledger Setup section is written, the push guard is active, and the main checkout is clean.
+**Done:** the user confirmed the summary and the ledger Setup section is written. For `Review and fix`, also: the push guard is active and the main checkout is clean.
 
 ## 2. Review (round N)
 
-1. Write the current change to `local://review-loop/round-N/diff.patch` with `git diff <base SHA>..HEAD`, for every target kind. It includes the fix commits of earlier rounds. Record HEAD.
+1. Write the current change to `local://review-loop/round-N/diff.patch` with `git diff <base SHA>..HEAD`, for every target kind. It includes the fix commits of earlier rounds. Record HEAD. For `Review only`, use the pinned head SHA in place of `HEAD`.
 1. Spawn one reviewer per review model in one `task` batch. Agent: `rl-read-<model>`. `context`: the full text of [briefs/review.md](briefs/review.md), the repository path, the target description, base and head SHAs, the diff path, the project rule files (for example `AGENTS.md`), and the user's focus. Every reviewer gets the same `task`.
 1. Run Consensus on the findings.
 1. Merge the results. Collapse duplicates and keep the models that raised each one.
@@ -63,7 +63,7 @@ For each merged finding:
 
 Spawn one validator per validation model in one batch. Agent: `rl-read-<model>`. `context`: the full text of [briefs/validate.md](briefs/validate.md), repository path, HEAD SHA, project rule files. `task`: the candidate findings with their annotations, labelled as claims. Run Consensus. Update each finding's status from the verdicts.
 
-**Done:** every candidate has one agreed verdict, or the user answered for it. `git status --porcelain` in the main checkout equals its state before the stage. If no finding is `confirmed` or `needs-decision`, go to step 8.
+**Done:** every candidate has one agreed verdict, or the user answered for it. `git status --porcelain` in the main checkout equals its state before the stage. For `Review only`, go to Report. Otherwise, if no finding is `confirmed` or `needs-decision`, go to step 8.
 
 ## 5. Decide
 
@@ -97,6 +97,12 @@ Start step 2 with round N+1. After 5 rounds, `ask` before you start up to 5 more
 
 Read [finish.md](finish.md) and follow it.
 
+## Report (review only)
+
+1. Write `/tmp/review-loop/<repo>-<head short SHA>.md`. First line: `Merge: yes`, `yes with nits`, or `no`. Then one section per `confirmed` and `needs-decision` finding: what it is in one sentence, location, impact, the models that raised it, and the validators' options. Then a short list of `rejected` findings with the reason.
+1. Tell the user the verdict and the file path. Then walk the findings one at a time, most severe first: what it is, why it matters, and the proposed fix. Ask "Fix, skip, or explain more?" and record the answer in the ledger. Do not change any repository file.
+1. Go to Stop.
+
 ## Stop
 
-Remove the push guard marker: `rm -f ~/.omp/agent/review-loop.active`. On a blocker, stop with the exact blocker, the round, the HEAD SHA, and `git status`. A failed child never counts as a clean result.
+`Review and fix` only: remove the push guard marker with `rm -f "$(git rev-parse --path-format=absolute --git-common-dir)/review-loop.active"` in the main checkout. `Review only` never touches the marker. Remove a review-only worktree with `git worktree remove`. On a blocker, stop with the exact blocker, the round, the HEAD SHA, and `git status`. A failed child never counts as a clean result.

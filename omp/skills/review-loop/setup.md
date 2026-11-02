@@ -22,9 +22,10 @@ Ask one question at a time with `ask`. Build each picker from facts you collecte
 ## Questions, in order
 
 1. **Target.** Options: `Current branch <name> vs <default>` (when not on the default branch), each open PR as `PR #<n>: <title>` (the PR of the current branch first), `Last commit <sha> <subject>`, `Commit range...`. Other: a branch, a PR number or URL, or a SHA.
+1. **Kind.** `Review and fix`: the full loop. `Review only`: one review and validation pass, then a report. No fix, no commit, no squash. For `Review only`, skip the Dirty tree, Checkout, Mode, Fixers, Judges, and Squash scope questions.
 1. **Dirty tree**, only when `git status --porcelain` is not empty. Fix commits need a clean main checkout. Options: `Commit as WIP first`, `Stash`, `Stop`.
 1. **Checkout**, only when the target is not the checked-out branch. Fixes need it checked out locally. Options: `Check it out here` (`gh pr checkout <n>` or `git switch <branch>`), `Stop`.
-1. **Base**, for a branch, PR, or range target. Options: the default branch, the PR base branch, the upstream branch. After the checkout, pin `git merge-base <base> HEAD` as the base SHA. A single commit target pins `<sha>^`.
+1. **Base**, for a branch, PR, or range target. Options: the default branch, the PR base branch, the upstream branch. Pin `git merge-base <base> <target head>` as the base SHA. A single commit target pins `<sha>^`. For `Review only`, fetch the target when it is not local (`git fetch origin pull/<n>/head` for a PR), pin its head SHA, and always create `git worktree add --detach /tmp/review-loop/<repo>-<head short SHA> <head SHA>`, also when the target is checked out. Every child gets that worktree as the repository path, so uncommitted changes in the main checkout never reach the review.
 1. **Mode.** `Human`: you are asked when a finding needs a choice, and you always give the reason. `Auto`: judge models decide and record their reasons. You are asked only when they stay split after 3 exchanges.
 1. **Reviewers** (`multi: true`). Recommend Opus + GPT.
 1. **Validators** (`multi: true`). Recommend Opus + GPT.
@@ -36,6 +37,6 @@ Ask one question at a time with `ask`. Build each picker from facts you collecte
 
 ## After the confirmation
 
-1. Write the ledger Setup section.
-1. Run `touch ~/.omp/agent/review-loop.active`. If the guard extension is missing, tell the user that pushes are not blocked by a hook in this session.
-1. Check that `git status --porcelain` is empty.
+1. Write the ledger Setup section, with the kind.
+1. `Review and fix` only: run `touch "$(git rev-parse --path-format=absolute --git-common-dir)/review-loop.active"` in the main checkout. The guard blocks pushes only in this repository and its worktrees. If the guard extension is missing, tell the user that pushes are not blocked by a hook in this session.
+1. `Review and fix` only: check that `git status --porcelain` is empty.
