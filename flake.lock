@@ -477,11 +477,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793485544,
-        "narHash": "sha256-xxLiqJUt396g7zGVSawh8MCtaLCgw/gGbMnc52lRZBU=",
+        "lastModified": 1793647372,
+        "narHash": "sha256-/Q1ahsjTY0WtwVEpvln+Ux1m0aclItsi9CIKEPxlnms=",
         "owner": "kevinpita",
         "repo": "herdr-nix",
-        "rev": "250664ab6f9e71cc2c859e0f364c60aa778cb0f3",
+        "rev": "51307cbfc7b786f80735219b950b972760c1843b",
         "type": "github"
       },
       "original": {
@@ -795,11 +795,11 @@
     "nixos-work": {
       "flake": false,
       "locked": {
-        "lastModified": 1793017930,
-        "narHash": "sha256-AnX1aREGUPzBiYIjSE/9BJcVEeHPg0SXUGpQLWtevgI=",
+        "lastModified": 1793644846,
+        "narHash": "sha256-+nR5dO3cDcTBKXPp0CEN7IqdD7osm+BklMZNpo3BTsM=",
         "ref": "refs/heads/main",
-        "rev": "896c97fd66d6c5b1e8b85cf1155f42aca4ed9089",
-        "revCount": 25,
+        "rev": "7e600292e8592c54bd36cd1d62e132e3381b3c4d",
+        "revCount": 26,
         "type": "git",
         "url": "ssh://git@github.com/kevinpita/nixos-work"
       },
@@ -958,11 +958,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1793629595,
-        "narHash": "sha256-vd062Mg8vA21ZXgZHMBVD3rVvwgbvHemt6WWXcCqNXk=",
+        "lastModified": 1793659107,
+        "narHash": "sha256-wFmUqVhs5Rx1EQjx88SdJ3X+jtcutbdqLH5DZ8kOMvU=",
         "owner": "can1357",
         "repo": "oh-my-pi",
-        "rev": "ebb4fcf1c2cfa7d4cfc4e2a18c59a0d4be7e6382",
+        "rev": "ef3293b64fbcbef7882430859f9685ddf5443ff5",
         "type": "github"
       },
       "original": {
@@ -1006,11 +1006,11 @@
     "pstack": {
       "flake": false,
       "locked": {
-        "lastModified": 1793620447,
-        "narHash": "sha256-+76YpZJeRXXvO6T0upLWAVsdTgOy2C7I5HVhYMUi5Fs=",
+        "lastModified": 1793639540,
+        "narHash": "sha256-AZ4C7yXWAdym1cg9k00wf9hhBVF0NzjuHKOC+iCBUkQ=",
         "owner": "michael-denyer",
         "repo": "pstack-claude",
-        "rev": "7c045e5617b5c5f8e2aa3667f1377c50b192b6b9",
+        "rev": "513c0886b79abb04065293581a4ef7e70049e4f2",
         "type": "github"
       },
       "original": {
@@ -1082,11 +1082,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793052255,
-        "narHash": "sha256-Y/JIHTnMlOabDfyaSBubWGLDIVGihLEUuoMhFvQKaDo=",
+        "lastModified": 1793657466,
+        "narHash": "sha256-GoOvpdsjO5hqZuO6T6ok9u6sJEjO0iPli2zRr9oNUNw=",
         "owner": "Mic92",
         "repo": "sops-nix",
-        "rev": "60182817ee048ac94b4c68ea76d5ef2e8aac730d",
+        "rev": "b18e01ce148eb3efff5de2f2d3181ca53b2b2a54",
         "type": "github"
       },
       "original": {
