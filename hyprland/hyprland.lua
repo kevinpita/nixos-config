@@ -352,6 +352,14 @@ hl.window_rule({
     center = true,
 })
 
+-- Auto HDR switches the monitor to HDR for fullscreen HDR video, which looks
+-- washed out here. Browsers keep Hyprland's SDR tone mapping instead.
+hl.window_rule({
+    name = "browser-no-auto-hdr",
+    match = { class = "^(brave-browser|google-chrome)$" },
+    no_auto_hdr = true,
+})
+
 hl.layer_rule({
     match = { namespace = "^omasnap$" },
     no_anim = true,
