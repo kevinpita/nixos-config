@@ -50,6 +50,7 @@
           enableCompletion = true;
           autosuggestion.enable = true;
           syntaxHighlighting.enable = true;
+          defaultKeymap = "viins";
           shellAliases = {
             cat = "bat";
             ll = lib.mkForce "lsd -lah";
@@ -96,6 +97,19 @@
                 source "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh"
               fi
             '')
+            ''
+              KEYTIMEOUT=1
+
+              autoload -Uz select-quoted select-bracketed edit-command-line
+              zle -N select-quoted
+              zle -N select-bracketed
+              zle -N edit-command-line
+              for m in visual viopp; do
+                for c in {a,i}{\',\",\`}; do bindkey -M $m $c select-quoted; done
+                for c in {a,i}''${(s..)^:-'()[]{}<>bB'}; do bindkey -M $m $c select-bracketed; done
+              done
+              bindkey -M vicmd '^V' edit-command-line
+            ''
             ''
               export BAST_NO_TELEMETRY=1
 
