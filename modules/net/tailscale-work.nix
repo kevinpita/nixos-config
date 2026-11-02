@@ -8,6 +8,7 @@
       config,
       lib,
       pkgs,
+      username,
       ...
     }:
     let
@@ -43,5 +44,10 @@
           exec ${tailscale}/bin/tailscale --socket=${socket} "$@"
         '')
       ];
+
+      home-manager.users.${username}.programs.zsh.shellAliases = {
+        tw = "tailscale-work";
+        tssh = "tailscale-work ssh";
+      };
     };
 }
