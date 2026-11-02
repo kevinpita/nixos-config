@@ -1,3 +1,4 @@
+{ inputs, ... }:
 {
   flake.modules.nixos.hyprland =
     {
@@ -68,6 +69,26 @@
         };
       };
 
+      # Terminal colors 0-15, shared by ghostty, herdr and omp.
+      ansiColors = theme: [
+        theme.background
+        theme.red
+        theme.green
+        theme.yellow
+        theme.blue
+        theme.magenta
+        theme.cyan
+        theme.foreground
+        theme.muted
+        theme.bright_red
+        theme.bright_green
+        theme.bright_yellow
+        theme.bright_blue
+        theme.bright_magenta
+        theme.bright_cyan
+        theme.bright_foreground
+      ];
+
       ghosttyTheme = theme: ''
         background = ${theme.background}
         foreground = ${theme.foreground}
@@ -75,23 +96,64 @@
         selection-background = ${theme.selection}
         selection-foreground = ${theme.bright_foreground}
 
-        palette = 0=${theme.background}
-        palette = 1=${theme.red}
-        palette = 2=${theme.green}
-        palette = 3=${theme.yellow}
-        palette = 4=${theme.blue}
-        palette = 5=${theme.magenta}
-        palette = 6=${theme.cyan}
-        palette = 7=${theme.foreground}
-        palette = 8=${theme.muted}
-        palette = 9=${theme.bright_red}
-        palette = 10=${theme.bright_green}
-        palette = 11=${theme.bright_yellow}
-        palette = 12=${theme.bright_blue}
-        palette = 13=${theme.bright_magenta}
-        palette = 14=${theme.bright_cyan}
-        palette = 15=${theme.bright_foreground}
-      '';
+        ${lib.concatImapStrings (index: color: ''
+          palette = ${toString (index - 1)}=${color}
+        '') (ansiColors theme)}'';
+
+      herdrTheme = theme: {
+        inherit (theme) background foreground selection;
+        cursor = theme.bright_foreground;
+        ansi = ansiColors theme;
+        colors.accent = theme.accent;
+      };
+
+      # omp's titanium theme with its colors taken from the palette. Answer
+      # text is brighter than thinking text. New titanium color keys still
+      # arrive with omp updates.
+      ompTheme =
+        theme:
+        lib.recursiveUpdate
+          (lib.importJSON "${inputs.oh-my-pi}/packages/tui/src/theme/defaults.json").titanium
+          {
+            name = "desktop";
+            vars = {
+              brushedTitanium = theme.background;
+              darkTitanium = theme.dark_background;
+              subtleGray = theme.lighter_background;
+              electricBlue = theme.accent;
+              deepBlue = theme.blue;
+              titaniumGold = theme.yellow;
+              brightAluminum = theme.bright_foreground;
+              dimAluminum = theme.dark_foreground;
+              warningAmber = theme.bright_yellow;
+              readoutGreen = theme.bright_green;
+              alertRed = theme.bright_red;
+            };
+            colors = {
+              assistantMessageText = "brightAluminum";
+              thinkingText = theme.muted;
+              mdCode = theme.bright_cyan;
+              mdCodeBlockBorder = theme.selection;
+              mdQuoteBorder = theme.selection;
+              mdHr = theme.selection;
+              mdListBullet = "deepBlue";
+              # titanium writes these as hex instead of vars.
+              borderMuted = theme.lighter_background;
+              dim = theme.muted;
+              syntaxComment = theme.muted;
+              toolErrorBg = theme.darker_background;
+              thinkingOff = theme.selection;
+              thinkingMinimal = theme.selection;
+              thinkingLow = theme.muted;
+              pythonMode = theme.bright_yellow;
+            };
+            terminal = {
+              inherit (theme) background foreground;
+              chrome = theme.dark_background;
+              widget = theme.lighter_background;
+              ansi = ansiColors theme;
+            };
+          };
 
       hyprlandColor = color: ''"rgb(${lib.removePrefix "#" color})"'';
 
@@ -191,9 +253,11 @@
             "dms-theme.json" = builtins.toJSON (dmsTheme name theme);
             "ghostty.conf" = ghosttyTheme theme;
             "hyprland.lua" = hyprlandTheme theme;
+            "herdr.json" = builtins.toJSON (herdrTheme theme);
             "icons.theme" = theme.icons;
             "mode" = theme.mode;
             "neovim.lua" = neovimTheme name theme;
+            "omp.json" = builtins.toJSON (ompTheme theme);
           };
           swatches = lib.concatMapStringsSep " " (color: "xc:'${color}'") [
             theme.background
@@ -236,6 +300,7 @@
           config.programs.hyprland.package
           pkgs.coreutils
           pkgs.findutils
+          pkgs.herdr
           pkgs.dconf
           pkgs.jq
           pkgs.procps
@@ -288,6 +353,14 @@
 
           pkill -USR2 -x '(ghostty|\.ghostty-wrappe)' || true
           hyprctl reload >/dev/null
+          # omp watches its themes folder, not the link target.
+          omp_theme="$HOME/.omp/agent/themes/desktop.json"
+          if [[ -L "$omp_theme" ]]; then
+            touch -h "$omp_theme"
+          fi
+          # herdr changes theme only on command. The window does not always
+          # answer, and the lock must not wait long for it.
+          timeout 2 herdr-app "do" app.theme --name "desktop-$1" >/dev/null || true
         '';
       };
 
@@ -320,22 +393,32 @@
         (pkgs.glib.getSchemaDataDirPath pkgs.gsettings-desktop-schemas)
       ];
 
-      home-manager.users.${username} = {
-        home.packages = [
-          themes
-          themeSet
-          pkgs.adw-gtk3
-          pkgs.yaru-theme
-        ];
+      home-manager.users.${username} =
+        { config, ... }:
+        {
+          home.packages = [
+            themes
+            themeSet
+            pkgs.adw-gtk3
+            pkgs.yaru-theme
+          ];
 
-        # DMS writes dank-colors.css on every theme change.
-        xdg.configFile = {
-          "gtk-3.0/gtk.css".text = ''@import url("dank-colors.css");'';
-          "gtk-4.0/gtk.css".text = ''@import url("dank-colors.css");'';
+          # DMS writes dank-colors.css on every theme change.
+          xdg.configFile = {
+            "gtk-3.0/gtk.css".text = ''@import url("dank-colors.css");'';
+            "gtk-4.0/gtk.css".text = ''@import url("dank-colors.css");'';
+          }
+          // lib.genAttrs' themeNames (name: {
+            name = "herdr-app/themes/desktop-${name}.json";
+            value.source = "${mkTheme name}/herdr.json";
+          });
+
+          # theme-set links the selected desktop theme here.
+          home.file.".omp/agent/themes/desktop.json".source =
+            config.lib.file.mkOutOfStoreSymlink "${config.xdg.stateHome}/theme/current/omp.json";
+
+          # Qt apps follow the GTK theme. The gtk3 plugin ships with qtbase.
+          home.sessionVariables.QT_QPA_PLATFORMTHEME = "gtk3";
         };
-
-        # Qt apps follow the GTK theme. The gtk3 plugin ships with qtbase.
-        home.sessionVariables.QT_QPA_PLATFORMTHEME = "gtk3";
-      };
     };
 }
