@@ -219,7 +219,6 @@
               "DankMaterialShell/.changelog-1.5".text = "";
               "hypr/xdph.conf".text = ''
                 screencopy {
-                  allow_token_by_default = true
                   cursor_mode = 2
                   custom_picker_binary = ${lib.getExe sharePicker}
                 }
