@@ -351,6 +351,8 @@ in
             ".omp/agent/skills".source = withInterfaceSkills (
               withOmpSkills (withPackagedSkills skillsWithoutBro)
             );
+            # File-based slash commands, for example /pre-pr.
+            ".omp/agent/commands".source = ../omp/commands;
             # Blocks git push while the review-loop skill runs.
             ".omp/agent/extensions/review-loop-guard.ts".source = ../omp/extensions/review-loop-guard.ts;
             # /send and /receive move resumable sessions between hosts over SSH.

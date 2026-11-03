@@ -7,8 +7,9 @@ This folder owns the oh-my-pi (omp) harness configuration. `modules/omp.nix` sel
 | Path | Change it for |
 | --- | --- |
 | `config.yml` | omp settings shared by all hosts. `~/.omp/agent/config.yml` links to this file, so settings changes in omp edit it in place. Commit and pull to share them. |
-| `agents/` | omp worker definitions. `~/.omp/agent/agents` links to this folder, so agents that omp creates or edits land here. Their `model` frontmatter selects a role from `config.yml`. The `rl-*` workers of the `review-loop` skill use explicit selectors instead, so they keep their reasoning effort. |
+| `agents/` | omp worker definitions. `~/.omp/agent/agents` links to this folder, so agents that omp creates or edits land here. Their `model` frontmatter selects a role from `config.yml`. The `rl-*` workers of the `review-loop` skill use explicit selectors instead, so they keep their reasoning effort unless a spawn sets `effort`. |
 | `skills/` | Skills that need omp tools or omp workers. They are installed with the shared skills from `agents/skills` into `~/.omp/agent/skills`, for omp only. |
+| `commands/` | File-based slash commands installed into `~/.omp/agent/commands`. `pre-pr.md` adds `/pre-pr`, an adversarial review of the current branch with its working tree, or of a PR, a branch, a commit, or a range: the picked models try to break the change in their own clones, and only findings that a rerun proves go into the report. `pre-pr.sh` does its git steps (snapshot, clones, guard, cleanup); test it with `bash omp/commands/pre-pr.test.sh`. omp loads only the `*.md` files as commands. |
 | `extensions/` | omp extensions installed into `~/.omp/agent/extensions`. `review-loop-guard.ts` blocks `git push`, `gh pr create`, and `gh pr merge` in a repository while `review-loop.active` exists in its git common dir. `session-relay.ts` adds `/send <host\|local> <name> [--snapshot]` and `/receive [host] <name>`. `/send` sends a fork of the current session over SSH and keeps the sender in the original. `/receive` installs the fork and switches the terminal to it. SSH always goes from the workstation to the server, so a server stages with `/send local` and the workstation pulls. `session-relay.e2e.sh` tests it in two incus VMs. `focus-view.ts` adds `ctrl+l` and `/focus`, a fullscreen view that shows one answer per prompt, with a spinner while the agent works. After an advisor note, a new message replaces the shown answer only when it starts with the `# Revised answer` heading that `agents/AGENTS.md` asks for. A short reply to the note does not hide the answer. omp reserves `ctrl+l` for its own live voice toggle, so the extension reads raw terminal input and replaces that toggle. |
 | `WATCHDOG.yml` | The advisor roster: each advisor's name, model, effort, and default on/off state. `~/.omp/agent/WATCHDOG.yml` links to this file, so `/advisor configure` at user scope edits it in place. |
 
@@ -19,6 +20,8 @@ This folder owns the oh-my-pi (omp) harness configuration. `modules/omp.nix` sel
 ## Model routing
 
 `config.yml` owns model assignments and reasoning effort. The `task` role selects the model for generic task workers. `task.agentModelOverrides` assigns models to bundled specialists without copying their prompts. Custom workers select roles through their `model` frontmatter.
+
+`task.enableEffort` lets a caller set `effort` per spawn. `hi` maps to the highest level of the worker's model and overrides its role effort for that spawn only. `/pre-pr` uses it, so its adversaries reuse the per-model workers in `agents/`.
 
 A session model switch does not change explicit worker assignments. Role aliases resolve at use time. An alias to `@default` can follow a session model switch, so use an explicit selector when a worker must stay on one model.
 
