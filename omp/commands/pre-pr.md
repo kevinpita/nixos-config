@@ -33,27 +33,30 @@ From here on, every exit path goes through §7, also a stop.
 
 Ask both questions in one `ask` call.
 
-1. **Models** (`multi: true`). Options, in this order. Mark Opus 5.5 as recommended and write "Default" in the descriptions of Opus 5.5 and GPT-6.1 Sol. When the user picks nothing, use those two.
+1. **Models and effort** (`multi: true`). Options, in this order. Mark Claude Opus 5.5 (medium) as recommended. Write "Default" in the descriptions of GPT-6.1 Sol (high) and Claude Opus 5.5 (medium). When the user picks nothing, use those two.
 
-   | Label | Agent |
-   | --- | --- |
-   | Claude Opus 5.5 | `opus` |
-   | GPT-6.1 Sol | `gpt` |
-   | GPT-6 Astra | `astra` |
-   | GLM-5.3 | `glm` |
-   | DeepSeek V4 Flash | `deepseek` |
+   | Label | Agent | Effort | Selection ID |
+   | --- | --- | --- | --- |
+   | GPT-6.1 Sol (high) | `gpt` | `high` | `gpt-high` |
+   | Claude Opus 5.5 (medium) | `opus` | `medium` | `opus-medium` |
+   | Claude Opus 5.5 (high) | `opus` | `high` | `opus-high` |
+   | GPT-6 Astra (high) | `astra` | `high` | `astra-high` |
+   | GLM-5.3 (high) | `glm` | `high` | `glm-high` |
+   | DeepSeek V4 Flash (high) | `deepseek` | `high` | `deepseek-high` |
 
-1. **Depth.** `Standard`: one general adversary per model. `Deep`: a general adversary and two lens adversaries per model. Recommend `Deep` when `size` shows more than about 300 changed lines or touches state, I/O, concurrency, or security. Otherwise recommend `Standard`.
+   Each selected row is independent. Selecting both Opus rows starts separate reviewers at their respective effort levels.
+
+1. **Depth.** `Standard`: one general adversary per selection. `Deep`: a general adversary and two lens adversaries per selection. Recommend `Deep` when `size` shows more than about 300 changed lines or touches state, I/O, concurrency, or security. Otherwise recommend `Standard`.
 
 ## 3. Clones
 
-Run `pre-pr.sh clones '<run>' <model>-<lens>...` with one name per adversary, for example `opus-general gpt-general`. Each adversary gets its own clone of the head SHA, at `<run>/clones/<name>`. A clone has its own refs, stash, config, index, and hooks, and no remote, so git commands in it cannot change your repository. The command also records the guard state of your checkout.
+Run `pre-pr.sh clones '<run>' <selection-id>-<lens>...` with one name per adversary, for example `gpt-high-general opus-medium-general opus-high-general`. Each adversary gets its own clone of the head SHA, at `<run>/clones/<name>`. A clone has its own refs, stash, config, index, and hooks, and no remote, so git commands in it cannot change your repository. The command also records the guard state of your checkout.
 
 Tell the user not to edit the repository and not to run `git gc` in it until the report is ready.
 
 ## 4. Fan out
 
-Spawn every adversary in one `task` batch. Set `agent` to the picked agent name and `effort: "hi"` on every item. Do not set `model`.
+Spawn every adversary in one `task` batch. Set `agent` and `effort` from its selected row. Derive a unique CamelCase task name from the selection ID and lens, for example `OpusMediumGeneral` or `OpusHighGeneral`. Do not set `model`.
 
 `context`, the same for every adversary: the intent, the base SHA, the head SHA, the `diff` path, the project rule files (for example `AGENTS.md`), and this brief:
 
@@ -67,12 +70,12 @@ Spawn every adversary in one `task` batch. Set `agent` to the picked agent name 
 | Inputs | Boundaries, empty, huge, and malformed inputs, API and protocol contracts, compatibility with existing callers and data. |
 | State | Concurrency and ordering, failure paths and error handling, retries, partial writes, resource leaks, security. |
 
-`Standard` spawns the General lens per model. `Deep` spawns all three lenses per model.
+`Standard` spawns the General lens per selection. `Deep` spawns all three lenses per selection.
 
 ## 5. Verify
 
 1. For each finding, run its command again in that adversary's clone. Keep the finding when the output shows the failure and the failure breaks the intent. Drop the rest and record why.
-1. Merge findings that share a root cause. Keep the list of models and lenses that found each one.
+1. Merge findings that share a root cause. Keep the list of model-and-effort selections and lenses that found each one.
 1. A failed or `INCOMPLETE` adversary never counts as a clean result. Name it in the report.
 1. Run `pre-pr.sh guard '<run>'` after the reruns, so it covers them too. Exit 0 prints `unchanged`. Exit 3 prints a diff: your checkout changed during the run, by an adversary or by the user. Put the diff in the report under **Checkout changed** and tell the user. Any other exit is an error: say that the guard did not run.
 
@@ -82,9 +85,9 @@ Write `<run>/report.md` and show it to the user:
 
 - **Verdict** on the first line: `Not ready` when a finding survives. Else `Incomplete` when any adversary failed or returned `Status: INCOMPLETE`. Else `Ready for PR`.
 - **Intent**: the restatement.
-- **Findings**, most severe first. For each: what breaks in one sentence, location, the command, its output, how it breaks the intent, and the models and lenses that found it. Write "No verified findings" when none survive.
+- **Findings**, most severe first. For each: what breaks in one sentence, location, the command, its output, how it breaks the intent, and the model-and-effort selections and lenses that found it. Write "No verified findings" when none survive.
 - **Dropped**: for each adversary, the count of dropped findings and why.
-- **Coverage**: the target, the base and head SHAs, the picked models, the depth, any adversary that failed or stopped early, the `note` lines, and the guard result. The guard does not cover ignored files, intent-to-add flags, or submodule content.
+- **Coverage**: the target, the base and head SHAs, the picked model-and-effort selections, the depth, any adversary that failed or stopped early, the `note` lines, and the guard result. The guard does not cover ignored files, intent-to-add flags, or submodule content.
 
 ## 7. Cleanup
 

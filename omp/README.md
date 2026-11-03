@@ -21,7 +21,7 @@ This folder owns the oh-my-pi (omp) harness configuration. `modules/omp.nix` sel
 
 `config.yml` owns model assignments and reasoning effort. The `task` role selects the model for generic task workers. `task.agentModelOverrides` assigns models to bundled specialists without copying their prompts. Custom workers select roles through their `model` frontmatter.
 
-`task.enableEffort` lets a caller set `effort` per spawn. `hi` maps to the highest level of the worker's model and overrides its role effort for that spawn only. `/pre-pr` uses it, so its adversaries reuse the per-model workers in `agents/`.
+`task.enableEffort` lets a caller set `effort` per spawn, overriding the worker's role effort. `/pre-pr` selects a model and effort together and reuses the per-model workers in `agents/`. Separate selections of the same model run independently.
 
 A session model switch does not change explicit worker assignments. Role aliases resolve at use time. An alias to `@default` can follow a session model switch, so use an explicit selector when a worker must stay on one model.
 
