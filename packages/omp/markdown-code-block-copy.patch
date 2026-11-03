@@ -1,8 +1,8 @@
 diff --git a/packages/coding-agent/src/modes/interactive-mode.ts b/packages/coding-agent/src/modes/interactive-mode.ts
-index 0ac55bd..6cdcdea 100644
+index 4af7372..b78ecd5 100644
 --- a/packages/coding-agent/src/modes/interactive-mode.ts
 +++ b/packages/coding-agent/src/modes/interactive-mode.ts
-@@ -214,6 +214,7 @@ import {
+@@ -218,6 +218,7 @@ import {
  } from "@oh-my-pi/pi-tui/tools/todo";
  import { vocalizer } from "../tts/vocalizer";
  import { applyFileLinkSetting, applyHyperlinkSetting, fileHyperlink } from "@oh-my-pi/pi-tui/render/hyperlink";
@@ -10,7 +10,7 @@ index 0ac55bd..6cdcdea 100644
  import {
  	extensionLinkClicksAvailable,
  	extensionLinksRouted,
-@@ -4342,7 +4343,8 @@ export class InteractiveMode implements InteractiveModeContext {
+@@ -4384,7 +4385,8 @@ export class InteractiveMode implements InteractiveModeContext {
  		const before = extensionLinksVersion();
  		const viewed = this.viewSession.extensionRunner;
  		viewed?.followSuspension(this.session.extensionRunner);
@@ -20,18 +20,18 @@ index 0ac55bd..6cdcdea 100644
  		return extensionLinksVersion() !== before;
  	}
  
-@@ -4379,6 +4381,10 @@ export class InteractiveMode implements InteractiveModeContext {
+@@ -4425,6 +4427,10 @@ export class InteractiveMode implements InteractiveModeContext {
  
- 	/** Raise `link_activate` for `url` on the viewed session's extension runner. */
- 	#activateLink(url: string): boolean {
+ 	/** Raise `link_activate` for `url` on `runner`, the extension runner of the transcript it was drawn in. */
+ 	#activateLink(url: string, runner: ExtensionRunner | undefined): boolean {
 +		if (isCodeCopyUrl(url)) {
 +			this.#copyCodeBlock(url);
 +			return true;
 +		}
- 		const runner = this.viewSession.extensionRunner;
  		if (!runner) return false;
  		// A focused subagent's runner is headless: hand its handler the UI drawing that transcript.
-@@ -4388,6 +4394,18 @@ export class InteractiveMode implements InteractiveModeContext {
+ 		runner.emitLinkActivate(url, this.session.extensionRunner?.getUIContext()).catch((error: unknown) => {
+@@ -4433,6 +4439,18 @@ export class InteractiveMode implements InteractiveModeContext {
  		return true;
  	}
  
@@ -49,9 +49,9 @@ index 0ac55bd..6cdcdea 100644
 +
  	activateViewportLink(index: number, col: number): boolean {
  		const url = this.composer.viewportLinkAt(index, col)?.url;
- 		return url !== undefined && this.#activateLink(url);
+ 		return url !== undefined && this.#activateLink(url, this.viewSession.extensionRunner);
 diff --git a/packages/coding-agent/test/interactive-click-focus.test.ts b/packages/coding-agent/test/interactive-click-focus.test.ts
-index 8df8e89..7fe85f7 100644
+index 5a55fc7..994ab66 100644
 --- a/packages/coding-agent/test/interactive-click-focus.test.ts
 +++ b/packages/coding-agent/test/interactive-click-focus.test.ts
 @@ -17,6 +17,7 @@ import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manage
@@ -62,7 +62,7 @@ index 8df8e89..7fe85f7 100644
  import { TempDir } from "@oh-my-pi/pi-utils";
  import { VirtualTerminal } from "../../tui/test/virtual-terminal";
  
-@@ -404,6 +405,24 @@ describe("inline click-to-focus geometry", () => {
+@@ -411,6 +412,24 @@ describe("inline click-to-focus geometry", () => {
  		expect(activated).toEqual(["demo:open/7"]);
  	});
  
@@ -221,7 +221,7 @@ index 0000000..c835812
 +	return isCodeCopyUrl(url) ? sources.get(url.slice(PREFIX.length)) : undefined;
 +}
 diff --git a/packages/tui/src/render/extension-links.ts b/packages/tui/src/render/extension-links.ts
-index 5dff9f8..d1ea03d 100644
+index 2ee85da..368fadc 100644
 --- a/packages/tui/src/render/extension-links.ts
 +++ b/packages/tui/src/render/extension-links.ts
 @@ -103,22 +103,28 @@ function endsUnderline(params: string): boolean {
@@ -257,9 +257,9 @@ index 5dff9f8..d1ea03d 100644
 +	return `${MARKER_OPEN}-${id};${safe}\x07${body}${EXTENSION_LINK_CLOSE}`;
  }
  
- /** Hint tag letters, home row first. */
-@@ -141,6 +147,11 @@ export function linkHintTags(count: number): string[] {
- 	return tags;
+ /**
+@@ -155,6 +161,11 @@ export interface ExtensionLinkLabel {
+ 	readonly endsRow: boolean;
  }
  
 +/** Whether `line` draws an extension link label, so its last OSC 8 close is omp's own. */
@@ -268,10 +268,10 @@ index 5dff9f8..d1ea03d 100644
 +}
 +
  /**
-  * `line` without omp's extension-link markers (the OSC 8 open and close around each label), for
-  * terminal output. Every other hyperlink is kept as is.
+  * The extension link labels drawn on a rendered row, left to right. Only omp's own markers with a
+  * registered scheme match, so ordinary hyperlinks (even of a registered scheme) and rows drawn for
 diff --git a/packages/tui/test/extension-links.test.ts b/packages/tui/test/extension-links.test.ts
-index 8e5fc2f..dfaaa3a 100644
+index 7630648..8bdf054 100644
 --- a/packages/tui/test/extension-links.test.ts
 +++ b/packages/tui/test/extension-links.test.ts
 @@ -5,6 +5,7 @@ import { TranscriptContainer } from "@oh-my-pi/pi-tui/chrome/transcript-containe
@@ -282,7 +282,7 @@ index 8e5fc2f..dfaaa3a 100644
  import {
  	extensionLinkLabels,
  	formatExtensionLink,
-@@ -14,6 +15,7 @@ import {
+@@ -13,6 +14,7 @@ import {
  } from "@oh-my-pi/pi-tui/render/extension-links";
  import {
  	ImageProtocol,
@@ -290,7 +290,7 @@ index 8e5fc2f..dfaaa3a 100644
  	setTerminalImageProtocol,
  	setTerminalTextSizing,
  	TERMINAL,
-@@ -393,4 +395,48 @@ describe("extension link hints", () => {
+@@ -393,6 +395,50 @@ describe("extension link hints", () => {
  			composer.stop();
  		}
  	});
@@ -339,3 +339,5 @@ index 8e5fc2f..dfaaa3a 100644
 +		}
 +	});
  });
+ 
+ describe("link hint tags", () => {
