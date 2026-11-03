@@ -1,78 +1,256 @@
+diff --git a/Cargo.toml b/Cargo.toml
+index 5ffed0e..1c3866e 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -28,6 +28,7 @@ image = { version = "0.25", default-features = false, features = ["png", "tiff",
+ png = "0.17"
+ ttf-parser = "0.25"
+ smallvec = "1"
++unicode-properties = { version = "0.1.3", default-features = false, features = ["emoji"] }
+ serde = { version = "1", features = ["derive"] }
+ serde_json = "1"
+ tracing = "0.1"
 diff --git a/src/terminal.rs b/src/terminal.rs
-index dc1721c..28d60a9 100644
+index dc1721c..78a15cb 100644
 --- a/src/terminal.rs
 +++ b/src/terminal.rs
-@@ -880,6 +880,12 @@ fn is_icon(text: &str) -> bool {
+@@ -880,6 +880,13 @@ fn is_icon(text: &str) -> bool {
      matches!((chars.next(), chars.next()), (Some(c), None) if matches!(c as u32, 0xE000..=0xF8FF | 0xF0000..=0x10FFFD))
  }
  
-+/// A one-cell emoji. The emoji font draws it two cells wide, so it covers
-+/// the next character unless it is fitted to its cell (U+1F579).
-+fn narrow_emoji(c: &vt::Cell) -> bool {
-+    !c.wide && (c.text.contains('\u{FE0F}') || c.text.chars().next().is_some_and(|ch| matches!(ch as u32, 0x1F000..=0x1FAFF)))
++/// An emoji that takes one cell: text-default emoji such as 🕹 without U+FE0F.
++/// Fonts draw many of them two cells wide.
++fn one_cell_emoji(c: &vt::Cell) -> bool {
++    use unicode_properties::UnicodeEmoji as _;
++    !c.wide && c.text.chars().next().is_some_and(|ch| !ch.is_ascii() && ch.is_emoji_char())
 +}
 +
  /// Keep the configured font’s icon proportions; only fit bundled fallback glyphs.
  fn fallback_icon(text: &str, font: &Font, ts: &gpui::TextSystem) -> Option<IconGlyph> {
      let c = text.chars().next().filter(|_| is_icon(text))?;
-@@ -1028,6 +1034,14 @@ fn cell_font(bold: bool, italic: bool) -> Font {
-     f
- }
- 
-+/// For emoji cells: the emoji font before the system fallbacks, where
-+/// DejaVu Sans draws some emoji in black and white.
-+fn emoji_font(bold: bool, italic: bool) -> Font {
-+    let mut f = cell_font(bold, italic);
-+    f.fallbacks = Some(FontFallbacks::from_fonts(vec!["Noto Color Emoji".into()]));
-+    f
-+}
-+
- pub fn cell_size(window: &Window) -> Size<Pixels> {
-     let ts = window.text_system();
-     let f = cell_font(false, false);
-@@ -1106,7 +1120,8 @@ fn row_ops(row: &[vt::Cell], cell: Size<Pixels>, window: &mut Window) -> Vec<Row
+@@ -1106,7 +1113,8 @@ fn row_ops(row: &[vt::Cell], cell: Size<Pixels>, window: &mut Window) -> Vec<Row
              continue;
          }
          let mut text = if c.text.is_empty() { " ".to_owned() } else { c.text.clone() };
 -        if !c.wide {
-+        let lone = narrow_emoji(c);
-+        if !c.wide && !lone {
++        let emoji = one_cell_emoji(c);
++        if !c.wide && !emoji {
              while x < row.len() {
                  let d = &row[x];
                  let same = !d.wide
-@@ -1117,7 +1132,7 @@ fn row_ops(row: &[vt::Cell], cell: Size<Pixels>, window: &mut Window) -> Vec<Row
+@@ -1116,8 +1124,8 @@ fn row_ops(row: &[vt::Cell], cell: Size<Pixels>, window: &mut Window) -> Vec<Row
+                     && d.faint == c.faint
                      && d.underline == c.underline
                      && d.strike == c.strike;
-                 // Bundled fallback icons are fitted separately from the text run.
+-                // Bundled fallback icons are fitted separately from the text run.
 -                if !same || (d.text.is_empty() && !d.underline && !d.strike) || crate::sprites::is_sprite(&d.text) || fallback_icon(&d.text, &text_font, window.text_system()).is_some() {
-+                if !same || (d.text.is_empty() && !d.underline && !d.strike) || crate::sprites::is_sprite(&d.text) || fallback_icon(&d.text, &text_font, window.text_system()).is_some() || narrow_emoji(d) {
++                // Bundled fallback icons and one-cell emoji are fitted separately from the text run.
++                if !same || (d.text.is_empty() && !d.underline && !d.strike) || crate::sprites::is_sprite(&d.text) || fallback_icon(&d.text, &text_font, window.text_system()).is_some() || one_cell_emoji(d) {
                      break;
                  }
                  text.push_str(if d.text.is_empty() { " " } else { &d.text });
-@@ -1129,14 +1144,24 @@ fn row_ops(row: &[vt::Cell], cell: Size<Pixels>, window: &mut Window) -> Vec<Row
-         }
-         let run = TextRun {
-             len: text.len(),
--            font: text_font,
-+            font: if c.wide || lone { emoji_font(c.bold, c.italic) } else { text_font },
-             color,
-             background_color: None,
+@@ -1135,8 +1143,18 @@ fn row_ops(row: &[vt::Cell], cell: Size<Pixels>, window: &mut Window) -> Vec<Row
              underline: c.underline.then(|| UnderlineStyle { thickness: px(1.0), color: Some(color), wavy: false }),
              strikethrough: c.strike.then(|| StrikethroughStyle { thickness: px(1.0), color: Some(color) }),
          };
-+        let size = px(crate::settings::font_size());
-+        if lone {
-+            // Fitted to its one cell, as Ghostty does, so it does not cover the next character.
-+            let natural = window.text_system().shape_line(text.clone().into(), size, &[run.clone()], None);
-+            if natural.width > cell.width && natural.runs.iter().flat_map(|r| &r.glyphs).any(|g| g.is_emoji) {
-+                let line = window.text_system().shape_line(text.into(), size * (cell.width / natural.width), &[run], None);
++        let font_size = px(crate::settings::font_size());
++        if emoji {
++            let line = window.text_system().shape_line(text.clone().into(), font_size, &[run.clone()], None);
++            if line.width > cell.width {
++                // Scaled to its cell, as Ghostty does, so it doesn't cover the next one.
++                let line = window.text_system().shape_line(text.into(), font_size * (cell.width / line.width), &[run], None);
 +                ops.push(RowOp::Text { x: start, line });
 +                continue;
 +            }
 +        }
          let force = (!c.wide).then_some(cell.width);
 -        let line = window.text_system().shape_line(text.into(), px(crate::settings::font_size()), &[run], force);
-+        let line = window.text_system().shape_line(text.into(), size, &[run], force);
++        let line = window.text_system().shape_line(text.into(), font_size, &[run], force);
          ops.push(RowOp::Text { x: start, line });
      }
      ops
+diff --git a/vendor/gpui-pre-wgpu/Cargo.toml b/vendor/gpui-pre-wgpu/Cargo.toml
+index bffb864..16706b2 100644
+--- a/vendor/gpui-pre-wgpu/Cargo.toml
++++ b/vendor/gpui-pre-wgpu/Cargo.toml
+@@ -144,11 +144,19 @@ version = "0.11.4"
+ default-features = false
+ features = ["std", "simd"]
+ 
++[dependencies.ttf-parser]
++version = "0.25"
++
+ [dependencies.unicode-bidi]
+ version = "0.3.18"
+ features = ["hardcoded-data"]
+ default-features = false
+ 
++[dependencies.unicode-properties]
++version = "0.1.3"
++default-features = false
++features = ["emoji"]
++
+ [dependencies.unicode-segmentation]
+ version = "1.10"
+ 
+diff --git a/vendor/gpui-pre-wgpu/src/cosmic_text_system.rs b/vendor/gpui-pre-wgpu/src/cosmic_text_system.rs
+index 07c4e5d..54d3ea2 100644
+--- a/vendor/gpui-pre-wgpu/src/cosmic_text_system.rs
++++ b/vendor/gpui-pre-wgpu/src/cosmic_text_system.rs
+@@ -19,6 +19,7 @@ use swash::{
+     scale::{Render, ScaleContext, Source, StrikeWith},
+     zeno::{Format, Vector},
+ };
++use unicode_properties::{EmojiStatus, UnicodeEmoji};
+ use unicode_segmentation::UnicodeSegmentation;
+ 
+ pub struct CosmicTextSystem(RwLock<CosmicTextSystemState>);
+@@ -54,6 +55,8 @@ struct CosmicTextSystemState {
+     font_system: FontSystem,
+     scratch: ShapeBuffer,
+     color_fallbacks: HashMap<(FontId, u32, String), Option<ColorFallback>>,
++    /// The color emoji family drawing each character, `None` when no color font has it.
++    color_emoji_families: HashMap<char, Option<SharedString>>,
+     swash_scale_context: ScaleContext,
+     pending_glyph_image: Option<(RenderGlyphParams, swash::scale::image::Image)>,
+     #[cfg(feature = "test-support")]
+@@ -150,6 +153,7 @@ impl CosmicTextSystem {
+             font_system,
+             scratch: ShapeBuffer::default(),
+             color_fallbacks: HashMap::default(),
++            color_emoji_families: HashMap::default(),
+             swash_scale_context: ScaleContext::new(),
+             pending_glyph_image: None,
+             #[cfg(feature = "test-support")]
+@@ -172,6 +176,7 @@ impl CosmicTextSystem {
+             font_system,
+             scratch: ShapeBuffer::default(),
+             color_fallbacks: HashMap::default(),
++            color_emoji_families: HashMap::default(),
+             swash_scale_context: ScaleContext::new(),
+             pending_glyph_image: None,
+             #[cfg(feature = "test-support")]
+@@ -391,6 +396,7 @@ impl CosmicTextSystemState {
+     fn add_fonts(&mut self, fonts: Vec<Cow<'static, [u8]>>) -> Result<()> {
+         self.font_ids_by_family_cache.clear();
+         self.color_fallbacks.clear();
++        self.color_emoji_families.clear();
+         let db = self.font_system.db_mut();
+         for bytes in fonts {
+             db.load_font_source(cosmic_text::fontdb::Source::Binary(Arc::new(bytes)));
+@@ -1016,6 +1022,7 @@ impl CosmicTextSystemState {
+                 )
+             };
+ 
++            let emoji_spans = self.color_emoji_spans(text, offs..run_end, &spans);
+             for span in spans {
+                 let attrs = match span.slot {
+                     None => &primary_attrs,
+@@ -1023,6 +1030,9 @@ impl CosmicTextSystemState {
+                 };
+                 attrs_list.add_span(span.start..span.end, attrs);
+             }
++            for (range, family) in emoji_spans {
++                attrs_list.add_span(range, &properties.attributes(run.font_id, &family));
++            }
+             offs = run_end;
+         }
+ 
+@@ -1297,6 +1307,67 @@ impl CosmicTextSystemState {
+             FallbackFontClass::Proportional
+         }
+     }
++
++    /// Graphemes in `range` that need a color emoji font, with the family
++    /// to draw each one. `spans` are the requested faces for that range.
++    fn color_emoji_spans(
++        &mut self,
++        text: &str,
++        range: Range<usize>,
++        spans: &[RunSpan],
++    ) -> SmallVec<[(Range<usize>, SharedString); 2]> {
++        let mut emoji_spans = SmallVec::new();
++        if text[range.clone()].is_ascii() {
++            return emoji_spans;
++        }
++        for (ix, grapheme) in text[range.clone()].grapheme_indices(true) {
++            let start = range.start + ix;
++            let ch = grapheme.chars().next().unwrap_or('\0');
++            let requested = spans
++                .iter()
++                .find(|span| span.start <= start && start < span.end)
++                .map(|span| span.font_id);
++            let loaded_fonts = &self.loaded_fonts;
++            let requested_covers =
++                || requested.is_some_and(|id| charmap_covers(loaded_fonts, id, ch));
++            if !needs_color_emoji(grapheme, requested_covers) {
++                continue;
++            }
++            if let Some(family) = self.color_emoji_family(ch) {
++                emoji_spans.push((start..start + grapheme.len(), family));
++            }
++        }
++        emoji_spans
++    }
++
++    /// The first installed color emoji family that has `ch`.
++    fn color_emoji_family(&mut self, ch: char) -> Option<SharedString> {
++        if let Some(family) = self.color_emoji_families.get(&ch) {
++            return family.clone();
++        }
++        let db = self.font_system.db();
++        let family = db
++            .faces()
++            // The same name test as cosmic-text's own emoji detection.
++            .filter(|face| face.post_script_name.contains("Emoji"))
++            .find(|face| {
++                db.with_face_data(face.id, |data, index| {
++                    ttf_parser::Face::parse(data, index).is_ok_and(|font| {
++                        let tables = font.tables();
++                        let color = tables.colr.is_some()
++                            || tables.cbdt.is_some()
++                            || tables.sbix.is_some()
++                            || tables.svg.is_some();
++                        color && font.glyph_index(ch).is_some()
++                    })
++                })
++                .unwrap_or(false)
++            })
++            .and_then(|face| face.families.first())
++            .map(|(family, _)| SharedString::from(family.clone()));
++        self.color_emoji_families.insert(ch, family.clone());
++        family
++    }
+ }
+ 
+ #[inline(always)]
+@@ -1521,6 +1592,29 @@ fn charmap_covers(loaded_fonts: &[LoadedFont], id: FontId, ch: char) -> bool {
+         .is_some_and(|loaded| loaded.font.as_swash().charmap().map(ch) != 0)
+ }
+ 
++/// Whether a grapheme is drawn from a color emoji font. U+FE0F asks for one
++/// and U+FE0E for text. Otherwise an `Emoji_Presentation` character uses one
++/// unless the requested font has it, so a configured font may draw either,
++/// as in Ghostty. Text-default emoji such as ☀ keep the normal fallback.
++fn needs_color_emoji(grapheme: &str, requested_covers: impl FnOnce() -> bool) -> bool {
++    if grapheme.contains('\u{fe0e}') {
++        return false;
++    }
++    if grapheme.contains('\u{fe0f}') {
++        return true;
++    }
++    let presentation = grapheme.chars().next().is_some_and(|ch| {
++        matches!(
++            ch.emoji_status(),
++            EmojiStatus::EmojiPresentation
++                | EmojiStatus::EmojiPresentationAndModifierBase
++                | EmojiStatus::EmojiPresentationAndEmojiComponent
++                | EmojiStatus::EmojiPresentationAndModifierAndEmojiComponent
++        )
++    });
++    presentation && !requested_covers()
++}
++
+ fn cosmic_font_features(features: &FontFeatures) -> Result<CosmicFontFeatures> {
+     let mut result = CosmicFontFeatures::new();
+     for feature in features.0.iter() {
