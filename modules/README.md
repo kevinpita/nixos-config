@@ -30,6 +30,8 @@ A new file is discovered automatically, but a new aspect must still be selected 
 
 The folder name does not decide which machines receive settings. The aspect name and its callers do. A file can define a feature or contribute directly to an existing role.
 
+The `gaming` aspect in `ui/gaming.nix` enables Steam for the `workstation` role.
+
 ## Shared wiring
 
 `nixos-configurations.nix` discovers aspects named `hosts/<hostname>` and creates their NixOS outputs. It also owns the shared username, architecture, package overlays, and common module integration. Change it for system-wide construction rules, not individual host preferences.

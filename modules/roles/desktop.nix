@@ -8,6 +8,7 @@
       communication
       development
       file-sharing
+      gaming
       ghostty
       kubernetes-client
       multimedia
