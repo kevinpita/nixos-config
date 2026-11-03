@@ -94,7 +94,7 @@ index bffb864..16706b2 100644
  version = "1.10"
  
 diff --git a/vendor/gpui-pre-wgpu/src/cosmic_text_system.rs b/vendor/gpui-pre-wgpu/src/cosmic_text_system.rs
-index 07c4e5d..b11d1b0 100644
+index 07c4e5d..c1ae9e3 100644
 --- a/vendor/gpui-pre-wgpu/src/cosmic_text_system.rs
 +++ b/vendor/gpui-pre-wgpu/src/cosmic_text_system.rs
 @@ -19,6 +19,7 @@ use swash::{
@@ -146,12 +146,18 @@ index 07c4e5d..b11d1b0 100644
              for span in spans {
                  let attrs = match span.slot {
                      None => &primary_attrs,
-@@ -1023,6 +1030,23 @@ impl CosmicTextSystemState {
+@@ -1023,6 +1030,29 @@ impl CosmicTextSystemState {
                  };
                  attrs_list.add_span(span.start..span.end, attrs);
              }
 +            for (range, id) in emoji_spans {
-+                let Some(face) = self.font_system.db().face(id) else {
++                // An alias family keeps the validated face, not a duplicate
++                // with the same family and style.
++                let Some(alias) = self.color_fallback_alias(id) else {
++                    continue;
++                };
++                let Some(face) = self.font_system.db().face(self.loaded_fonts[alias.0].font.id())
++                else {
 +                    continue;
 +                };
 +                let Some((family, _)) = face.families.first() else {
@@ -170,7 +176,7 @@ index 07c4e5d..b11d1b0 100644
              offs = run_end;
          }
  
-@@ -1297,6 +1321,67 @@ impl CosmicTextSystemState {
+@@ -1297,6 +1327,67 @@ impl CosmicTextSystemState {
              FallbackFontClass::Proportional
          }
      }
@@ -238,7 +244,7 @@ index 07c4e5d..b11d1b0 100644
  }
  
  #[inline(always)]
-@@ -1521,6 +1606,29 @@ fn charmap_covers(loaded_fonts: &[LoadedFont], id: FontId, ch: char) -> bool {
+@@ -1521,6 +1612,29 @@ fn charmap_covers(loaded_fonts: &[LoadedFont], id: FontId, ch: char) -> bool {
          .is_some_and(|loaded| loaded.font.as_swash().charmap().map(ch) != 0)
  }
  
