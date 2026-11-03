@@ -35,16 +35,16 @@ Ask both questions in one `ask` call.
 
 1. **Models and effort** (`multi: true`). Options, in this order. Mark Claude Opus 5.5 (medium) as recommended. Write "Default" in the descriptions of GPT-6.1 Sol (high) and Claude Opus 5.5 (medium). When the user picks nothing, use those two.
 
-   | Label | Agent | Effort | Selection ID |
-   | --- | --- | --- | --- |
-   | GPT-6.1 Sol (high) | `gpt` | `high` | `gpt-high` |
-   | Claude Opus 5.5 (medium) | `opus` | `medium` | `opus-medium` |
-   | Claude Opus 5.5 (high) | `opus` | `high` | `opus-high` |
-   | GPT-6 Astra (high) | `astra` | `high` | `astra-high` |
-   | GLM-5.3 (high) | `glm` | `high` | `glm-high` |
-   | DeepSeek V4 Flash (high) | `deepseek` | `high` | `deepseek-high` |
+   | Label | Agent | Selection ID |
+   | --- | --- | --- |
+   | GPT-6.1 Sol (high) | `gpt-high` | `gpt-high` |
+   | Claude Opus 5.5 (medium) | `opus-medium` | `opus-medium` |
+   | Claude Opus 5.5 (high) | `opus-high` | `opus-high` |
+   | GPT-6 Astra (high) | `astra-high` | `astra-high` |
+   | GLM-5.3 (high) | `glm-high` | `glm-high` |
+   | DeepSeek V4 Flash (high) | `deepseek-high` | `deepseek-high` |
 
-   Each selected row is independent. Selecting both Opus rows starts separate reviewers at their respective effort levels.
+   Each agent fixes its model role and reasoning effort in its `model` frontmatter, for example `'@opus:medium'`. Each selected row is independent. Selecting both Opus rows starts separate reviewers at their respective effort levels.
 
 1. **Depth.** `Standard`: one general adversary per selection. `Deep`: a general adversary and two lens adversaries per selection. Recommend `Deep` when `size` shows more than about 300 changed lines or touches state, I/O, concurrency, or security. Otherwise recommend `Standard`.
 
@@ -56,7 +56,7 @@ Tell the user not to edit the repository and not to run `git gc` in it until the
 
 ## 4. Fan out
 
-Spawn every adversary in one `task` batch. Set `agent` and `effort` from its selected row. Derive a unique CamelCase task name from the selection ID and lens, for example `OpusMediumGeneral` or `OpusHighGeneral`. Do not set `model`.
+Spawn every adversary in one `task` batch. Set `agent` from its selected row. Do not set `effort`: the tool maps `lo`, `med`, and `hi` to the lowest, middle, and highest level of the model, for example `hi` to `max`, and that replaces the agent's level. Do not set `model`. Derive a unique CamelCase task name from the selection ID and lens, for example `OpusMediumGeneral` or `OpusHighGeneral`.
 
 `context`, the same for every adversary: the intent, the base SHA, the head SHA, the `diff` path, the project rule files (for example `AGENTS.md`), and this brief:
 
