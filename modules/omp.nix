@@ -431,11 +431,6 @@ in
                 };
             };
 
-            ".gemini/antigravity-cli/skills" = {
-              force = true;
-              source = withPackagedSkills ../agents/skills;
-            };
-
             # Reports omp agent state to herdr. Same file that
             # `herdr integration install omp` writes, pinned to the package.
             ".omp/agent/extensions/herdr-omp-agent-state.ts" = lib.mkIf config.programs.herdr.enable {

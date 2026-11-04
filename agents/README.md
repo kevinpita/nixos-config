@@ -16,11 +16,11 @@ Harness settings and files that use harness-specific syntax belong in the folder
 | Harness | `AGENTS.md` | `skills/` |
 | --- | --- | --- |
 | omp | `~/.omp/agent/AGENTS.md` | `~/.omp/agent/skills`, without `bro` because pstack ships its own |
-| Antigravity | not installed | `~/.gemini/antigravity-cli/skills` |
+| Claude Code | `~/.claude/CLAUDE.md` | not installed |
 
-Both harnesses also get the `forklab` skill. The forklab package ships that skill, so it stays at the same version as the installed CLI. Change it in the forklab repository.
+omp also gets the `forklab` skill. The forklab package ships that skill, so it stays at the same version as the installed CLI. Change it in the forklab repository.
 
-omp also gets selected interface design skills from [`jakubkrehel/skills`](https://github.com/jakubkrehel/skills). The `interface-skills` flake input pins that repository, and `modules/omp.nix` lists which skill folders to link. Antigravity does not get them. Run `nix flake update interface-skills` to get a newer version.
+omp also gets selected interface design skills from [`jakubkrehel/skills`](https://github.com/jakubkrehel/skills). The `interface-skills` flake input pins that repository, and `modules/omp.nix` lists which skill folders to link. Run `nix flake update interface-skills` to get a newer version.
 
 ## Applying changes
 
