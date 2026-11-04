@@ -8,6 +8,7 @@ This folder owns agent content that does not depend on one harness. Harness modu
 | --- | --- |
 | `AGENTS.md` | Global instructions for all projects. Project-specific rules belong in the relevant project's instruction file. |
 | `skills/` | Reusable task guidance and its supporting references. Extend the existing skill when it already owns the task. |
+| `evals/` | Eval suites that measure a skill against a no-skill baseline. No harness installs them. |
 
 Harness settings and files that use harness-specific syntax belong in the folder of that harness, for example [`omp/`](../omp/README.md).
 
