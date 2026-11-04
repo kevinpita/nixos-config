@@ -118,6 +118,12 @@ When adding or changing tests:
 - Check affected callers, references, comments, error messages, and documentation for anything made stale by the change.
 - Before you report or commit, read the full diff once. Look for duplicated rules, unnecessary helpers, redundant tests, and unrelated edits. Limit cleanup to code and tests added or made obsolete by this task. Report weak existing tests instead of deleting them.
 
+## Subagents
+
+- Every subagent runs at the configured effort of its role or agent. Do not choose a level yourself.
+- Select a level only when the user names it, or tells you to choose. Then use the agent whose `model`, resolved through its role in `omp/config.yml`, has that exact level. Example: `gpt` selects `@gpt`, and the `gpt` role is `gpt-6.1-sol:medium`, so `gpt` runs GPT medium. "Medium" means medium and "high" means high, never the highest level of the model. If no agent resolves to the requested model and level, say so and ask before you start it.
+- When the user tells you to choose, name the model and level of each subagent before you start it.
+
 ## Kubernetes
 
 - "k" means Kubernetes. In the user's zsh, `k` is an alias for `kubectl`.
