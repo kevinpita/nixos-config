@@ -23,9 +23,28 @@ hl.monitor({
     scale = 1,
 })
 
-local function setLaptopDisplay(disabled)
+local laptopOutput = "eDP-1"
+local lidClosed = false
+local laptopDisabled = nil
+
+-- Turn the laptop panel off only while the lid is closed and another monitor
+-- is active. Without another monitor logind suspends, and removing the only
+-- output during the DMS lock kills the lock screen.
+local function updateLaptopDisplay(removed)
+    local external = false
+    for _, monitor in ipairs(hl.get_monitors()) do
+        if monitor.name ~= laptopOutput and monitor.name ~= removed then
+            external = true
+        end
+    end
+
+    local disabled = lidClosed and external
+    if disabled == laptopDisabled then
+        return
+    end
+    laptopDisabled = disabled
     hl.monitor({
-        output = "eDP-1",
+        output = laptopOutput,
         mode = "preferred",
         position = "auto",
         scale = 1,
@@ -35,14 +54,25 @@ end
 
 local lidState = io.open("/proc/acpi/button/lid/LID/state", "r")
 if lidState then
-    setLaptopDisplay(lidState:read("*a"):match("closed") ~= nil)
+    lidClosed = lidState:read("*a"):match("closed") ~= nil
     lidState:close()
 end
+updateLaptopDisplay()
+
+hl.on("monitor.added", function()
+    updateLaptopDisplay()
+end)
+
+hl.on("monitor.removed", function(monitor)
+    updateLaptopDisplay(monitor and monitor.name)
+end)
 
 hl.bind("switch:on:Lid Switch", function()
-    setLaptopDisplay(true)
+    lidClosed = true
+    updateLaptopDisplay()
 end, { locked = true })
 
 hl.bind("switch:off:Lid Switch", function()
-    setLaptopDisplay(false)
+    lidClosed = false
+    updateLaptopDisplay()
 end, { locked = true })
