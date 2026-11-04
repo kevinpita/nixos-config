@@ -53,5 +53,3 @@ advisor:
 dev:
   autoqaConsent: denied
 hideThinkingBlock: false
-tui:
-  mouse: true

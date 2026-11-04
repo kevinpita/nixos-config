@@ -92,28 +92,10 @@ in
       # native Rust build to thin LTO with 16 codegen units.
       # withWaylandScreencast builds pi-natives with `wayland-pipewire`, which
       # computer use needs to capture the screen on Hyprland.
-      # The patches, in order: composer chip thumbnails use a Kitty direct
-      # placement when Unicode placeholders are off, as in herdr panes. Code
-      # block rows in answers get the toolSuccessBg background. A click
-      # (tui.mouse) or a link hint on a code block copies its exact source.
-      # A closed ```markdown or ```md block shows a rendered Markdown preview,
-      # with its inner code blocks highlighted, and still copies its source.
-      # With tui.mouse on, the wheel opens a scrollback page that omp draws
-      # itself, so a click on a scrolled-back code block still copies it.
-      ompBasePackage =
-        (inputs.oh-my-pi.packages.${system}.default.override {
-          withWaylandScreencast = true;
-          withFatLto = false;
-        }).overrideAttrs
-          (old: {
-            patches = (old.patches or [ ]) ++ [
-              ../packages/omp/attachment-chip-direct-placement.patch
-              ../packages/omp/markdown-code-block-background.patch
-              ../packages/omp/markdown-code-block-copy.patch
-              ../packages/omp/markdown-code-block-preview.patch
-              ../packages/omp/transcript-scrollback.patch
-            ];
-          });
+      ompBasePackage = inputs.oh-my-pi.packages.${system}.default.override {
+        withWaylandScreencast = true;
+        withFatLto = false;
+      };
       # pstack is a Claude Code plugin; omp loads that format through
       # --plugin-dir. Its poteto-mode scripts install commander into their own
       # directory on first run, which a store path cannot allow, so the
