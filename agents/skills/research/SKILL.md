@@ -11,19 +11,11 @@ Find the best way to do one thing, and prove that it works. You are the **lead**
 
 Open a todo list with one entry per phase before you start: Interview, Plan, Survey, Shortlist, Build, Attack, Verify, Judge, Report.
 
-## Roster
+## Models
 
-Spawn each subagent with `task` and the agent named below. Each agent pins its model through a role in `omp/config.yml`.
+The user chooses the models and their reasoning levels, for example with `^` tags. The user also chooses the **builder**: the model that builds the candidates and fixes confirmed findings. When the user named no models, ask for them, and for the builder, in the Interview. Do not choose a model or a level yourself. Spawn each subagent with the agent of its tag.
 
-| Agent | Model | Role |
-| --- | --- | --- |
-| `opus` | Claude Opus 5.5 | Strongest model by far. Surveys, builds every prototype, fixes confirmed findings. |
-| `gpt` | GPT-6.1 Sol | Surveys, attacks, and is the cross-family judge. |
-| `fable` | Claude Fable 5.1 | Surveys and attacks. |
-| `glm-flash` | GLM 5.3 Flash | Explores unusual angles and attacks. Advice only. |
-| `deepseek` | DeepSeek V4 Flash | Explores unusual angles and attacks. Advice only. |
-
-Only Opus writes code that can become the result. The other models advise, explore, and attack. Their output is a lead until you or Opus confirm it. If a model fails or returns nothing, continue without it and record the dropout. A model never reviews or judges its own work.
+Only the builder writes code that can become the result. The other models advise, explore, and attack. Their output is a lead until you or the builder confirm it. If a model fails or returns nothing, continue without it and record the dropout. A model never reviews or judges its own work.
 
 ## 1. Interview
 
@@ -39,6 +31,7 @@ Resolve these decisions:
 - **Proof of works**: the exact test, benchmark, or command that must pass. For knowledge-only results, the proof is a primary source for each key claim.
 - **Depth**: Light, Standard, or Full (see Plan).
 - **Sources**: repo only, or repo and web.
+- **Models**: the models and the builder, see Models. Ask in a text message, not with `ask`, so that the user can answer with `^` tags.
 
 The interview is done when every decision has an answer or the user defers it.
 
@@ -50,25 +43,25 @@ Show the user the plan before you spawn anything:
 - A table with each model, its role in this run, and the phases it runs in.
 - The subagent count for the chosen depth:
 
-| Depth | Survey | Build | Attack | Judge | About |
-| --- | --- | --- | --- | --- | --- |
-| Light | 5 models | 1 written case by you | 2 attackers on the case | you only | 7 subagents |
-| Standard | 5 models | 2 candidates | 2 attackers per candidate | GPT + you | 12 subagents |
-| Full | 5 models | 3 candidates | 4 attackers per candidate | GPT + you | 21 subagents |
+| Depth | Survey | Build | Attack | Judge |
+| --- | --- | --- | --- | --- |
+| Light | every model | 1 written case by you | 2 attackers on the case | you only |
+| Standard | every model | 2 candidates | 2 attackers per candidate | 1 model + you |
+| Full | every model | 3 candidates | 4 attackers per candidate | 1 model + you |
 
 Get approval with `ask`. Then write the brief to `local://research-brief.md`. Every subagent task points to it, because subagents do not see this conversation.
 
 ## 3. Survey
 
-Spawn all five models in one `task` batch. Give each model a different lens:
+Spawn every model in one `task` batch. Give each model a different lens from this list, in order. With more models than lenses, start the list again.
 
-| Model | Lens |
-| --- | --- |
-| Opus | The standard approach that experts use, and how it fits this codebase. |
-| GPT | Prior art, known failures, and post-mortems of similar work. |
-| Fable | Alternatives that the standard approach misses. |
-| GLM | An unusual or contrarian approach. |
-| DeepSeek | The simplest or cheapest approach that meets the rubric. |
+| Lens |
+| --- |
+| The standard approach that experts use, and how it fits this codebase. |
+| Prior art, known failures, and post-mortems of similar work. |
+| Alternatives that the standard approach misses. |
+| An unusual or contrarian approach. |
+| The simplest or cheapest approach that meets the rubric. |
 
 Each model returns 2 to 5 approaches. For each approach: how it works, tradeoffs against the rubric, failure modes, and a source for each factual claim. A claim without a source is marked `[INFERENCE]`.
 
@@ -85,13 +78,13 @@ Every candidate becomes one **candidate artifact**, which the Attack, Verify, an
 - **Prototype**: the result type is working code, and the depth is Standard or Full. The artifact is a git worktree.
 - **Written case**: every other run. The artifact is `local://research-<candidate>.md`.
 
-For a prototype, spawn one Opus subagent per candidate in one batch. Give each one its own git worktree at `/tmp/research-<slug>/<candidate>`. Each candidate must include the proof-of-works test, and must return the worktree path, the commands it ran, and their output.
+For a prototype, spawn one builder subagent per candidate in one batch. Give each one its own git worktree at `/tmp/research-<slug>/<candidate>`. Each candidate must include the proof-of-works test, and must return the worktree path, the commands it ran, and their output.
 
-For a written case, the artifact states the recommendation, how it works, the tradeoffs against the rubric, each key claim with its primary source, and the known risks. At Light depth, write it yourself. At Standard and Full depth, spawn one Opus subagent per candidate in one batch to write it.
+For a written case, the artifact states the recommendation, how it works, the tradeoffs against the rubric, each key claim with its primary source, and the known risks. At Light depth, write it yourself. At Standard and Full depth, spawn one builder subagent per candidate in one batch to write it.
 
 ## 6. Attack
 
-Spawn the attackers in one batch. Give each attacker one candidate artifact and the brief. Use a different model family from the author when possible. Rotate GPT, Fable, GLM, and DeepSeek so that each candidate gets different attackers.
+Spawn the attackers in one batch. Give each attacker one candidate artifact and the brief. Use the models other than the builder. Rotate them so that each candidate gets different attackers. When no other model is available, attack the candidates yourself.
 
 An attacker returns findings. Each finding has a concrete failing input, a scenario with steps, or a source that contradicts a claim. An opinion without one of these is not a finding.
 
@@ -104,13 +97,13 @@ Check the proof of each candidate yourself:
 
 Reproduce each finding yourself. For each finding, record **confirmed** or **rejected**, with the evidence.
 
-Send the confirmed findings for a candidate to one Opus subagent to fix in the same artifact. Then check the proof again. Drop a candidate that you cannot fix.
+Send the confirmed findings for a candidate to one builder subagent to fix in the same artifact. Then check the proof again. Drop a candidate that you cannot fix.
 
 Verification is done when every finding has a status and the proof of every remaining candidate holds in your own check.
 
 ## 8. Judge
 
-Score each remaining candidate against the rubric, one criterion at a time. For Standard and Full depth, spawn GPT as an independent judge with the brief and the candidate artifacts, and without your scores. When you and GPT pick a different winner, read both reasons and explain the result.
+Score each remaining candidate against the rubric, one criterion at a time. For Standard and Full depth, spawn one model other than the builder as an independent judge with the brief and the candidate artifacts, and without your scores. When no other model is available, judge alone. When you and the judge pick a different winner, read both reasons and explain the result.
 
 ## 9. Report
 

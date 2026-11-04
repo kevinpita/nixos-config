@@ -28,7 +28,7 @@ A question, an explain request, or a check request gets an answer or a report, n
 - Command output is in Spanish. To parse it, run the command with `LC_ALL=C`, or check the exit code.
 - git uses difftastic as its external diff. To read or apply a patch, use `git --no-pager diff --no-ext-diff --no-color`.
 - `docker` talks to rootless Podman. Bind-mounted files get mapped uids.
-- `~/.omp/agent` is generated from `~/nixos-config`. Edit the files there: `agents/` for AGENTS.md and shared skills, `omp/` for omp config, agents, and omp-only skills (see `omp/README.md`). New files need `git add -N` before a Nix build sees them.
+- `~/.omp/agent` is generated from `~/nixos-config`. Edit the files there: `agents/` for AGENTS.md and shared skills, `omp/` for omp config, commands, and extensions (see `omp/README.md`). New files need `git add -N` before a Nix build sees them.
 
 ## Answer layout
 
@@ -120,9 +120,8 @@ When adding or changing tests:
 
 ## Subagents
 
-- Every subagent runs at the configured effort of its role or agent. Do not choose a level yourself.
-- Select a level only when the user names it, or tells you to choose. Then use the agent whose `model`, resolved through its role in `omp/config.yml`, has that exact level. Example: `gpt` selects `@gpt`, and the `gpt` role is `gpt-6.1-sol:medium`, so `gpt` runs GPT medium. "Medium" means medium and "high" means high, never the highest level of the model. If no agent resolves to the requested model and level, say so and ask before you start it.
-- When the user tells you to choose, name the model and level of each subagent before you start it.
+- The user chooses the model and the reasoning level of each subagent, for example with a tag such as `<model agent="m1" name="..."/>`. Use the agent of that tag. Do not choose a model or a level yourself.
+- When the user names no model, use any agent that omp offers, without a model or effort override.
 
 ## Kubernetes
 

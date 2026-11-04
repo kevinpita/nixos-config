@@ -1,9 +1,9 @@
 ---
-description: Adversarial pre-PR review. Picked models try to break the branch, and only findings proven by a rerun survive.
-argument-hint: '[target or focus]'
+description: Adversarial pre-PR review. The models you tag with ^ try to break the branch, and only findings proven by a rerun survive.
+argument-hint: ^model[:level]... [deep|standard] [target or focus]
 ---
 
-Run an adversarial pre-PR review. The method is the pstack `interrogate` skill: adversaries try to break the change, and a finding survives only when a run proves it. This command replaces its model roster with a picker and adds focus lenses. Report the findings. Do not fix them, commit, or push.
+Run an adversarial pre-PR review. The method is the pstack `interrogate` skill: adversaries try to break the change, and a finding survives only when a run proves it. This command replaces its model roster with the models that the user tags, and adds focus lenses. Report the findings. Do not fix them, commit, or push.
 
 User hint: $ARGUMENTS
 
@@ -11,7 +11,9 @@ User hint: $ARGUMENTS
 
 `~/.omp/agent/commands/pre-pr.sh` does every git step. Call it `pre-pr.sh` below. Its subcommands print `key=value` lines, keep their state in the run folder, and exit non-zero with a `pre-pr:` message on any problem. Shell variables do not survive between `bash` calls, so write the literal run folder path into every later call, quoted.
 
-1. Pick the target from the user hint and run `pre-pr.sh prepare <target>` in the repository:
+1. Find the `<model agent="mN" name="..."/>` tags in the user hint. Each tag is one **selection**: its adversaries run as agent `mN`, and its name says the model and the level. With no tag, tell the user to run the command again with one `^provider/model[:level]` tag per model, and stop. Do not pick models yourself.
+
+1. Pick the target from the rest of the user hint and run `pre-pr.sh prepare <target>` in the repository:
 
    | Hint | Target |
    | --- | --- |
@@ -29,34 +31,19 @@ User hint: $ARGUMENTS
 
 From here on, every exit path goes through §7, also a stop.
 
-## 2. Picker
+## 2. Depth
 
-Ask both questions in one `ask` call.
-
-1. **Models and effort** (`multi: true`). Options, in this order. Mark Claude Opus 5.5 (medium) as recommended. Write "Default" in the descriptions of GPT-6.1 Sol (high) and Claude Opus 5.5 (medium). When the user picks nothing, use those two.
-
-   | Label | Agent | Selection ID |
-   | --- | --- | --- |
-   | GPT-6.1 Sol (high) | `gpt-high` | `gpt-high` |
-   | Claude Opus 5.5 (medium) | `opus-medium` | `opus-medium` |
-   | Claude Opus 5.5 (high) | `opus-high` | `opus-high` |
-   | GPT-6 Astra (high) | `astra-high` | `astra-high` |
-   | GLM-5.3 (high) | `glm-high` | `glm-high` |
-   | DeepSeek V4 Flash (high) | `deepseek-high` | `deepseek-high` |
-
-   Each agent fixes its model role and reasoning effort in its `model` frontmatter, for example `'@opus:medium'`. Each selected row is independent. Selecting both Opus rows starts separate reviewers at their respective effort levels.
-
-1. **Depth.** `Standard`: one general adversary per selection. `Deep`: a general adversary and two lens adversaries per selection. Recommend `Deep` when `size` shows more than about 300 changed lines or touches state, I/O, concurrency, or security. Otherwise recommend `Standard`.
+`Standard`: one general adversary per selection. `Deep`: a general adversary and two lens adversaries per selection. When the user hint says `standard` or `deep`, use it. Otherwise ask in a text message, not with `ask`, and wait for the answer. Recommend `Deep` when `size` shows more than about 300 changed lines or touches state, I/O, concurrency, or security. Otherwise recommend `Standard`.
 
 ## 3. Clones
 
-Run `pre-pr.sh clones '<run>' <selection-id>-<lens>...` with one name per adversary, for example `gpt-high-general opus-medium-general opus-high-general`. Each adversary gets its own clone of the head SHA, at `<run>/clones/<name>`. A clone has its own refs, stash, config, index, and hooks, and no remote, so git commands in it cannot change your repository. The command also records the guard state of your checkout.
+Run `pre-pr.sh clones '<run>' <agent>-<lens>...` with one name per adversary, for example `m1-general m2-general m2-inputs`. Each adversary gets its own clone of the head SHA, at `<run>/clones/<name>`. A clone has its own refs, stash, config, index, and hooks, and no remote, so git commands in it cannot change your repository. The command also records the guard state of your checkout.
 
 Tell the user not to edit the repository and not to run `git gc` in it until the report is ready.
 
 ## 4. Fan out
 
-Spawn every adversary in one `task` batch. Set `agent` from its selected row. Do not set `effort`: the tool maps `lo`, `med`, and `hi` to the lowest, middle, and highest level of the model, for example `hi` to `max`, and that replaces the agent's level. Do not set `model`. Derive a unique CamelCase task name from the selection ID and lens, for example `OpusMediumGeneral` or `OpusHighGeneral`.
+Spawn every adversary in one `task` batch. Set `agent` to the agent of its selection, for example `m1`. Do not set `effort` or `model`: the tag fixes the model, and the level when the tag has one. Derive a unique CamelCase task name from the agent and the lens, for example `M1General` or `M2Inputs`.
 
 `context`, the same for every adversary: the intent, the base SHA, the head SHA, the `diff` path, the project rule files (for example `AGENTS.md`), and this brief:
 
@@ -75,7 +62,7 @@ Spawn every adversary in one `task` batch. Set `agent` from its selected row. Do
 ## 5. Verify
 
 1. For each finding, run its command again in that adversary's clone. Keep the finding when the output shows the failure and the failure breaks the intent. Drop the rest and record why.
-1. Merge findings that share a root cause. Keep the list of model-and-effort selections and lenses that found each one.
+1. Merge findings that share a root cause. Keep the list of selections and lenses that found each one, by tag name.
 1. A failed or `INCOMPLETE` adversary never counts as a clean result. Name it in the report.
 1. Run `pre-pr.sh guard '<run>'` after the reruns, so it covers them too. Exit 0 prints `unchanged`. Exit 3 prints a diff: your checkout changed during the run, by an adversary or by the user. Put the diff in the report under **Checkout changed** and tell the user. Any other exit is an error: say that the guard did not run.
 
@@ -85,9 +72,9 @@ Write `<run>/report.md` and show it to the user:
 
 - **Verdict** on the first line: `Not ready` when a finding survives. Else `Incomplete` when any adversary failed or returned `Status: INCOMPLETE`. Else `Ready for PR`.
 - **Intent**: the restatement.
-- **Findings**, most severe first. For each: what breaks in one sentence, location, the command, its output, how it breaks the intent, and the model-and-effort selections and lenses that found it. Write "No verified findings" when none survive.
+- **Findings**, most severe first. For each: what breaks in one sentence, location, the command, its output, how it breaks the intent, and the selections and lenses that found it. Write "No verified findings" when none survive.
 - **Dropped**: for each adversary, the count of dropped findings and why.
-- **Coverage**: the target, the base and head SHAs, the picked model-and-effort selections, the depth, any adversary that failed or stopped early, the `note` lines, and the guard result. The guard does not cover ignored files, intent-to-add flags, or submodule content.
+- **Coverage**: the target, the base and head SHAs, the tag names of the selections, the depth, any adversary that failed or stopped early, the `note` lines, and the guard result. The guard does not cover ignored files, intent-to-add flags, or submodule content.
 
 ## 7. Cleanup
 

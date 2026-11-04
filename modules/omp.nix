@@ -182,14 +182,6 @@ in
             ${pkgs.forklab}/share/forklab/.agents/skills/forklab \
             "$out"/
         '';
-      # Skills that use omp-specific tools and agents live in omp/skills and
-      # go to omp only.
-      withOmpSkills =
-        skills:
-        pkgs.runCommand "omp-skills" { } ''
-          mkdir "$out"
-          ln -s ${skills}/* ${../omp/skills}/* "$out"/
-        '';
       # Interface design skills from jakubkrehel/skills.
       interfaceSkills = map (name: "${inputs.interface-skills}/skills/${name}") [
         "better-accessibility"
@@ -309,8 +301,8 @@ in
       home-manager.users.${username} =
         { config, lib, ... }:
         {
-          # Direct symlinks to repo paths so omp settings and agent edits on
-          # any host land in the working tree as a git diff. Logins stay in
+          # Direct symlinks to repo paths so omp settings edits on any host
+          # land in the working tree as a git diff. Logins stay in
           # ~/.omp/agent/agent.db on the auth broker host, or on each host
           # when no host runs the broker. mkOutOfStoreSymlink does not
           # work here: it links through the Nix store, and an in-place
@@ -322,20 +314,13 @@ in
             run ln -sfn $VERBOSE_ARG \
               "${repo}/omp/WATCHDOG.yml" \
               "${config.home.homeDirectory}/.omp/agent/WATCHDOG.yml"
-            run ln -sfn $VERBOSE_ARG \
-              "${repo}/omp/agents" \
-              "${config.home.homeDirectory}/.omp/agent/agents"
           '';
 
           home.file = {
             ".omp/agent/AGENTS.md".source = ../agents/AGENTS.md;
-            ".omp/agent/skills".source = withInterfaceSkills (
-              withOmpSkills (withPackagedSkills skillsWithoutBro)
-            );
+            ".omp/agent/skills".source = withInterfaceSkills (withPackagedSkills skillsWithoutBro);
             # File-based slash commands, for example /pre-pr.
             ".omp/agent/commands".source = ../omp/commands;
-            # Blocks git push while the review-loop skill runs.
-            ".omp/agent/extensions/review-loop-guard.ts".source = ../omp/extensions/review-loop-guard.ts;
             # /send and /receive move resumable sessions between hosts over SSH.
             ".omp/agent/extensions/session-relay.ts".source = ../omp/extensions/session-relay.ts;
             # ctrl+l and /focus show only the latest answer.
