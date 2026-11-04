@@ -1,0 +1,11 @@
+[keys]
+# prefix+g opens the session navigator by default.
+goto = ""
+
+[[keys.command]]
+command = "lazygit"
+description = "open lazygit"
+height = "80%"
+key = "prefix+g"
+type = "popup"
+width = "80%"

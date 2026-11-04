@@ -36,6 +36,7 @@ Hosts can also import individual features, such as `development` on `minidesk`.
 | [`hosts/`](hosts/) | Hardware, disk layouts, and host-specific desktop files |
 | [`hyprland/`](hyprland/) | Desktop configuration, DMS settings, plugins, and patches |
 | [`neovim/`](neovim/) | Neovim Lua configuration and Nix wrapper |
+| [`herdr/`](herdr/) | herdr settings, linked writable into `~/.config/herdr` |
 | [`agents/`](agents/) | Harness-independent agent instructions and skills |
 | [`omp/`](omp/) | omp settings and worker definitions |
 | [`packages/`](packages/) | Local helper packages |
