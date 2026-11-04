@@ -6,7 +6,7 @@ rec {
 
   paletteOf = name: builtins.fromTOML (builtins.readFile ../themes/${name}/theme.toml);
 
-  # Terminal colors 0-15, shared by ghostty, herdr and omp.
+  # Terminal colors 0-15, shared by ghostty and omp.
   ansiColors = theme: [
     theme.background
     theme.red

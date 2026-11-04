@@ -163,9 +163,9 @@ in
       # PI_CONFIG_FILES layers above ~/.omp/agent/config.yml, so runtime
       # settings edits cannot re-enable the providers or the update check, or
       # change the status line.
-      # herdr-core terminals (HC_TERMINAL_ID) claim TERM_PROGRAM=ghostty, but
-      # the herdr app skips Kitty virtual placements, so Unicode placeholders
-      # draw as boxes. Plain Kitty graphics work.
+      # omp cannot see the outer terminal through herdr, so it shows image
+      # placeholders. herdr forwards Kitty graphics to Ghostty. Unicode
+      # placeholders stay off because herdr stretches them (herdr#4858).
       ompPackage = pkgs.symlinkJoin {
         name = "omp-${ompBasePackage.version}";
         paths = [ ompBasePackage ];
@@ -179,7 +179,7 @@ in
             ${
               lib.optionalString (authBrokerUrl != null) "--set-default OMP_AUTH_BROKER_URL ${authBrokerUrl}"
             } \
-            --run 'if [ -n "''${HC_TERMINAL_ID-}" ]; then export PI_FORCE_IMAGE_PROTOCOL="''${PI_FORCE_IMAGE_PROTOCOL-kitty}" PI_KITTY_PLACEHOLDERS="''${PI_KITTY_PLACEHOLDERS-0}"; fi' \
+            --run 'if [ "''${TERM_PROGRAM-}" = herdr ]; then export PI_FORCE_IMAGE_PROTOCOL="''${PI_FORCE_IMAGE_PROTOCOL-kitty}" PI_KITTY_PLACEHOLDERS="''${PI_KITTY_PLACEHOLDERS-0}"; fi' \
             ${
               lib.optionalString (config.omp.optInPluginDirs != { }) "--run ${lib.escapeShellArg ompOptInPlugins}"
             } \
@@ -191,8 +191,7 @@ in
         root = ../agents/skills;
         fileset = lib.fileset.difference ../agents/skills ../agents/skills/bro;
       };
-      # forklab ships its skill in its package. agents/skills/herdr replaces the
-      # skill that herdr-core ships.
+      # forklab ships its skill in its package.
       withPackagedSkills =
         skills:
         pkgs.runCommand "agent-skills" { } ''
@@ -465,6 +464,12 @@ in
             ".gemini/antigravity-cli/skills" = {
               force = true;
               source = withPackagedSkills ../agents/skills;
+            };
+
+            # Reports omp agent state to herdr. Same file that
+            # `herdr integration install omp` writes, pinned to the package.
+            ".omp/agent/extensions/herdr-omp-agent-state.ts" = lib.mkIf config.programs.herdr.enable {
+              source = "${config.programs.herdr.package}/share/herdr/integrations/omp/herdr-agent-state.ts";
             };
           };
         };

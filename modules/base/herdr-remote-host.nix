@@ -125,52 +125,42 @@
     let
       servers = hostsWithRole "server";
 
-      # hc keeps machines in its state with the remote core's id, so they
-      # are added through hc, not written as a file. Machines added by hand
-      # stay. A server that is down is tried again later.
-      addMachines = pkgs.writeShellApplication {
-        name = "herdr-core-add-machines";
-        runtimeInputs = with pkgs; [
-          bash
-          coreutils
-          herdr-core
-          jq
-          openssh
-        ];
-        text = ''
-          known=$(hc machine ls --json)
-          failed=0
-          for name in ${lib.escapeShellArgs servers}; do
-            if jq -e --arg name "$name" '.machines[] | select(.name == $name)' <<<"$known" >/dev/null; then
-              continue
-            fi
-            hc machine add "$name" --name "$name" </dev/null || failed=1
-          done
-          exit "$failed"
-        '';
-      };
+      # herdr's saved SSH machines. The build reads the file with herdr, so a
+      # format change fails the build. herdr cannot add or remove machines in
+      # this read-only file.
+      herdrMachines =
+        pkgs.runCommand "herdr-endpoints.json"
+          {
+            nativeBuildInputs = [ pkgs.herdr ];
+            machines = builtins.toJSON {
+              version = 1;
+              ssh = map (name: {
+                id = builtins.substring 0 32 (builtins.hashString "sha256" name);
+                label = name;
+                target = name;
+                session = "default";
+                enabled = true;
+              }) servers;
+            };
+            passAsFile = [ "machines" ];
+          }
+          ''
+            export HOME="$TMPDIR/home" XDG_STATE_HOME="$TMPDIR/home/.local/state"
+            install -D "$machinesPath" "$XDG_STATE_HOME/herdr/client/endpoints.json"
+            herdr machine list --json
+            cp "$machinesPath" "$out"
+          '';
     in
     {
-      home-manager.users.${username} = {
-        programs.ssh.settings = lib.genAttrs servers (name: {
-          HostName = "${name}.${tailnetDomain}";
-          User = username;
-        });
+      home-manager.users.${username} =
+        { config, ... }:
+        {
+          programs.ssh.settings = lib.genAttrs servers (name: {
+            HostName = "${name}.${tailnetDomain}";
+            User = username;
+          });
 
-        systemd.user.services.herdr-core-machines = {
-          Unit = {
-            Description = "Add the servers to herdr-core as machines";
-            After = [ "network-online.target" ];
-            StartLimitIntervalSec = 0;
-          };
-          Service = {
-            Type = "oneshot";
-            ExecStart = lib.getExe addMachines;
-            Restart = "on-failure";
-            RestartSec = "5min";
-          };
-          Install.WantedBy = [ "default.target" ];
+          home.file."${config.xdg.stateHome}/herdr/client/endpoints.json".source = herdrMachines;
         };
-      };
     };
 }

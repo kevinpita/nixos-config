@@ -6,10 +6,11 @@ if (($# != 1)); then
 	exit 2
 fi
 
-# An hc terminal on a server has no SSH_CONNECTION (the core runs as a user
-# service) and no display. On a workstation it has the session's display.
+# A herdr terminal on a server can lack SSH_CONNECTION (its server runs
+# detached) and has no display. On a workstation it has the session's
+# display.
 if [[ -z ${SSH_CONNECTION:-} ]] &&
-	[[ -z ${HC_TERMINAL_ID:-} || -n ${WAYLAND_DISPLAY:-}${DISPLAY:-} ]]; then
+	[[ -z ${HERDR_ENV:-} || -n ${WAYLAND_DISPLAY:-}${DISPLAY:-} ]]; then
 	exec xdg-open "$1"
 fi
 

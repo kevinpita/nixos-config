@@ -83,13 +83,6 @@
           palette = ${toString (index - 1)}=${color}
         '') (ansiColors theme)}'';
 
-      herdrTheme = theme: {
-        inherit (theme) background foreground selection;
-        cursor = theme.bright_foreground;
-        ansi = ansiColors theme;
-        colors.accent = theme.accent;
-      };
-
       hyprlandColor = color: ''"rgb(${lib.removePrefix "#" color})"'';
 
       hyprlandTheme = theme: ''
@@ -188,7 +181,6 @@
             "dms-theme.json" = builtins.toJSON (dmsTheme name theme);
             "ghostty.conf" = ghosttyTheme theme;
             "hyprland.lua" = hyprlandTheme theme;
-            "herdr.json" = builtins.toJSON (herdrTheme theme);
             "icons.theme" = theme.icons;
             "mode" = theme.mode;
             "neovim.lua" = neovimTheme name theme;
@@ -235,7 +227,6 @@
           config.programs.hyprland.package
           pkgs.coreutils
           pkgs.findutils
-          pkgs.herdr
           pkgs.dconf
           pkgs.jq
           pkgs.procps
@@ -293,15 +284,6 @@
           if [[ -L "$omp_theme" ]]; then
             touch -h "$omp_theme"
           fi
-          # herdr changes theme only on command. The window does not always
-          # answer, and the lock must not wait long for it.
-          timeout 2 herdr-app "do" app.theme --name "desktop-$1" >/dev/null || true
-          # Herdr reads a background image once per path until it restarts, so
-          # the panes show a new wallpaper after the next Herdr start. A real
-          # file is needed: Herdr draws no link into the Nix store. Herdr finds
-          # the format from the content, so a PNG wallpaper also works here.
-          install -D -m 644 "$(dms ipc call wallpaper get)" \
-            "''${XDG_CONFIG_HOME:-$HOME/.config}/herdr-app/backgrounds/desktop.jpg" || true
         '';
       };
 
@@ -348,11 +330,7 @@
           xdg.configFile = {
             "gtk-3.0/gtk.css".text = ''@import url("dank-colors.css");'';
             "gtk-4.0/gtk.css".text = ''@import url("dank-colors.css");'';
-          }
-          // lib.genAttrs' names (name: {
-            name = "herdr-app/themes/desktop-${name}.json";
-            value.source = "${mkTheme name}/herdr.json";
-          });
+          };
 
           # theme-set links the selected desktop theme here.
           home.file.".omp/agent/themes/desktop.json".source =
