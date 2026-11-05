@@ -1,0 +1,11 @@
+--- a/src/main/java/reva/revaFileSystem.java
++++ b/src/main/java/reva/revaFileSystem.java
+@@ -60,7 +60,7 @@
+ 	 * 
+ 	 * @param monitor A cancellable task monitor.
+ 	 */
+-	public void mount(TaskMonitor monitor) {
++	public void mount(TaskMonitor monitor) throws IOException {
+ 		monitor.setMessage("Opening " + revaFileSystem.class.getSimpleName() + "...");
+ 
+ 		// Customize how things in the file system are stored.  The following should be 

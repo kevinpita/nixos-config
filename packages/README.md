@@ -12,6 +12,8 @@ Give a new helper its own directory and a `package.nix`. Add an output in `modul
 
 Change the package for executable behavior and build dependencies. Change its caller for when it runs, its permissions, or which machines use it. For fetched sources, review the version or revision and source hash together. Some Go packages also require a vendor hash update.
 
+For `mcp-reva`, apply Java extension patches to `exts.reva` inside the `ghidra.withExtensions` callback. The Python application's `patches` list affects only the CLI, not the separately built Ghidra extension.
+
 ## Checking and using changes
 
 From the repository root, build one output with `nix build .#<package-name>`. This does not activate a system configuration. `just switch` deploys changes to the current host if its selected features use the package.

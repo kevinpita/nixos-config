@@ -8,7 +8,11 @@
 
 let
   # The Python CLI drives the ReVa Java extension, so both come from the same release.
-  ghidraWithReva = ghidra.withExtensions (exts: [ exts.reva ]);
+  ghidraWithReva = ghidra.withExtensions (exts: [
+    (exts.reva.overrideAttrs (old: {
+      patches = (old.patches or [ ]) ++ [ ./ghidra-12.2-ioexception.patch ];
+    }))
+  ]);
 in
 python3Packages.buildPythonApplication {
   pname = "mcp-reva";
