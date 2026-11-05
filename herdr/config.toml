@@ -1,3 +1,4 @@
+onboarding = false
 [keys]
 # prefix+g opens the session navigator by default.
 goto = ""
