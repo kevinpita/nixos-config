@@ -10,3 +10,7 @@ height = "80%"
 key = "prefix+g"
 type = "popup"
 width = "80%"
+
+[ui]
+# Mouse wheel and keyboard scrollback still work without the bar.
+pane_scrollbars = false
