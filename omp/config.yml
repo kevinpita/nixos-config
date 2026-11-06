@@ -23,10 +23,18 @@ providers:
 retry:
   rateLimitWalksChain: true
   fallbackChains:
-    default: [openai-codex/gpt-6.1-sol, zai/glm-5.3]
-    task: [openai-codex/gpt-6.1-sol, zai/glm-5.3]
-    advisor: [anthropic/claude-opus-5-5, zai/glm-5.3]
-    reviewer: [anthropic/claude-opus-5-5, zai/glm-5.3]
+    default:
+      - openai-codex/gpt-6.1-sol
+      - zai/glm-5.3
+    task:
+      - openai-codex/gpt-6.1-sol
+      - zai/glm-5.3
+    advisor:
+      - anthropic/claude-opus-5-5
+      - zai/glm-5.3
+    reviewer:
+      - anthropic/claude-opus-5-5
+      - zai/glm-5.3
 task:
   enableEffort: false
   agentModelOverrides:
@@ -38,7 +46,7 @@ composer:
   shape: band
 theme:
   dark: desktop
-setupVersion: 2
+setupVersion: 3
 browser:
   headless: true
 advisor:
