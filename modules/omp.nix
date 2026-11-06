@@ -90,15 +90,9 @@ in
       # Upstream's release profile uses fat LTO with one codegen unit, which
       # links pi-natives on a single core. withFatLto = false switches the
       # native Rust build to thin LTO with 16 codegen units.
-      # The patch makes a `^provider/model:level` mention tag the model at that
-      # reasoning level, and `:` after a tagged model lists its levels.
-      ompBasePackage =
-        (inputs.oh-my-pi.packages.${system}.default.override {
-          withFatLto = false;
-        }).overrideAttrs
-          (old: {
-            patches = (old.patches or [ ]) ++ [ ../packages/omp/model-mention-thinking-level.patch ];
-          });
+      ompBasePackage = inputs.oh-my-pi.packages.${system}.default.override {
+        withFatLto = false;
+      };
       # pstack is a Claude Code plugin; omp loads that format through
       # --plugin-dir. Its poteto-mode scripts install commander into their own
       # directory on first run, which a store path cannot allow, so the

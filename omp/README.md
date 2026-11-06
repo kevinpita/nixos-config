@@ -19,7 +19,7 @@ This folder owns the oh-my-pi (omp) harness configuration. `modules/omp.nix` sel
 
 `config.yml` owns the default model assignments and reasoning effort. The `task` role selects the model for generic task workers. `task.agentModelOverrides` assigns models to bundled specialists without copying their prompts.
 
-There are no custom worker agents. To run a worker on a model, tag the model with `^provider/model` in the prompt. Add `:level` to pin its reasoning level, for example `^anthropic/claude-opus-5-5:high`. A tag without a level keeps the level that omp uses without one. `packages/omp/model-mention-thinking-level.patch` adds the `:level` suffix and its completion: after a model, type `:` to list its levels.
+There are no custom worker agents. To run a worker on a model, tag the model with `^provider/model` in the prompt. Add `:level` to pin its initial reasoning level, for example `^anthropic/claude-opus-5-5:high`. A tag without a level keeps the level that omp uses without one. Upstream omp supports the suffix and its completion: type `^opus:` before accepting a model completion to list matching models and their supported levels.
 
 `task.enableEffort` is `false`, so a caller cannot set `effort` per spawn. The `effort` field would map `lo`, `med`, and `hi` to the lowest, middle, and highest level of the model, so `hi` would run at `max`.
 
