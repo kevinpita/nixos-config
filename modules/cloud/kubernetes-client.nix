@@ -24,6 +24,29 @@
       helm = pkgs.wrapHelm helm3 {
         plugins = [ pkgs.kubernetes-helmPlugins.helm-diff ];
       };
+      fluxcd = pkgs.stdenvNoCC.mkDerivation {
+        pname = "fluxcd";
+        version = "2.10.0";
+        src = pkgs.fetchurl {
+          url = "https://github.com/fluxcd/flux2/releases/download/v2.10.0/flux_2.10.0_linux_amd64.tar.gz";
+          hash = "sha256-II3XASwE/t7tWy0LbmPfOxWxw0o4FSeBFoXAmLyfhlk=";
+        };
+        sourceRoot = ".";
+        nativeBuildInputs = [ pkgs.installShellFiles ];
+        installPhase = ''
+          runHook preInstall
+          install -Dm755 flux $out/bin/flux
+          installShellCompletion --cmd flux \
+            --bash <($out/bin/flux completion bash) \
+            --fish <($out/bin/flux completion fish) \
+            --zsh <($out/bin/flux completion zsh)
+          runHook postInstall
+        '';
+        meta = pkgs.fluxcd.meta // {
+          platforms = [ "x86_64-linux" ];
+          changelog = "https://github.com/fluxcd/flux2/releases/tag/v2.10.0";
+        };
+      };
       secretsPath = "${inputs.nixos-secrets}/secrets";
       kubeFiles = lib.filterAttrs (
         name: type: type == "regular" && builtins.match "kube-.+\\.yaml" name != null
@@ -46,6 +69,7 @@
 
       environment.systemPackages = [
         pkgs.argocd
+        fluxcd
         pkgs.helm-tui
         pkgs.k9s
         pkgs.ku
