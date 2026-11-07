@@ -1,6 +1,7 @@
 { config, inputs, ... }:
 {
   flake.overlays.default = final: _prev: {
+    claude-desktop = final.callPackage ../packages/claude-desktop/package.nix { };
     exrpd = final.callPackage ../packages/exrpd/package.nix { };
     mcp-reva = final.callPackage ../packages/mcp-reva/package.nix { };
     open-code-review = final.callPackage ../packages/open-code-review/package.nix { };
@@ -14,7 +15,14 @@
   };
 
   perSystem =
-    { pkgs, ... }:
+    { system, ... }:
+    let
+      # claude-desktop is unfree, so the default perSystem pkgs refuses to evaluate it.
+      pkgs = import inputs.nixpkgs {
+        inherit system;
+        config.allowUnfree = true;
+      };
+    in
     {
       packages = config.flake.overlays.default pkgs pkgs;
     };

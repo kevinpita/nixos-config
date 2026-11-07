@@ -2,6 +2,7 @@
 {
   flake.modules.nixos = {
     workstation.imports = with config.flake.modules.nixos; [
+      ai-desktop
       aws
       base
       browsers
