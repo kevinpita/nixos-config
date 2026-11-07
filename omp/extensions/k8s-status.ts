@@ -29,7 +29,7 @@ export default function (pi) {
     const current = mtimes();
     if (current === seen) return;
     seen = current;
-    // "z-" sorts this status after the provider and tps statuses.
+    // "z-" sorts this status after the provider status.
     ctx.ui.setStatus("z-k8s", resolve());
   };
   pi.on("session_start", async (_event, ctx) => {

@@ -40,8 +40,9 @@ in
           "bedrock-mantle"
         ];
       };
-      # The default preset with `status` after `model`, where the
-      # provider-status extension renders the active provider id.
+      # The default preset with `status` and `token_rate` after `model`.
+      # The provider-status extension renders the active provider id in
+      # `status`.
       ompStatusLine = (pkgs.formats.yaml { }).generate "omp-status-line.yml" {
         statusLine = {
           preset = "custom";
@@ -50,6 +51,7 @@ in
             "vim"
             "model"
             "status"
+            "token_rate"
             "mode"
             "collab"
             "stream"
@@ -353,36 +355,6 @@ in
                 desktopThemes.ompTheme (desktopThemes.paletteOf "gruvbox")
               )
             );
-
-            # Throughput on the status line. omp records per-message timing
-            # (duration, ttft) but never shows a rate, and has no model-change
-            # event, so derive it here: last response, then the session mean,
-            # both excluding first-token latency.
-            ".omp/agent/extensions/speed-status.ts".text = ''
-              export default function (pi) {
-                let key = "";
-                let output = 0;
-                let gen = 0;
-                pi.on("message_end", async (event, ctx) => {
-                  if (ctx.agent?.kind !== "main") return;
-                  const message = event.message;
-                  if (message?.role !== "assistant") return;
-                  const tokens = message.usage?.output ?? 0;
-                  const decode = ((message.duration ?? 0) - (message.ttft ?? 0)) / 1000;
-                  if (!tokens || decode <= 0) return;
-                  if (ctx.agent.id !== key) {
-                    key = ctx.agent.id;
-                    output = 0;
-                    gen = 0;
-                  }
-                  output += tokens;
-                  gen += decode;
-                  const last = Math.round(tokens / decode);
-                  const mean = Math.round(output / gen);
-                  ctx.ui.setStatus("tps", `''${last} t/s (avg ''${mean})`);
-                });
-              }
-            '';
 
             # NaN cluster (https://nan.builders/docs), OpenAI-compatible.
             # The key stays out of the store and the repo: omp reads it from
