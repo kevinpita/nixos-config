@@ -44,6 +44,7 @@ task:
 symbolPreset: nerd
 composer:
   shape: band
+  tokenRate: true
 theme:
   dark: desktop
 setupVersion: 3
