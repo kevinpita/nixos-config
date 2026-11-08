@@ -56,7 +56,7 @@ A question, an explain request, or a check request gets an answer or a report, n
 - Use Conventional Commit messages with a subject line only, no body.
 - Commit only the changes that you made for the current task. Leave other changes in the working tree out of the commit.
 - Do not push until the user asks you to.
-- In a repo that uses pull requests, never commit on `main` or a release branch. Create a feature branch. "Prepare" means local only.
+- Before committing, check the repo's instructions and remote branches with `git ls-remote --heads origin`. Ignore bot branches such as `dependabot/*` and `renovate/*`. If there are no feature branches and no instruction requires them, commit on the current branch, including `main`. If feature branches exist, check the repo's workflow before choosing a branch. Occasional PRs alone do not require a feature branch. If the repo requires a PR workflow, create a feature branch instead of committing on `main` or a release branch. "Prepare" means local only.
 - Do not edit PR titles or bodies, and do not post comments, until the user asks you to.
 - In a branch stack, commit each fix on the branch that introduced the code.
 - Before you say "not pushed", or before you amend, squash, or rebase, check `git status -sb` and the remote branch.
