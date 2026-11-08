@@ -20,7 +20,6 @@
           alsa.enable = true;
           alsa.support32Bit = true;
           pulse.enable = true;
-          jack.enable = true;
           # Keep Bluetooth headsets on A2DP when an app opens the mic.
           wireplumber.extraConfig."51-bluetooth-a2dp"."wireplumber.settings" = {
             "bluetooth.autoswitch-to-headset-profile" = false;
@@ -40,6 +39,8 @@
       home-manager.users.${username} = {
         fonts.fontconfig.enable = true;
         home.packages = with pkgs; [
+          pipewire.jack
+
           # Clipboard
           wl-clipboard
 
