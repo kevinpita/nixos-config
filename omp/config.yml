@@ -17,6 +17,71 @@ modelRoles:
   image: openai-codex/gpt-image-2
   judge: "@smol"
   security: zai/glm-5.3:high
+modelPresets:
+  "quick (terra)":
+    defaultThinkingLevel: high
+    modelRoles:
+      default: openai-codex/gpt-6.1-terra:high
+      smol: openai-codex/gpt-6.1-terra:low
+      slow: openai-codex/gpt-6.1-terra:xhigh
+      vision: openai-codex/gpt-6.1-terra:high
+      plan: openai-codex/gpt-6.1-terra:high
+      task: openai-codex/gpt-6.1-terra:high
+      advisor: openai-codex/gpt-6.1-terra:high
+      security: nan/deepseek-v4-flash:high
+      commit: "@smol"
+      tiny: "@smol"
+      memory: "@smol"
+      judge: "@smol"
+      image: openai-codex/gpt-image-2
+  "code (opus)":
+    defaultThinkingLevel: medium
+    modelRoles:
+      default: anthropic/claude-opus-5-5:medium
+      smol: anthropic/claude-opus-5-5:low
+      slow: anthropic/claude-opus-5-5:xhigh
+      vision: anthropic/claude-opus-5-5:medium
+      plan: anthropic/claude-opus-5-5:xhigh
+      task: anthropic/claude-opus-5-5:medium
+      advisor: openai-codex/gpt-6.1-sol:medium
+      security: nan/deepseek-v4-flash:high
+      commit: "@smol"
+      tiny: "@smol"
+      memory: "@smol"
+      judge: "@smol"
+      image: openai-codex/gpt-image-2
+  "think (astra)":
+    defaultThinkingLevel: high
+    modelRoles:
+      default: openai-codex/gpt-6-astra:high
+      smol: openai-codex/gpt-6.1-sol:medium
+      slow: openai-codex/gpt-6-astra:xhigh
+      vision: openai-codex/gpt-6.1-sol:medium
+      plan: openai-codex/gpt-6-astra:xhigh
+      task: openai-codex/gpt-6-astra:high
+      advisor: openai-codex/gpt-6.1-sol:medium
+      security: nan/deepseek-v4-flash:high
+      commit: "@smol"
+      tiny: "@smol"
+      memory: "@smol"
+      judge: "@smol"
+      image: openai-codex/gpt-image-2
+  "cyber (deepseek)":
+    defaultThinkingLevel: high
+    modelRoles:
+      default: nan/deepseek-v4-flash:high
+      smol: nan/deepseek-v4-flash:max
+      slow: nan/deepseek-v4-flash:max
+      vision: nan/glm5.3-flash:xhigh
+      plan: nan/deepseek-v4-flash:max
+      task: nan/deepseek-v4-flash:max
+      advisor: nan/glm5.3-flash:xhigh
+      security: nan/glm5.3-flash:xhigh
+      commit: "@smol"
+      tiny: "@smol"
+      memory: "@smol"
+      judge: "@smol"
+      image: openai-codex/gpt-image-2
 providers:
   maxInFlightRequests:
     nan: 10
