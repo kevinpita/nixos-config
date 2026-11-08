@@ -117,6 +117,18 @@ in
         { cat "$scripts/package.json"; printf '\0'; cat "$scripts/bun.lock"; } \
           | sha256sum | cut -d' ' -f1 > "$scripts/node_modules/.poteto-mode-tools-install-key"
       '';
+      plannotatorPlugin = pkgs.buildNpmPackage {
+        pname = "omp-plannotator";
+        version = "0.28.55";
+        src = ../omp/plannotator;
+        npmDepsHash = "sha256-i8pISckhDSAUnhyKotdePLeIlmyEZs/B+pSas8M4Zlk=";
+        npmFlags = [ "--legacy-peer-deps" ];
+        dontNpmBuild = true;
+        installPhase = ''
+          mkdir -p "$out"
+          cp -r node_modules "$out/"
+        '';
+      };
       # `omp --<name>` adds the plugin directory that omp.optInPluginDirs.<name>
       # names for that run. The wrapper removes the flag before omp parses it.
       # Arguments after `--` are message text and stay unchanged.
@@ -164,7 +176,7 @@ in
             ${
               lib.optionalString (config.omp.optInPluginDirs != { }) "--run ${lib.escapeShellArg ompOptInPlugins}"
             } \
-            --add-flags "--plugin-dir ${pstackPlugin}"
+            --add-flags "--plugin-dir ${pstackPlugin} --extension ${plannotatorPlugin}/node_modules/@plannotator/pi-extension/index.ts"
         '';
       };
       # pstack ships its own bro skill.

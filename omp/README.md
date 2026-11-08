@@ -37,6 +37,10 @@ The extension uses the NaN dashboard's undocumented `https://cloud-api.nan.build
 
 The extension works with the auth broker. If the broker has no NaN report, omp fetches the quota locally with the configured key.
 
+## Plannotator
+
+OMP loads the pinned Plannotator extension in every session. Use `/plannotator-plan-mode` to review plans in a browser. The extension also provides code review and document annotation commands. Its npm dependencies are pinned in `plannotator/package-lock.json`.
+
 ## Logins
 
 One host can set `omp.authBroker.enable` to run `omp auth-broker serve` as a system service. That host keeps the logins in its `~/.omp/agent/agent.db` and refreshes the OAuth tokens. The broker listens only on `127.0.0.1:8765`, and Tailscale Serve publishes that port on the tailnet, so no other network can reach it. The wrapper on every other host sets `OMP_AUTH_BROKER_URL` to the MagicDNS name of the broker host, so omp on those hosts ignores its local logins. Sign in on the broker host. All hosts read the shared bearer token from `~/.omp/auth-broker.token`, which sops-nix writes from `omp-auth-broker-token` in the `nixos-secrets` file `secrets/common.yaml`.

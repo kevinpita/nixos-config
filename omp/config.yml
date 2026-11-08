@@ -1,24 +1,24 @@
-defaultThinkingLevel: medium
+defaultThinkingLevel: high
 modelProviderOrder:
   - anthropic
   - openai-codex
   - zai
 modelRoles:
-  default: anthropic/claude-opus-5-5:medium
-  smol: anthropic/claude-opus-5-5:low
-  slow: anthropic/claude-opus-5-5:xhigh
-  vision: openai-codex/gpt-6.1-sol:xhigh
-  plan: anthropic/claude-opus-5-5:xhigh
+  default: openai-codex/gpt-6.1-terra:high
+  smol: openai-codex/gpt-6.1-terra:low
+  slow: openai-codex/gpt-6.1-terra:xhigh
+  vision: openai-codex/gpt-6.1-terra:high
+  plan: openai-codex/gpt-6.1-terra:high
   commit: "@smol"
   tiny: "@smol"
   memory: "@smol"
-  task: anthropic/claude-opus-5-5:medium
-  advisor: openai-codex/gpt-6.1-sol:xhigh
+  task: openai-codex/gpt-6.1-terra:high
+  advisor: openai-codex/gpt-6.1-terra:high
   image: openai-codex/gpt-image-2
   judge: "@smol"
-  security: zai/glm-5.3:high
+  security: nan/deepseek-v4-flash:high
 modelPresets:
-  "quick (terra)":
+  quick (terra):
     defaultThinkingLevel: high
     modelRoles:
       default: openai-codex/gpt-6.1-terra:high
@@ -34,7 +34,7 @@ modelPresets:
       memory: "@smol"
       judge: "@smol"
       image: openai-codex/gpt-image-2
-  "code (opus)":
+  code (opus):
     defaultThinkingLevel: medium
     modelRoles:
       default: anthropic/claude-opus-5-5:medium
@@ -50,7 +50,7 @@ modelPresets:
       memory: "@smol"
       judge: "@smol"
       image: openai-codex/gpt-image-2
-  "think (astra)":
+  think (astra):
     defaultThinkingLevel: high
     modelRoles:
       default: openai-codex/gpt-6-astra:high
@@ -66,7 +66,7 @@ modelPresets:
       memory: "@smol"
       judge: "@smol"
       image: openai-codex/gpt-image-2
-  "cyber (deepseek)":
+  cyber (deepseek):
     defaultThinkingLevel: high
     modelRoles:
       default: nan/deepseek-v4-flash:high
