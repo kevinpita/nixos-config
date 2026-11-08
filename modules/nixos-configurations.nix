@@ -21,8 +21,6 @@ let
 
     inputs.lazyrsync-nix.overlays.default
 
-    inputs.tuicr-nix.overlays.default
-
     inputs.ink-nix.overlays.default
 
     inputs.forklab.overlays.default

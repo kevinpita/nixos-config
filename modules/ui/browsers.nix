@@ -8,10 +8,15 @@
       ...
     }:
     let
-      inherit ((import inputs.nixpkgs-brave {
-          inherit (pkgs.stdenv.hostPlatform) system;
-          config.allowUnfree = true;
-        })) brave;
+      inherit
+        (
+          (import inputs.nixpkgs-brave {
+            inherit (pkgs.stdenv.hostPlatform) system;
+            config.allowUnfree = true;
+          })
+        )
+        brave
+        ;
       zen = inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default;
       zenOnlyDomains = [
         "youtube.com"

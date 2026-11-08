@@ -129,11 +129,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    tuicr-nix = {
-      url = "github:kevinpita/tuicr-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     ilofan = {
       url = "github:kevinpita/ilofan";
       inputs.nixpkgs.follows = "nixpkgs";
