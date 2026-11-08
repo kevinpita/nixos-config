@@ -18,7 +18,6 @@
 
         # Database and messaging clients
         lazysql
-        mqttui
         postgresql
         pgbot
 
