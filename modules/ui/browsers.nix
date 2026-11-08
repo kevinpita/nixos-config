@@ -17,8 +17,10 @@
         )
         brave
         ;
-      zen = inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default;
-      zenOnlyDomains = [
+      unstableBrave = builtins.tryEval (
+        if pkgs ? brave && pkgs.brave ? version then pkgs.brave.version else null
+      );
+      braveOnlyDomains = [
         "youtube.com"
         "x.com"
         "forocoches.com"
@@ -31,10 +33,9 @@
           coreutils
           dux-shell
           google-chrome
-          zen
         ];
         text = ''
-          zen_domains=(${lib.concatStringsSep " " (map (d: "\"${d}\"") zenOnlyDomains)})
+          brave_domains=(${lib.concatStringsSep " " (map (d: "\"${d}\"") braveOnlyDomains)})
 
           url="''${1:-}"
           host=""
@@ -54,9 +55,9 @@
           fi
 
           if [[ -n "$host" ]]; then
-            for d in "''${zen_domains[@]}"; do
+            for d in "''${brave_domains[@]}"; do
               if [[ "$host" == "$d" || "$host" == *".$d" ]]; then
-                exec zen-beta "$@"
+                exec brave "$@"
               fi
             done
           fi
@@ -68,7 +69,6 @@
           case "$mode" in
             chrome) exec google-chrome-stable "$@" ;;
             brave)  exec brave "$@" ;;
-            zen)    exec zen-beta "$@" ;;
           esac
 
           dow=$(date +%u)
@@ -76,17 +76,16 @@
           if (( dow >= 1 && dow <= 5 && 10#$hm >= 800 && 10#$hm < 1830 )); then
             # Work hours: ask, with Chrome preselected. Exit 1 = cancelled, 2 = shell down.
             status=0
-            choice=$(printf '%s\n' Chrome Brave Zen \
+            choice=$(printf '%s\n' Chrome Brave \
               | dms dmenu -p "Open with" --mesg "''${url:-new window}" \
                   --no-custom --select Chrome --format i --disable-history) || status=$?
             case "$status:$choice" in
               0:1) exec brave "$@" ;;
-              0:2) exec zen-beta "$@" ;;
               1:*) exit 0 ;;
               *)   exec google-chrome-stable "$@" ;;
             esac
           else
-            exec zen-beta "$@"
+            exec brave "$@"
           fi
         '';
       };
@@ -110,6 +109,16 @@
       };
     in
     {
+      assertions = [
+        {
+          assertion =
+            !unstableBrave.success
+            || unstableBrave.value == null
+            || lib.versionOlder unstableBrave.value brave.version;
+          message = "nixpkgs Brave has caught up with the pin. Review and remove nixpkgs-brave.";
+        }
+      ];
+
       programs.firefox.enable = true;
 
       home-manager.users.${username} = {
@@ -122,7 +131,6 @@
           brave
           chromium
           google-chrome
-          zen
         ];
 
         xdg.mimeApps = {

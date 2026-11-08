@@ -160,7 +160,7 @@ end
 hl.bind(mainMod .. " + SUPER_L", hl.dsp.exec_cmd("super-double-tap"), { release = true })
 hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd("uwsm app -- ghostty"))
 hl.bind(mainMod .. " + SHIFT + Return", toggle_scratch)
-hl.bind(mainMod .. " + B", hl.dsp.exec_cmd("uwsm app -- zen-beta"))
+hl.bind(mainMod .. " + B", hl.dsp.exec_cmd("uwsm app -- brave"))
 hl.bind(mainMod .. " + C", hl.dsp.exec_cmd("uwsm app -- google-chrome-stable --new-window about:blank"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd("uwsm app -- nautilus --new-window"))
 hl.bind(mainMod .. " + M", toggle_music)
