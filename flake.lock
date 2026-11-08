@@ -782,6 +782,22 @@
         "url": "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.zst"
       }
     },
+    "nixpkgs-brave": {
+      "locked": {
+        "lastModified": 1794163779,
+        "narHash": "sha256-QYb4xxOjLZeSWwXoQHUvmcIc1Bfx48YOSHB9fJ4w9zQ=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "4a6c457f7ee58f3aa2d6ff73515471d20fbca571",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "4a6c457f7ee58f3aa2d6ff73515471d20fbca571",
+        "type": "github"
+      }
+    },
     "nixpkgs-darwin-x64": {
       "locked": {
         "lastModified": 1786527240,
@@ -1003,6 +1019,7 @@
         "nixos-secrets": "nixos-secrets",
         "nixos-work": "nixos-work",
         "nixpkgs": "nixpkgs_5",
+        "nixpkgs-brave": "nixpkgs-brave",
         "nixpkgs-pgbot": "nixpkgs-pgbot",
         "oh-my-pi": "oh-my-pi",
         "plugins-lze": "plugins-lze",
@@ -1011,7 +1028,8 @@
         "sops-nix": "sops-nix",
         "treefmt-nix": "treefmt-nix_5",
         "tuicr-nix": "tuicr-nix",
-        "wrappers": "wrappers"
+        "wrappers": "wrappers",
+        "zen-browser": "zen-browser"
       }
     },
     "rust-overlay": {
@@ -1285,6 +1303,29 @@
       "original": {
         "owner": "BirdeeHub",
         "repo": "nix-wrapper-modules",
+        "type": "github"
+      }
+    },
+    "zen-browser": {
+      "inputs": {
+        "home-manager": [
+          "home-manager"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1794113319,
+        "narHash": "sha256-zQgtR/G5j0eZayjrb6fpBVmy1fkOGlCHyLxW4Tboy2M=",
+        "owner": "0xc000022070",
+        "repo": "zen-browser-flake",
+        "rev": "5f45f55b9f6f2de78504a95b372e13951793be3a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "0xc000022070",
+        "repo": "zen-browser-flake",
         "type": "github"
       }
     }

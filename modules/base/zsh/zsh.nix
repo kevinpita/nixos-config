@@ -154,6 +154,7 @@
                 case "$1" in
                   chrome) echo chrome > ~/.cache/browser-mode ;;
                   brave)  echo brave  > ~/.cache/browser-mode ;;
+                  zen)    echo zen    > ~/.cache/browser-mode ;;
                   auto)   rm -f ~/.cache/browser-mode ;;
                   status|"")
                     if [[ -r ~/.cache/browser-mode ]]; then
@@ -162,7 +163,7 @@
                       echo "mode: auto"
                     fi
                     ;;
-                  *) echo "usage: browser [chrome|brave|auto|status]" ;;
+                  *) echo "usage: browser [chrome|brave|zen|auto|status]" ;;
                 esac
               }
             ''

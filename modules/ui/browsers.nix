@@ -2,12 +2,18 @@
   flake.modules.nixos.browsers =
     {
       lib,
+      inputs,
       pkgs,
       username,
       ...
     }:
     let
-      braveOnlyDomains = [
+      inherit ((import inputs.nixpkgs-brave {
+          inherit (pkgs.stdenv.hostPlatform) system;
+          config.allowUnfree = true;
+        })) brave;
+      zen = inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default;
+      zenOnlyDomains = [
         "youtube.com"
         "x.com"
         "forocoches.com"
@@ -20,9 +26,10 @@
           coreutils
           dux-shell
           google-chrome
+          zen
         ];
         text = ''
-          brave_domains=(${lib.concatStringsSep " " (map (d: "\"${d}\"") braveOnlyDomains)})
+          zen_domains=(${lib.concatStringsSep " " (map (d: "\"${d}\"") zenOnlyDomains)})
 
           url="''${1:-}"
           host=""
@@ -42,9 +49,9 @@
           fi
 
           if [[ -n "$host" ]]; then
-            for d in "''${brave_domains[@]}"; do
+            for d in "''${zen_domains[@]}"; do
               if [[ "$host" == "$d" || "$host" == *".$d" ]]; then
-                exec brave "$@"
+                exec zen-beta "$@"
               fi
             done
           fi
@@ -56,6 +63,7 @@
           case "$mode" in
             chrome) exec google-chrome-stable "$@" ;;
             brave)  exec brave "$@" ;;
+            zen)    exec zen-beta "$@" ;;
           esac
 
           dow=$(date +%u)
@@ -63,16 +71,17 @@
           if (( dow >= 1 && dow <= 5 && 10#$hm >= 800 && 10#$hm < 1830 )); then
             # Work hours: ask, with Chrome preselected. Exit 1 = cancelled, 2 = shell down.
             status=0
-            choice=$(printf '%s\n' Chrome Brave \
+            choice=$(printf '%s\n' Chrome Brave Zen \
               | dms dmenu -p "Open with" --mesg "''${url:-new window}" \
                   --no-custom --select Chrome --format i --disable-history) || status=$?
             case "$status:$choice" in
               0:1) exec brave "$@" ;;
+              0:2) exec zen-beta "$@" ;;
               1:*) exit 0 ;;
               *)   exec google-chrome-stable "$@" ;;
             esac
           else
-            exec brave "$@"
+            exec zen-beta "$@"
           fi
         '';
       };
@@ -108,6 +117,7 @@
           brave
           chromium
           google-chrome
+          zen
         ];
 
         xdg.mimeApps = {
