@@ -2,6 +2,7 @@
   flake.modules.nixos.base = { pkgs, username, ... }: {
     environment.systemPackages = with pkgs; [
       devenv
+      dix
       nix-output-monitor
       nvd
     ];
