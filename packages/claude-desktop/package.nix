@@ -59,12 +59,12 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "claude-desktop";
-  version = "4.23118.0";
+  version = "4.23118.1";
 
   # Newest entry in https://downloads.claude.ai/claude-desktop/apt/stable/dists/stable/main/binary-amd64/Packages
   src = fetchurl {
     url = "https://downloads.claude.ai/claude-desktop/apt/stable/pool/main/c/claude-desktop/claude-desktop_${finalAttrs.version}_amd64.deb";
-    hash = "sha256-GtmW6MqrBcmzdGRgUcQMtrudhPNxdW8VuNNyiJdRWpc=";
+    hash = "sha256-sJzN1ys4kWyWN9SFSNtw53xCXrLgm7RnRlQJ0v+dKHo=";
   };
 
   strictDeps = true;

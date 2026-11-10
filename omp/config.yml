@@ -34,6 +34,22 @@ modelPresets:
       memory: "@smol"
       judge: "@smol"
       image: openai-codex/gpt-image-2
+  think (fable):
+    defaultThinkingLevel: medium
+    modelRoles:
+      default: anthropic/claude-fable-5-2:medium
+      smol: anthropic/claude-opus-5-5:medium
+      slow: anthropic/claude-fable-5-2:high
+      vision: anthropic/claude-fable-5-2:medium
+      plan: anthropic/claude-fable-5-2:high
+      task: anthropic/claude-fable-5-2:medium
+      advisor: openai-codex/gpt-6.1-terra:high
+      security: nan/deepseek-v4-flash:high
+      commit: "@smol"
+      tiny: "@smol"
+      memory: "@smol"
+      judge: "@smol"
+      image: openai-codex/gpt-image-2
   code (opus):
     defaultThinkingLevel: medium
     modelRoles:
