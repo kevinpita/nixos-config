@@ -405,6 +405,9 @@ in
                     (nanModel "deepseek-v4-flash" "DeepSeek V4 Flash (NaN)" { })
                     # The id is not in the catalog, so name the tokenizer.
                     (nanModel "glm5.3-flash" "GLM 5.3 Flash (NaN)" { tokenizer = "glm5"; })
+                    (nanModel "glm5.3" "GLM 5.3 (NaN)" { tokenizer = "glm5"; })
+                    (nanModel "kimi-k3.1-pro" "Kimi K3.1 Pro (NaN)" { })
+                    (nanModel "deepseek-v4-pro" "DeepSeek V4 Pro (NaN)" { input = [ "text" ]; })
                   ];
                 };
             };
