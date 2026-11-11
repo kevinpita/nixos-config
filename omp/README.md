@@ -29,6 +29,12 @@ A session model switch does not change explicit worker assignments. Role aliases
 
 Keep providers available for manual selection when only their default routes change. Provider blocks belong in `modules/omp.nix`, separate from role assignments. Custom providers go into the generated `~/.omp/agent/models.yml`. Their API keys stay outside the repository: the `nan` provider reads its key from `~/.config/nan/api-key`, which sops-nix writes from `nan-key` in the `nixos-secrets` file `secrets/common.yaml`.
 
+## Command approval
+
+`modules/omp.nix` generates a `bash.patterns` overlay. omp asks before a `kubectl` or `helm` command that changes a cluster and before `git push`. A headless subagent cannot answer, so it gets a refusal. Change the rules there, not in `config.yml`, so a settings edit cannot remove them.
+
+The rules are an approval policy, not containment. They do not cover `eval` or a verb that is not listed, and a command that only contains the text of a listed command also asks.
+
 ## NaN usage
 
 `extensions/nan-usage.ts` adds NaN quota reports to `/usage` and `omp usage`. It reads the `nan` provider's model IDs and API-key reference from `~/.omp/agent/models.yml`, so inference and usage keep the same configuration.

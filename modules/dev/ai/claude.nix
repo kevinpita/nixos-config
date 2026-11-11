@@ -16,7 +16,9 @@
         { config, lib, ... }:
         {
           home.file = {
-            ".claude/CLAUDE.md".source = ../../../agents/AGENTS.md;
+            # Claude Code reads one instruction file, so it gets both as one.
+            ".claude/CLAUDE.md".text =
+              builtins.readFile ../../../agents/AGENTS.md + "\n" + builtins.readFile ../../../agents/RULES.md;
             # Reports Claude Code agent state to herdr. Same file that
             # `herdr integration install claude` writes, pinned to the package.
             # claude-settings.json runs it from the SessionStart hook.
