@@ -961,11 +961,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1794366820,
-        "narHash": "sha256-WHubUaebx5P2/FbRtRFnSaE2CKhxBSrqQosjy0NLHiE=",
+        "lastModified": 1794401756,
+        "narHash": "sha256-jrDh3Tci4NCAZVjf7d+niSn0K13Tzd+T19NsgfLZ18k=",
         "owner": "can1357",
         "repo": "oh-my-pi",
-        "rev": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
+        "rev": "b9b3cc4d69962e492197178155dd95216cd9c21b",
         "type": "github"
       },
       "original": {
@@ -1009,11 +1009,11 @@
     "pstack": {
       "flake": false,
       "locked": {
-        "lastModified": 1794356398,
-        "narHash": "sha256-UsnW8ChyJMZuF4OlFr1V1OJPuFUKN3g8JfjqyU33Cmc=",
+        "lastModified": 1794399342,
+        "narHash": "sha256-GLSoCxktgj71yW0MNAFhfZSJNsRlqqOGpZOCjrRSZ9A=",
         "owner": "michael-denyer",
         "repo": "pstack-claude",
-        "rev": "bc09365fe61c725c486ba95157fc4048bf8a0b99",
+        "rev": "36f43364d9198e951f2b739bfb007eb747f834b7",
         "type": "github"
       },
       "original": {
@@ -1281,11 +1281,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794344362,
-        "narHash": "sha256-UZB0RUCb35IzpsXWn1VN4509aY5wJfZ5/UdW0Mi6EDU=",
+        "lastModified": 1794397181,
+        "narHash": "sha256-wHdMM1K4TYrGKjzvb67RfBr57Q4w8LwxlxPd2nEWGuM=",
         "owner": "BirdeeHub",
         "repo": "nix-wrapper-modules",
-        "rev": "de1a7d3c71624460ab418198611c49970defbcc7",
+        "rev": "c36fa7feb82dca492342f61da4f7bb10a48f0764",
         "type": "github"
       },
       "original": {
