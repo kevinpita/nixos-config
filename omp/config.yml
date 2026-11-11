@@ -2,7 +2,6 @@ defaultThinkingLevel: high
 modelProviderOrder:
   - anthropic
   - openai-codex
-  - zai
 modelRoles:
   default: openai-codex/gpt-6.1-terra:high
   smol: openai-codex/gpt-6.1-terra:low
@@ -106,16 +105,12 @@ retry:
   fallbackChains:
     default:
       - openai-codex/gpt-6.1-sol
-      - zai/glm-5.3
     task:
       - openai-codex/gpt-6.1-sol
-      - zai/glm-5.3
     advisor:
       - anthropic/claude-opus-5-5
-      - zai/glm-5.3
     reviewer:
       - anthropic/claude-opus-5-5
-      - zai/glm-5.3
 task:
   enableEffort: false
   agentModelOverrides:

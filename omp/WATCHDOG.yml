@@ -2,9 +2,6 @@ advisors:
   - name: GPT-SOL
     enabled: true
     model: openai-codex/gpt-6.1-sol:high
-  - name: GLM-5.3
-    enabled: false
-    model: zai/glm-5.3:high
   - name: DeepSeek V4 Flash
     enabled: false
     model: nan/deepseek-v4-flash:high
