@@ -9,8 +9,6 @@
     let
       cfg = config.selfhosted.web;
       grafanaDomain = "grafana.${cfg.domain}";
-      argoDomain = "argo.${cfg.domain}";
-      chartVersion = "10.8.2";
       ingressChartVersion = "41.5.0";
       hostIPv4Addresses = lib.concatMap (
         interface: map (address: address.address) interface.ipv4.addresses
@@ -84,29 +82,6 @@
                   reverse_proxy 127.0.0.1:${toString config.services.grafana.settings.server.http_port}
                 }
 
-                @argo host ${argoDomain}
-                handle @argo {
-                  @grpc header_regexp Content-Type "^application/grpc([+;]|$)"
-                  reverse_proxy @grpc {
-                    dynamic a argocd-server.argocd.svc.cluster.local 80 {
-                      resolvers 10.43.0.10:53
-                      versions ipv4
-                    }
-                    transport http {
-                      versions h2c 2
-                    }
-                  }
-                  reverse_proxy {
-                    dynamic a argocd-server.argocd.svc.cluster.local 80 {
-                      resolvers 10.43.0.10:53
-                      versions ipv4
-                    }
-                    transport http {
-                      versions 1.1
-                    }
-                  }
-                }
-
                 handle {
                   reverse_proxy {
                     dynamic a private-ingress.ingress.svc.cluster.local 80 {
@@ -141,21 +116,6 @@
             enforce_domain = true;
           };
           security.cookie_secure = true;
-        };
-
-        services.k3s.autoDeployCharts.argocd = {
-          name = "argo-cd";
-          repo = "https://argoproj.github.io/argo-helm";
-          version = chartVersion;
-          hash = "sha256-lvtasol+PIdYzY/vQJpGZo7xoZpTgRaxErBpFhSkjyA=";
-          targetNamespace = "argocd";
-          createNamespace = true;
-          extraFieldDefinitions.spec.version = chartVersion;
-          values = {
-            global.domain = argoDomain;
-            configs.params."server.insecure" = true;
-            server.service.type = "ClusterIP";
-          };
         };
 
         services.k3s.autoDeployCharts.private-ingress = {

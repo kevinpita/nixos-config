@@ -68,7 +68,6 @@
       );
 
       environment.systemPackages = [
-        pkgs.argocd
         fluxcd
         pkgs.helm-tui
         pkgs.k9s
