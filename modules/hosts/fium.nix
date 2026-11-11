@@ -4,7 +4,6 @@ let
     hermes-vm
     ilofan
     kubernetes-server
-    moshi
     nix-cache-server
     selfhosted
     selfhosted-secrets
@@ -20,7 +19,6 @@ in
         hermes-vm
         ilofan
         kubernetes-server
-        moshi
         nix-cache-server
         selfhosted
         selfhosted-secrets
