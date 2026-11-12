@@ -808,22 +808,6 @@
         "url": "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.zst"
       }
     },
-    "nixpkgs-brave": {
-      "locked": {
-        "lastModified": 1794163779,
-        "narHash": "sha256-QYb4xxOjLZeSWwXoQHUvmcIc1Bfx48YOSHB9fJ4w9zQ=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "4a6c457f7ee58f3aa2d6ff73515471d20fbca571",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "4a6c457f7ee58f3aa2d6ff73515471d20fbca571",
-        "type": "github"
-      }
-    },
     "nixpkgs-darwin-x64": {
       "locked": {
         "lastModified": 1786527240,
@@ -1045,7 +1029,6 @@
         "nixos-secrets": "nixos-secrets",
         "nixos-work": "nixos-work",
         "nixpkgs": "nixpkgs_5",
-        "nixpkgs-brave": "nixpkgs-brave",
         "nixpkgs-pgbot": "nixpkgs-pgbot",
         "oh-my-pi": "oh-my-pi",
         "plugins-lze": "plugins-lze",

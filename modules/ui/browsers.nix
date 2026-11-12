@@ -2,24 +2,11 @@
   flake.modules.nixos.browsers =
     {
       lib,
-      inputs,
       pkgs,
       username,
       ...
     }:
     let
-      inherit
-        (
-          (import inputs.nixpkgs-brave {
-            inherit (pkgs.stdenv.hostPlatform) system;
-            config.allowUnfree = true;
-          })
-        )
-        brave
-        ;
-      unstableBrave = builtins.tryEval (
-        if pkgs ? brave && pkgs.brave ? version then pkgs.brave.version else null
-      );
       braveOnlyDomains = [
         "youtube.com"
         "x.com"
@@ -109,16 +96,6 @@
       };
     in
     {
-      assertions = [
-        {
-          assertion =
-            !unstableBrave.success
-            || unstableBrave.value == null
-            || lib.versionOlder unstableBrave.value brave.version;
-          message = "nixpkgs Brave has caught up with the pin. Review and remove nixpkgs-brave.";
-        }
-      ];
-
       programs.firefox.enable = true;
 
       home-manager.users.${username} = {
