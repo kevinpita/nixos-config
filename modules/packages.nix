@@ -3,6 +3,8 @@
   flake.overlays.default = final: _prev: {
     claude-desktop = final.callPackage ../packages/claude-desktop/package.nix { };
     exrpd = final.callPackage ../packages/exrpd/package.nix { };
+    herdr-app = (inputs.herdr-nix.overlays.default final _prev).herdr;
+    inherit ((inputs.herdr-nix.overlays.default final _prev)) herdr-core;
     mcp-reva = final.callPackage ../packages/mcp-reva/package.nix { };
     open-code-review = final.callPackage ../packages/open-code-review/package.nix { };
     plymouth-nixos-grub = final.callPackage ../packages/plymouth-nixos-grub/package.nix {

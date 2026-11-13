@@ -1,4 +1,4 @@
-# The herdr TUI (`herdr`) from nixpkgs. omp.nix adds the omp integration.
+# The TUI and herdr-core run on both roles; the desktop app runs on workstations.
 let
   herdr =
     {
@@ -11,6 +11,8 @@ let
       repo = config.programs.nh.flake;
     in
     {
+      environment.systemPackages = [ pkgs.herdr-core ];
+
       home-manager.users.${username} =
         { config, lib, ... }:
         {
@@ -43,6 +45,16 @@ let
     };
 in
 {
-  flake.modules.nixos.server = herdr;
-  flake.modules.nixos.workstation = herdr;
+  flake.modules.nixos.server =
+    { username, ... }:
+    {
+      imports = [ herdr ];
+      users.users.${username}.linger = true;
+    };
+  flake.modules.nixos.workstation =
+    { pkgs, ... }:
+    {
+      imports = [ herdr ];
+      environment.systemPackages = [ pkgs.herdr-app ];
+    };
 }

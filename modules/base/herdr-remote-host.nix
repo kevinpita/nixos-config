@@ -150,6 +150,26 @@
             herdr machine list --json
             cp "$machinesPath" "$out"
           '';
+
+      addCoreMachines = pkgs.writeShellApplication {
+        name = "herdr-core-add-machines";
+        runtimeInputs = with pkgs; [
+          herdr-core
+          jq
+          openssh
+        ];
+        text = ''
+          known=$(hc machine ls --json)
+          failed=0
+          for name in ${lib.escapeShellArgs servers}; do
+            if jq -e --arg name "$name" '.machines[] | select(.name == $name)' <<<"$known" >/dev/null; then
+              continue
+            fi
+            hc machine add "$name" --name "$name" </dev/null || failed=1
+          done
+          exit "$failed"
+        '';
+      };
     in
     {
       home-manager.users.${username} =
@@ -161,6 +181,20 @@
           });
 
           home.file."${config.xdg.stateHome}/herdr/client/endpoints.json".source = herdrMachines;
+
+          systemd.user.services.herdr-core-machines = {
+            Unit = {
+              Description = "Add servers to herdr-core";
+              StartLimitIntervalSec = 0;
+            };
+            Service = {
+              Type = "oneshot";
+              ExecStart = lib.getExe addCoreMachines;
+              Restart = "on-failure";
+              RestartSec = "5min";
+            };
+            Install.WantedBy = [ "default.target" ];
+          };
         };
     };
 }
