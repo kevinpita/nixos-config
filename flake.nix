@@ -82,6 +82,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    herdr-lazygit = {
+      url = "github:kevinpita/herdr-lazygit";
+      flake = false;
+    };
+
     bast-nix = {
       url = "github:kevinpita/bast-nix";
       inputs.nixpkgs.follows = "nixpkgs";

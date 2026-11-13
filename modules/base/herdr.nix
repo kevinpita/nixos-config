@@ -1,3 +1,4 @@
+{ inputs, ... }:
 # The TUI and herdr-core run on both roles; the desktop app runs on workstations.
 let
   herdr =
@@ -52,9 +53,50 @@ in
       users.users.${username}.linger = true;
     };
   flake.modules.nixos.workstation =
-    { pkgs, ... }:
+    { pkgs, username, ... }:
     {
       imports = [ herdr ];
       environment.systemPackages = [ pkgs.herdr-app ];
+
+      home-manager.users.${username} =
+        { config, lib, ... }:
+        let
+          keys = "${config.xdg.configHome}/herdr-app/keys.json";
+          mergeKeys = pkgs.writeShellApplication {
+            name = "herdr-lazygit-keys";
+            runtimeInputs = [
+              pkgs.coreutils
+              pkgs.jq
+            ];
+            text = builtins.readFile ./herdr-lazygit-keys.sh;
+          };
+        in
+        {
+          xdg.configFile =
+            lib.genAttrs
+              [
+                "herdr-app/mods/lazygit-popup/main.js"
+                "herdr-app/mods/lazygit-popup/mod.json"
+              ]
+              (name: {
+                source = "${inputs.herdr-lazygit}/mods/lazygit-popup/${builtins.baseNameOf name}";
+                force = true;
+              });
+
+          systemd.user.services.herdr-lazygit-keys = {
+            Unit.Description = "Merge the lazygit mod shortcut into Herdr";
+            Service = {
+              Type = "oneshot";
+              ExecStart = "${lib.getExe mergeKeys} ${keys} ${inputs.herdr-lazygit}/keys.json";
+            };
+            Install.WantedBy = [ "default.target" ];
+          };
+
+          systemd.user.paths.herdr-lazygit-keys = {
+            Unit.Description = "Watch Herdr shortcuts for the lazygit mod";
+            Path.PathChanged = keys;
+            Install.WantedBy = [ "default.target" ];
+          };
+        };
     };
 }

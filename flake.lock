@@ -495,6 +495,22 @@
         "type": "github"
       }
     },
+    "herdr-lazygit": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794580909,
+        "narHash": "sha256-1gVaVxubY2aXZU6mDhnaEzwRmTovrYfigG8iSKBJaS0=",
+        "owner": "kevinpita",
+        "repo": "herdr-lazygit",
+        "rev": "8aef1927684a8d9a552ff2b826f9810056b2681c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kevinpita",
+        "repo": "herdr-lazygit",
+        "type": "github"
+      }
+    },
     "herdr-nix": {
       "inputs": {
         "flake-utils": "flake-utils_2",
@@ -1055,6 +1071,7 @@
         "dux-greeter": "dux-greeter",
         "flake-parts": "flake-parts_2",
         "forklab": "forklab",
+        "herdr-lazygit": "herdr-lazygit",
         "herdr-nix": "herdr-nix",
         "home-manager": "home-manager_2",
         "ilofan": "ilofan",

@@ -53,6 +53,8 @@ nix build .#installer-iso    # build the installation ISO
 
 Servers deploy `main` automatically with [Comin](modules/services/comin.nix). The cache host updates the flake inputs daily and pushes the lock only when every workstation builds. See [Applying changes](modules/README.md#applying-changes).
 
+Workstations install [herdr-lazygit](https://github.com/kevinpita/herdr-lazygit) as a pinned Herdr desktop mod. A user service merges its shortcut into Herdr's writable key file after Herdr creates it and when it changes. Other bindings stay user-managed.
+
 ## Documentation
 
 - [Install a machine](INSTALL.md): new hosts, reinstalls, secrets, and first-boot setup.
