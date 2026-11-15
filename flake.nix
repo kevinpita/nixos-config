@@ -132,6 +132,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    whisp-nix = {
+      url = "github:kevinpita/whisp-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     ilofan = {
       url = "github:kevinpita/ilofan";
       inputs.nixpkgs.follows = "nixpkgs";

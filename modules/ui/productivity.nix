@@ -7,6 +7,7 @@
           pkgs.heynote
           pkgs.obsidian
           pkgs.sioyek
+          pkgs.whisp
         ];
 
         xdg.mimeApps.defaultApplications = {
