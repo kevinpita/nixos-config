@@ -55,6 +55,8 @@ One host can set `omp.authBroker.enable` to run `omp auth-broker serve` as a sys
 
 Change `modules/omp.nix` for the package, wrapper settings that runtime edits must not override, or which files are installed. Change this folder for the content of those files. The `oh-my-pi` flake input provides omp. The `pstack` input pins the pstack plugin that omp loads.
 
+The package applies [upstream PR #19201](https://github.com/can1357/oh-my-pi/pull/19201) for `/fork pane` and `/fork tab` in Herdr Desktop and Core. Remove the patch when the pinned upstream version includes the fix.
+
 ## Applying changes
 
 Run `just switch` from the repository root to deploy Nix-managed changes, then restart omp to load them. Edit the source here rather than linked files under `~/.omp/agent/`.

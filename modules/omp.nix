@@ -150,9 +150,18 @@ in
       # Upstream's release profile uses fat LTO with one codegen unit, which
       # links pi-natives on a single core. withFatLto = false switches the
       # native Rust build to thin LTO with 16 codegen units.
-      ompBasePackage = inputs.oh-my-pi.packages.${system}.default.override {
-        withFatLto = false;
-      };
+      ompBasePackage =
+        (inputs.oh-my-pi.packages.${system}.default.override {
+          withFatLto = false;
+        }).overrideAttrs
+          (old: {
+            patches = (old.patches or [ ]) ++ [
+              (pkgs.fetchurl {
+                url = "https://github.com/can1357/oh-my-pi/compare/7c49c11aa5bbaf3f418406583096168ad5b8c6dc...6f7e5358e07e3fa968a88ac008479cd119993684.diff";
+                hash = "sha256-EXnTZNrd5pFSwKNAb4l/eXRmUeGMr5SAJI7HzUWxh4c=";
+              })
+            ];
+          });
       # pstack is a Claude Code plugin; omp loads that format through
       # --plugin-dir. Its poteto-mode scripts install commander into their own
       # directory on first run, which a store path cannot allow, so the
