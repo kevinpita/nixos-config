@@ -1,7 +1,6 @@
 { config, inputs, ... }:
 {
   flake.overlays.default = final: _prev: {
-    claude-desktop = final.callPackage ../packages/claude-desktop/package.nix { };
     exrpd = final.callPackage ../packages/exrpd/package.nix { };
     herdr-app = (inputs.herdr-nix.overlays.default final _prev).herdr;
     inherit ((inputs.herdr-nix.overlays.default final _prev)) herdr-core;
@@ -17,14 +16,7 @@
   };
 
   perSystem =
-    { system, ... }:
-    let
-      # claude-desktop is unfree, so the default perSystem pkgs refuses to evaluate it.
-      pkgs = import inputs.nixpkgs {
-        inherit system;
-        config.allowUnfree = true;
-      };
-    in
+    { pkgs, ... }:
     {
       packages = config.flake.overlays.default pkgs pkgs;
     };

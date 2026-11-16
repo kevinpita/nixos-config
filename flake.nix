@@ -137,6 +137,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    claude-desktop-nix = {
+      url = "github:kevinpita/claude-desktop-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     ilofan = {
       url = "github:kevinpita/ilofan";
       inputs.nixpkgs.follows = "nixpkgs";
