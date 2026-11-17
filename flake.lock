@@ -552,6 +552,23 @@
         "type": "github"
       }
     },
+    "herdr-hoverfocus": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793544598,
+        "narHash": "sha256-HG5PcuL5+o0Ye0Gxeav1gkfr4rADy49ejga1l2qTmUs=",
+        "owner": "monorkin",
+        "repo": "herdr-app-hoverfocus",
+        "rev": "1c8ca93f9758567b55694e22c243e36aea923e3d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "monorkin",
+        "repo": "herdr-app-hoverfocus",
+        "rev": "1c8ca93f9758567b55694e22c243e36aea923e3d",
+        "type": "github"
+      }
+    },
     "herdr-lazygit": {
       "flake": false,
       "locked": {
@@ -1129,6 +1146,7 @@
         "dux-greeter": "dux-greeter",
         "flake-parts": "flake-parts_2",
         "forklab": "forklab",
+        "herdr-hoverfocus": "herdr-hoverfocus",
         "herdr-lazygit": "herdr-lazygit",
         "herdr-nix": "herdr-nix",
         "home-manager": "home-manager_2",

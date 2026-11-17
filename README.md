@@ -55,6 +55,8 @@ Servers deploy `main` automatically with [Comin](modules/services/comin.nix). Th
 
 Workstations install [herdr-lazygit](https://github.com/kevinpita/herdr-lazygit) as a pinned Herdr desktop mod. A user service merges its shortcut into Herdr's writable key file after Herdr creates it and when it changes. Other bindings stay user-managed.
 
+Workstations also install [herdr-app-hoverfocus](https://github.com/monorkin/herdr-app-hoverfocus), which focuses the pane under the pointer. It is a third-party mod, so `flake.nix` pins it to an audited commit and the daily input update leaves it alone. The mod works only in a layout that names it as its pane header. Layouts stay user-managed.
+
 ## Documentation
 
 - [Install a machine](INSTALL.md): new hosts, reinstalls, secrets, and first-boot setup.

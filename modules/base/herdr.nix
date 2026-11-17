@@ -73,15 +73,22 @@ in
         in
         {
           xdg.configFile =
-            lib.genAttrs
-              [
-                "herdr-app/mods/lazygit-popup/main.js"
-                "herdr-app/mods/lazygit-popup/mod.json"
-              ]
-              (name: {
-                source = "${inputs.herdr-lazygit}/mods/lazygit-popup/${builtins.baseNameOf name}";
-                force = true;
-              });
+            lib.concatMapAttrs
+              (
+                mod: src:
+                lib.genAttrs' [ "main.js" "mod.json" ] (
+                  file:
+                  lib.nameValuePair "herdr-app/mods/${mod}/${file}" {
+                    source = "${src}/mods/${mod}/${file}";
+                    force = true;
+                  }
+                )
+              )
+              {
+                lazygit-popup = inputs.herdr-lazygit;
+                # Inert until a layout names it as its pane header.
+                hoverfocus = inputs.herdr-hoverfocus;
+              };
 
           systemd.user.services.herdr-lazygit-keys = {
             Unit.Description = "Merge the lazygit mod shortcut into Herdr";

@@ -87,6 +87,12 @@
       flake = false;
     };
 
+    # Third-party mod, pinned to the audited commit. Review the diff before changing the revision.
+    herdr-hoverfocus = {
+      url = "github:monorkin/herdr-app-hoverfocus/1c8ca93f9758567b55694e22c243e36aea923e3d";
+      flake = false;
+    };
+
     bast-nix = {
       url = "github:kevinpita/bast-nix";
       inputs.nixpkgs.follows = "nixpkgs";
