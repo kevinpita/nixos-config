@@ -32,10 +32,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    autofirma-nix = {
-      url = "github:nix-community/autofirma-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    dnie-nix.url = "github:kevinpita/dnie-nix";
 
     nixos-hardware.url = "github:kevinpita/nixos-hardware";
 
