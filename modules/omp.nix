@@ -22,6 +22,7 @@ in
     let
       repo = config.programs.nh.flake;
       system = pkgs.stdenv.hostPlatform.system;
+      ompExtensions = ../omp/extensions;
       # The broker host owns the logins in its agent.db. Every other host
       # reads them from the broker over the tailnet.
       authBrokerHost = lib.findSingle (
@@ -405,7 +406,8 @@ in
             # /send and /receive move resumable sessions between hosts over SSH.
             ".omp/agent/extensions/session-relay.ts".source = ../omp/extensions/session-relay.ts;
             # ctrl+l and /focus show only the latest answer.
-            ".omp/agent/extensions/focus-view.ts".source = ../omp/extensions/focus-view.ts;
+            ".omp/agent/extensions/focus-view.ts".source = "${ompExtensions}/focus-view.ts";
+            ".omp/agent/extensions/emphasis".source = "${ompExtensions}/emphasis";
             # kubectl context and namespace, for kubie sessions.
             ".omp/agent/extensions/k8s-status.ts".source = ../omp/extensions/k8s-status.ts;
             ".omp/agent/extensions/nan-usage.ts".source = ../omp/extensions/nan-usage.ts;

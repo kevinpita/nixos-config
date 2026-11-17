@@ -20,6 +20,7 @@ import {
 	type TUI,
 	visibleWidth,
 } from "@oh-my-pi/pi-tui";
+import { emphasize } from "./emphasis/render.ts";
 
 // Lines longer than this are harder to read, so a wide terminal gets margins.
 const MAX_COLUMNS = 100;
@@ -179,7 +180,7 @@ class FocusView {
 			const style = theme.hasColor("assistantMessageText")
 				? { color: (text: string) => theme.fg("assistantMessageText", text), proseFg: true }
 				: undefined;
-			const markdown = new Markdown(source, 0, 0, getMarkdownTheme(), style);
+			const markdown = new Markdown(emphasize(source), 0, 0, getMarkdownTheme(), style);
 			this.#lines = markdown.render(columns).map(line => margin + line);
 		}
 		const maxScroll = Math.max(0, this.#lines.length - body);

@@ -15,6 +15,12 @@ This folder owns the oh-my-pi (omp) harness configuration. `modules/omp.nix` sel
 
 `config.yml` selects the theme `desktop`. `modules/_desktop-themes.nix` makes it from the upstream `titanium` theme with the colors of a desktop theme in `themes/`, so other upstream changes still arrive. Answer text is brighter than thinking text. On desktop hosts, `~/.omp/agent/themes/desktop.json` links to the theme that `theme-set` selects, and omp loads it again on each switch. Other hosts show gruvbox.
 
+## Reply emphasis
+
+`extensions/emphasis/` is a self-contained, display-only OMP package adapted from pi-emphasis. It owns pills, label icons, and colored bold text without adding prompt instructions. The native assistant text hook and `extensions/focus-view.ts` use its shared renderer. Stored messages and exports keep the original Markdown.
+
+Nix installs focus-view and emphasis from one source directory so their relative import works through store symlinks. Keep focus-specific behavior outside the package so emphasis can move to its own repository. See its [package documentation](extensions/emphasis/README.md) for controls, ownership, and focused checks.
+
 ## Model routing
 
 `config.yml` owns the default model assignments and reasoning effort. The `task` role selects the model for generic task workers. `task.agentModelOverrides` assigns models to bundled specialists without copying their prompts.

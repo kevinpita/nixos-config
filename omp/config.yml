@@ -118,6 +118,8 @@ task:
     reviewer: "@advisor"
     security-reviewer: "@security"
 symbolPreset: nerd
+extensionRenderers:
+  assistantText: true
 composer:
   shape: band
   tokenRate: true
