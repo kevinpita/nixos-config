@@ -51,6 +51,10 @@ hl.config({
         -- Let a restarted DMS take the lock back after a crash.
         allow_session_lock_restore = true,
     },
+    render = {
+        -- A fullscreen app that claims HDR must not switch an 8-bit output to HDR.
+        cm_auto_hdr = 0,
+    },
 })
 
 hl.gesture({
