@@ -8,11 +8,7 @@
 
 let
   # The Python CLI drives the ReVa Java extension, so both come from the same release.
-  ghidraWithReva = ghidra.withExtensions (exts: [
-    (exts.reva.overrideAttrs (old: {
-      patches = (old.patches or [ ]) ++ [ ./ghidra-12.2-ioexception.patch ];
-    }))
-  ]);
+  ghidraWithReva = ghidra.withExtensions (exts: [ exts.reva ]);
 in
 python3Packages.buildPythonApplication {
   pname = "mcp-reva";
@@ -32,10 +28,8 @@ python3Packages.buildPythonApplication {
   ];
 
   dependencies = with python3Packages; [
-    httpx
-    httpx-sse
-    # The ReVa bridge uses the mcp 1.x client API (streamablehttp_client), removed in mcp 2.
-    mcp_1
+    httpx2
+    mcp
     pyghidra
   ];
 
