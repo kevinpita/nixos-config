@@ -4,7 +4,7 @@ let
 in
 {
   flake.modules.nixos."hosts/microg8" =
-    { ... }:
+    { pkgs, ... }:
     {
       imports = [
         ../../hosts/microg8/disko-config.nix
@@ -16,6 +16,7 @@ in
         efiSupport = false;
         theme = null;
       };
+      boot.kernelPackages = pkgs.linuxPackages_latest;
 
       services.btrfs.autoScrub = {
         enable = true;
