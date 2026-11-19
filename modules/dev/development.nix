@@ -16,6 +16,9 @@
         nodejs_22
         python3
 
+        # Security scanning
+        trivy
+
         # Database and messaging clients
         lazysql
         postgresql
