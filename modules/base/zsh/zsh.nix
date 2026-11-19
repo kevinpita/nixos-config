@@ -12,10 +12,6 @@
       users.defaultUserShell = pkgs.zsh;
 
       home-manager.users.${username} = {
-        home.packages = with pkgs; [
-          ncdu
-        ];
-
         programs.atuin = {
           enable = true;
           enableZshIntegration = true;
@@ -39,8 +35,8 @@
           keymap.mgr.prepend_keymap = [
             {
               on = "u";
-              run = "shell 'ncdu' --block";
-              desc = "Disk usage (ncdu)";
+              run = "shell 'gdu' --block";
+              desc = "Disk usage (gdu)";
             }
           ];
         };
@@ -56,6 +52,7 @@
             ll = lib.mkForce "lsd -lah";
             lld = "ll -L";
             htop = "btop";
+            ncdu = "gdu";
             vi = "nvim";
             vim = "nvim";
             neofetch = "fastfetch";

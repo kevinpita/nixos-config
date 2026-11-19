@@ -34,6 +34,7 @@
         # Hardware and system monitoring
         btop
         dmidecode
+        dysk
         fastfetch
         gdu
         i2c-tools
