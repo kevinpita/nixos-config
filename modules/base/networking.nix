@@ -10,6 +10,7 @@
       environment.systemPackages = with pkgs; [
         curl
         ethtool
+        nmap
         tcpdump
         wget
       ];
