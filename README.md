@@ -14,6 +14,7 @@ This is a personal configuration, not a starter template. It targets `x86_64-lin
 | [`t14g6`](modules/hosts/t14g6.nix) | ThinkPad T14 Gen 6 AMD, Hyprland desktop |
 | [`fium`](modules/hosts/fium.nix) | Self-hosted services, storage, k3s, and the Nix binary cache |
 | [`minidesk`](modules/hosts/minidesk.nix) | Development and work server |
+| [`microg8`](modules/hosts/microg8.nix) | Server with Btrfs storage |
 | [`installer`](modules/hosts/installer.nix) | Minimal installation ISO |
 
 ## Structure
@@ -21,7 +22,7 @@ This is a personal configuration, not a starter template. It targets `x86_64-lin
 [import-tree](https://github.com/vic/import-tree) loads the files under `modules/`. Features are named NixOS modules called **aspects**. Roles group aspects, and host entry points select the roles and features each machine needs.
 
 <p align="center">
-  <img src="docs/diagrams/hosts.svg" alt="Host composition: base feeds the desktop and server role lines. The desktop line passes workstation and desktop and ends at amdep and t14g6. The server line passes server and kubernetes-server and ends at fium, with a branch to minidesk. Feature aspects join at workstation, desktop, and fium." width="100%">
+  <img src="docs/diagrams/hosts.svg" alt="Host composition: base feeds the desktop and server role lines. The desktop line passes workstation and desktop and ends at amdep and t14g6. The server line passes server and kubernetes-server and ends at fium, with branches to minidesk and microg8. Feature aspects join at workstation, desktop, and fium." width="100%">
 </p>
 
 Hosts can also import individual features, such as `development` on `minidesk`.

@@ -42,6 +42,7 @@
             gitkevin@pm.me ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDfbHR9tJn6nhBhWadyR5U8wNIOxmgz8ZyN07FUvXpvF
             gitkevin@pm.me ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICu5mC/cYIUBzI38YXIb8GNTQo1maEHGJEEbdthkVngT
             gitkevin@pm.me ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPnec7ynN2CfIXOy8cfeRt6j2ICZtxPwel6btoQ9nZo4
+            gitkevin@pm.me ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN0hT51h8O/EBS1SNmlh2Np55OvNXDbusZDRekt3r3Rt
           ''
         );
       };

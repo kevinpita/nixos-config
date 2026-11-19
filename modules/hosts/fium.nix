@@ -11,7 +11,7 @@ let
 in
 {
   flake.modules.nixos."hosts/fium" =
-    { config, ... }:
+    { ... }:
     {
       imports = [
         ../../hosts/fium/disko-config.nix
@@ -77,16 +77,6 @@ in
         theme = null;
       };
 
-      services.openssh = {
-        enable = true;
-        openFirewall = false;
-        settings = {
-          PasswordAuthentication = false;
-          KbdInteractiveAuthentication = false;
-          PermitRootLogin = "no";
-        };
-      };
-
       services.zfs.autoScrub = {
         enable = true;
         interval = "Sun *-*-* 04:00:00";
@@ -109,7 +99,6 @@ in
         forceImportRoot = false;
       };
       networking = {
-        firewall.interfaces.${config.services.tailscale.interfaceName}.allowedTCPPorts = [ 22 ];
         hostId = "44dc8051";
         networkmanager.enable = false;
         useDHCP = false;
