@@ -723,11 +723,11 @@
     "interface-skills": {
       "flake": false,
       "locked": {
-        "lastModified": 1795008553,
-        "narHash": "sha256-pGLC0yfL2nknRoPGo6paM5NhgFgSFYJ3QnKq7ml09Oo=",
+        "lastModified": 1795061490,
+        "narHash": "sha256-gKruv6vNgrpAaGCe9Vg2EWv4GfsQQi05Wp7zJ4MyRB8=",
         "owner": "jakubkrehel",
         "repo": "skills",
-        "rev": "547d415dc10a23e66088eba5aa6664e6e772432c",
+        "rev": "672ae44ace6aaed65b86cbb1e2fd6fbea0e79578",
         "type": "github"
       },
       "original": {
@@ -918,11 +918,11 @@
     "nixos-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1792658209,
-        "narHash": "sha256-CTpcuHRI3lx++tOMCOD73E9hCzLZz+PBc9c0wcDATz8=",
+        "lastModified": 1795096631,
+        "narHash": "sha256-QdQ2MOg1YSrClpmA9FLYdupQ+QFrnciekFZXk0Il8NA=",
         "ref": "refs/heads/main",
-        "rev": "50cc5afacb632ffedca363808d174449142e4444",
-        "revCount": 41,
+        "rev": "bd7addba24eb06fc0275cbe4eecedcd232f49041",
+        "revCount": 42,
         "type": "git",
         "url": "ssh://git@github.com/kevinpita/nixos-secrets"
       },
@@ -1113,11 +1113,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1795041800,
-        "narHash": "sha256-ENqRf+4sy1u7QYfbKastdpfJmq58PaO31V9wKhw/Nxk=",
+        "lastModified": 1795093415,
+        "narHash": "sha256-0QT7bgSV/sBhFNHvUBND7eQoVarw/uoaqfHX2PjLnSU=",
         "owner": "can1357",
         "repo": "oh-my-pi",
-        "rev": "2421bdb99f84fbc74454eda374747afcbf9c0f4d",
+        "rev": "27a9ad51f94e8695662c6cfcb32b25949a902772",
         "type": "github"
       },
       "original": {
@@ -1161,11 +1161,11 @@
     "pstack": {
       "flake": false,
       "locked": {
-        "lastModified": 1795043867,
-        "narHash": "sha256-UI60FpQ+gy0FeyNtW7xf2eKvjav42emGYrerB/ELfKA=",
+        "lastModified": 1795087809,
+        "narHash": "sha256-ZrXpvZIJgmbRO6n3//G/cg3/yc75XtQ8b+xzdxpOEv0=",
         "owner": "michael-denyer",
         "repo": "pstack-claude",
-        "rev": "e9db3a5a29aa2210dbf101e5c75d591ea8352eda",
+        "rev": "412990b837ddb5e41ee589d770ba1bff24144654",
         "type": "github"
       },
       "original": {
