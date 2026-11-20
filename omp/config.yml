@@ -6,16 +6,15 @@ modelRoles:
   default: openai-codex/gpt-6.1-terra:high
   smol: openai-codex/gpt-6.1-terra:low
   slow: openai-codex/gpt-6.1-terra:xhigh
-  vision: openai-codex/gpt-6.1-terra:high
+  vision: anthropic/claude-opus-5-5:medium
   plan: openai-codex/gpt-6.1-terra:high
-  commit: "@smol"
-  tiny: "@smol"
-  memory: "@smol"
+  commit: openai-codex/gpt-6.1-terra:medium
+  tiny: openai-codex/gpt-6.1-terra:low
+  memory: openai-codex/gpt-6.1-terra:low
   task: openai-codex/gpt-6.1-terra:high
-  advisor: openai-codex/gpt-6.1-terra:high
+  advisor: openai-codex/gpt-6.2-sol:high
   image: openai-codex/gpt-image-2
   judge: "@smol"
-  security: nan/deepseek-v4-flash:high
 modelPresets:
   quick (terra):
     defaultThinkingLevel: high
@@ -23,78 +22,58 @@ modelPresets:
       default: openai-codex/gpt-6.1-terra:high
       smol: openai-codex/gpt-6.1-terra:low
       slow: openai-codex/gpt-6.1-terra:xhigh
-      vision: openai-codex/gpt-6.1-terra:high
+      vision: anthropic/claude-opus-5-5:medium
       plan: openai-codex/gpt-6.1-terra:high
       task: openai-codex/gpt-6.1-terra:high
-      advisor: openai-codex/gpt-6.1-terra:high
-      security: nan/deepseek-v4-flash:high
-      commit: "@smol"
-      tiny: "@smol"
-      memory: "@smol"
+      advisor: openai-codex/gpt-6.2-sol:high
+      commit: openai-codex/gpt-6.1-terra:medium
+      tiny: openai-codex/gpt-6.1-terra:low
+      memory: openai-codex/gpt-6.1-terra:low
       judge: "@smol"
       image: openai-codex/gpt-image-2
   think (fable):
-    defaultThinkingLevel: medium
+    defaultThinkingLevel: high
     modelRoles:
-      default: anthropic/claude-fable-5-2:medium
-      smol: anthropic/claude-opus-5-5:medium
+      default: anthropic/claude-fable-5-2:high
+      smol: anthropic/claude-opus-5-5:high
       slow: anthropic/claude-fable-5-2:high
-      vision: anthropic/claude-fable-5-2:medium
+      vision: anthropic/claude-opus-5-5:medium
       plan: anthropic/claude-fable-5-2:high
       task: anthropic/claude-fable-5-2:medium
-      advisor: openai-codex/gpt-6.1-terra:high
-      security: nan/deepseek-v4-flash:high
-      commit: "@smol"
-      tiny: "@smol"
-      memory: "@smol"
+      advisor: openai-codex/gpt-6.2-sol:high
+      commit: openai-codex/gpt-6.1-terra:medium
+      tiny: openai-codex/gpt-6.1-terra:low
+      memory: openai-codex/gpt-6.1-terra:low
       judge: "@smol"
       image: openai-codex/gpt-image-2
   code (opus):
-    defaultThinkingLevel: medium
+    defaultThinkingLevel: high
     modelRoles:
-      default: anthropic/claude-opus-5-5:medium
-      smol: anthropic/claude-opus-5-5:low
+      default: anthropic/claude-opus-5-5:high
+      smol: anthropic/claude-opus-5-5:medium
       slow: anthropic/claude-opus-5-5:xhigh
       vision: anthropic/claude-opus-5-5:medium
       plan: anthropic/claude-opus-5-5:xhigh
-      task: anthropic/claude-opus-5-5:medium
-      advisor: openai-codex/gpt-6.1-sol:medium
-      security: nan/deepseek-v4-flash:high
-      commit: "@smol"
-      tiny: "@smol"
-      memory: "@smol"
+      task: anthropic/claude-opus-5-5:high
+      advisor: openai-codex/gpt-6.2-sol:high
+      commit: openai-codex/gpt-6.1-terra:medium
+      tiny: openai-codex/gpt-6.1-terra:low
+      memory: openai-codex/gpt-6.1-terra:low
       judge: "@smol"
       image: openai-codex/gpt-image-2
   think (astra):
     defaultThinkingLevel: high
     modelRoles:
-      default: openai-codex/gpt-6-astra:high
-      smol: openai-codex/gpt-6.1-sol:medium
-      slow: openai-codex/gpt-6-astra:xhigh
-      vision: openai-codex/gpt-6.1-sol:medium
-      plan: openai-codex/gpt-6-astra:xhigh
-      task: openai-codex/gpt-6-astra:high
-      advisor: openai-codex/gpt-6.1-sol:medium
-      security: nan/deepseek-v4-flash:high
-      commit: "@smol"
-      tiny: "@smol"
-      memory: "@smol"
-      judge: "@smol"
-      image: openai-codex/gpt-image-2
-  cyber (deepseek):
-    defaultThinkingLevel: high
-    modelRoles:
-      default: nan/deepseek-v4-flash:high
-      smol: nan/deepseek-v4-flash:max
-      slow: nan/deepseek-v4-flash:max
-      vision: nan/glm5.3-flash:xhigh
-      plan: nan/deepseek-v4-flash:max
-      task: nan/deepseek-v4-flash:max
-      advisor: nan/glm5.3-flash:xhigh
-      security: nan/glm5.3-flash:xhigh
-      commit: "@smol"
-      tiny: "@smol"
-      memory: "@smol"
+      default: openai-codex/gpt-6.2-astra:high
+      smol: openai-codex/gpt-6.2-sol:high
+      slow: openai-codex/gpt-6.2-sol:xhigh
+      vision: anthropic/claude-opus-5-5:medium
+      plan: openai-codex/gpt-6.2-astra:high
+      task: anthropic/claude-opus-5-5:high
+      advisor: openai-codex/gpt-6.2-sol:high
+      commit: openai-codex/gpt-6.1-terra:medium
+      tiny: openai-codex/gpt-6.1-terra:low
+      memory: openai-codex/gpt-6.1-terra:low
       judge: "@smol"
       image: openai-codex/gpt-image-2
 providers:
@@ -104,9 +83,11 @@ retry:
   rateLimitWalksChain: true
   fallbackChains:
     default:
-      - openai-codex/gpt-6.1-sol
+      - openai-codex/gpt-6.2-sol
+      - anthropic/claude-opus-5-5
     task:
-      - openai-codex/gpt-6.1-sol
+      - openai-codex/gpt-6.2-sol
+      - anthropic/claude-opus-5-5
     advisor:
       - anthropic/claude-opus-5-5
     reviewer:
@@ -116,7 +97,6 @@ task:
   agentModelOverrides:
     scout: "@smol"
     reviewer: "@advisor"
-    security-reviewer: "@security"
 symbolPreset: nerd
 extensionRenderers:
   assistantText: true

@@ -1,7 +1,7 @@
 advisors:
   - name: GPT-SOL
     enabled: true
-    model: openai-codex/gpt-6.1-sol:high
+    model: openai-codex/gpt-6.2-sol:high
   - name: DeepSeek V4 Flash
     enabled: false
     model: nan/deepseek-v4-flash:high
