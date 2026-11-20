@@ -2,6 +2,7 @@
 """Forward Grafana alerts, successful Comin deployments, and Kubernetes pod changes to Matrix."""
 
 import hashlib
+from datetime import datetime
 from html import escape
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
@@ -19,6 +20,10 @@ from urllib.request import Request, urlopen
 MATRIX_URL = "https://matrix.org/_matrix/client/v3/rooms/"
 PROMETHEUS_URL = "http://127.0.0.1:9090/api/v1/query"
 KUBERNETES_PODS_URL = "https://127.0.0.1:6443/api/v1/pods"
+# A container that runs this long after its last restart is stable again.
+POD_STABLE_SECONDS = 600
+# A pod that has not started a container after this time is reported.
+POD_START_SECONDS = 300
 
 
 def request_json(url, payload=None, headers=None, method=None, context=None):
@@ -39,13 +44,19 @@ def workload_of(pod):
     return owner.get("kind"), f"{metadata['namespace']}/{name}"
 
 
-def pod_changes(known, pods):
+def age(timestamp, now):
+    return now - datetime.fromisoformat(timestamp).timestamp()
+
+
+def pod_changes(known, pods, now):
     """Compare the pods with the known state. Return the messages and the new state.
 
-    The state maps a workload to the images of its containers and to the restart
-    counts of each container in each pod.
+    The state holds, for each workload, the images of its containers and the restart
+    state of each container in each pod. It also holds the pods that were reported
+    as not started.
     """
-    current = {}
+    workloads = {}
+    stuck = []
     lines = {}
     for pod in pods:
         kind, workload = workload_of(pod)
@@ -53,44 +64,68 @@ def pod_changes(known, pods):
             # Each run of a Job is a new pod by design.
             continue
         uid = pod["metadata"]["uid"]
-        statuses = {status["name"]: status for status in pod.get("status", {}).get("containerStatuses", [])}
+        pod_status = pod.get("status", {})
+        statuses = {status["name"]: status for status in pod_status.get("containerStatuses", [])}
         if not any(
             status["restartCount"] or "waiting" not in status.get("state", {"waiting": {}})
             for status in statuses.values()
         ):
             # No container has started yet, for example while the image is pulled or
-            # when the pull fails. Report the pod only when it runs the new image.
+            # when the pull fails. Report the image only when the pod runs it.
+            if uid in known["stuck"]:
+                stuck.append(uid)
+            elif age(pod["metadata"]["creationTimestamp"], now) >= POD_START_SECONDS:
+                reasons = [
+                    status["state"]["waiting"].get("reason")
+                    for status in pod_status.get("initContainerStatuses", []) + list(statuses.values())
+                    if "waiting" in status.get("state", {})
+                ]
+                lines[f"{workload}: not started ({next(filter(None, reasons), pod_status.get('phase', 'unknown'))})"] = None
+                stuck.append(uid)
             continue
-        entry = current.setdefault(workload, {"images": {}, "pods": {}})
-        counts = entry["pods"][uid] = {}
-        before = known.get(workload)
+        entry = workloads.setdefault(workload, {"images": {}, "pods": {}})
+        restarts = entry["pods"][uid] = {}
+        before = known["workloads"].get(workload)
         containers = pod["spec"]["containers"]
         if before is None:
             lines[f"{workload}: started ({', '.join(container['image'] for container in containers)})"] = None
         for container in containers:
             name, image = container["name"], container["image"]
             status = statuses.get(name, {})
-            counts[name] = status.get("restartCount", 0)
+            count = status.get("restartCount", 0)
             images = entry["images"].setdefault(name, [])
             if image not in images:
                 images.append(image)
-            if before is None:
-                continue
             label = workload if len(containers) == 1 else f"{workload} ({name})"
-            old_images = before["images"].get(name, [])
-            old_count = before["pods"].get(uid, {}).get(name)
-            if image not in old_images:
-                lines[f"{label}: image {' / '.join(old_images) or 'none'} -> {image}"] = None
-            elif old_count is None:
+            old = (before or {"pods": {}})["pods"].get(uid, {}).get(name)
+            # "loop" counts the restarts that were not reported. None means stable.
+            loop = old["loop"] if old else None
+            if before is None:
+                pass
+            elif image not in before["images"].get(name, []):
+                lines[f"{label}: image {' / '.join(before['images'].get(name, [])) or 'none'} -> {image}"] = None
+            elif old is None:
                 lines[f"{label}: new pod"] = None
-            elif counts[name] > old_count:
-                reason = status.get("lastState", {}).get("terminated", {}).get("reason", "unknown reason")
-                lines[f"{label}: restarted ({old_count} -> {counts[name]}, {reason})"] = None
-    for workload, entry in known.items():
+            elif count > old["count"]:
+                if loop is None:
+                    reason = status.get("lastState", {}).get("terminated", {}).get("reason", "unknown reason")
+                    lines[f"{label}: restarted ({old['count']} -> {count}, {reason})"] = None
+                    loop = 0
+                else:
+                    # Report only the first restart of a crash loop.
+                    loop += 1
+            elif loop is not None and "running" in status.get("state", {}):
+                finished = status.get("lastState", {}).get("terminated", {}).get("finishedAt")
+                if finished is None or age(finished, now) >= POD_STABLE_SECONDS:
+                    if loop:
+                        lines[f"{label}: stable again after {loop + 1} restarts"] = None
+                    loop = None
+            restarts[name] = {"count": count, "loop": loop}
+    for workload, entry in known["workloads"].items():
         # A workload can have no pod for a moment while its pod is replaced.
         # Keep its images, so the new pod is compared with them.
-        current.setdefault(workload, {"images": entry["images"], "pods": {}})
-    return list(lines), current
+        workloads.setdefault(workload, {"images": entry["images"], "pods": {}})
+    return list(lines), {"workloads": workloads, "stuck": stuck}
 
 
 class Notifier:
@@ -167,12 +202,13 @@ class Notifier:
             headers={"Authorization": "Bearer " + self.kubernetes_token},
             context=self.kubernetes_tls,
         )
-        if self.pods_file.exists():
-            known = json.loads(self.pods_file.read_text(encoding="utf-8"))
-            lines, current = pod_changes(known, result["items"])
+        known = json.loads(self.pods_file.read_text(encoding="utf-8")) if self.pods_file.exists() else {}
+        if "workloads" in known:
+            lines, current = pod_changes(known, result["items"], time.time())
         else:
-            # Do not notify about the pods that preceded the first installation.
-            lines, current = pod_changes({}, result["items"])
+            # No state, or the state of the first version of this poll. Do not
+            # notify about the pods that preceded this state.
+            lines, current = pod_changes({"workloads": {}, "stuck": []}, result["items"], time.time())
             lines = []
         serialized = json.dumps(current, sort_keys=True)
         if lines:
