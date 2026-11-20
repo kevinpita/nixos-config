@@ -11,6 +11,9 @@
     let
       matrixEnabled = !ciMode;
       servers = lib.concatStringsSep "|" (hostsWithRole "server");
+      # Report pod restarts, replaced pods, and image changes of the local cluster.
+      podWatch = matrixEnabled && config.services.k3s.enable;
+      credentials = "/run/credentials/matrix-notifier.service";
       storageHost = "fium";
       filesystemAvailable = ''
         node_filesystem_avail_bytes{job="node",fstype!~"tmpfs|devtmpfs|overlay|squashfs|ramfs|nsfs"}
@@ -313,18 +316,26 @@
           ];
         };
 
-        sops.secrets = lib.mkIf matrixEnabled {
-          matrix.restartUnits = [ "matrix-notifier.service" ];
-          "matrix-chat".restartUnits = [ "matrix-notifier.service" ];
-        };
+        sops.secrets = lib.mkIf matrixEnabled (
+          lib.mkMerge [
+            {
+              matrix.restartUnits = [ "matrix-notifier.service" ];
+              "matrix-chat".restartUnits = [ "matrix-notifier.service" ];
+            }
+            (lib.mkIf podWatch {
+              "matrix-kubernetes-token".restartUnits = [ "matrix-notifier.service" ];
+            })
+          ]
+        );
 
         systemd.services.matrix-notifier = lib.mkIf matrixEnabled {
-          description = "Deliver Grafana alerts and Comin deployments to Matrix";
+          description = "Deliver Grafana alerts, Comin deployments, and Kubernetes pod changes to Matrix";
           wantedBy = [ "multi-user.target" ];
           after = [
             "network-online.target"
             "prometheus.service"
-          ];
+          ]
+          ++ lib.optional podWatch "k3s.service";
           wants = [ "network-online.target" ];
           serviceConfig = {
             Type = "simple";
@@ -333,8 +344,15 @@
             LoadCredential = [
               "matrix:${config.sops.secrets.matrix.path}"
               "matrix-chat:${config.sops.secrets."matrix-chat".path}"
+            ]
+            ++ lib.optionals podWatch [
+              # The token of the read-only ServiceAccount that flux-config declares.
+              "kubernetes-token:${config.sops.secrets."matrix-kubernetes-token".path}"
+              "kubernetes-ca:/var/lib/rancher/k3s/server/tls/server-ca.crt"
             ];
-            ExecStart = "${lib.getExe pkgs.python3} ${./matrix-notifier.py} /run/credentials/matrix-notifier.service/matrix /run/credentials/matrix-notifier.service/matrix-chat /var/lib/matrix-notifier ${lib.escapeShellArg servers}";
+            ExecStart =
+              "${lib.getExe pkgs.python3} ${./matrix-notifier.py} ${credentials}/matrix ${credentials}/matrix-chat /var/lib/matrix-notifier ${lib.escapeShellArg servers}"
+              + lib.optionalString podWatch " ${credentials}/kubernetes-token ${credentials}/kubernetes-ca";
             Restart = "on-failure";
             RestartSec = "10s";
             NoNewPrivileges = true;

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Forward Grafana alerts and successful Comin deployments to Matrix."""
+"""Forward Grafana alerts, successful Comin deployments, and Kubernetes pod changes to Matrix."""
 
 import hashlib
 from html import escape
@@ -8,6 +8,7 @@ import json
 import logging
 import os
 from pathlib import Path
+import ssl
 import sys
 import threading
 import time
@@ -17,17 +18,83 @@ from urllib.request import Request, urlopen
 
 MATRIX_URL = "https://matrix.org/_matrix/client/v3/rooms/"
 PROMETHEUS_URL = "http://127.0.0.1:9090/api/v1/query"
+KUBERNETES_PODS_URL = "https://127.0.0.1:6443/api/v1/pods"
 
 
-def request_json(url, payload=None, headers=None, method=None):
+def request_json(url, payload=None, headers=None, method=None, context=None):
     data = None if payload is None else json.dumps(payload).encode("utf-8")
     request = Request(url, data=data, headers=headers or {}, method=method)
-    with urlopen(request, timeout=15) as response:
+    with urlopen(request, timeout=15, context=context) as response:
         return json.load(response)
 
 
+def workload_of(pod):
+    """Return the owner kind and a name that stays the same when the pod is replaced."""
+    metadata = pod["metadata"]
+    owner = (metadata.get("ownerReferences") or [{}])[0]
+    name = owner.get("name") or metadata["name"]
+    if owner.get("kind") == "ReplicaSet":
+        # A Deployment names its ReplicaSets "<deployment>-<pod-template-hash>".
+        name = name.removesuffix("-" + metadata.get("labels", {}).get("pod-template-hash", ""))
+    return owner.get("kind"), f"{metadata['namespace']}/{name}"
+
+
+def pod_changes(known, pods):
+    """Compare the pods with the known state. Return the messages and the new state.
+
+    The state maps a workload to the images of its containers and to the restart
+    counts of each container in each pod.
+    """
+    current = {}
+    lines = {}
+    for pod in pods:
+        kind, workload = workload_of(pod)
+        if kind == "Job":
+            # Each run of a Job is a new pod by design.
+            continue
+        uid = pod["metadata"]["uid"]
+        statuses = {status["name"]: status for status in pod.get("status", {}).get("containerStatuses", [])}
+        if not any(
+            status["restartCount"] or "waiting" not in status.get("state", {"waiting": {}})
+            for status in statuses.values()
+        ):
+            # No container has started yet, for example while the image is pulled or
+            # when the pull fails. Report the pod only when it runs the new image.
+            continue
+        entry = current.setdefault(workload, {"images": {}, "pods": {}})
+        counts = entry["pods"][uid] = {}
+        before = known.get(workload)
+        containers = pod["spec"]["containers"]
+        if before is None:
+            lines[f"{workload}: started ({', '.join(container['image'] for container in containers)})"] = None
+        for container in containers:
+            name, image = container["name"], container["image"]
+            status = statuses.get(name, {})
+            counts[name] = status.get("restartCount", 0)
+            images = entry["images"].setdefault(name, [])
+            if image not in images:
+                images.append(image)
+            if before is None:
+                continue
+            label = workload if len(containers) == 1 else f"{workload} ({name})"
+            old_images = before["images"].get(name, [])
+            old_count = before["pods"].get(uid, {}).get(name)
+            if image not in old_images:
+                lines[f"{label}: image {' / '.join(old_images) or 'none'} -> {image}"] = None
+            elif old_count is None:
+                lines[f"{label}: new pod"] = None
+            elif counts[name] > old_count:
+                reason = status.get("lastState", {}).get("terminated", {}).get("reason", "unknown reason")
+                lines[f"{label}: restarted ({old_count} -> {counts[name]}, {reason})"] = None
+    for workload, entry in known.items():
+        # A workload can have no pod for a moment while its pod is replaced.
+        # Keep its images, so the new pod is compared with them.
+        current.setdefault(workload, {"images": entry["images"], "pods": {}})
+    return list(lines), current
+
+
 class Notifier:
-    def __init__(self, token_file, room_file, state_dir, hosts):
+    def __init__(self, token_file, room_file, state_dir, hosts, kubernetes_token_file=None, kubernetes_ca_file=None):
         self.deployment_query = f'comin_last_successful_deployment_timestamp_seconds{{job="node",host=~"{hosts}"}}'
         self.token = Path(token_file).read_text(encoding="utf-8").strip()
         if not self.token:
@@ -43,6 +110,13 @@ class Notifier:
             self.state = {"baseline": int(time.time()), "last": {}}
         if not isinstance(self.state.get("baseline"), int) or not isinstance(self.state.get("last"), dict):
             raise ValueError("Invalid deployment state")
+        self.pods_file = Path(state_dir) / "pods.json"
+        self.kubernetes_token = None
+        if kubernetes_token_file is not None:
+            self.kubernetes_token = Path(kubernetes_token_file).read_text(encoding="utf-8").strip()
+            if not self.kubernetes_token:
+                raise ValueError("Kubernetes token is empty")
+            self.kubernetes_tls = ssl.create_default_context(cafile=kubernetes_ca_file)
 
     def send(self, text, transaction_id, formatted_html=None):
         url = (
@@ -86,6 +160,29 @@ class Notifier:
                 logging.info("Notified successful Comin deployment on %s", host)
             self.state["last"][host] = timestamp
             self.save_state()
+
+    def poll_pods(self):
+        result = request_json(
+            KUBERNETES_PODS_URL,
+            headers={"Authorization": "Bearer " + self.kubernetes_token},
+            context=self.kubernetes_tls,
+        )
+        if self.pods_file.exists():
+            known = json.loads(self.pods_file.read_text(encoding="utf-8"))
+            lines, current = pod_changes(known, result["items"])
+        else:
+            # Do not notify about the pods that preceded the first installation.
+            lines, current = pod_changes({}, result["items"])
+            lines = []
+        serialized = json.dumps(current, sort_keys=True)
+        if lines:
+            # The state identifies the message: a retry reuses the transaction ID,
+            # and the same text at a later time gets a new one.
+            self.send("\n".join(lines), "pods-" + hashlib.sha256(serialized.encode()).hexdigest())
+            logging.info("Notified %d pod changes", len(lines))
+        temporary = self.pods_file.with_suffix(".tmp")
+        temporary.write_text(serialized + "\n", encoding="utf-8")
+        os.replace(temporary, self.pods_file)
 
     def notify_alerts(self, payload):
         if not isinstance(payload, dict) or not isinstance(payload.get("alerts"), list):
@@ -154,14 +251,18 @@ def handler_for(notifier):
 
 def main():
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-    notifier = Notifier(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+    notifier = Notifier(*sys.argv[1:])
+    polls = {"Comin deployment": notifier.poll_deployments}
+    if notifier.kubernetes_token is not None:
+        polls["Kubernetes pod"] = notifier.poll_pods
 
     def poll_forever():
         while True:
-            try:
-                notifier.poll_deployments()
-            except Exception:
-                logging.exception("Comin deployment poll failed")
+            for name, poll in polls.items():
+                try:
+                    poll()
+                except Exception:
+                    logging.exception("%s poll failed", name)
             time.sleep(30)
 
     threading.Thread(target=poll_forever, daemon=True).start()
