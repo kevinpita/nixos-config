@@ -61,6 +61,21 @@ modelPresets:
       memory: openai-codex/gpt-6.1-terra:low
       judge: "@smol"
       image: openai-codex/gpt-image-2
+  code (sol):
+    defaultThinkingLevel: high
+    modelRoles:
+      default: openai-codex/gpt-6.2-sol:high
+      smol: openai-codex/gpt-6.2-sol:medium
+      slow: openai-codex/gpt-6.2-sol:xhigh
+      vision: openai-codex/gpt-6.2-sol:medium
+      plan: openai-codex/gpt-6.2-sol:xhigh
+      task: openai-codex/gpt-6.2-sol:high
+      advisor: anthropic/claude-opus-5-5:high
+      commit: openai-codex/gpt-6.1-terra:medium
+      tiny: openai-codex/gpt-6.1-terra:low
+      memory: openai-codex/gpt-6.1-terra:low
+      judge: "@smol"
+      image: openai-codex/gpt-image-2
   think (astra):
     defaultThinkingLevel: high
     modelRoles:
