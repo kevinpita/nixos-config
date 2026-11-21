@@ -1,10 +1,16 @@
 advisors:
-  - name: GPT-SOL
+  - name: FABLE 5.2
     enabled: true
+    model: anthropic/claude-fable-5-2:high
+  - name: ASTRA 6.2
+    enabled: true
+    model: openai-codex/gpt-6.2-astra:high
+  - name: GPT-SOL
+    enabled: false
     model: openai-codex/gpt-6.2-sol:high
   - name: DeepSeek V4 Flash
     enabled: false
     model: nan/deepseek-v4-flash:high
   - name: Claude Opus 5.5
-    enabled: true
+    enabled: false
     model: anthropic/claude-opus-5-5:high
