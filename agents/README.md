@@ -17,14 +17,13 @@ Harness settings and files that use harness-specific syntax belong in the folder
 
 | Harness | `AGENTS.md` | `RULES.md` | `skills/` |
 | --- | --- | --- | --- |
-| omp | `~/.omp/agent/AGENTS.md` | `~/.omp/agent/RULES.md` | `~/.omp/agent/skills`, without `bro` because pstack ships its own |
+| omp | `~/.omp/agent/AGENTS.md` | `~/.omp/agent/RULES.md` | `~/.omp/agent/skills` |
+| Antigravity CLI | `~/.gemini/config/AGENTS.md` | the end of `~/.gemini/config/AGENTS.md` | `~/.gemini/config/skills.json` |
 | Claude Code | `~/.claude/CLAUDE.md` | the end of `~/.claude/CLAUDE.md` | not installed |
 
 omp gives `AGENTS.md` to the main session only. Task subagents get `RULES.md`, so a rule that a subagent must follow belongs there.
 
-omp also gets the `forklab` skill. The forklab package ships that skill, so it stays at the same version as the installed CLI. Change it in the forklab repository.
-
-omp also gets selected interface design skills from [`jakubkrehel/skills`](https://github.com/jakubkrehel/skills). The `interface-skills` flake input pins that repository, and `modules/omp.nix` lists which skill folders to link. Run `nix flake update interface-skills` to get a newer version.
+omp and Antigravity CLI use the same catalog in [`modules/omp.nix`](../modules/omp.nix). It includes the skills in this directory, the `forklab` skill from its CLI package, and selected interface skills from [`jakubkrehel/skills`](https://github.com/jakubkrehel/skills). The `interface-skills` flake input pins the interface skills. Both agents load the pinned pstack plugin, which provides `bro` instead of the copy in this directory.
 
 ## Applying changes
 

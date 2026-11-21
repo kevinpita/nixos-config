@@ -273,7 +273,6 @@ in
         "better-writing"
         "break"
         "interface-review"
-        "teardown"
         "variant"
       ];
       withInterfaceSkills =
@@ -282,6 +281,7 @@ in
           mkdir "$out"
           ln -s ${skills}/* ${lib.escapeShellArgs interfaceSkills} "$out"/
         '';
+      agentSkills = withInterfaceSkills (withPackagedSkills skillsWithoutBro);
     in
     {
       imports = [
@@ -299,6 +299,7 @@ in
       ];
 
       programs.nix-ld.enable = true;
+      environment.systemPackages = [ pkgs.antigravity-cli ];
 
       programs.omp = {
         enable = true;
@@ -397,10 +398,17 @@ in
           '';
 
           home.file = {
+            ".gemini/config/AGENTS.md".text =
+              builtins.readFile ../agents/AGENTS.md + "\n" + builtins.readFile ../agents/RULES.md;
+            ".gemini/config/skills.json".text = builtins.toJSON {
+              entries = [ { path = "${agentSkills}"; } ];
+            };
+            ".gemini/config/plugins/pstack".source = pstackPlugin;
+
             ".omp/agent/AGENTS.md".source = ../agents/AGENTS.md;
             # Task subagents get RULES.md, but not AGENTS.md.
             ".omp/agent/RULES.md".source = ../agents/RULES.md;
-            ".omp/agent/skills".source = withInterfaceSkills (withPackagedSkills skillsWithoutBro);
+            ".omp/agent/skills".source = agentSkills;
             # File-based slash commands, for example /pre-pr.
             ".omp/agent/commands".source = ../omp/commands;
             # /send and /receive move resumable sessions between hosts over SSH.
