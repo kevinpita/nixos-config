@@ -279,7 +279,7 @@ in
         skills:
         pkgs.runCommand "interface-skills" { } ''
           mkdir "$out"
-          ln -s ${skills}/* ${lib.escapeShellArgs interfaceSkills} "$out"/
+          ln -s ${skills}/* ${lib.escapeShellArgs interfaceSkills} ${inputs.unslop-ui}/skills/unslop-ui "$out"/
         '';
       agentSkills = withInterfaceSkills (withPackagedSkills skillsWithoutBro);
     in

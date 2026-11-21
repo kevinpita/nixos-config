@@ -1208,6 +1208,7 @@
         "pstack": "pstack",
         "sops-nix": "sops-nix",
         "treefmt-nix": "treefmt-nix_5",
+        "unslop-ui": "unslop-ui",
         "whisp-nix": "whisp-nix",
         "wrappers": "wrappers"
       }
@@ -1473,6 +1474,22 @@
       "original": {
         "owner": "numtide",
         "repo": "treefmt-nix",
+        "type": "github"
+      }
+    },
+    "unslop-ui": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1795175079,
+        "narHash": "sha256-c4fuulNZKKB0JrqE7wHenZJeScjfkz1N7F1x/UMTtyc=",
+        "owner": "felipebasurto",
+        "repo": "unslop-ui",
+        "rev": "32279dec96ef20a4a0ac47a5b113e48dda6b3b6e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "felipebasurto",
+        "repo": "unslop-ui",
         "type": "github"
       }
     },

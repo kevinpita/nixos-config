@@ -23,7 +23,7 @@ Harness settings and files that use harness-specific syntax belong in the folder
 
 omp gives `AGENTS.md` to the main session only. Task subagents get `RULES.md`, so a rule that a subagent must follow belongs there.
 
-omp and Antigravity CLI use the same catalog in [`modules/omp.nix`](../modules/omp.nix). It includes the skills in this directory, the `forklab` skill from its CLI package, and selected interface skills from [`jakubkrehel/skills`](https://github.com/jakubkrehel/skills). The `interface-skills` flake input pins the interface skills. Both agents load the pinned pstack plugin, which provides `bro` instead of the copy in this directory.
+omp and Antigravity CLI use the same catalog in [`modules/omp.nix`](../modules/omp.nix). It includes the skills in this directory, the `forklab` skill from its CLI package, selected interface skills from [`jakubkrehel/skills`](https://github.com/jakubkrehel/skills), and [`unslop-ui`](https://github.com/felipebasurto/unslop-ui). Flake inputs pin the external skills. Both agents load the pinned pstack plugin, which provides `bro` instead of the copy in this directory.
 
 ## Applying changes
 

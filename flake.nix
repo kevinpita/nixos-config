@@ -110,6 +110,11 @@
       flake = false;
     };
 
+    unslop-ui = {
+      url = "github:felipebasurto/unslop-ui";
+      flake = false;
+    };
+
     dankcalendar = {
       url = "github:AvengeMedia/dankcalendar";
       inputs.nixpkgs.follows = "nixpkgs";
