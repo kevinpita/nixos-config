@@ -1,10 +1,8 @@
 {
   flake.modules.nixos.base =
     {
-      inputs,
       lib,
       username,
-      hostname,
       config,
       ciMode,
       ...
@@ -26,13 +24,6 @@
         useGlobalPkgs = true;
         useUserPackages = true;
         backupFileExtension = "bak";
-        extraSpecialArgs = {
-          inherit
-            inputs
-            username
-            hostname
-            ;
-        };
         users.${username} = {
           home = {
             enableNixpkgsReleaseCheck = false;
