@@ -685,6 +685,22 @@
         "type": "github"
       }
     },
+    "impeccable": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1795039099,
+        "narHash": "sha256-vtmRhNPnX974JYvn5BKXeJ1JpBusS/0O57zTPVxbJPg=",
+        "owner": "pbakaus",
+        "repo": "impeccable",
+        "rev": "b49177d32788f2dc585c42831d845dacf1ebed2c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "pbakaus",
+        "repo": "impeccable",
+        "type": "github"
+      }
+    },
     "import-tree": {
       "locked": {
         "lastModified": 1788467110,
@@ -717,22 +733,6 @@
       "original": {
         "owner": "kevinpita",
         "repo": "ink-nix",
-        "type": "github"
-      }
-    },
-    "interface-skills": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1795061490,
-        "narHash": "sha256-gKruv6vNgrpAaGCe9Vg2EWv4GfsQQi05Wp7zJ4MyRB8=",
-        "owner": "jakubkrehel",
-        "repo": "skills",
-        "rev": "672ae44ace6aaed65b86cbb1e2fd6fbea0e79578",
-        "type": "github"
-      },
-      "original": {
-        "owner": "jakubkrehel",
-        "repo": "skills",
         "type": "github"
       }
     },
@@ -1190,9 +1190,9 @@
         "herdr-nix": "herdr-nix",
         "home-manager": "home-manager_2",
         "ilofan": "ilofan",
+        "impeccable": "impeccable",
         "import-tree": "import-tree",
         "ink-nix": "ink-nix",
-        "interface-skills": "interface-skills",
         "kevinpita-nixpkgs": "kevinpita-nixpkgs",
         "ku-nix": "ku-nix",
         "lazyrsync-nix": "lazyrsync-nix",

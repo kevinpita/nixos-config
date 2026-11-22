@@ -105,8 +105,8 @@
       flake = false;
     };
 
-    interface-skills = {
-      url = "github:jakubkrehel/skills";
+    impeccable = {
+      url = "github:pbakaus/impeccable";
       flake = false;
     };
 

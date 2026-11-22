@@ -262,26 +262,56 @@ in
             ${pkgs.forklab}/share/forklab/.agents/skills/forklab \
             "$out"/
         '';
-      # Interface design skills from jakubkrehel/skills.
-      interfaceSkills = map (name: "${inputs.interface-skills}/skills/${name}") [
-        "better-accessibility"
-        "better-colors"
-        "better-interface"
-        "better-layout"
-        "better-typography"
-        "better-ui"
-        "better-writing"
-        "break"
-        "interface-review"
-        "variant"
-      ];
-      withInterfaceSkills =
+      # impeccable's launcher runs the engine at scripts/bin/<os>-<arch>/ when
+      # its version matches scripts/VERSION, and downloads it into ~/.impeccable
+      # otherwise. The engine is pinned here with the digest from the skill's
+      # own manifest, so updating the input updates both.
+      impeccableSource = "${inputs.impeccable}/.pi/skills/impeccable";
+      impeccableVersion = lib.fileContents "${impeccableSource}/scripts/VERSION";
+      impeccableArch =
+        {
+          x86_64-linux = "x64";
+          aarch64-linux = "arm64";
+        }
+        .${system};
+      impeccableAsset = "impeccable-linux-${impeccableArch}";
+      impeccableEngine = pkgs.fetchurl {
+        url = "https://github.com/pbakaus/impeccable/releases/download/engine-v${impeccableVersion}/${impeccableAsset}";
+        sha256 = lib.pipe "${impeccableSource}/scripts/engine-checksums.txt" [
+          lib.fileContents
+          (lib.splitString "\n")
+          (lib.findFirst (lib.hasPrefix "${impeccableVersion} ${impeccableAsset} ") (
+            throw "impeccable has no checksum for ${impeccableAsset} ${impeccableVersion}"
+          ))
+          (lib.splitString " ")
+          lib.last
+        ];
+      };
+      impeccableSkill =
+        pkgs.runCommand "impeccable-skill" { nativeBuildInputs = [ pkgs.makeWrapper ]; }
+          ''
+            mkdir "$out"
+            skill="$out/impeccable"
+            cp -r ${impeccableSource} "$skill"
+            chmod -R u+w "$skill"
+            # The instructions call the launcher by its path in a project install.
+            grep -rlF .pi/skills/impeccable/scripts "$skill" \
+              | xargs sed -i "s|\.pi/skills/impeccable/scripts|$skill/scripts|g"
+            install -Dm755 ${impeccableEngine} "$out/libexec/impeccable"
+            # Updates come from the flake input. Live mode applies copy edits in
+            # the chat session instead of starting codex or claude without a sandbox.
+            makeWrapper "$out/libexec/impeccable" "$skill/scripts/bin/linux-${impeccableArch}/impeccable" \
+              --set-default IMPECCABLE_NO_UPDATE_CHECK 1 \
+              --set-default IMPECCABLE_NO_TELEMETRY 1 \
+              --set-default IMPECCABLE_LIVE_COPY_AGENT chat
+          '';
+      withExternalSkills =
         skills:
-        pkgs.runCommand "interface-skills" { } ''
+        pkgs.runCommand "external-skills" { } ''
           mkdir "$out"
-          ln -s ${skills}/* ${lib.escapeShellArgs interfaceSkills} ${inputs.unslop-ui}/skills/unslop-ui "$out"/
+          ln -s ${skills}/* ${impeccableSkill}/impeccable ${inputs.unslop-ui}/skills/unslop-ui "$out"/
         '';
-      agentSkills = withInterfaceSkills (withPackagedSkills skillsWithoutBro);
+      agentSkills = withExternalSkills (withPackagedSkills skillsWithoutBro);
     in
     {
       imports = [
