@@ -18,15 +18,6 @@ in
       };
       boot.kernelPackages = pkgs.linuxPackages_latest;
 
-      services.btrfs.autoScrub = {
-        enable = true;
-        fileSystems = [
-          "/"
-          "/storage/500gb"
-          "/storage/1tb"
-        ];
-        interval = "weekly";
-      };
       services.smartd.defaults.monitored = "-a -s (S/../.././01|L/../../3/02)";
 
       networking = {

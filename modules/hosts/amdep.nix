@@ -13,6 +13,16 @@
         config.flake.modules.nixos.reverse-engineering
       ];
 
+      fileSystems."/storage/datos" = {
+        device = "/dev/disk/by-uuid/8aebe5a1-9a38-40cc-959a-1d2fb65f36e2";
+        fsType = "btrfs";
+        options = [
+          "nofail"
+          "noatime"
+          "compress=zstd"
+        ];
+      };
+
       hardware.bluetooth.enable = true;
 
       boot.kernelPackages = pkgs.linuxPackages_latest;

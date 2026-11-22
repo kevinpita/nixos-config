@@ -1,0 +1,83 @@
+{
+  "uid": "btrfs",
+  "title": "Btrfs",
+  "description": "Btrfs device error counters, block group allocation, and the weekly scrub schedule. Scrub panels show when systemd started a scrub and whether the scrub service failed. They do not show that a scrub completed. Missing data does not mean a filesystem is healthy.",
+  "tags": ["nixos"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": false,
+  "refresh": "1m",
+  "time": {"from": "now-7d", "to": "now"},
+  "templating": {
+    "list": [
+      {
+        "name": "host", "label": "Host", "type": "query",
+        "datasource": {"type": "prometheus", "uid": "prometheus"},
+        "query": {"query": "label_values(node_btrfs_info{job=\"node\"}, host)", "refId": "StandardVariableQuery"},
+        "definition": "label_values(node_btrfs_info{job=\"node\"}, host)",
+        "refresh": 2, "sort": 1, "multi": false, "includeAll": false,
+        "options": [], "current": {}
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1, "title": "Device errors", "type": "stat",
+      "description": "Sum of read, write, flush, corruption, and generation errors for each device. Counters stay until btrfs device stats resets them.",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": {"x": 0, "y": 0, "w": 8, "h": 5},
+      "targets": [{"refId": "A", "expr": "sum by (device) (node_btrfs_device_errors_total{job=\"node\",host=\"$host\"})", "legendFormat": "{{device}}", "instant": true}],
+      "fieldConfig": {"defaults": {"noValue": "No data", "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]}}, "overrides": []},
+      "options": {"colorMode": "background", "reduceOptions": {"calcs": ["lastNotNull"], "values": false}}
+    },
+    {
+      "id": 2, "title": "Scrub service", "type": "stat",
+      "description": "Failed state of each scrub service. A scrub that finds uncorrectable errors fails. No data means that systemd has not loaded the service since startup.",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": {"x": 8, "y": 0, "w": 8, "h": 5},
+      "targets": [{"refId": "A", "expr": "node_systemd_unit_state{job=\"node\",host=\"$host\",name=~\"btrfs-scrub@.+[.]service\",state=\"failed\"}", "legendFormat": "{{name}}", "instant": true}],
+      "fieldConfig": {"defaults": {"noValue": "No data", "mappings": [{"type": "value", "options": {"0": {"text": "Not failed", "color": "green"}, "1": {"text": "Failed", "color": "red"}}}]}, "overrides": []},
+      "options": {"colorMode": "background", "reduceOptions": {"calcs": ["lastNotNull"], "values": false}}
+    },
+    {
+      "id": 3, "title": "Last scrub start", "type": "stat",
+      "description": "Last trigger time that systemd reports for each scrub timer. This is a start time, not a completion time. Before the first scrub, it shows No data or the time when the timer was set up.",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": {"x": 16, "y": 0, "w": 8, "h": 5},
+      "targets": [{"refId": "A", "expr": "1000 * (node_systemd_timer_last_trigger_seconds{job=\"node\",host=\"$host\",name=~\"btrfs-scrub@.+[.]timer\"} > 0)", "legendFormat": "{{name}}", "instant": true}],
+      "fieldConfig": {"defaults": {"unit": "dateTimeAsIso", "color": {"mode": "fixed", "fixedColor": "blue"}, "noValue": "No data"}, "overrides": []},
+      "options": {"colorMode": "value", "graphMode": "none", "reduceOptions": {"calcs": ["lastNotNull"], "values": false}, "text": {"titleSize": 14, "valueSize": 16}}
+    },
+    {
+      "id": 4, "title": "Device errors by type", "type": "timeseries",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": {"x": 0, "y": 5, "w": 12, "h": 8},
+      "targets": [{"refId": "A", "expr": "node_btrfs_device_errors_total{job=\"node\",host=\"$host\"}", "legendFormat": "{{device}} {{type}}"}],
+      "fieldConfig": {"defaults": {"noValue": "No data", "min": 0, "decimals": 0}, "overrides": []}
+    },
+    {
+      "id": 5, "title": "Allocated block groups used", "type": "timeseries",
+      "description": "Used share of the space that Btrfs allocated to data and metadata block groups. Full metadata with no unallocated device space can make writes fail.",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": {"x": 12, "y": 5, "w": 12, "h": 8},
+      "targets": [{"refId": "A", "expr": "100 * sum by (uuid, block_group_type) (node_btrfs_used_bytes{job=\"node\",host=\"$host\",block_group_type=~\"data|metadata\"}) / sum by (uuid, block_group_type) (node_btrfs_size_bytes{job=\"node\",host=\"$host\",block_group_type=~\"data|metadata\"})", "legendFormat": "{{block_group_type}} {{uuid}}"}],
+      "fieldConfig": {"defaults": {"unit": "percent", "min": 0, "max": 100, "noValue": "No data"}, "overrides": []}
+    },
+    {
+      "id": 6, "title": "Unallocated device space", "type": "timeseries",
+      "description": "Space on each device that no block group uses yet.",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": {"x": 0, "y": 13, "w": 12, "h": 8},
+      "targets": [{"refId": "A", "expr": "node_btrfs_device_unused_bytes{job=\"node\",host=\"$host\"}", "legendFormat": "{{device}}"}],
+      "fieldConfig": {"defaults": {"unit": "bytes", "min": 0, "noValue": "No data"}, "overrides": []}
+    },
+    {
+      "id": 7, "title": "Used space by block group", "type": "timeseries",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": {"x": 12, "y": 13, "w": 12, "h": 8},
+      "targets": [{"refId": "A", "expr": "node_btrfs_used_bytes{job=\"node\",host=\"$host\"}", "legendFormat": "{{block_group_type}} {{uuid}}"}],
+      "fieldConfig": {"defaults": {"unit": "bytes", "min": 0, "noValue": "No data"}, "overrides": []}
+    }
+  ]
+}

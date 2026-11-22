@@ -93,7 +93,7 @@
         }
         {
           alert = "SmartHealthFailed";
-          expr = ''smartctl_device_smart_status{job="smartctl",host="${storageHost}"} == 0'';
+          expr = ''smartctl_device_smart_status{job="smartctl",host=~"${servers}"} == 0'';
           for = "2m";
           labels.severity = "critical";
           annotations = {
@@ -103,7 +103,7 @@
         }
         {
           alert = "SmartDrivesUnreported";
-          expr = ''(smartctl_devices{job="smartctl",host="${storageHost}"} - on(host,instance) (count by(host,instance) (smartctl_device{job="smartctl",host="${storageHost}"}) or on(host,instance) (0 * smartctl_devices{job="smartctl",host="${storageHost}"}))) > 0'';
+          expr = ''(smartctl_devices{job="smartctl",host=~"${servers}"} - on(host,instance) (count by(host,instance) (smartctl_device{job="smartctl",host=~"${servers}"}) or on(host,instance) (0 * smartctl_devices{job="smartctl",host=~"${servers}"}))) > 0'';
           for = "10m";
           labels.severity = "critical";
           annotations = {
@@ -139,6 +139,46 @@
           annotations = {
             summary = "ZFS scrub metrics stale on {{ $labels.host }}";
             description = "The scrub metadata collector has not reported fresh data for 5 minutes.";
+          };
+        }
+        {
+          alert = "BtrfsDeviceErrors";
+          expr = ''node_btrfs_device_errors_total{job="node"} > 0'';
+          for = "5m";
+          labels.severity = "critical";
+          annotations = {
+            summary = "Btrfs device errors on {{ $labels.host }}";
+            description = "Device {{ $labels.device }} has {{ $labels.type }} errors. Check btrfs device stats. The counter stays until it is reset.";
+          };
+        }
+        {
+          alert = "BtrfsScrubFailed";
+          expr = ''node_systemd_unit_state{job="node",name=~"btrfs-scrub@.+[.]service",state="failed"} == 1'';
+          for = "5m";
+          labels.severity = "critical";
+          annotations = {
+            summary = "Btrfs scrub failed on {{ $labels.host }}";
+            description = "{{ $labels.name }} failed. The scrub found uncorrectable errors or could not finish. Check btrfs scrub status.";
+          };
+        }
+        {
+          alert = "BtrfsScrubMissing";
+          expr = ''node_systemd_timer_last_trigger_seconds{job="node",host=~"${servers}",name=~"btrfs-scrub@.+[.]timer"} == 0'';
+          for = "10d";
+          labels.severity = "warning";
+          annotations = {
+            summary = "No Btrfs scrub started on {{ $labels.host }}";
+            description = "{{ $labels.name }} has not started a scrub after 10 days.";
+          };
+        }
+        {
+          alert = "BtrfsScrubOverdue";
+          expr = ''time() - (node_systemd_timer_last_trigger_seconds{job="node",host=~"${servers}",name=~"btrfs-scrub@.+[.]timer"} > 0) > 10 * 24 * 60 * 60'';
+          for = "30m";
+          labels.severity = "warning";
+          annotations = {
+            summary = "Btrfs scrub overdue on {{ $labels.host }}";
+            description = "{{ $labels.name }} has not started a scrub in over 10 days.";
           };
         }
         {
@@ -183,7 +223,7 @@
         }
         {
           alert = "MonitoringExporterDown";
-          expr = ''up{job="node",host=~"${servers}"} == 0 or up{job=~"smartctl|zfs|ilofan",host="${storageHost}"} == 0'';
+          expr = ''up{job=~"node|smartctl",host=~"${servers}"} == 0 or up{job=~"zfs|ilofan",host="${storageHost}"} == 0'';
           for = "5m";
           labels.severity = "critical";
           annotations = {
