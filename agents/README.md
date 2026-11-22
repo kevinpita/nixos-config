@@ -23,7 +23,7 @@ Harness settings and files that use harness-specific syntax belong in the folder
 
 omp gives `AGENTS.md` to the main session only. Task subagents get `RULES.md`, so a rule that a subagent must follow belongs there.
 
-omp and Antigravity CLI use the same catalog in [`modules/omp.nix`](../modules/omp.nix). It includes the skills in this directory, the `forklab` skill from its CLI package, the `impeccable` skill from [`pbakaus/impeccable`](https://github.com/pbakaus/impeccable) with its pinned engine binary, and [`unslop-ui`](https://github.com/felipebasurto/unslop-ui). Flake inputs pin the external skills. Both agents load the pinned pstack plugin, which provides `bro` instead of the copy in this directory.
+omp and Antigravity CLI use the same catalog in [`modules/omp.nix`](../modules/omp.nix). It includes the skills in this directory, the `forklab` skill from its CLI package, the `impeccable` skill from [`pbakaus/impeccable`](https://github.com/pbakaus/impeccable) with its pinned engine binary, and selected skills from [`felipebasurto/unslop-ui`](https://github.com/felipebasurto/unslop-ui), [`obsidianmd/obsidian-skills`](https://github.com/obsidianmd/obsidian-skills), [`grafana/skills`](https://github.com/grafana/skills), [`github/gh-stack`](https://github.com/github/gh-stack), [`github/awesome-copilot`](https://github.com/github/awesome-copilot), [`mattpocock/skills`](https://github.com/mattpocock/skills), and [`cursor/plugins`](https://github.com/cursor/plugins). Flake inputs pin the external skills. Both agents load the pinned pstack plugin, which provides `bro`.
 
 ## Applying changes
 

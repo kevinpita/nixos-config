@@ -248,11 +248,6 @@ in
             --add-flags "--plugin-dir ${pstackPlugin} --extension ${plannotatorPlugin}/node_modules/@plannotator/pi-extension/index.ts"
         '';
       };
-      # pstack ships its own bro skill.
-      skillsWithoutBro = lib.fileset.toSource {
-        root = ../agents/skills;
-        fileset = lib.fileset.difference ../agents/skills ../agents/skills/bro;
-      };
       # forklab ships its skill in its package.
       withPackagedSkills =
         skills:
@@ -309,9 +304,20 @@ in
         skills:
         pkgs.runCommand "external-skills" { } ''
           mkdir "$out"
-          ln -s ${skills}/* ${impeccableSkill}/impeccable ${inputs.unslop-ui}/skills/unslop-ui "$out"/
+          ln -s ${skills}/* \
+            ${impeccableSkill}/impeccable \
+            ${inputs.unslop-ui}/skills/unslop-ui \
+            ${inputs.mattpocock-skills}/skills/engineering/domain-modeling \
+            ${inputs.mattpocock-skills}/skills/productivity/writing-for-agents \
+            ${inputs.awesome-copilot}/skills/create-readme \
+            ${inputs.cursor-plugins}/thermos/skills/thermo-nuclear-code-quality-review \
+            ${inputs.obsidian-skills}/plugins/obsidian/skills/obsidian-cli \
+            ${inputs.obsidian-skills}/plugins/obsidian/skills/obsidian-markdown \
+            ${inputs.grafana-skills}/skills/grafana-core/grafana-oss \
+            ${inputs.gh-stack-skills}/skills/gh-stack \
+            "$out"/
         '';
-      agentSkills = withExternalSkills (withPackagedSkills skillsWithoutBro);
+      agentSkills = withExternalSkills (withPackagedSkills ../agents/skills);
     in
     {
       imports = [

@@ -110,6 +110,36 @@
       flake = false;
     };
 
+    mattpocock-skills = {
+      url = "github:mattpocock/skills";
+      flake = false;
+    };
+
+    cursor-plugins = {
+      url = "github:cursor/plugins";
+      flake = false;
+    };
+
+    obsidian-skills = {
+      url = "github:obsidianmd/obsidian-skills";
+      flake = false;
+    };
+
+    grafana-skills = {
+      url = "github:grafana/skills";
+      flake = false;
+    };
+
+    gh-stack-skills = {
+      url = "github:github/gh-stack";
+      flake = false;
+    };
+
+    awesome-copilot = {
+      url = "github:github/awesome-copilot";
+      flake = false;
+    };
+
     unslop-ui = {
       url = "github:felipebasurto/unslop-ui";
       flake = false;

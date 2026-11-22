@@ -44,6 +44,22 @@
         "type": "github"
       }
     },
+    "awesome-copilot": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1795144408,
+        "narHash": "sha256-B9fQq0z5dqDOABYBazLnbhSUHpMzwx4kptSwutA/Lu0=",
+        "owner": "github",
+        "repo": "awesome-copilot",
+        "rev": "f10fdb8b2660ce85c98f220b2f1ca24653768a5c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "github",
+        "repo": "awesome-copilot",
+        "type": "github"
+      }
+    },
     "bast-nix": {
       "inputs": {
         "flake-utils": "flake-utils",
@@ -185,6 +201,22 @@
       "original": {
         "owner": "ipetkov",
         "repo": "crane",
+        "type": "github"
+      }
+    },
+    "cursor-plugins": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1795247883,
+        "narHash": "sha256-Vc1sLJs2MLDlOJ5jVsVXfakHp8+VX0o74aXOrUH4aZ8=",
+        "owner": "cursor",
+        "repo": "plugins",
+        "rev": "792440e8a560a4a3f63748cdee70491ecd412982",
+        "type": "github"
+      },
+      "original": {
+        "owner": "cursor",
+        "repo": "plugins",
         "type": "github"
       }
     },
@@ -573,6 +605,38 @@
         "type": "github"
       }
     },
+    "gh-stack-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794845793,
+        "narHash": "sha256-bctwLafwZ2MhfyfmriEZhcfO9VkMuDDH/dK7yx5GFGY=",
+        "owner": "github",
+        "repo": "gh-stack",
+        "rev": "80b6d6e910cc1b7eaa26b961d7721ade21084fed",
+        "type": "github"
+      },
+      "original": {
+        "owner": "github",
+        "repo": "gh-stack",
+        "type": "github"
+      }
+    },
+    "grafana-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793134833,
+        "narHash": "sha256-PAeYV+ZJWO6eoz+w2v0TsD3TYbkfWnvVrx3yHXmtkNU=",
+        "owner": "grafana",
+        "repo": "skills",
+        "rev": "8fb72a527961f05e708f53d2a0500709e12d7970",
+        "type": "github"
+      },
+      "original": {
+        "owner": "grafana",
+        "repo": "skills",
+        "type": "github"
+      }
+    },
     "herdr-hoverfocus": {
       "flake": false,
       "locked": {
@@ -808,6 +872,22 @@
       "original": {
         "owner": "kevinpita",
         "repo": "lazyrsync-nix",
+        "type": "github"
+      }
+    },
+    "mattpocock-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1795095298,
+        "narHash": "sha256-fc5+qmchp1IQ/rQP1olWKC1eC4VdYhaB7YYzC3+JBe0=",
+        "owner": "mattpocock",
+        "repo": "skills",
+        "rev": "abeeaf95660ba9e8b7c753eb38f441ca707a8823",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mattpocock",
+        "repo": "skills",
         "type": "github"
       }
     },
@@ -1100,6 +1180,22 @@
         "type": "github"
       }
     },
+    "obsidian-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1795194247,
+        "narHash": "sha256-L6qIfM2TKp+g3j0J2SxfWf5qeqahCe7+YcSOMPoePOs=",
+        "owner": "obsidianmd",
+        "repo": "obsidian-skills",
+        "rev": "b110b2f8e9eb1f287892f937050dfd40af862cbb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "obsidianmd",
+        "repo": "obsidian-skills",
+        "type": "github"
+      }
+    },
     "oh-my-pi": {
       "inputs": {
         "bun2nix": "bun2nix",
@@ -1176,15 +1272,19 @@
     },
     "root": {
       "inputs": {
+        "awesome-copilot": "awesome-copilot",
         "bast-nix": "bast-nix",
         "claude-desktop-nix": "claude-desktop-nix",
         "comin": "comin",
+        "cursor-plugins": "cursor-plugins",
         "dankcalendar": "dankcalendar",
         "disko": "disko",
         "dnie-nix": "dnie-nix",
         "dux-greeter": "dux-greeter",
         "flake-parts": "flake-parts_2",
         "forklab": "forklab",
+        "gh-stack-skills": "gh-stack-skills",
+        "grafana-skills": "grafana-skills",
         "herdr-hoverfocus": "herdr-hoverfocus",
         "herdr-lazygit": "herdr-lazygit",
         "herdr-nix": "herdr-nix",
@@ -1196,12 +1296,14 @@
         "kevinpita-nixpkgs": "kevinpita-nixpkgs",
         "ku-nix": "ku-nix",
         "lazyrsync-nix": "lazyrsync-nix",
+        "mattpocock-skills": "mattpocock-skills",
         "nixos-grub-themes": "nixos-grub-themes",
         "nixos-hardware": "nixos-hardware",
         "nixos-secrets": "nixos-secrets",
         "nixos-work": "nixos-work",
         "nixpkgs": "nixpkgs_6",
         "nixpkgs-pgbot": "nixpkgs-pgbot",
+        "obsidian-skills": "obsidian-skills",
         "oh-my-pi": "oh-my-pi",
         "plugins-lze": "plugins-lze",
         "plugins-lzextras": "plugins-lzextras",
