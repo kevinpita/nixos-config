@@ -454,7 +454,6 @@ in
             ".omp/agent/extensions/emphasis".source = "${ompExtensions}/emphasis";
             # kubectl context and namespace, for kubie sessions.
             ".omp/agent/extensions/k8s-status.ts".source = ../omp/extensions/k8s-status.ts;
-            ".omp/agent/extensions/nan-usage.ts".source = ../omp/extensions/nan-usage.ts;
             # ##name completes a git branch in the prompt.
             ".omp/agent/extensions/branch-ref.ts".source = ../omp/extensions/branch-ref.ts;
             # omp has no model-change event, so poll the live model to keep

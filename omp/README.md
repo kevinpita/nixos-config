@@ -41,14 +41,6 @@ Keep providers available for manual selection when only their default routes cha
 
 The rules are an approval policy, not containment. They do not cover `eval` or a verb that is not listed, and a command that only contains the text of a listed command also asks.
 
-## NaN usage
-
-`extensions/nan-usage.ts` adds NaN quota reports to `/usage` and `omp usage`. It reads the `nan` provider's model IDs and API-key reference from `~/.omp/agent/models.yml`, so inference and usage keep the same configuration.
-
-The extension uses the NaN dashboard's undocumented `https://cloud-api.nan.builders/api/usage/quota` endpoint. It reports base quotas for configured models and uses each model's period-end timestamp. Rolling windows appear only when the API supplies their usage and budget. Bonus tokens are not included in the base quotas.
-
-The extension works with the auth broker. If the broker has no NaN report, omp fetches the quota locally with the configured key.
-
 ## Plannotator
 
 OMP loads the pinned Plannotator extension in every session. Use `/plannotator-plan-mode` to review plans in a browser. The extension also provides code review and document annotation commands. Its npm dependencies are pinned in `plannotator/package-lock.json`.
