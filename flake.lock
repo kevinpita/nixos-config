@@ -678,11 +678,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795396738,
-        "narHash": "sha256-CuRVWyEWyNvudj6009TQPkPRLyoLSjBEB4xrO9vAIlQ=",
+        "lastModified": 1795439993,
+        "narHash": "sha256-5IqpeUORtF7TayZB0obEI55+yahHNPxH6i4nhYAbQ5U=",
         "owner": "kevinpita",
         "repo": "herdr-nix",
-        "rev": "60621799fa63bdd9dcc68986ad4c280f462fa972",
+        "rev": "5306ba7f8dc4bdfcf025caa3fb9ae876a681a34a",
         "type": "github"
       },
       "original": {
