@@ -1,5 +1,5 @@
 usage() {
-  cat >&2 <<'EOF'
+  cat <<'EOF'
 usage: sandbox-run --target DIR [--ro DIR]... [--gomodcache DIR] [--path DIR]... -- COMMAND [ARG]...
 
 Runs COMMAND with no external network (loopback only), an empty environment,
@@ -12,9 +12,25 @@ Limits for the whole process tree come from environment variables:
   SANDBOX_MEM (default 4G, swap 0), SANDBOX_CPU (default 200%), SANDBOX_TASKS (default 512),
   SANDBOX_TIME (default 15min), SANDBOX_DISK (default 2G, size of /scratch),
   SANDBOX_FSIZE (default 1G, largest file).
+Sizes use an uppercase IEC suffix (512M, 8G); a plain number is bytes.
+SANDBOX_CPU is a percent of one CPU (400% is 4 CPUs). SANDBOX_TIME is a systemd time span (30min, 2h).
+
+Go build or test (there is no C compiler, so turn cgo off):
+  SANDBOX_DISK=8G SANDBOX_MEM=8G sandbox-run --target . --gomodcache "$(go env GOMODCACHE)" \
+    --path "$(dirname "$(command -v go)")" -- env CGO_ENABLED=0 go test ./...
 EOF
+}
+
+fail() {
+  echo "sandbox-run: $1" >&2
+  usage >&2
   exit 64
 }
+
+if (($# == 0)); then
+  usage
+  exit 0
+fi
 
 target=""
 ro_dirs=()
@@ -22,15 +38,24 @@ path_dirs=()
 gomodcache=""
 while (($#)); do
   case "$1" in
-    --target) target=$(realpath "$2"); shift 2 ;;
-    --ro) ro_dirs+=("$(realpath "$2")"); shift 2 ;;
-    --path) path_dirs+=("$(realpath "$2")"); shift 2 ;;
-    --gomodcache) gomodcache=$(realpath "$2"); shift 2 ;;
+    -h | --help) usage; exit 0 ;;
+    --target | --ro | --path | --gomodcache)
+      (($# >= 2)) || fail "$1 needs a directory"
+      dir=$(realpath "$2")
+      case "$1" in
+        --target) target=$dir ;;
+        --ro) ro_dirs+=("$dir") ;;
+        --path) path_dirs+=("$dir") ;;
+        --gomodcache) gomodcache=$dir ;;
+      esac
+      shift 2
+      ;;
     --) shift; break ;;
-    *) usage ;;
+    *) fail "unknown option: $1" ;;
   esac
 done
-[[ -n "$target" && $# -gt 0 ]] || usage
+[[ -n "$target" ]] || fail "--target is required"
+(($#)) || fail "no command after --"
 
 disk_bytes=$(numfmt --from=iec "${SANDBOX_DISK:-2G}")
 path=/run/current-system/sw/bin

@@ -16,6 +16,13 @@
         nodejs_22
         python3
 
+        # Shell script and GitHub Actions linters
+        actionlint
+        shellcheck
+
+        # Audio and video processing
+        ffmpeg
+
         # Security scanning
         trivy
 
