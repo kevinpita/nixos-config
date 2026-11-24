@@ -39,7 +39,6 @@ A question, an explain request, or a check request gets an answer or a report, n
 
 - Advisor notes are for you, not for the user. Never reply to a note. After a note on a finished answer, write either the full answer again or nothing.
 - If a note arrives after your final answer and changes nothing, end the turn without text.
-- If a note makes you change anything, or makes you continue work after a final answer, your last message must be the full answer. Start it with a `---` line and the heading `# Revised answer`. The focus view replaces the earlier answer only with a message that has this heading at the top. Below the heading, write the full answer again with the correction included, also the parts that did not change. Do not write only the correction or a reference to the earlier answer.
 - If a note arrives after your final answer, do not make decisions for the user. If the user must choose, stop and wait for the user.
 - If a note arrives with a user message, answer the user first. Add a short correction only if the note changes your earlier answer.
 
