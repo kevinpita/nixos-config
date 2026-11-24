@@ -43,7 +43,7 @@ The rules are an approval policy, not containment. They do not cover `eval` or a
 
 ## Plannotator
 
-OMP loads the pinned Plannotator extension in every session. Use `/plannotator-plan-mode` to review plans in a browser. The extension also provides code review and document annotation commands. Its npm dependencies are pinned in `plannotator/package-lock.json`.
+OMP loads the pinned Plannotator extension in every session. Use `/plannotator-plan-mode` to review plans in a browser. The extension also provides code review and document annotation commands. Its npm dependencies are pinned in `plannotator/package-lock.json`. `modules/omp.nix` replaces its one use of the pi-tui key helper, which omp no longer provides.
 
 ## Logins
 
@@ -53,7 +53,7 @@ One host can set `omp.authBroker.enable` to run `omp auth-broker serve` as a sys
 
 Change `modules/omp.nix` for the package, wrapper settings that runtime edits must not override, or which files are installed. Change this folder for the content of those files. The `oh-my-pi` flake input provides omp. The `pstack` input pins the pstack plugin package. `modules/omp.nix` also owns the skill catalog and the pstack plugin that omp and Antigravity CLI share. See [`agents/README.md`](../agents/README.md) for where each harness reads them.
 
-The package applies [upstream PR #19201](https://github.com/can1357/oh-my-pi/pull/19201) for `/fork pane` and `/fork tab` in Herdr Desktop and Core. Remove the patch when the pinned upstream version includes the fix.
+The package applies `patches/herdr-core-fork.patch` for `/fork pane` and `/fork tab` in Herdr Desktop and Core. The patch ports [upstream PR #19201](https://github.com/can1357/oh-my-pi/pull/19201), which upstream closed without a merge, and it holds only the source changes. If an `oh-my-pi` update makes the patch fail to apply, port it to the new source.
 
 ## Applying changes
 

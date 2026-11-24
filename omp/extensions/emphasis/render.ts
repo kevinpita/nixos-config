@@ -1,13 +1,7 @@
-import type { Token } from "@oh-my-pi/pi-utils/marked";
-import {
-	getThemeEpoch,
-	isValidThemeColor,
-	lexDocument,
-	theme,
-	type Theme,
-	type ThemeBg,
-	type ThemeColor,
-} from "@oh-my-pi/pi-tui";
+import { lexMarkdown, type Token } from "@oh-my-pi/pi-tui/text/markdown/lexer";
+import { currentTheme } from "@oh-my-pi/pi-tui/theme/runtime";
+import { isForegroundKey } from "@oh-my-pi/pi-tui/theme/schema";
+import type { ResolvedTheme } from "@oh-my-pi/pi-tui/theme/theme";
 import { labelIcon, splitLabel, type PillTone } from "./words.ts";
 
 type Piece = { from: number; to: number };
@@ -23,17 +17,17 @@ export interface Palette {
 }
 
 export function createPalette(
-	colors: Pick<Theme, "fg" | "getFgAnsi" | "getBgAnsi">,
-	options: { icons?: boolean; roundCaps?: boolean; boldColor?: ThemeColor } = {},
+	colors: Pick<ResolvedTheme, "fg" | "fgSgr" | "bgSgr">,
+	options: { icons?: boolean; roundCaps?: boolean; boldColor?: string } = {},
 ): Palette {
-	const tone = (fg: ThemeColor, bg: ThemeBg) => {
-		const background = colors.getBgAnsi(bg);
+	const tone = (fg: string, bg: string) => {
+		const background = colors.bgSgr(bg);
 		if (!background || background === "\x1b[49m") {
-			const foreground = colors.getFgAnsi(fg === "text" ? "accent" : fg);
+			const foreground = colors.fgSgr(fg === "text" ? "accent" : fg);
 			return { label: foreground + "\x1b[7m", cap: foreground };
 		}
 		return {
-			label: background + colors.getFgAnsi(fg),
+			label: background + colors.fgSgr(fg),
 			cap: background.replaceAll("\x1b[48;", "\x1b[38;").replace(/\[(4|10)([0-7])m/g, (_, prefix: string, n: string) => `[${prefix === "4" ? "3" : "9"}${n}m`),
 		};
 	};
@@ -205,7 +199,7 @@ export function decorate(markdown: string, palette: Palette): string {
 		}
 	};
 
-	walk(lexDocument(markdown), 0, source.length);
+	walk(lexMarkdown(markdown), 0, source.length);
 	if (edits.length === 0) return markdown;
 	const out: string[] = [];
 	let cursor = 0;
@@ -218,16 +212,16 @@ export function decorate(markdown: string, palette: Palette): string {
 }
 
 const color = process.env.OMP_EMPHASIS_COLOR ?? "mdLink";
-if (!isValidThemeColor(color)) throw new Error(`Invalid OMP_EMPHASIS_COLOR: ${color}`);
+if (!isForegroundKey(color)) throw new Error(`Invalid OMP_EMPHASIS_COLOR: ${color}`);
 const options = {
 	boldColor: color,
 	icons: process.env.OMP_EMPHASIS_ICONS !== "0",
 	roundCaps: process.env.OMP_EMPHASIS_ROUND_CAPS !== "0",
 };
-let cached: { epoch: number; palette: Palette } | undefined;
+let cached: { theme: ResolvedTheme; palette: Palette } | undefined;
 
 export function emphasize(markdown: string): string {
-	const epoch = getThemeEpoch();
-	if (cached?.epoch !== epoch) cached = { epoch, palette: createPalette(theme, options) };
+	const theme = currentTheme();
+	if (cached?.theme !== theme) cached = { theme, palette: createPalette(theme, options) };
 	return decorate(markdown, cached.palette);
 }

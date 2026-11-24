@@ -1,0 +1,455 @@
+diff --git a/packages/coding-agent/src/modes/controllers/command-controller.ts b/packages/coding-agent/src/modes/controllers/command-controller.ts
+index 0f9e591..e2ca5a0 100644
+--- a/packages/coding-agent/src/modes/controllers/command-controller.ts
++++ b/packages/coding-agent/src/modes/controllers/command-controller.ts
+@@ -13,7 +13,7 @@ import {
+ 	usageSubscriptionPlan,
+ } from "@oh-my-pi/pi-ai";
+ import { createRoot, type JSXNode, signal, type UiNode, untrack } from "@oh-my-pi/pi-tui";
+-import { classifyMultiplexer, type MultiplexerId } from "@oh-my-pi/pi-tui/driver/mux/detect";
++import type { MultiplexerId } from "@oh-my-pi/pi-tui/driver/mux/detect";
+ import { staticEnvironment } from "@oh-my-pi/pi-tui/term/paint";
+ import { renderBlock } from "@oh-my-pi/pi-tui/term/render";
+ import { visibleWidth } from "@oh-my-pi/pi-tui/text/width";
+@@ -101,6 +101,7 @@ import { cfgProviderAppendOnlyContext } from "../../session/settings";
+ import { cfgShareRedactSecrets, cfgShareServerUrl, cfgShareStore } from "../../commands/settings";
+ import { flagConsumesValue, restartArgv } from "../../cli/flag-tables";
+ import {
++	classifyLaunchMultiplexer,
+ 	createDefaultTerminalLaunchRequest,
+ 	getTerminalLaunchPlacement,
+ 	launchTerminal,
+@@ -207,7 +208,7 @@ export class CommandController {
+ 		forkTerminalDependencies: Partial<ForkTerminalDependencies> = {},
+ 	) {
+ 		this.#forkTerminalDependencies = {
+-			classifyMultiplexer,
++			classifyMultiplexer: classifyLaunchMultiplexer,
+ 			environment: () => process.env,
+ 			launchTerminal,
+ 			resolveCliEntryCmd,
+diff --git a/packages/coding-agent/src/subprocess/terminal-launch.ts b/packages/coding-agent/src/subprocess/terminal-launch.ts
+index 4e37205..77c4234 100644
+--- a/packages/coding-agent/src/subprocess/terminal-launch.ts
++++ b/packages/coding-agent/src/subprocess/terminal-launch.ts
+@@ -12,7 +12,11 @@ import { validateRequest } from "./terminal-launch/validate";
+ 
+ export { terminalLaunchCapabilities } from "./terminal-launch/providers";
+ export * from "./terminal-launch/types";
+-export { createDefaultTerminalLaunchRequest, getTerminalLaunchPlacement } from "./terminal-launch/request";
++export {
++	classifyLaunchMultiplexer,
++	createDefaultTerminalLaunchRequest,
++	getTerminalLaunchPlacement,
++} from "./terminal-launch/request";
+ 
+ /** Every supported provider's backend, keyed so a missing provider is a type error. */
+ const backends: {
+diff --git a/packages/coding-agent/src/subprocess/terminal-launch/herdr-core.ts b/packages/coding-agent/src/subprocess/terminal-launch/herdr-core.ts
+new file mode 100644
+index 0000000..7e123eb
+--- /dev/null
++++ b/packages/coding-agent/src/subprocess/terminal-launch/herdr-core.ts
+@@ -0,0 +1,295 @@
++import { launchError, nestedString, parseJson, runStep } from "./shared";
++import type {
++	SupportedMultiplexerCapabilities,
++	TerminalLaunchBackend,
++	TerminalLaunchCliResult,
++	TerminalLaunchProvider,
++	TerminalLaunchRequest,
++} from "./types";
++
++const capabilities = {
++	displayName: "Herdr Core",
++	supported: true,
++	pane: { displayName: "pane", execution: ["direct"], target: "pane", direction: ["right", "down"], focus: true },
++	window: { displayName: "tab", execution: ["direct"], target: "space", focus: true },
++} as const satisfies SupportedMultiplexerCapabilities;
++
++type DesktopLocation = { pane: string; space: string };
++
++function desktopFailure(request: TerminalLaunchRequest, operation: string, result: TerminalLaunchCliResult): Error {
++	const output = `${result.stderr ?? ""}\n${result.stdout}`;
++	let detail = "Inspect Herdr Desktop logs for details; check whether a terminal was created before retrying.";
++	if (/permission denied/i.test(output)) {
++		detail = "Desktop permission denied; check its socket permissions.";
++	} else if (/connection refused/i.test(output)) {
++		detail = "Desktop connection refused; check that its window is running.";
++	} else if (/\bpane\b.{0,80}\bnot found\b/i.test(output)) {
++		detail = "The Desktop pane no longer exists; inspect the current Desktop layout.";
++	} else if (/\bspace\b.{0,80}\bnot found\b/i.test(output)) {
++		detail = "The Desktop space no longer exists; inspect the current Desktop layout.";
++	}
++	const exit = result.exitCode === null ? "did not exit successfully" : `failed (exit ${result.exitCode})`;
++	return launchError(request, operation, `herdr-core ${operation} ${exit}. ${detail}`, result.exitCode);
++}
++
++function locations(
++	request: TerminalLaunchRequest,
++	stdout: string,
++	terminalId: string,
++	target?: string,
++): { matches: DesktopLocation[]; targetMachines: (string | null)[] } {
++	const payload = parseJson(request, "desktop list", stdout);
++	const invalid = () => launchError(request, "desktop list", "Herdr Desktop returned an invalid terminal listing.");
++	if (!Array.isArray(payload.spaces)) throw invalid();
++	const matches: DesktopLocation[] = [];
++	const targetMachines: (string | null)[] = [];
++	for (const space of payload.spaces) {
++		if (typeof space !== "object" || space === null || Array.isArray(space)) throw invalid();
++		if (
++			typeof space.id !== "string" ||
++			!space.id.trim() ||
++			(space.machine !== null && typeof space.machine !== "string")
++		) {
++			throw invalid();
++		}
++		if (!Array.isArray(space.tabs)) throw invalid();
++		if (request.placement === "window" && target === space.id) targetMachines.push(space.machine);
++		for (const tab of space.tabs) {
++			if (typeof tab !== "object" || tab === null || Array.isArray(tab)) throw invalid();
++			if (typeof tab.id !== "string" || !tab.id.trim() || !Array.isArray(tab.terminals)) throw invalid();
++			for (const terminal of tab.terminals) {
++				if (typeof terminal !== "object" || terminal === null || Array.isArray(terminal)) throw invalid();
++				if (
++					typeof terminal.terminal !== "string" ||
++					!terminal.terminal.trim() ||
++					typeof terminal.pane !== "string" ||
++					!terminal.pane.trim()
++				) {
++					throw invalid();
++				}
++				if (request.placement === "pane" && target === terminal.pane) targetMachines.push(space.machine);
++				if (space.machine === null && terminal.terminal === terminalId) {
++					matches.push({ pane: terminal.pane, space: space.id });
++				}
++			}
++		}
++	}
++	return { matches, targetMachines };
++}
++
++const launchHerdrCore: TerminalLaunchBackend<"herdr-core", typeof capabilities> = async (
++	request,
++	{ environment, platform, runCli },
++) => {
++	const terminalId = environment.HC_TERMINAL_ID;
++	if (!terminalId?.trim()) {
++		throw launchError(request, "target", "Herdr Core launch requires HC_TERMINAL_ID.");
++	}
++	if (platform === "win32") {
++		throw launchError(request, "capability", "Herdr Core terminal launches are not supported on Windows.");
++	}
++	let listing: TerminalLaunchCliResult | undefined;
++	try {
++		listing = await runCli(["herdr-app", "ls"], request.cwd);
++	} catch (error) {
++		if (!(error instanceof Error && "code" in error && error.code === "ENOENT")) {
++			throw launchError(request, "desktop list", "Herdr Desktop listing could not start its CLI.");
++		}
++	}
++	let matches: DesktopLocation[] = [];
++	let targetMachines: (string | null)[] = [];
++	if (listing) {
++		if (listing.exitCode === 0) {
++			({ matches, targetMachines } = locations(request, listing.stdout, terminalId, request.target));
++		} else if (
++			!(
++				listing.exitCode === 2 &&
++				!listing.stdout.trim() &&
++				(/^herdr-app: no Herdr window at [^:\r\n]+: No such file or directory(?: \(os error 2\))?\s*$/.test(
++					listing.stderr ?? "",
++				) ||
++					/^herdr-app: no Herdr window at [^:\r\n]+: Connection refused \(os error (?:61|111)\)\s*$/.test(
++						listing.stderr ?? "",
++					))
++			)
++		) {
++			throw desktopFailure(request, "desktop list", listing);
++		}
++	}
++	if (request.target !== undefined) {
++		if (!listing || listing.exitCode !== 0) {
++			throw launchError(request, "target", "An explicit Herdr Desktop target requires a running Desktop window.");
++		}
++		if (targetMachines.length === 0) {
++			throw launchError(request, "target", "The Herdr Desktop target was not found in the listing.");
++		}
++		if (targetMachines.length > 1) {
++			throw launchError(request, "target", "The Herdr Desktop target matched multiple locations in the listing.");
++		}
++		if (targetMachines[0] !== null) {
++			throw launchError(request, "target", "Herdr Desktop targets must belong to a local space.");
++		}
++	} else if (matches.length > 1) {
++		throw launchError(request, "desktop list", "Herdr Desktop listing matched multiple panes for HC_TERMINAL_ID.");
++	}
++
++	const location = request.target === undefined ? matches[0] : { pane: request.target, space: request.target };
++	if (request.command[0]?.includes("=") && request.command[0].startsWith("-")) {
++		throw launchError(
++			request,
++			"command",
++			"Herdr Core cannot safely run an executable beginning with '-' and containing '='.",
++		);
++	}
++	const command = request.command[0]?.includes("=")
++		? ["/bin/sh", "-c", 'exec "$@"', "herdr-core", ...request.command]
++		: request.command;
++	if (!location) {
++		if (request.focus !== undefined) {
++			throw launchError(request, "focus", "Explicit focus requires a visible Herdr Desktop source pane.");
++		}
++		// A leading env makes even a one-element argv an explicit program, not hc's shell-line form.
++		const argv = [
++			"hc",
++			"run",
++			"--json",
++			"--bg",
++			"--no-notify",
++			"--outlive-parent",
++			"--cwd",
++			request.cwd,
++			"--",
++			"/usr/bin/env",
++			"--",
++			...command,
++		];
++		const output = parseJson(request, "core run", await runStep(request, "core run", argv, request.cwd, runCli));
++		const id = nestedString(output, "address");
++		if (!id) throw launchError(request, "core run", "Herdr Core run returned no terminal address.");
++		if (!/^t[0-9a-z]+$/.test(id))
++			throw launchError(
++				request,
++				"core run",
++				"Herdr Core run returned an invalid terminal address; check existing terminals before retrying.",
++			);
++		return {
++			multiplexer: "herdr-core",
++			placement: request.placement,
++			id,
++			warning: `Herdr Core created a headless terminal; no visible ${request.placement === "pane" ? "pane" : "tab"} was created. Program startup was not confirmed; attach with hc attach ${id}.`,
++		};
++	}
++
++	let focusArgs: { pane: string } | { terminal: string } | undefined;
++	if (request.focus === false) {
++		const status = parseJson(
++			request,
++			"desktop status",
++			await runStep(request, "desktop status", ["herdr-app", "status"], request.cwd, runCli, undefined, result =>
++				desktopFailure(request, "desktop status", result),
++			),
++		);
++		const pane = nestedString(status, "focused_pane");
++		if (!pane || /[\s\u0000-\u001f\u007f-\u009f]/u.test(pane)) {
++			throw launchError(request, "desktop status", "Herdr Desktop status returned no valid focused pane.");
++		}
++		focusArgs = { pane };
++	}
++
++	const operation = request.placement === "pane" ? "pane.split" : "tab.new";
++	// pane.split has no folder option; pass cwd and command as literal shell arguments.
++	const args =
++		request.placement === "pane"
++			? {
++					pane: location.pane,
++					direction: request.direction ?? "right",
++					argv: [
++						"/bin/sh",
++						"-c",
++						'CDPATH= cd -P -- "$1" || exit; shift; exec -- "$@"',
++						"herdr-core",
++						request.cwd,
++						...request.command,
++					],
++				}
++			: { space: location.space, folder: request.cwd, argv: request.command };
++	const output = parseJson(
++		request,
++		operation,
++		await runStep(
++			request,
++			operation,
++			["herdr-app", "do", operation, JSON.stringify(args)],
++			request.cwd,
++			runCli,
++			undefined,
++			result => desktopFailure(request, operation, result),
++		),
++	);
++	const id = nestedString(output, request.placement === "pane" ? "pane" : "tab");
++	const terminal = nestedString(output, "terminal");
++	if (!id || !terminal) {
++		throw launchError(request, operation, `Herdr Desktop ${operation} returned incomplete IDs.`);
++	}
++	if (request.focus === true) focusArgs = { terminal };
++	let warning = "Herdr Desktop created the terminal, but program startup was not confirmed.";
++	if (request.focus === false && focusArgs && "pane" in focusArgs) {
++		try {
++			let createdPane = id;
++			if (request.placement === "window") {
++				const listing = await runCli(["herdr-app", "ls"], request.cwd);
++				if (listing.exitCode !== 0) throw new Error("Desktop listing failed");
++				const { matches } = locations(request, listing.stdout, terminal);
++				if (matches.length !== 1 || /[\s\u0000-\u001f\u007f-\u009f]/u.test(matches[0]!.pane)) {
++					throw new Error("Invalid created pane");
++				}
++				createdPane = matches[0]!.pane;
++			}
++			const result = await runCli(["herdr-app", "status"], request.cwd);
++			if (result.exitCode !== 0) throw new Error("Desktop status failed");
++			const status = parseJson(request, "desktop status", result.stdout);
++			const currentPane = nestedString(status, "focused_pane");
++			if (!currentPane || /[\s\u0000-\u001f\u007f-\u009f]/u.test(currentPane)) {
++				throw new Error("Invalid focused pane");
++			}
++			if (currentPane === focusArgs.pane) {
++				focusArgs = undefined;
++			} else {
++				if (currentPane !== createdPane) {
++					focusArgs = undefined;
++					warning += " Focus changed during creation; restoration was skipped.";
++					if (request.placement === "window") warning += " Inspect the Desktop layout.";
++				}
++			}
++		} catch {
++			focusArgs = undefined;
++			warning +=
++				" Could not check Desktop focus after creation; restoration was skipped. Inspect the Desktop layout and logs.";
++		}
++	}
++	if (focusArgs) {
++		let focusFailed = false;
++		try {
++			const result = await runCli(["herdr-app", "do", "pane.focus", JSON.stringify(focusArgs)], request.cwd);
++			focusFailed = result.exitCode !== 0;
++		} catch {
++			focusFailed = true;
++		}
++		if (focusFailed) {
++			warning += request.focus
++				? " Could not focus the created terminal. Inspect the Desktop layout and logs."
++				: " Could not restore the previously focused pane. Inspect the Desktop layout and logs.";
++		}
++	}
++	return {
++		multiplexer: "herdr-core",
++		placement: request.placement,
++		id,
++		warning,
++	};
++};
++
++export const herdrCoreLaunchProvider: TerminalLaunchProvider<"herdr-core", typeof capabilities> = {
++	capabilities,
++	launch: launchHerdrCore,
++};
+diff --git a/packages/coding-agent/src/subprocess/terminal-launch/providers.ts b/packages/coding-agent/src/subprocess/terminal-launch/providers.ts
+index 2507643..be8fd28 100644
+--- a/packages/coding-agent/src/subprocess/terminal-launch/providers.ts
++++ b/packages/coding-agent/src/subprocess/terminal-launch/providers.ts
+@@ -1,6 +1,7 @@
+ import type { MultiplexerId } from "@oh-my-pi/pi-tui/driver/mux/detect";
+ import { cmuxLaunchProvider } from "./cmux";
+ import { herdrLaunchProvider } from "./herdr";
++import { herdrCoreLaunchProvider } from "./herdr-core";
+ import { orcaLaunchProvider } from "./orca";
+ import { tmuxLaunchProvider } from "./tmux";
+ import type { SupportedMultiplexerCapabilities, UnsupportedMultiplexerCapabilities } from "./types";
+@@ -14,6 +15,7 @@ import { zellijLaunchProvider } from "./zellij";
+  */
+ export const terminalLaunchProviders = {
+ 	herdr: herdrLaunchProvider,
++	"herdr-core": herdrCoreLaunchProvider,
+ 	tmux: tmuxLaunchProvider,
+ 	screen: {
+ 		capabilities: {
+diff --git a/packages/coding-agent/src/subprocess/terminal-launch/request.ts b/packages/coding-agent/src/subprocess/terminal-launch/request.ts
+index 208d236..97f9af0 100644
+--- a/packages/coding-agent/src/subprocess/terminal-launch/request.ts
++++ b/packages/coding-agent/src/subprocess/terminal-launch/request.ts
+@@ -1,4 +1,4 @@
+-import type { MultiplexerId } from "@oh-my-pi/pi-tui/driver/mux/detect";
++import { classifyMultiplexer, hasMultiplexerSession, type MultiplexerId } from "@oh-my-pi/pi-tui/driver/mux/detect";
+ import { terminalLaunchCapabilities } from "./providers";
+ import type {
+ 	TerminalLaunchMultiplexer,
+@@ -21,6 +21,14 @@ function supportedProvidersMessage(placement: TerminalLaunchPlacement): string {
+ 		: `No supported ${placement} launch providers are configured.`;
+ }
+ 
++/**
++ * The provider a launch from `env` addresses: the classified multiplexer, else the
++ * Herdr Core host, which hosts the terminal without being a multiplexer layer.
++ */
++export function classifyLaunchMultiplexer(env: NodeJS.ProcessEnv): MultiplexerId | null {
++	return classifyMultiplexer(env) ?? (hasMultiplexerSession("herdr-core", env) ? "herdr-core" : null);
++}
++
+ /** Resolve the provider's support and user-facing placement metadata. */
+ export function getTerminalLaunchPlacement(
+ 	multiplexer: MultiplexerId | null,
+diff --git a/packages/coding-agent/src/subprocess/terminal-launch/shared.ts b/packages/coding-agent/src/subprocess/terminal-launch/shared.ts
+index 0672be4..ec31c2a 100644
+--- a/packages/coding-agent/src/subprocess/terminal-launch/shared.ts
++++ b/packages/coding-agent/src/subprocess/terminal-launch/shared.ts
+@@ -8,7 +8,7 @@ import {
+ 
+ export const processCli: TerminalLaunchCliRunner = async (argv, cwd, env) => {
+ 	const result = await ptree.exec([...argv], { cwd, env, allowNonZero: true });
+-	return { stdout: result.stdout, exitCode: result.exitCode };
++	return { stdout: result.stdout, stderr: result.stderr, exitCode: result.exitCode };
+ };
+ 
+ export function launchError(
+@@ -27,6 +27,7 @@ export async function runStep(
+ 	cwd: string,
+ 	runCli: TerminalLaunchCliRunner,
+ 	env?: NodeJS.ProcessEnv,
++	formatFailure?: (result: TerminalLaunchCliResult) => Error,
+ ): Promise<string> {
+ 	let result: TerminalLaunchCliResult;
+ 	try {
+@@ -35,6 +36,7 @@ export async function runStep(
+ 		throw launchError(request, operation, `${request.multiplexer} ${operation} could not start its CLI.`);
+ 	}
+ 	if (result.exitCode !== 0) {
++		if (formatFailure) throw formatFailure(result);
+ 		const exit = result.exitCode === null ? "did not exit successfully" : `failed (exit ${result.exitCode})`;
+ 		throw launchError(request, operation, `${request.multiplexer} ${operation} ${exit}.`, result.exitCode);
+ 	}
+diff --git a/packages/coding-agent/src/subprocess/terminal-launch/types.ts b/packages/coding-agent/src/subprocess/terminal-launch/types.ts
+index bfea1ff..d68487e 100644
+--- a/packages/coding-agent/src/subprocess/terminal-launch/types.ts
++++ b/packages/coding-agent/src/subprocess/terminal-launch/types.ts
+@@ -119,6 +119,7 @@ export interface TerminalLaunchResult {
+ 
+ export interface TerminalLaunchCliResult {
+ 	stdout: string;
++	stderr?: string;
+ 	exitCode: number | null;
+ }
+ 
+diff --git a/packages/tui/src/driver/mux/detect.ts b/packages/tui/src/driver/mux/detect.ts
+index 7f281e0..745104f 100644
+--- a/packages/tui/src/driver/mux/detect.ts
++++ b/packages/tui/src/driver/mux/detect.ts
+@@ -11,12 +11,15 @@
+ export type Env = Readonly<Record<string, string | undefined>>;
+ 
+ /** Every multiplexer (or pane host) the driver recognizes. */
+-export type MultiplexerId = "herdr" | "tmux" | "screen" | "zellij" | "cmux" | "wmux" | "orca";
++export type MultiplexerId = "herdr" | "herdr-core" | "tmux" | "screen" | "zellij" | "cmux" | "wmux" | "orca";
+ 
+ const SESSION_MARKERS: Record<MultiplexerId, (env: Env) => boolean> = {
+ 	// HERDR_ENV=1 or a pane/tab/workspace id (they survive launchers that drop HERDR_ENV);
+ 	// client-only paths (socket, bin, session, config) are not a session.
+ 	herdr: env => env.HERDR_ENV === "1" || Boolean(env.HERDR_PANE_ID || env.HERDR_TAB_ID || env.HERDR_WORKSPACE_ID),
++	// Herdr Core hosts the pty and the attached viewer draws it: a launch target only, so
++	// `classifyMultiplexer` never returns it and the direct-terminal render path stays.
++	"herdr-core": env => Boolean(env.HC_TERMINAL_ID?.trim()),
+ 	tmux: env => Boolean(env.TMUX),
+ 	screen: env => Boolean(env.STY),
+ 	zellij: env => Boolean(env.ZELLIJ),

@@ -6,8 +6,9 @@
  * it as a branch. `#123` and the `#` prompt actions stay with omp.
  */
 import type { ExtensionAPI } from "@oh-my-pi/pi-coding-agent";
-import { type AutocompleteItem, type AutocompleteProvider, fuzzyRank } from "@oh-my-pi/pi-tui";
-import { isLocalExecutionDraft } from "@oh-my-pi/pi-tui/prompt/skill-tokens";
+import type { AutocompleteItem, AutocompleteProvider } from "@oh-my-pi/pi-coding-agent/autocomplete/autocomplete";
+import { isLocalExecutionDraft } from "@oh-my-pi/pi-coding-agent/extensibility/skill-tokens";
+import { fuzzyRank } from "@oh-my-pi/pi-coding-agent/utils/fuzzy";
 
 // `##` after a token boundary, the same boundary that omp requires for `#123`.
 const TOKEN_RE = /(?:^|[\s"'`(<=])(##[^\s#]*)$/;

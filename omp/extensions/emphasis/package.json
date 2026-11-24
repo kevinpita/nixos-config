@@ -14,8 +14,8 @@
   },
   "files": ["index.ts", "render.ts", "words.ts", "LICENSE", "README.md"],
   "peerDependencies": {
-    "@oh-my-pi/pi-coding-agent": ">=18.22.0 <19",
-    "@oh-my-pi/pi-tui": ">=18.22.0 <19"
+    "@oh-my-pi/pi-coding-agent": ">19.1.1",
+    "@oh-my-pi/pi-tui": ">19.1.1"
   },
   "scripts": {
     "test": "bun test",

@@ -32,7 +32,7 @@ rec {
   ompTheme =
     theme:
     lib.recursiveUpdate
-      (lib.importJSON "${inputs.oh-my-pi}/packages/tui/src/theme/defaults.json").titanium
+      (lib.importJSON "${inputs.oh-my-pi}/packages/tui/src/theme/data/defaults.json").titanium
       {
         name = "desktop";
         vars = {

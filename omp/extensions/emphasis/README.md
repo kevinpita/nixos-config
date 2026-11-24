@@ -1,6 +1,6 @@
 # OMP emphasis
 
-Display-only status pills, label icons, and colored bold text for OMP 18.22.0. The package adapts [pi-emphasis](https://github.com/johnlindquist/pi-emphasis/tree/f884b736c489944ee778ab951c7f78580f137b02). It retains the upstream MIT notice.
+Display-only status pills, label icons, and colored bold text for OMP releases after 19.1.1, which draw with the reactive pi-tui. The package adapts [pi-emphasis](https://github.com/johnlindquist/pi-emphasis/tree/f884b736c489944ee778ab951c7f78580f137b02). It retains the upstream MIT notice.
 
 The extension does not add prompt instructions, call a model, or change stored messages. Code, escapes, links, images, HTML blocks, and math stay unchanged. It uses OMP's own Markdown lexer so code recognition agrees with the renderer. Unrecognized custom tokens stay unchanged.
 
@@ -42,3 +42,5 @@ bun run check
 ```
 
 The tests follow the upstream emphasis tests and OMP's Markdown tests. They cover pills, nested prose, protected code forms, original line endings, and theme changes.
+
+No npm release has the reactive pi-tui yet, so the pinned development dependencies still have the old API and this check fails. Until the next OMP release, copy this directory into a checkout of the `oh-my-pi` revision that the flake pins, and run `bun test` on the copy.

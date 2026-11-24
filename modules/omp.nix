@@ -156,12 +156,7 @@ in
           withFatLto = false;
         }).overrideAttrs
           (old: {
-            patches = (old.patches or [ ]) ++ [
-              (pkgs.fetchurl {
-                url = "https://github.com/can1357/oh-my-pi/compare/7c49c11aa5bbaf3f418406583096168ad5b8c6dc...6f7e5358e07e3fa968a88ac008479cd119993684.diff";
-                hash = "sha256-EXnTZNrd5pFSwKNAb4l/eXRmUeGMr5SAJI7HzUWxh4c=";
-              })
-            ];
+            patches = (old.patches or [ ]) ++ [ ../omp/patches/herdr-core-fork.patch ];
           });
       # pstack is a Claude Code plugin; omp loads that format through
       # --plugin-dir. Its poteto-mode scripts install commander into their own
@@ -192,9 +187,14 @@ in
         npmDepsHash = "sha256-i8pISckhDSAUnhyKotdePLeIlmyEZs/B+pSas8M4Zlk=";
         npmFlags = [ "--legacy-peer-deps" ];
         dontNpmBuild = true;
+        # omp no longer provides the pi-tui `Key` helpers, and it refuses an
+        # extension that imports them. A shortcut is now a key id string.
         installPhase = ''
           mkdir -p "$out"
           cp -r node_modules "$out/"
+          substituteInPlace "$out/node_modules/@plannotator/pi-extension/index.ts" \
+            --replace-fail 'import { Key } from "@earendil-works/pi-tui";' "" \
+            --replace-fail 'Key.ctrlAlt("p")' '"ctrl+alt+p"'
         '';
       };
       # `omp --<name>` adds the plugin directory that omp.optInPluginDirs.<name>

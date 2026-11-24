@@ -1,13 +1,16 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { stripVTControlCharacters } from "node:util";
-import { getMarkdownTheme, initTheme, Markdown, setTheme, stopThemeWatcher, theme } from "@oh-my-pi/pi-tui";
+import { initTheme, setTheme, stopThemeWatcher } from "@oh-my-pi/pi-coding-agent/ui/theme/service";
+import { renderMarkdown } from "@oh-my-pi/pi-tui/text/markdown/render";
+import { currentTheme } from "@oh-my-pi/pi-tui/theme/runtime";
 import { createPalette, decorate, emphasize } from "../render.ts";
 
-await initTheme(false, "nerd", false, "dark", "dark");
+initTheme({ symbolPreset: "nerd", dark: "dark", light: "dark", appearance: "dark" });
 afterAll(stopThemeWatcher);
+const theme = currentTheme();
 const palette = createPalette(theme, { icons: false, roundCaps: false });
 const plain = (source: string) => stripVTControlCharacters(source).replace(/\u00a0/g, " ");
-const render = (source: string) => new Markdown(source, 0, 0, getMarkdownTheme()).render(100).map(plain).join("\n");
+const render = (source: string) => renderMarkdown(source, 100, { theme: currentTheme() }).map(plain).join("\n");
 
 describe("pills", () => {
 	test.each([
@@ -125,9 +128,7 @@ describe("labels and emphasis", () => {
 	});
 
 	test("keeps bold weight before and after pills and marks", () => {
-		const output = new Markdown(
-			decorate("**before [[Done]] → after**", palette), 0, 0, getMarkdownTheme(),
-		).render(100).join("\n");
+		const output = renderMarkdown(decorate("**before [[Done]] → after**", palette), 100, { theme }).join("\n");
 		for (const word of ["before", "after"]) {
 			const at = output.indexOf(word);
 			expect(at).toBeGreaterThanOrEqual(0);
@@ -148,13 +149,13 @@ describe("labels and emphasis", () => {
 
 	test("rebuilds the shared palette after a theme switch", async () => {
 		const before = emphasize("[[Done]] **anchor**");
-		await setTheme("light", false);
+		await setTheme("light");
 		try {
 			const after = emphasize("[[Done]] **anchor**");
 			expect(after).not.toBe(before);
 			expect(plain(after)).toBe(plain(before));
 		} finally {
-			await setTheme("dark", false);
+			await setTheme("dark");
 		}
 	});
 });

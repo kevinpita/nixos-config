@@ -8,23 +8,16 @@
  * raw terminal input, which runs before omp's own keybindings. It replaces the
  * ctrl+l toggle of live voice mode.
  */
-import type { ExtensionAPI, ExtensionContext } from "@oh-my-pi/pi-coding-agent";
-import {
-	getMarkdownTheme,
-	isKeyRelease,
-	Markdown,
-	matchesKey,
-	parseSgrMouse,
-	theme,
-	truncateToWidth,
-	type TUI,
-	visibleWidth,
-} from "@oh-my-pi/pi-tui";
+import type { ExtensionAPI, ExtensionContext, ExtensionUiHost } from "@oh-my-pi/pi-coding-agent";
+import { decodeInput } from "@oh-my-pi/pi-tui/driver/input/decoder";
+import { renderMarkdown } from "@oh-my-pi/pi-tui/text/markdown/render";
+import { truncate, visibleWidth } from "@oh-my-pi/pi-tui/text/width";
+import { currentTheme } from "@oh-my-pi/pi-tui/theme/runtime";
+import type { ResolvedTheme } from "@oh-my-pi/pi-tui/theme/theme";
 import { emphasize } from "./emphasis/render.ts";
 
 // Lines longer than this are harder to read, so a wide terminal gets margins.
 const MAX_COLUMNS = 100;
-const WHEEL_LINES = 3;
 const SPINNER_MS = 80;
 
 interface RunState {
@@ -115,11 +108,12 @@ class FocusView {
 	#scroll = 0;
 	#source: string | undefined;
 	#columns = 0;
+	#theme: ResolvedTheme | undefined;
 	#lines: string[] = [];
 	#spinner: NodeJS.Timeout | undefined;
 
 	constructor(
-		private readonly tui: TUI,
+		private readonly ui: ExtensionUiHost,
 		private readonly ctx: ExtensionContext,
 		private readonly run: RunState,
 		private readonly close: () => void,
@@ -136,7 +130,8 @@ class FocusView {
 	}
 
 	render(width: number): string[] {
-		const height = Math.max(4, this.tui.terminal.rows);
+		const theme = currentTheme();
+		const height = Math.max(4, this.ui.size().rows);
 		const columns = Math.max(20, Math.min(MAX_COLUMNS, width - 4));
 		const pages = this.#pages();
 		const last = pages.length - 1;
@@ -146,21 +141,21 @@ class FocusView {
 		const waiting = this.run.running && index === last;
 		this.#syncSpinner(waiting);
 		const position = pages.length > 1 ? `${index + 1}/${pages.length}  ` : "";
-		const header = theme.fg("dim", truncateToWidth(`${position}${turn?.prompt.split("\n")[0] ?? ""}`, columns));
+		const header = theme.fg("dim", truncate(`${position}${turn?.prompt.split("\n")[0] ?? ""}`, columns));
 		const rows = waiting
-			? this.#renderWaiting(height - 3, width)
-			: this.#renderAnswer(height - 3, columns, " ".repeat(Math.max(0, Math.floor((width - columns) / 2))), turn);
+			? this.#renderWaiting(theme, height - 3, width)
+			: this.#renderAnswer(theme, height - 3, columns, " ".repeat(Math.max(0, Math.floor((width - columns) / 2))), turn);
 		const keys = [pages.length > 1 ? "Left/Right answers" : "", rows.scrollable ? "Up/Down scroll" : "", "Esc close"];
 		return [
 			centered(header, width),
 			"",
 			...rows.lines,
-			theme.fg("dim", truncateToWidth(centered(`${rows.percent}${keys.filter(Boolean).join("  ")}`, width), width)),
+			theme.fg("dim", truncate(centered(`${rows.percent}${keys.filter(Boolean).join("  ")}`, width), width)),
 		];
 	}
 
-	#renderWaiting(body: number, width: number) {
-		const frames = theme.spinnerFrames;
+	#renderWaiting(theme: ResolvedTheme, body: number, width: number) {
+		const frames = theme.symbols.spinnerFrames;
 		const frame = frames[Math.floor(Date.now() / SPINNER_MS) % frames.length] ?? "*";
 		const status = `${theme.fg("accent", frame)}  ${theme.fg("muted", `Working  ${elapsed(Date.now() - this.run.startedAt)}`)}`;
 		const lines = new Array<string>(body).fill("");
@@ -168,20 +163,19 @@ class FocusView {
 		return { lines, scrollable: false, percent: "" };
 	}
 
-	#renderAnswer(body: number, columns: number, margin: string, turn: Turn | undefined) {
+	#renderAnswer(theme: ResolvedTheme, body: number, columns: number, margin: string, turn: Turn | undefined) {
 		const source = turn?.answer ?? `_${missingAnswer(turn)}_`;
 		if (source !== this.#source) {
 			this.#source = source;
 			this.#columns = 0;
 			this.#scroll = 0;
 		}
-		if (columns !== this.#columns) {
+		if (columns !== this.#columns || theme !== this.#theme) {
 			this.#columns = columns;
-			const style = theme.hasColor("assistantMessageText")
-				? { color: (text: string) => theme.fg("assistantMessageText", text), proseFg: true }
-				: undefined;
-			const markdown = new Markdown(emphasize(source), 0, 0, getMarkdownTheme(), style);
-			this.#lines = markdown.render(columns).map(line => margin + line);
+			this.#theme = theme;
+			// The transcript draws answers with this color when the theme sets it.
+			const textStyle = theme.has("assistantMessageText") ? "assistantMessageText" : undefined;
+			this.#lines = renderMarkdown(emphasize(source), columns, { theme, textStyle }).map(line => margin + line);
 		}
 		const maxScroll = Math.max(0, this.#lines.length - body);
 		this.#scroll = Math.min(Math.max(0, this.#scroll), maxScroll);
@@ -193,7 +187,7 @@ class FocusView {
 
 	#syncSpinner(waiting: boolean): void {
 		if (waiting && !this.#spinner) {
-			this.#spinner = setInterval(() => this.tui.requestRender(), SPINNER_MS);
+			this.#spinner = setInterval(() => this.ui.requestRender(), SPINNER_MS);
 			this.#spinner.unref?.();
 		} else if (!waiting) {
 			this.#stopSpinner();
@@ -211,28 +205,50 @@ class FocusView {
 		this.#pinned = index === last ? undefined : index;
 	}
 
+	/** The host sends each key press and paste as raw input, and draws the view again after it. */
 	handleInput(data: string): void {
-		if (data.startsWith("\x1b[<")) {
-			const wheel = parseSgrMouse(data)?.wheel;
-			if (wheel) this.#scroll += wheel * WHEEL_LINES;
-			this.tui.requestRender();
-			return;
+		const page = Math.max(1, this.ui.size().rows - 4);
+		for (const event of decodeInput(data)) {
+			if (event.type !== "key") continue;
+			switch (event.key.id) {
+				case "escape":
+				case "q":
+					this.close();
+					break;
+				case "left":
+				case "h":
+					this.#move(-1);
+					break;
+				case "right":
+				case "l":
+					this.#move(1);
+					break;
+				case "up":
+				case "k":
+					this.#scroll -= 1;
+					break;
+				case "down":
+				case "j":
+					this.#scroll += 1;
+					break;
+				case "pageUp":
+				case "b":
+					this.#scroll -= page;
+					break;
+				case "pageDown":
+				case "space":
+					this.#scroll += page;
+					break;
+				case "home":
+				case "g":
+					this.#scroll = 0;
+					break;
+				case "end":
+				case "shift+g":
+					this.#scroll = Number.MAX_SAFE_INTEGER;
+					break;
+			}
 		}
-		const page = Math.max(1, this.tui.terminal.rows - 4);
-		if (matchesKey(data, "escape") || data === "q") this.close();
-		else if (matchesKey(data, "left") || data === "h") this.#move(-1);
-		else if (matchesKey(data, "right") || data === "l") this.#move(1);
-		else if (matchesKey(data, "up") || data === "k") this.#scroll -= 1;
-		else if (matchesKey(data, "down") || data === "j") this.#scroll += 1;
-		else if (matchesKey(data, "pageUp") || data === "b") this.#scroll -= page;
-		else if (matchesKey(data, "pageDown") || data === " ") this.#scroll += page;
-		else if (matchesKey(data, "home") || data === "g") this.#scroll = 0;
-		else if (matchesKey(data, "end") || data === "G") this.#scroll = Number.MAX_SAFE_INTEGER;
-		this.tui.requestRender();
-	}
-
-	invalidate(): void {
-		this.#columns = 0;
 	}
 
 	dispose(): void {
@@ -250,22 +266,16 @@ export default function (pi: ExtensionAPI) {
 			close();
 			return;
 		}
-		let view: FocusView | undefined;
 		void ctx.ui
 			.custom<void>(
-				(tui, _theme, _keybindings, done) => {
+				(ui, _theme, _keybindings, done) => {
 					close = () => done(undefined);
-					refresh = () => tui.requestRender();
-					view = new FocusView(tui, ctx, run, close);
-					return view;
+					refresh = () => ui.requestRender();
+					return new FocusView(ui, ctx, run, close);
 				},
-				{
-					overlay: true,
-					overlayOptions: { width: "100%", maxHeight: "100%", margin: 0, fullscreen: true },
-				},
+				{ overlay: true, fullscreen: true },
 			)
 			.finally(() => {
-				view?.dispose();
 				close = undefined;
 				refresh = undefined;
 			});
@@ -278,7 +288,10 @@ export default function (pi: ExtensionAPI) {
 		if (!ctx.hasUI || ctx.agent?.kind !== "main") return;
 		unbind?.();
 		unbind = ctx.ui.onTerminalInput(data => {
-			if (isKeyRelease(data) || !matchesKey(data, "ctrl+l")) return undefined;
+			const pressed = decodeInput(data).some(
+				event => event.type === "key" && event.key.kind !== "release" && event.key.id === "ctrl+l",
+			);
+			if (!pressed) return undefined;
 			toggle(ctx);
 			return { consume: true };
 		});
