@@ -4,9 +4,9 @@
 
 A problem has three stages: understand it, choose a solution, implement it. Implementation is mechanical. Understanding and the choice need the user, because the user knows the environment: what to change and what to keep.
 
-- **Stage 1: Understand the problem.** First read the code, docs, and history that you can find. Then give the user a short problem statement: the goal, what "done" looks like, the constraints, what to leave out, and your open questions. If the request can mean two things, ask. If the intent looks wrong or impossible, say so and show why. This stage is done when the user confirms the statement.
+- **Stage 1: Understand the problem.** Give the user a short problem statement: the goal, what "done" looks like, the constraints, what to leave out, and your open questions. If the request can mean two things, ask. This stage is done when the user confirms the statement.
 - **Stage 2: Choose a solution.** Compare the reasonable solutions in a few lines each, and recommend the simplest. The user chooses between options that differ in behavior, API, or design. Decide small implementation details yourself. Then offer to try to beat the chosen solution: look for a simpler way, or for a different approach that is not a variant of the compared options. Search only if the user accepts, and report a better solution or that the choice stays. You can send stages 1 and 2 in one message.
-- **Stage 3: Implement.** Implement the confirmed problem with the chosen solution. Stop when a new choice comes up, or when the solution grows much larger than the task needs. A solution that grows usually means that the problem statement is incomplete. A wrong path is normal, but stop as soon as the evidence shows it. Then tell the user what you assumed, what shows that it is wrong, and which check or other idea could find the right direction. After a stop, go back to stage 1 or 2. This stage is done when the result meets the "done" of the problem statement, or the clear goal of a task that skipped stage 1, and you ran the checks that prove it.
+- **Stage 3: Implement.** Stop when a new choice comes up, or when the solution grows much larger than the task needs. A solution that grows usually means that the problem statement is incomplete. A wrong path is normal, but stop as soon as the evidence shows it. Then tell the user what you assumed, what shows that it is wrong, and which check or other idea could find the right direction. After a stop, go back to stage 1 or 2. This stage is done when the result meets the "done" of the problem statement, or the clear goal of a task that skipped stage 1, and you ran the checks that prove it.
 
 Skip stages 1 and 2 when the task has one clear goal and one clear way to do it, for example "find the root cause of X". Research that changes nothing needs no confirmation. If the user tells you to work without them, write down your assumptions, continue, and list the assumptions in your report.
 
@@ -45,69 +45,46 @@ A question, an explain request, or a check request gets an answer or a report, n
 ## Commits
 
 - Use Conventional Commit messages with a subject line only, no body.
-- Commit only the changes that you made for the current task. Leave other changes in the working tree out of the commit.
-- Do not push until the user asks you to.
-- Before committing, check the repo's instructions and remote branches with `git ls-remote --heads origin`. Ignore bot branches such as `dependabot/*` and `renovate/*`. If there are no feature branches and no instruction requires them, commit on the current branch, including `main`. If feature branches exist, check the repo's workflow before choosing a branch. Occasional PRs alone do not require a feature branch. If the repo requires a PR workflow, create a feature branch instead of committing on `main` or a release branch. "Prepare" means local only.
-- Do not edit PR titles or bodies, and do not post comments, until the user asks you to.
+- Before committing, check the repo's instructions and remote branches with `git ls-remote --heads origin`. Ignore bot branches such as `dependabot/*` and `renovate/*`. If there are no feature branches and no instruction requires them, commit on the current branch, including `main`. If feature branches exist, check the repo's workflow before choosing a branch. Occasional PRs alone do not require a feature branch. If the repo requires a PR workflow, create a feature branch instead of committing on `main` or a release branch.
 - In a branch stack, commit each fix on the branch that introduced the code.
 - Before you say "not pushed", or before you amend, squash, or rebase, check `git status -sb` and the remote branch.
 
 ## Programming instructions
 
-In stage 1 of "Work on a problem", use steps 1 and 2 to read the code before you write the problem statement.
+In stage 1 of "Work on a problem", read the code before you write the problem statement.
 
-### Before implementation
+### Before you change code
 
-#### 1. Find the owner
+- Find the type or package that owns the rule, and change the code there.
+- Search the owner and related code for a helper or implementation that does the same thing. Use it or extend it.
+- Keep one implementation of each rule. If you find the rule in two places, tell the user.
+- For a bug fix in production code, write the regression test first. Run it and show that it fails on the old code.
+- Before you act on a review finding or on a claim from a handoff, verify it against the code. Report each finding as accepted or rejected, with the reason.
+- For each risk, say first whether this change adds it or it exists today, and whether it needs deliberate misuse.
+- A failure from an intended, documented action of a trusted actor, such as governance or an operator, is still a finding.
+- Call a fix "hardening" only after you verify that supported inputs cannot reach the state. Judge the change against "same or better than today".
 
-- Locate the feature's entry points, callers, and related packages.
-- Identify which type or package should own the rule before choosing where to edit.
-- Check whether that rule is already implemented in more than one place.
+### While you change code
 
-#### 2. Look for existing work
+- Make the smallest change that fully solves the request. Every changed line must trace directly to the user's request.
+- Follow the existing types, style, conventions, and control flow.
+- Give invalid inputs an explicit result.
+- Write single-use code inline. Add a helper, a parameter, an option, or a config value only when the task needs it now.
+- When you rename something or change a behavior, update all callers, references, comments, error messages, and docs.
+- Remove the imports, variables, and functions that your change made unused. Keep other dead code and weak tests, and list them in the report.
 
-- Search the owning area and related code for existing implementations, helpers, and conventions.
-- Compare their purpose and behavior with what is needed.
-- Reuse or extend code that already expresses the required behavior. Introduce code when no existing implementation fits.
+### Tests
 
-#### 3. Confirm the expected behavior
+- Before you write a test, open the 2 closest tests in the same package. Copy their name pattern, table shape, helpers, and assert style. In the report, name the test that you copied.
+- If a test of the same behavior has the same setup and assertions, add your case to its table. Write a separate test only when the setup or the assertions are different.
+- Test the behavior through the smallest path that proves it. Use the fewest lines that prove the change or stop a later drift. Often, one more assertion or table case is enough.
+- Make sure that each new test fails when the behavior is wrong.
 
-- Identify the valid inputs, invalid inputs, and expected results.
-- For a bug fix in production code, add or use a regression test, as step 6 describes. Confirm that it detects the original failure before you change the code. A fix in a test, CI, or docs needs no new regression test.
-- Before you act on a review finding, or on a claim from a handoff or an earlier session, verify it against the code. Report which findings you accept and which you reject, with the reason.
-- For each risk, say first whether this change adds it or it exists today, and whether it needs deliberate misuse. A failure caused by an intended, documented action of a trusted actor, such as governance or an operator, is still a finding. Call a fix "hardening" only after you verify that supported inputs cannot reach the state. Judge a change against "same or better than today".
+### Before you report done
 
-### During implementation
-
-#### 4. Start with the simplest solution
-
-- Choose the simplest design that fully works. Make the smallest clear change in the chosen owner.
-- Follow the existing types, conventions, and control flow.
-- Give each new branch, helper, or abstraction a concrete purpose required by the task.
-
-#### 5. Share behavior, not similar-looking code
-
-- Compare the repeated code's intention, inputs, outputs, and edge cases.
-- If those match, reuse or extract one implementation. Otherwise, keep the behaviors separate.
-- Place shared code with the owner of that behavior.
-- Update affected callers and references, including renames. Remove only copies made obsolete by the current change.
-
-#### 6. Add focused tests
-
-When adding or changing tests:
-
-- State the behavior being protected and an incorrect result the test should catch.
-- Test the real behavior of the change through the smallest path that can prove it. Add a higher-level test only when it can catch a different failure. Do not test trivial code, such as wiring, getters, or copied constants, unless the goal is to pin a behavior.
-- Keep tests in proportion to the change. A test must prove that the change works or prevent later drift, with the fewest lines that do this. Often one more assertion in an existing test is enough.
-- Before you write a test, open the 2 closest existing tests in the same package. Copy their name pattern, table shape, helpers, and assert style. In the report, name the test that you copied. Put shared setup and data in the existing helpers, not in each test.
-- Before you add a test, look for an existing test of the same behavior. If setup and assertions match, add the case to its table. If that test has no table yet, change it into a table test. Use a separate test only when setup or assertions differ.
-- For tests added or changed in this task, keep cases that protect distinct rules, boundaries, or failure modes. Boundary cases can remain useful even when their expected results match.
-
-### Verification
-
-- Run the affected tests and lint. Confirm that the regression test passes after a bug fix.
-- Check affected callers, references, comments, error messages, and documentation for anything made stale by the change.
-- Before you report or commit, read the full diff once. Look for duplicated rules, unnecessary helpers, redundant tests, and unrelated edits. Limit cleanup to code and tests added or made obsolete by this task. Report weak existing tests instead of deleting them.
+- Report findings for each round. Classify each finding as added by the change or existing. Stop when no new real findings remain. After round two, also stop when their count does not fall from the previous round.
+- After your last edit, run the affected tests and the linter. Make sure that the regression test passes.
+- Before you report or commit, read the full diff once. Make sure that each changed line traces to the request. Remove duplicated rules, extra helpers, and redundant tests.
 
 ## Subagents
 
