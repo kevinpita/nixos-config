@@ -21,7 +21,7 @@ Nerd Font symbols are on by default. Set environment variables before starting O
 - `OMP_EMPHASIS_ROUND_CAPS=0` draws square pills.
 - `OMP_EMPHASIS_COLOR` selects a valid OMP theme foreground token for bold text.
 
-There is no guidance setting because this package never changes the prompt. In this repository, `/focus` calls the same renderer directly. The native `extensionRenderers.assistantText` setting controls only the transcript hook.
+There is no guidance setting because this package never changes the prompt. The native `extensionRenderers.assistantText` setting controls the transcript hook.
 
 ## Ownership
 
@@ -32,7 +32,7 @@ There is no guidance setting because this package never changes the prompt. In t
 
 The directory has no runtime npm dependencies. OMP provides its SDK and lexer. Development dependencies are pinned in `bun.lock`.
 
-The package can move to its own repository without Nix or focus-view code. Consumers can import `omp-emphasis/render` instead of the current relative path. The parent repository owns deployment and the focus integration. Nix copies their shared source directory so relative imports survive store symlinks.
+The package can move to its own repository without Nix code. Consumers can import `omp-emphasis/render`. The parent repository owns deployment.
 
 ## Check
 
