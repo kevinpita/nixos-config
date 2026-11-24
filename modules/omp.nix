@@ -324,6 +324,7 @@ in
             ${inputs.mattpocock-skills}/skills/engineering/domain-modeling \
             ${inputs.mattpocock-skills}/skills/productivity/writing-for-agents \
             ${inputs.awesome-copilot}/skills/create-readme \
+            ${inputs.awesome-copilot}/skills/github-actions-hardening \
             ${inputs.cursor-plugins}/thermos/skills/thermo-nuclear-code-quality-review \
             ${inputs.obsidian-skills}/plugins/obsidian/skills/obsidian-cli \
             ${inputs.obsidian-skills}/plugins/obsidian/skills/obsidian-markdown \
