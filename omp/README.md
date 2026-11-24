@@ -7,9 +7,27 @@ This folder owns the oh-my-pi (omp) harness configuration. `modules/omp.nix` sel
 | Path | Change it for |
 | --- | --- |
 | `config.yml` | omp settings shared by all hosts. `~/.omp/agent/config.yml` links to this file, so settings changes in omp edit it in place. Commit and pull to share them. |
-| `commands/` | File-based slash commands installed into `~/.omp/agent/commands`. `pre-pr.md` adds `/pre-pr`, an adversarial review of the current branch with its working tree, or of a PR, a branch, a commit, or a range: the models you tag with `^` try to break the change in their own clones, and only findings that a rerun proves go into the report. `pre-pr.sh` does its git steps (snapshot, clones, guard, cleanup); test it with `bash omp/commands/pre-pr.test.sh`. `impeccable.md` adds `/impeccable`, the name that the `impeccable` skill uses for itself. omp loads only the `*.md` files as commands. |
 | `extensions/` | omp extensions installed into `~/.omp/agent/extensions`. `session-relay.ts` adds `/send <host\|local> <name> [--snapshot]` and `/receive [host] <name>`. `/send` sends a fork of the current session over SSH and keeps the sender in the original. `/receive` installs the fork and switches the terminal to it. SSH always goes from the workstation to the server, so a server stages with `/send local` and the workstation pulls. `session-relay.e2e.sh` tests it in two incus VMs. `branch-ref.ts` adds `##name` in the prompt: a fuzzy list of the local and remote git branches that inserts "branch `name`" so the model reads it as a branch. It is off in drafts that omp runs as shell or Python code. |
+| `commands/` | File-based slash commands installed into `~/.omp/agent/commands`. `pre-pr.md` adds `/pre-pr`, an adversarial review of the current branch with its working tree, or of a PR, a branch, a commit, or a range: the models you tag with `^` try to break the change in their own clones, and only findings that a rerun proves go into the report. `pre-pr.sh` does its git steps (snapshot, clones, guard, cleanup); test it with `bash omp/commands/pre-pr.test.sh`. `impeccable.md` adds `/impeccable`, the name that the `impeccable` skill uses for itself. `explainer-video.md` adds [`/explainer-video`](#explainer-video) for narrated Manim videos. `tldr.md` adds `/tldr`, a 2- or 3-sentence version of the last answer; its `side: true` frontmatter makes it a `/btw` side question, so it stays off the transcript and can run while a turn streams. `ask.md` adds `/ask <question>`, an answer in the transcript with read-only research and no change. omp loads only the `*.md` files as commands. |
 | `WATCHDOG.yml` | The advisor roster: each advisor's name, model, effort, and default on/off state. `~/.omp/agent/WATCHDOG.yml` links to this file, so `/advisor configure` at user scope edits it in place. |
+
+## Explainer video
+
+Build the offline media runtime once from this repository root:
+
+```sh
+mkdir -p "$HOME/.cache/omp/explainer-video"
+nix build .#explainer-video-env --out-link "$HOME/.cache/omp/explainer-video/runtime"
+```
+
+Deploy the command and skill with `just switch`, then restart omp. In the directory where the output should go, run `/explainer-video Estimar pi con puntos in Spanish from Spain`. The command writes the checked MP4 to `videos/`. The [explainer skill](../agents/skills/explainer-video/SKILL.md) owns the storyboard format, render steps, and job files. The package in `packages/explainer-video/` owns the tools and voice pins. The build can fetch dependencies. The runtime runs the media tools without network access.
+
+To run the audio and mux fixtures from this repository:
+
+```sh
+"$HOME/.cache/omp/explainer-video/runtime/bin/explainer-video-env" \
+	python3 -B agents/skills/explainer-video/test-video.py
+```
 
 ## Theme
 

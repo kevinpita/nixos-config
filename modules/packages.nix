@@ -2,6 +2,7 @@
 {
   flake.overlays.default = final: _prev: {
     exrpd = final.callPackage ../packages/exrpd/package.nix { };
+    explainer-video-env = final.callPackage ../packages/explainer-video/package.nix { };
     herdr-app = (inputs.herdr-nix.overlays.default final _prev).herdr;
     inherit ((inputs.herdr-nix.overlays.default final _prev)) herdr-core;
     mcp-reva = final.callPackage ../packages/mcp-reva/package.nix { };
