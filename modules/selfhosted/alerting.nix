@@ -112,6 +112,29 @@
           };
         }
         {
+          alert = "SmartSectorsUnreadable";
+          # Match by ID. Vendors name attribute 197 differently.
+          expr = ''smartctl_device_attribute{job="smartctl",host=~"${servers}",attribute_id=~"197|198",attribute_value_type="raw"} > 0'';
+          for = "15m";
+          labels.severity = "warning";
+          annotations = {
+            summary = "Unreadable sectors on {{ $labels.host }}";
+            description = "Drive {{ $labels.device }} reports {{ $labels.attribute_name }} above 0. Check smartctl. The count stays until the drive rewrites or remaps the sectors.";
+          };
+        }
+        {
+          alert = "SmartSelfTestFailed";
+          # The exporter gives no latest result for some drives, for example
+          # past 65536 power-on hours. This rule does not cover those drives.
+          expr = ''smartctl_device_self_test_age_seconds{job="smartctl",host=~"${servers}",result="Failed"}'';
+          for = "5m";
+          labels.severity = "warning";
+          annotations = {
+            summary = "SMART self-test failed on {{ $labels.host }}";
+            description = "The latest self-test of drive {{ $labels.device }} failed. Check smartctl.";
+          };
+        }
+        {
           alert = "ZfsScrubMissing";
           expr = ''(node_zfs_pool_last_scrub_timestamp_seconds{job="node",host="${storageHost}"} == 0) and on(instance,host) (${scrubFresh})'';
           for = "10d";
