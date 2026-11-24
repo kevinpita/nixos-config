@@ -1,7 +1,7 @@
 { config, ... }:
 {
   flake.modules.nixos.server =
-    { ... }:
+    { pkgs, ... }:
     {
       imports = with config.flake.modules.nixos; [
         base
@@ -11,6 +11,8 @@
         podman
         tailscale
       ];
+
+      environment.systemPackages = [ pkgs.forklab ];
 
       host.roles = [ "server" ];
     };
