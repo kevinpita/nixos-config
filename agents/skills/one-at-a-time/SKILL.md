@@ -9,6 +9,8 @@ Walk the user through a list one **point** per message, so they can read and com
 
 Use the list the user names. Otherwise use the most recent multi-point content in the conversation: a numbered or bulleted list, a plan, a set of findings, review comments, steps. When the current task is about to produce such a list (a plan, an explanation of a process), write it as points and deliver it through this skill instead of all at once.
 
+When the walk starts, create a new **decision log** for it. Name the log after the walk: a short slug of the list's subject plus the start time, such as `local://walk-<slug>-<HHMM>.md` in omp, or the same name in the OS temporary directory in another harness. Keep the log outside the workspace. On its first line, write the walk's subject and point count. Name the log path in the first message of the walk, so that the path stays in the conversation after a compaction. Use this log until the walk ends.
+
 ## Each turn
 
 1. Open with the position: `Point 3 of 7: <short title>`.
@@ -22,8 +24,10 @@ The user's reply decides the next turn:
 - "next", "ok", "go on", or similar: present the next point.
 - "skip" or "stop": skip the point, or end the walk.
 
+When the user gives a decision on a point, write it at once to the walk's decision log, one line per point: the position, the short title, and the decision in the user's words or as a short restatement.
+
 ## Finish
 
-The walk is done when every point has been presented and the user has moved past it. Close with a recap: each point as one line, plus every change or decision the user made along the way.
+The walk is done when every point has been presented and the user has moved past it. Read the decision log of the current walk only, then close with a recap: each point as one line, plus every change or decision the user made along the way. The log keeps the decisions through a long walk or a compaction.
 
 This skill covers discussion only. Act on a point (edit files, run commands) when the user asks for it during the walk.
