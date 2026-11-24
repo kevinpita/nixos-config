@@ -5,7 +5,7 @@
   "tags": ["nixos"],
   "timezone": "browser",
   "schemaVersion": 39,
-  "version": 4,
+  "version": 5,
   "editable": false,
   "refresh": "1m",
   "time": {"from": "now-7d", "to": "now"},
@@ -40,11 +40,11 @@
     },
     {
       "id": 2, "title": "Last recorded self-test (powered-on age)", "type": "stat",
-      "description": "Age and result of the latest recorded self-test that ended, including failed or aborted tests. Running tests do not replace that record. Yellow after 28 powered-on hours, red after 48. Drive logs record power-on hours, not calendar dates: powered-off time is excluded and resolution is one hour. Unknown means no usable record, unsupported logs, ambiguous ATA counter wrap, or a disk read older than 10 minutes. An old Passed result is not proof that scheduled tests still run.",
+      "description": "Age and result of the latest recorded self-test that ended, including failed or aborted tests. Running tests do not replace that record. Yellow after 28 powered-on hours, red after 48. Drive logs record power-on hours, not calendar dates: powered-off time is excluded and resolution is one hour. Age unknown means the drive recorded a result without a usable time, for example after an ATA counter wrap. Unknown means no usable record, unsupported logs, or a disk read older than 10 minutes. An old Passed result is not proof that scheduled tests still run.",
       "datasource": {"type": "prometheus", "uid": "prometheus"},
       "gridPos": {"x": 6, "y": 0, "w": 18, "h": 5},
-      "targets": [{"refId": "A", "expr": "(smartctl_device_self_test_age_seconds{job=\"smartctl\",host=\"$host\",device=~\"$device\"} and on(instance,device) (time() - smartctl_device_smart_status_read_time_seconds{job=\"smartctl\",host=\"$host\",device=~\"$device\"} < 600)) or on(instance,device) label_replace((0 * smartctl_device{job=\"smartctl\",host=\"$host\",device=~\"$device\"} - 1), \"result\", \"Unknown\", \"device\", \".*\")", "legendFormat": "{{device}}: {{result}}", "instant": true}],
-      "fieldConfig": {"defaults": {"unit": "s", "noValue": "Unknown", "mappings": [{"type": "value", "options": {"-1": {"text": "Unknown", "color": "gray"}}}], "thresholds": {"mode": "absolute", "steps": [{"color": "gray", "value": null}, {"color": "green", "value": 0}, {"color": "yellow", "value": 100800}, {"color": "red", "value": 172800}]}}, "overrides": [{"matcher": {"id": "byRegexp", "options": ".*: (Failed|Aborted)$"}, "properties": [{"id": "thresholds", "value": {"mode": "absolute", "steps": [{"color": "red", "value": null}]}}]}, {"matcher": {"id": "byRegexp", "options": ".*: Unknown$"}, "properties": [{"id": "thresholds", "value": {"mode": "absolute", "steps": [{"color": "gray", "value": null}]}}]}]},
+      "targets": [{"refId": "A", "expr": "((smartctl_device_self_test_age_seconds{job=\"smartctl\",host=\"$host\",device=~\"$device\"} or on(instance,device) (0 * smartctl_device_self_test_result{job=\"smartctl\",host=\"$host\",device=~\"$device\"} - 2)) and on(instance,device) (time() - smartctl_device_smart_status_read_time_seconds{job=\"smartctl\",host=\"$host\",device=~\"$device\"} < 600)) or on(instance,device) label_replace((0 * smartctl_device{job=\"smartctl\",host=\"$host\",device=~\"$device\"} - 1), \"result\", \"Unknown\", \"device\", \".*\")", "legendFormat": "{{device}}: {{result}}", "instant": true}],
+      "fieldConfig": {"defaults": {"unit": "s", "noValue": "Unknown", "mappings": [{"type": "value", "options": {"-1": {"text": "Unknown", "color": "gray"}, "-2": {"text": "Age unknown"}}}], "thresholds": {"mode": "absolute", "steps": [{"color": "gray", "value": null}, {"color": "green", "value": 0}, {"color": "yellow", "value": 100800}, {"color": "red", "value": 172800}]}}, "overrides": [{"matcher": {"id": "byRegexp", "options": ".*: (Failed|Aborted)$"}, "properties": [{"id": "thresholds", "value": {"mode": "absolute", "steps": [{"color": "red", "value": null}]}}]}, {"matcher": {"id": "byRegexp", "options": ".*: Unknown$"}, "properties": [{"id": "thresholds", "value": {"mode": "absolute", "steps": [{"color": "gray", "value": null}]}}]}]},
       "options": {"colorMode": "value", "graphMode": "none", "textMode": "value_and_name", "reduceOptions": {"calcs": ["lastNotNull"], "values": false}}
     },
     {

@@ -85,24 +85,31 @@
 +}
 --- a/main.go
 +++ b/main.go
-@@ -85,6 +85,8 @@
+@@ -85,6 +85,9 @@
  	ch <- metricDeviceErrorLogCount
  	ch <- metricDeviceSelfTestLogCount
  	ch <- metricDeviceSelfTestLogErrorCount
 +	ch <- metricDeviceSelfTestAge
++	ch <- metricDeviceSelfTestResult
 +	ch <- metricDeviceSmartStatusReadTime
  	ch <- metricDeviceERCSeconds
  	ch <- metricSCSIGrownDefectList
  	ch <- metricReadErrorsCorrectedByRereadsRewrites
 --- a/metrics.go
 +++ b/metrics.go
-@@ -18,6 +18,18 @@
+@@ -18,6 +18,24 @@
  )
  
  var (
 +	metricDeviceSelfTestAge = prometheus.NewDesc(
 +		"smartctl_device_self_test_age_seconds",
 +		"Powered-on seconds since the latest recorded self-test ended, excluding tests still running.",
++		[]string{"device", "result"},
++		nil,
++	)
++	metricDeviceSelfTestResult = prometheus.NewDesc(
++		"smartctl_device_self_test_result",
++		"Result of the latest recorded self-test that ended, excluding tests still running.",
 +		[]string{"device", "result"},
 +		nil,
 +	)
@@ -161,7 +168,7 @@
  func readSMARTctlDevices(logger *slog.Logger) gjson.Result {
 --- /dev/null
 +++ b/selftest_history_test.go
-@@ -0,0 +1,98 @@
+@@ -0,0 +1,114 @@
 +package main
 +
 +import (
@@ -206,8 +213,9 @@
 +	}
 +}
 +
-+// Only a recorded self-test can supply test age. Overall health and scrape
-+// times must not substitute for a test, and old tests must remain old.
++// Only a recorded self-test can supply a result or an age. Overall health and
++// scrape times must not substitute for a test, and old tests must remain old.
++// An unusable timestamp hides the age, not the result.
 +func TestSelfTestHistoryAge(t *testing.T) {
 +	for _, tc := range []struct {
 +		name, data, result string
@@ -225,37 +233,52 @@
 +		{"zero lifetime valid", `{"power_on_time":{"hours":1},"nvme_self_test_log":{"table":[{"self_test_result":{"value":0},"power_on_hours":0}]}}`, "Passed", 3600, true},
 +		{"health is not a test", `{"power_on_time":{"hours":100},"smart_status":{"passed":true}}`, "", 0, false},
 +		{"empty log", `{"power_on_time":{"hours":100},"nvme_self_test_log":{"table":[]}}`, "", 0, false},
-+		{"missing hours", `{"nvme_self_test_log":{"table":[{"self_test_result":{"value":0},"power_on_hours":98}]}}`, "", 0, false},
-+		{"missing entry time", `{"power_on_time":{"hours":100},"nvme_self_test_log":{"table":[{"self_test_result":{"value":0}}]}}`, "", 0, false},
-+		{"future entry", `{"power_on_time":{"hours":10},"nvme_self_test_log":{"table":[{"self_test_result":{"value":0},"power_on_hours":98}]}}`, "", 0, false},
-+		{"ATA wrap ambiguous", `{"power_on_time":{"hours":65536},"ata_smart_self_test_log":{"standard":{"table":[{"status":{"value":0},"lifetime_hours":0}]}}}`, "", 0, false},
++		{"missing hours", `{"nvme_self_test_log":{"table":[{"self_test_result":{"value":0},"power_on_hours":98}]}}`, "Passed", 0, false},
++		{"missing entry time", `{"power_on_time":{"hours":100},"nvme_self_test_log":{"table":[{"self_test_result":{"value":0}}]}}`, "Passed", 0, false},
++		{"future entry", `{"power_on_time":{"hours":10},"nvme_self_test_log":{"table":[{"self_test_result":{"value":0},"power_on_hours":98}]}}`, "Passed", 0, false},
++		{"ATA wrap ambiguous", `{"power_on_time":{"hours":65536},"ata_smart_self_test_log":{"standard":{"table":[{"status":{"value":0},"lifetime_hours":0}]}}}`, "Passed", 0, false},
++		{"ATA wrap keeps failure", `{"power_on_time":{"hours":70000},"ata_smart_self_test_log":{"standard":{"table":[{"status":{"value":112},"lifetime_hours":4464},{"status":{"value":0},"lifetime_hours":4440}]}}}`, "Failed", 0, false},
 +	} {
 +		t.Run(tc.name, func(t *testing.T) {
 +			ch := make(chan prometheus.Metric, 128)
 +			smart := NewSMARTctl(slog.Default(), gjson.Parse(tc.data), ch, Device{})
 +			smart.Collect()
 +			close(ch)
-+			found := false
++			ageDesc := prometheus.NewDesc("smartctl_device_self_test_age_seconds", "Powered-on seconds since the latest recorded self-test ended, excluding tests still running.", []string{"device", "result"}, nil).String()
++			resultDesc := prometheus.NewDesc("smartctl_device_self_test_result", "Result of the latest recorded self-test that ended, excluding tests still running.", []string{"device", "result"}, nil).String()
++			aged, result := false, ""
 +			for metric := range ch {
-+				if metric.Desc().String() != prometheus.NewDesc("smartctl_device_self_test_age_seconds", "Powered-on seconds since the latest recorded self-test ended, excluding tests still running.", []string{"device", "result"}, nil).String() {
++				desc := metric.Desc().String()
++				if desc != ageDesc && desc != resultDesc {
 +					continue
 +				}
-+				found = true
 +				var value dto.Metric
 +				if err := metric.Write(&value); err != nil {
 +					t.Fatal(err)
 +				}
-+				if value.GetGauge().GetValue() != tc.age {
-+					t.Fatalf("age = %v, want %v", value.GetGauge().GetValue(), tc.age)
++				if desc == ageDesc {
++					aged = true
++					if value.GetGauge().GetValue() != tc.age {
++						t.Fatalf("age = %v, want %v", value.GetGauge().GetValue(), tc.age)
++					}
 +				}
 +				for _, label := range value.GetLabel() {
-+					if label.GetName() == "result" && label.GetValue() != tc.result {
++					if label.GetName() != "result" {
++						continue
++					}
++					if label.GetValue() != tc.result {
 +						t.Fatalf("result = %s, want %s", label.GetValue(), tc.result)
++					}
++					if desc == resultDesc {
++						result = label.GetValue()
 +					}
 +				}
 +			}
-+			if found != tc.present {
-+				t.Fatalf("present = %v, want %v", found, tc.present)
++			if aged != tc.present {
++				t.Fatalf("age present = %v, want %v", aged, tc.present)
++			}
++			if result != tc.result {
++				t.Fatalf("latest result = %q, want %q", result, tc.result)
 +			}
 +		})
 +	}
@@ -266,7 +289,7 @@
  	smart.mineDeviceStatistics()
  	smart.mineDeviceErrorLog()
  	smart.mineDeviceSelfTestLog()
-+	smart.mineSelfTestAge()
++	smart.mineLatestSelfTest()
  	smart.mineDeviceERC()
  	smart.mineSmartStatus()
  
@@ -286,22 +309,15 @@
  	}
  }
  
-@@ -544,6 +554,64 @@
+@@ -544,6 +554,67 @@
  	}
  }
  
-+func (smart *SMARTctl) mineSelfTestAge() {
++func (smart *SMARTctl) mineLatestSelfTest() {
 +	hours := smart.json.Get("power_on_time.hours")
-+	if !hours.Exists() || hours.Float() < 0 {
-+		return
-+	}
 +	nvme := smart.json.Get("nvme_self_test_log").Exists()
 +	table := smart.json.Get("nvme_self_test_log.table")
 +	if !nvme {
-+		// ATA log timestamps wrap at 65536 hours. Do not guess an epoch.
-+		if hours.Float() >= 65536 {
-+			return
-+		}
 +		table = smart.json.Get("ata_smart_self_test_log.extended.table")
 +		if len(table.Array()) == 0 {
 +			table = smart.json.Get("ata_smart_self_test_log.standard.table")
@@ -326,9 +342,6 @@
 +		if code == 15 { // ATA still running, or unused NVMe entry.
 +			continue
 +		}
-+		if !ended.Exists() || ended.Float() < 0 || ended.Float() > hours.Float() {
-+			return
-+		}
 +		result := "Unknown"
 +		if code == 0 {
 +			result = "Passed"
@@ -336,6 +349,19 @@
 +			result = "Failed"
 +		} else if (!nvme && (code == 1 || code == 2)) || (nvme && ((code >= 1 && code <= 4) || code == 8 || code == 9)) {
 +			result = "Aborted"
++		}
++		smart.ch <- prometheus.MustNewConstMetric(
++			metricDeviceSelfTestResult,
++			prometheus.GaugeValue,
++			1,
++			smart.device.device,
++			result,
++		)
++		// The result needs no timestamp. The age does. ATA log timestamps
++		// wrap at 65536 hours. Do not guess an epoch.
++		if !hours.Exists() || hours.Float() < 0 || (!nvme && hours.Float() >= 65536) ||
++			!ended.Exists() || ended.Float() < 0 || ended.Float() > hours.Float() {
++			return
 +		}
 +		smart.ch <- prometheus.MustNewConstMetric(
 +			metricDeviceSelfTestAge,

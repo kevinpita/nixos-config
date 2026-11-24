@@ -124,9 +124,7 @@
         }
         {
           alert = "SmartSelfTestFailed";
-          # The exporter gives no latest result for some drives, for example
-          # past 65536 power-on hours. This rule does not cover those drives.
-          expr = ''smartctl_device_self_test_age_seconds{job="smartctl",host=~"${servers}",result="Failed"}'';
+          expr = ''smartctl_device_self_test_result{job="smartctl",host=~"${servers}",result="Failed"} == 1'';
           for = "5m";
           labels.severity = "warning";
           annotations = {
