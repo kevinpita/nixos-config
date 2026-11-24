@@ -97,9 +97,6 @@ providers:
 retry:
   rateLimitWalksChain: true
   fallbackChains:
-    default:
-      - openai-codex/gpt-6.2-sol
-      - anthropic/claude-opus-5-5
     task:
       - openai-codex/gpt-6.2-sol
       - anthropic/claude-opus-5-5

@@ -27,6 +27,8 @@ See its [package documentation](extensions/emphasis/README.md) for controls, own
 
 There are no custom worker agents. To run a worker on a model, tag the model with `^provider/model` in the prompt. Add `:level` to pin its initial reasoning level, for example `^anthropic/claude-opus-5-5:high`. A tag without a level keeps the level that omp uses without one. Upstream omp supports the suffix and its completion: type `^opus:` before accepting a model completion to list matching models and their supported levels.
 
+A tagged worker has no fallback model for provider errors, such as capacity or rate limits. It retries its own model and then fails with an error that names that model. The main session has no fallback either. `modules/omp.nix` fixes this with an empty `retry.fallbackChains.default`, which a runtime settings edit cannot change. The chains of the named roles, such as `task` and `advisor`, stay in `config.yml`. One path stays open: when the tagged model has no usable login at spawn time, omp starts the worker on the main session's model and reports no error.
+
 `task.enableEffort` is `false`, so a caller cannot set `effort` per spawn. The `effort` field would map `lo`, `med`, and `hi` to the lowest, middle, and highest level of the model, so `hi` would run at `max`.
 
 A session model switch does not change explicit worker assignments. Role aliases resolve at use time. An alias to `@default` can follow a session model switch, so use an explicit selector when a worker must stay on one model.
@@ -37,9 +39,9 @@ Keep providers available for manual selection when only their default routes cha
 
 ## Command approval
 
-`modules/omp.nix` generates a `bash.patterns` overlay. omp asks before a `kubectl` or `helm` command that changes a cluster and before `git push`. A headless subagent cannot answer, so it gets a refusal. Change the rules there, not in `config.yml`, so a settings edit cannot remove them.
+`modules/omp.nix` generates a `bash.patterns` overlay. omp asks before a `kubectl` or `helm` command that changes a cluster and before `git push`, also when a flag comes before the verb (`git -C dir push`) or the command runs inside `bash -c`. A headless subagent cannot answer, so it gets a refusal. Change the rules there, not in `config.yml`, so a settings edit cannot remove them.
 
-The rules are an approval policy, not containment. They do not cover `eval` or a verb that is not listed, and a command that only contains the text of a listed command also asks.
+The rules are an approval policy, not containment. They do not cover `eval` or a verb that is not listed. A command that only contains the text of a listed command also asks, and so does `git -C dir stash push`.
 
 ## Plannotator
 

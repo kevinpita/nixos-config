@@ -42,9 +42,11 @@ in
       };
       # omp asks before a cluster write or a push, and a headless subagent
       # gets a refusal. This is an approval policy, not containment: it does
-      # not cover `eval` or a verb that is not listed. For kubectl and helm,
-      # the leading * also matches an environment prefix, and the second form
-      # matches a flag before the verb.
+      # not cover `eval` or a verb that is not listed. The leading * also
+      # matches an environment prefix and a push inside `bash -c '...'`, and
+      # the second form of each rule matches a flag before the verb, such as
+      # `git -C dir push`. Globs cannot skip `stash` after such a flag, so
+      # `git -C dir stash push` also asks.
       ompBashPolicy = (pkgs.formats.yaml { }).generate "omp-bash-policy.yml" {
         bash.patterns =
           let
@@ -96,7 +98,18 @@ in
             "test"
             "push"
           ]
-          ++ [ (prompt "git push*") ];
+          ++ [
+            (prompt "*git push*")
+            (prompt "*git -* push*")
+          ];
+      };
+      # A worker that the user tags with `^provider/model` has no model role,
+      # so omp gives it the `default` fallback chain. The user chooses the
+      # model, so this chain is empty: the worker retries its own model and
+      # then fails with an error that names it. The main session uses the same
+      # chain. The chains of the named roles stay in omp/config.yml.
+      ompFallbackPolicy = (pkgs.formats.yaml { }).generate "omp-fallback-policy.yml" {
+        retry.fallbackChains.default = [ ];
       };
       # The default preset with `status` and `token_rate` after `model`.
       # The provider-status extension renders the active provider id in
@@ -222,7 +235,8 @@ in
       '';
       # PI_CONFIG_FILES layers above ~/.omp/agent/config.yml, so runtime
       # settings edits cannot re-enable the providers or the update check, or
-      # change the status line or the bash approval policy.
+      # change the status line, the bash approval policy, or the empty default
+      # fallback chain.
       # omp cannot see the outer terminal through herdr, so it shows image
       # placeholders. herdr forwards Kitty graphics to Ghostty. Unicode
       # placeholders stay off because herdr stretches them (herdr#4858).
@@ -234,6 +248,7 @@ in
           wrapProgram "$out/bin/omp" \
             --prefix PI_CONFIG_FILES : ${ompProviderPolicy} \
             --prefix PI_CONFIG_FILES : ${ompBashPolicy} \
+            --prefix PI_CONFIG_FILES : ${ompFallbackPolicy} \
             --prefix PI_CONFIG_FILES : ${ompStatusLine} \
             --prefix PI_CONFIG_FILES : ${ompNoUpdateCheck} \
             --prefix PI_CONFIG_FILES : ${ompPython} \
