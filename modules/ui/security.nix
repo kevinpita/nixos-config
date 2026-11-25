@@ -11,6 +11,8 @@
 
         # Security keys
         yubikey-manager
+
+        proton-vpn
       ];
     };
 }
