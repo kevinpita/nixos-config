@@ -130,7 +130,12 @@ def pod_changes(known, pods, now):
 
 class Notifier:
     def __init__(self, token_file, room_file, state_dir, hosts, kubernetes_token_file=None, kubernetes_ca_file=None):
-        self.deployment_query = f'comin_last_successful_deployment_timestamp_seconds{{job="node",host=~"{hosts}"}}'
+        timestamp = f'comin_last_successful_deployment_timestamp_seconds{{job="node",host=~"{hosts}"}}'
+        # Add the package changes of the deployment for the hosts that report them.
+        self.deployment_query = (
+            f"{timestamp} * on(host, instance) group_left(changes) comin_last_successful_deployment_changes_info"
+            f" or on(host, instance) {timestamp}"
+        )
         self.token = Path(token_file).read_text(encoding="utf-8").strip()
         if not self.token:
             raise ValueError("Matrix token is empty")
@@ -191,7 +196,8 @@ class Notifier:
             if previous is not None and timestamp <= previous:
                 continue
             if previous is not None or timestamp > self.state["baseline"]:
-                self.send(f"{host} completed a Comin deployment.", f"comin-{host}-{timestamp}")
+                changes = sample["metric"].get("changes", "")
+                self.send(f"{host} completed a Comin deployment.\n{changes}".rstrip(), f"comin-{host}-{timestamp}")
                 logging.info("Notified successful Comin deployment on %s", host)
             self.state["last"][host] = timestamp
             self.save_state()

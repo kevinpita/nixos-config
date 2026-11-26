@@ -21,7 +21,12 @@
         postDeploymentCommand = lib.getExe (
           pkgs.writeShellApplication {
             name = "comin-deployment-metric";
-            runtimeInputs = [ pkgs.coreutils ];
+            runtimeInputs = [
+              config.nix.package
+              pkgs.coreutils
+              pkgs.gnugrep
+              pkgs.gnused
+            ];
             text = ''
               exec ${pkgs.bash}/bin/bash ${./comin-deployment-metric.sh} /var/lib/comin-metrics
             '';
