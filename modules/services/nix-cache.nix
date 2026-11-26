@@ -88,6 +88,10 @@ in
           daemonIOSchedClass = "idle";
         };
 
+        services.prometheus.exporters.node.extraFlags = [
+          "--collector.textfile.directory=${stateDirectory}"
+        ];
+
         # Build each workstation from the newest main commit. The out-links are
         # GC roots, so harmonia keeps serving the latest closures.
         systemd.services.nix-cache-prebuild = lib.recursiveUpdate serviceDefaults {
@@ -95,6 +99,13 @@ in
           serviceConfig.ExecStart = script "nix-cache-prebuild" ''
             revision=$(git ls-remote ${repository} refs/heads/main | cut -f1)
             [[ -n "$revision" ]] || { echo "Could not resolve main" >&2; exit 1; }
+            # Publish main, so Grafana can compare the revision of each host with it.
+            {
+              printf '# HELP nix_cache_main_revision_info Newest commit of main that the cache host resolved.\n'
+              printf '# TYPE nix_cache_main_revision_info gauge\n'
+              printf 'nix_cache_main_revision_info{revision="%s"} 1\n' "$revision"
+            } > ${stateDirectory}/.main.prom.tmp
+            mv -f ${stateDirectory}/.main.prom.tmp ${stateDirectory}/main.prom
             if [[ "$(cat ${stateDirectory}/revision 2>/dev/null || true)" == "$revision" ]]; then
               exit 0
             fi

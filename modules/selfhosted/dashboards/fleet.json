@@ -52,13 +52,23 @@
       "fieldConfig": {"defaults": {"unit": "percent", "min": 0, "max": 100}, "overrides": []}
     },
     {
-      "id": 6, "title": "Server reboot required", "type": "stat",
-      "description": "Comin only runs on the server hosts. No data for a workstation does not mean that it needs no reboot.",
+      "id": 6, "title": "Reboot required", "type": "stat",
+      "description": "The active kernel, initrd, or kernel modules differ from the booted ones. Each host updates the value when it activates a system.",
       "datasource": {"type": "prometheus", "uid": "prometheus"},
       "gridPos": {"x": 12, "y": 13, "w": 12, "h": 8},
-      "targets": [{"refId": "A", "expr": "comin_need_to_reboot{job=\"comin\"} and on(host,instance) (up{job=\"comin\"} == 1)", "legendFormat": "{{host}}", "instant": true}],
+      "targets": [{"refId": "A", "expr": "nixos_reboot_required{job=\"node\"} and on(host,instance) (up{job=\"node\"} == 1)", "legendFormat": "{{host}}", "instant": true}],
       "fieldConfig": {"defaults": {"noValue": "Unknown", "mappings": [{"type": "value", "options": {"0": {"text": "No", "color": "green"}, "1": {"text": "Yes", "color": "yellow"}}}]}, "overrides": []},
       "options": {"colorMode": "value", "textMode": "value_and_name", "reduceOptions": {"calcs": ["lastNotNull"], "values": false}}
+    },
+    {
+      "id": 7, "title": "Deployed revision", "type": "table",
+      "description": "Commit of this repository that built the active system of each reporting host. Dirty means that the checkout had uncommitted changes at the switch, so the system can differ from the commit. On main compares the commit with the newest main commit that the cache host resolved. It is Unknown when the cache host has not resolved main in the last 30 minutes.",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": {"x": 0, "y": 21, "w": 24, "h": 7},
+      "targets": [{"refId": "A", "expr": "(((nixos_configuration_revision_info{job=\"node\"} * on(revision) group_left() nix_cache_main_revision_info{job=\"node\"}) or (0 * nixos_configuration_revision_info{job=\"node\"})) and on() (time() - node_textfile_mtime_seconds{job=\"node\",file=\"/var/lib/nix-cache-prebuild/main.prom\"} < 1800)) or (-1 * nixos_configuration_revision_info{job=\"node\"})", "instant": true, "range": false, "format": "table"}],
+      "transformations": [{"id": "organize", "options": {"excludeByName": {"Time": true, "instance": true, "job": true}, "renameByName": {"host": "Host", "revision": "Revision", "dirty": "Dirty", "Value": "On main"}}}],
+      "fieldConfig": {"defaults": {"noValue": "No data"}, "overrides": [{"matcher": {"id": "byName", "options": "On main"}, "properties": [{"id": "mappings", "value": [{"type": "value", "options": {"-1": {"text": "Unknown"}, "0": {"text": "No", "color": "yellow"}, "1": {"text": "Yes", "color": "green"}}}]}, {"id": "custom.cellOptions", "value": {"type": "color-text"}}]}]},
+      "options": {"showHeader": true}
     }
   ]
 }
