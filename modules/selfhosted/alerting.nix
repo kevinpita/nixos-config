@@ -262,6 +262,59 @@
             description = "The {{ $labels.collector }} collector has failed for 5 minutes. Pool values can be stale.";
           };
         }
+        {
+          alert = "CominDeploymentFailed";
+          expr = lib.concatStringsSep " or " (
+            lib.mapAttrsToList
+              (
+                metric: stage:
+                ''label_replace(comin_last_${metric}_failed{job="comin"} == 1, "stage", "${stage}", "", "")''
+              )
+              {
+                eval = "evaluation";
+                build = "build";
+                deployment = "activation";
+              }
+          );
+          for = "5m";
+          labels.severity = "critical";
+          annotations = {
+            summary = "Comin deployment failed on {{ $labels.host }}";
+            description = "The last {{ $labels.stage }} of main failed. The host keeps its previous system. Check journalctl -u comin.";
+          };
+        }
+        {
+          alert = "CominFetchFailed";
+          expr = ''comin_last_fetch_failed{job="comin"} == 1'';
+          for = "30m";
+          labels.severity = "warning";
+          annotations = {
+            summary = "Comin cannot fetch on {{ $labels.host }}";
+            description = "The last fetch of {{ $labels.remote_name }} has failed for 30 minutes. The host does not receive new commits. Check journalctl -u comin.";
+          };
+        }
+        {
+          alert = "NixCacheUpdateFailed";
+          expr = ''node_systemd_unit_state{job="node",name="nix-cache-update.service",state="failed"} == 1'';
+          for = "5m";
+          labels.severity = "warning";
+          annotations = {
+            summary = "Flake input update failed on {{ $labels.host }}";
+            description = "The daily input update did not push a new flake.lock. A workstation build failed with the new inputs, or the push failed. Check journalctl -u nix-cache-update.";
+          };
+        }
+        {
+          alert = "NixCachePrebuildFailed";
+          # The timer retries a failed build every 10 minutes. The range keeps
+          # the alert active while a retry runs.
+          expr = ''max_over_time(node_systemd_unit_state{job="node",name="nix-cache-prebuild.service",state="failed"}[30m]) == 1'';
+          for = "5m";
+          labels.severity = "warning";
+          annotations = {
+            summary = "Workstation prebuild failed on {{ $labels.host }}";
+            description = "The cache host could not build a workstation from main. Workstations build that commit locally. Check journalctl -u nix-cache-prebuild.";
+          };
+        }
       ];
       grafanaRule = rule: {
         uid = "${rule.alert}-${rule.labels.severity}";
