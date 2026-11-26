@@ -88,14 +88,61 @@ end
 
 hl.on("monitor.added", configure_monitor_workspaces)
 
+-- Usage log: bind presses, window opens, and workspace switches, to find
+-- config improvements. See README.md.
+local usageLogDir = os.getenv("HOME") .. "/nixos-config-log"
+os.execute('mkdir -p "' .. usageLogDir .. '"')
+local hostnameFile = io.open("/etc/hostname", "r")
+local usageLog = io.open(usageLogDir .. "/" .. hostnameFile:read("*l") .. ".jsonl", "a")
+hostnameFile:close()
+if usageLog then
+    usageLog:setvbuf("line")
+end
+
+local function log_usage(event, value)
+    if usageLog then
+        local escaped = tostring(value):gsub('[%c\\"]', function(char)
+            return ("\\u%04x"):format(char:byte())
+        end)
+        usageLog:write(('{"t":"%s","e":"%s","v":"%s"}\n'):format(os.date("%Y-%m-%dT%H:%M:%S%z"), event, escaped))
+    end
+end
+
+-- Later binds, including the ones that Nix and DMS append, go through this.
+local bind = hl.bind
+hl.bind = function(keys, action, options)
+    -- Drag and resize binds need their dispatcher, so they stay unlogged.
+    if options and options.mouse then
+        return bind(keys, action, options)
+    end
+    return bind(keys, function()
+        log_usage("bind", keys)
+        if type(action) == "function" then
+            action()
+        else
+            hl.dispatch(action)
+        end
+    end, options or {})
+end
+
+hl.on("window.open", function(window)
+    log_usage("window", window.class)
+end)
+
+hl.on("workspace.active", function(workspace)
+    log_usage("workspace", workspace.name)
+end)
+
 local mainMod = "SUPER"
 local dms = "dms ipc call "
 
 local function focus_or_launch(selector, command)
     return function()
         if hl.get_window(selector) then
+            log_usage("focus", selector)
             hl.dispatch(hl.dsp.focus({ window = selector }))
         else
+            log_usage("launch", command)
             hl.dispatch(hl.dsp.exec_cmd(command))
         end
     end

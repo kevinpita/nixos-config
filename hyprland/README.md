@@ -34,3 +34,7 @@ Use `plugins/` for a local DMS feature. Its matching module under `modules/hyprl
 Use `patches/` only for changes to upstream packaged behavior. The module that applies a patch owns its build integration. Recheck patches when updating DMS, because upstream source changes can make them fail to apply.
 
 Keep shared preferences in Git. Store per-user history and frequently changing runtime state outside the checkout.
+
+## Usage log
+
+`hyprland.lua` appends one JSON line to `~/nixos-config-log/<hostname>.jsonl` for each bind press, window open, and workspace switch. The log stays on the machine and records window classes, never titles or typed text. Use it to find unused binds and apps that deserve one. A window open does not record how the app was launched, so compare bind and window counts as clues only.
