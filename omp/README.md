@@ -7,7 +7,7 @@ This folder owns the oh-my-pi (omp) harness configuration. `modules/omp.nix` sel
 | Path | Change it for |
 | --- | --- |
 | `config.yml` | omp settings shared by all hosts. `~/.omp/agent/config.yml` links to this file, so settings changes in omp edit it in place. Commit and pull to share them. |
-| `extensions/` | omp extensions installed into `~/.omp/agent/extensions`. `session-relay.ts` adds `/send <host\|local> <name> [--snapshot]` and `/receive [host] <name>`. `/send` sends a fork of the current session over SSH and keeps the sender in the original. `/receive` installs the fork and switches the terminal to it. SSH always goes from the workstation to the server, so a server stages with `/send local` and the workstation pulls. `session-relay.e2e.sh` tests it in two incus VMs. `branch-ref.ts` adds `##name` in the prompt: a fuzzy list of the local and remote git branches that inserts "branch `name`" so the model reads it as a branch. It is off in drafts that omp runs as shell or Python code. |
+| `extensions/` | omp extensions installed into `~/.omp/agent/extensions`. `session-relay.ts` adds `/send <host\|local> <name> [--snapshot]` and `/receive [host] <name>`. `/send` sends a fork of the current session over SSH and keeps the sender in the original. `/receive` installs the fork and switches the terminal to it. SSH always goes from the workstation to the server, so a server stages with `/send local` and the workstation pulls. `session-relay.e2e.sh` tests it in two incus VMs. `branch-ref.ts` adds `##name` in the prompt: a fuzzy list of the local and remote git branches that inserts "branch `name`" so the model reads it as a branch. It is off in drafts that omp runs as shell or Python code. `model-preset.ts` adds [`/preset`](#model-presets), a model preset switch for one session. |
 | `commands/` | File-based slash commands installed into `~/.omp/agent/commands`. `pre-pr.md` adds `/pre-pr`, an adversarial review of the current branch with its working tree, or of a PR, a branch, a commit, or a range: the models you tag with `^` try to break the change in their own clones, and only findings that a rerun proves go into the report. `pre-pr.sh` does its git steps (snapshot, clones, guard, cleanup); test it with `bash omp/commands/pre-pr.test.sh`. `impeccable.md` adds `/impeccable`, the name that the `impeccable` skill uses for itself. `explainer-video.md` adds [`/explainer-video`](#explainer-video) for narrated Manim videos. `tldr.md` adds `/tldr`, a 2- or 3-sentence version of the last answer; its `side: true` frontmatter makes it a `/btw` side question, so it stays off the transcript and can run while a turn streams. `ask.md` adds `/ask <question>`, an answer in the transcript with read-only research and no change. omp loads only the `*.md` files as commands. |
 | `WATCHDOG.yml` | The advisor roster: each advisor's name, model, effort, and default on/off state. `~/.omp/agent/WATCHDOG.yml` links to this file, so `/advisor configure` at user scope edits it in place. |
 
@@ -54,6 +54,15 @@ A session model switch does not change explicit worker assignments. Role aliases
 `providers.maxInFlightRequests.nan` caps all Nan models together at 10 in-flight requests across local omp processes that share the config root. Other hosts do not share this limit. A model-specific provider limit can be lower.
 
 Keep providers available for manual selection when only their default routes change. Provider blocks belong in `modules/omp.nix`, separate from role assignments. Custom providers go into the generated `~/.omp/agent/models.yml`. Their API keys stay outside the repository: the `nan` provider reads its key from `~/.config/nan/api-key`, which sops-nix writes from `nan-key` in the `nixos-secrets` file `secrets/common.yaml`.
+
+### Model presets
+
+`config.yml` also holds the named presets under `modelPresets`. There are two ways to switch:
+
+- `/preset [name]` switches the current session only, and `config.yml` does not change. Without a name, it shows a list. The session records the preset, so a resumed session gets its roles back. A new session or a fork in the same omp process stays on the preset.
+- `/modelpreset switch <name>` is the built-in command. It writes the roles into `config.yml`, so use it to change the default for all sessions, and commit the result.
+
+`/preset` keeps the roles in the runtime layer that `--model` and `--smol` use. It imports omp internals that the extension API does not cover, so check it after an omp update: `omp -p -e omp/extensions/model-preset.ts "/preset <name>"` must leave `config.yml` unchanged.
 
 ## Command approval
 

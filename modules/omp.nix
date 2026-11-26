@@ -469,6 +469,8 @@ in
             ".omp/agent/extensions/k8s-status.ts".source = ../omp/extensions/k8s-status.ts;
             # ##name completes a git branch in the prompt.
             ".omp/agent/extensions/branch-ref.ts".source = ../omp/extensions/branch-ref.ts;
+            # /preset switches model presets for one session.
+            ".omp/agent/extensions/model-preset.ts".source = ../omp/extensions/model-preset.ts;
             # omp has no model-change event, so poll the live model to keep
             # the status line current after /model switches.
             ".omp/agent/extensions/provider-status.ts".text = ''
