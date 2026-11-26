@@ -82,7 +82,7 @@
           };
         };
 
-        programs.zsh.shellAliases.z = "zeditor";
+        programs.zsh.shellAliases.zed = "zeditor";
       };
     };
 }
