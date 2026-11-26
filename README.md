@@ -42,12 +42,15 @@ Hosts can also import individual features, such as `development` on `minidesk`.
 | [`omp/`](omp/) | omp settings and worker definitions |
 | [`packages/`](packages/) | Local helper packages |
 | [`lib/`](lib/) | Shared Nix helpers |
-| [`justfile`](justfile) | `just switch` to build and activate the current host |
+| [`scripts/`](scripts/) | Maintenance scripts that `just` runs |
+| [`justfile`](justfile) | `just switch`, `just check`, and `just pins` |
 
 ## Usage
 
 ```bash
 just switch                  # build and activate the current host
+just check                   # evaluate every host and run the flake checks
+just pins                    # compare hand-made version pins with upstream
 nix fmt                      # format the repository
 nix build .#installer-iso    # build the installation ISO
 ```
