@@ -3,15 +3,15 @@ modelProviderOrder:
   - anthropic
   - openai-codex
 modelRoles:
-  default: openai-codex/gpt-6.1-terra:high
-  smol: openai-codex/gpt-6.1-terra:low
-  slow: openai-codex/gpt-6.1-terra:xhigh
+  default: anthropic/claude-fable-5-2:high
+  smol: anthropic/claude-opus-5-5:high
+  slow: anthropic/claude-fable-5-2:high
   vision: anthropic/claude-opus-5-5:medium
-  plan: openai-codex/gpt-6.1-terra:high
+  plan: anthropic/claude-fable-5-2:high
   commit: openai-codex/gpt-6.1-terra:medium
   tiny: openai-codex/gpt-6.1-terra:low
   memory: openai-codex/gpt-6.1-terra:low
-  task: openai-codex/gpt-6.1-terra:high
+  task: anthropic/claude-fable-5-2:medium
   advisor: openai-codex/gpt-6.2-sol:high
   image: openai-codex/gpt-image-2
   judge: "@smol"
