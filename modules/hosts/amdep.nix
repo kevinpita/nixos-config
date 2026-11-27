@@ -28,5 +28,9 @@
       boot.kernelPackages = pkgs.linuxPackages_latest;
 
       boot.loader.grub.useOSProber = true;
+
+      # A short press of the case power button does nothing. A long press
+      # still cuts the power in firmware.
+      services.logind.settings.Login.HandlePowerKey = "ignore";
     };
 }
