@@ -69,6 +69,24 @@
       "transformations": [{"id": "organize", "options": {"excludeByName": {"Time": true, "instance": true, "job": true}, "renameByName": {"host": "Host", "revision": "Revision", "dirty": "Dirty", "Value": "On main"}}}],
       "fieldConfig": {"defaults": {"noValue": "No data"}, "overrides": [{"matcher": {"id": "byName", "options": "On main"}, "properties": [{"id": "mappings", "value": [{"type": "value", "options": {"-1": {"text": "Unknown"}, "0": {"text": "No", "color": "yellow"}, "1": {"text": "Yes", "color": "green"}}}]}, {"id": "custom.cellOptions", "value": {"type": "color-text"}}]}]},
       "options": {"showHeader": true}
+    },
+    {
+      "id": 8, "title": "Cache host update services", "type": "stat",
+      "description": "Whether a service that updates the flake inputs or prebuilds the workstations failed in the last 30 minutes. A failed build or push fails the service. nix-cache-update runs daily, and the other two run every 10 minutes. No data means that systemd has not loaded the service since startup.",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": {"x": 0, "y": 28, "w": 12, "h": 5},
+      "targets": [{"refId": "A", "expr": "max_over_time(node_systemd_unit_state{job=\"node\",name=~\"nix-cache-(prebuild|update|update-fast)[.]service\",state=\"failed\"}[30m])", "legendFormat": "{{name}}", "instant": true}],
+      "fieldConfig": {"defaults": {"noValue": "No data", "mappings": [{"type": "value", "options": {"0": {"text": "Not failed", "color": "green"}, "1": {"text": "Failed", "color": "red"}}}]}, "overrides": []},
+      "options": {"colorMode": "background", "textMode": "value_and_name", "reduceOptions": {"calcs": ["lastNotNull"], "values": false}}
+    },
+    {
+      "id": 9, "title": "Last cache host update start", "type": "stat",
+      "description": "Last trigger time that systemd reports for each timer. This is a start time, not a completion time. A run that finds nothing new also counts.",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": {"x": 12, "y": 28, "w": 12, "h": 5},
+      "targets": [{"refId": "A", "expr": "1000 * (node_systemd_timer_last_trigger_seconds{job=\"node\",name=~\"nix-cache-(prebuild|update|update-fast)[.]timer\"} > 0)", "legendFormat": "{{name}}", "instant": true}],
+      "fieldConfig": {"defaults": {"unit": "dateTimeAsIso", "color": {"mode": "fixed", "fixedColor": "blue"}, "noValue": "No data"}, "overrides": []},
+      "options": {"colorMode": "value", "graphMode": "none", "reduceOptions": {"calcs": ["lastNotNull"], "values": false}, "text": {"titleSize": 14, "valueSize": 16}}
     }
   ]
 }
