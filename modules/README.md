@@ -51,7 +51,7 @@ The input update runs once a day in these steps:
 1. When every build passes, the cache host pushes a signed `chore: update flake.lock` commit to `main`.
 1. Comin deploys that update to the servers.
 
-Every 10 minutes the cache host runs the same update for only the `oh-my-pi`, `herdr-nix`, and `herdr-lazygit` inputs, so a new omp or herdr release reaches `main` soon after upstream publishes it.
+Every 10 minutes the cache host runs the same update for only the `oh-my-pi` and `herdr-nix` inputs, so a new omp or herdr release reaches `main` soon after upstream publishes it.
 
 On a workstation, run `git pull` and `just switch` to get the update. Every host downloads from the cache host, so a server also gets what the cache host built for the workstations, for example omp. Packages download from the cache only when their build inputs match what the cache host built, so local module changes that are not on `main` can still build locally, for example a change to the omp wrapper in `omp.nix`.
 

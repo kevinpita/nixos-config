@@ -202,7 +202,7 @@ in
         # every 10 minutes. A run with no new release changes nothing.
         systemd.services.nix-cache-update-fast = lib.recursiveUpdate serviceDefaults {
           description = "Prebuild workstation systems with new omp and herdr releases";
-          serviceConfig.ExecStart = "${config.systemd.services.nix-cache-update.serviceConfig.ExecStart} oh-my-pi herdr-nix herdr-lazygit";
+          serviceConfig.ExecStart = "${config.systemd.services.nix-cache-update.serviceConfig.ExecStart} oh-my-pi herdr-nix";
         };
 
         systemd.timers.nix-cache-prebuild = {
