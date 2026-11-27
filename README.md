@@ -1,10 +1,13 @@
 # NixOS configuration
 
+[Hosts](#hosts) • [Structure](#structure) • [Usage](#usage) • [Herdr mods](#herdr-mods) • [Documentation](#documentation)
+
 My NixOS desktops, servers, and development environment. Built on [nixos-unstable](https://github.com/NixOS/nixpkgs), [Home Manager](https://github.com/nix-community/home-manager), and [flake-parts](https://flake.parts/).
 
 Desktops use Hyprland and DankMaterialShell. The repo also contains Neovim configuration, omp settings and skills, container tools, and self-hosted services.
 
-This is a personal configuration, not a starter template. It targets `x86_64-linux`, uses the account `kevin`, and depends on private secrets and work configuration. Desktop settings expect a checkout at `~/nixos-config`.
+> [!NOTE]
+> This is a personal configuration, not a starter template. It targets `x86_64-linux`, uses the account `kevin`, and depends on private secrets and work configuration. Desktop settings expect a checkout at `~/nixos-config`.
 
 ## Hosts
 
@@ -36,14 +39,19 @@ Hosts can also import individual features, such as `development` on `minidesk`.
 | [`modules/`](modules/) | Feature settings grouped by area |
 | [`hosts/`](hosts/) | Hardware, disk layouts, and host-specific desktop files |
 | [`hyprland/`](hyprland/) | Desktop configuration, DMS settings, plugins, and patches |
+| [`themes/`](themes/) | Desktop theme palettes and wallpapers |
 | [`neovim/`](neovim/) | Neovim Lua configuration and Nix wrapper |
 | [`herdr/`](herdr/) | herdr settings, linked writable into `~/.config/herdr` |
+| [`orca-slicer/`](orca-slicer/) | Orca Slicer printer, process, and filament presets, linked writable into its configuration |
 | [`agents/`](agents/) | Harness-independent agent instructions and skills |
-| [`omp/`](omp/) | omp settings and worker definitions |
+| [`omp/`](omp/) | omp settings, extensions, and commands |
 | [`packages/`](packages/) | Local helper packages |
 | [`lib/`](lib/) | Shared Nix helpers |
 | [`scripts/`](scripts/) | Maintenance scripts that `just` runs |
 | [`justfile`](justfile) | `just switch`, `just check`, and `just pins` |
+| [`treefmt.nix`](treefmt.nix) | Formatters that `nix fmt` and the formatting check run |
+| [`ci-dummy-input/`](ci-dummy-input/) | Stand-in for the private inputs in public CI |
+| [`docs/`](docs/) | Documentation diagrams |
 
 ## Usage
 
@@ -56,6 +64,8 @@ nix build .#installer-iso    # build the installation ISO
 ```
 
 Servers deploy `main` automatically with [Comin](modules/services/comin.nix). The cache host updates the flake inputs daily and pushes the lock only when every workstation builds. See [Applying changes](modules/README.md#applying-changes).
+
+## Herdr mods
 
 Workstations install [herdr-lazygit](https://github.com/kevinpita/herdr-lazygit) as a pinned Herdr desktop mod. A user service merges its shortcut into Herdr's writable key file after Herdr creates it and when it changes. Other bindings stay user-managed.
 

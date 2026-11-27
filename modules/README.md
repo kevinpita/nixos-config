@@ -23,6 +23,7 @@ A new file is discovered automatically, but a new aspect must still be selected 
 | `ui/` | Desktop applications and shared UI settings |
 | `hyprland/` | Desktop session setup, DMS integration, plugin installation, and desktop helper services |
 | `selfhosted/` | Hosted services, monitoring, alerts, dashboards, and storage integration |
+| `services/` | Server deployment with Comin, the Nix binary cache, and its prebuild jobs |
 | `virtualization/` | Virtual machines and system containers |
 | `misc/` | Private work integration and specialized features that do not fit another category |
 | `neovim.nix` | Wiring the [Neovim package](../neovim/README.md) into system and flake outputs |
@@ -44,7 +45,20 @@ Private work modules and encrypted secrets come from flake inputs. Change those 
 
 Run `nix fmt` from the repository root. `just switch` builds and activates the current host. `just check` evaluates every host with the real private inputs. Run it before a push that changes a server, because public CI uses dummy inputs and Comin deploys `main` unattended. A change to a shared aspect affects every host that imports it when that host is rebuilt. Keep existing `stateVersion` values unchanged during routine updates.
 
-The cache host updates all flake inputs on top of `main` once a day and builds every workstation with them. When every build passes, it pushes a signed `flake.lock` commit to `main`. Comin then deploys that update to the servers. On a workstation, run `git pull` and `just switch` to get it. Packages download from the cache only when their build inputs match what the cache host built, so local module changes that are not on `main` can still build locally, for example a change to the omp wrapper in `omp.nix`. Run `update-git` for an immediate update. Inputs that moved since the last cache host run build locally. After you push that commit, the cache host builds the new `main` for the other workstations within about 10 minutes. The cache host's checkout always resets to the remote `main`, including after a force push. If `main` moves during its builds, it puts the built lock on top of the new `main`. If the new `main` has a different `flake.lock`, it discards its own update.
+The input update runs once a day in these steps:
+
+1. The cache host updates all flake inputs on top of `main` and builds every workstation with them.
+1. When every build passes, the cache host pushes a signed `flake.lock` commit to `main`.
+1. Comin deploys that update to the servers.
+
+On a workstation, run `git pull` and `just switch` to get the update. Packages download from the cache only when their build inputs match what the cache host built, so local module changes that are not on `main` can still build locally, for example a change to the omp wrapper in `omp.nix`.
+
+Run `update-git` for an immediate update. Inputs that moved since the last cache host run build locally. After you push that commit, the cache host builds the new `main` for the other workstations within about 10 minutes.
+
+The cache host's checkout always resets to the remote `main`, including after a force push.
+
+- If `main` moves during its builds, it puts the built lock on top of the new `main`.
+- If the new `main` has a different `flake.lock`, it discards its own update.
 
 <p align="center">
   <img src="../docs/diagrams/updates.svg" alt="Update flow: a daily timer updates inputs, builds every workstation, and pushes a signed lock. Servers deploy it with Comin and workstations pull it. A failed build or a changed lock on main discards the update. Every 10 minutes the cache host prebuilds new main commits for workstations." width="100%">
