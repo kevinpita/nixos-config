@@ -47,18 +47,20 @@ Run `nix fmt` from the repository root. `just switch` builds and activates the c
 
 The input update runs once a day in these steps:
 
-1. The cache host updates all flake inputs on top of `main` and builds every workstation with them.
-1. When every build passes, the cache host pushes a signed `flake.lock` commit to `main`.
+1. The cache host updates all flake inputs on top of `main` and builds every workstation with them. The update also moves omp to its newest release, which changes the tag in `flake.nix` and the addon pin in `omp/natives.json`.
+1. When every build passes, the cache host pushes a signed `chore: update flake.lock` commit to `main`.
 1. Comin deploys that update to the servers.
 
-On a workstation, run `git pull` and `just switch` to get the update. Packages download from the cache only when their build inputs match what the cache host built, so local module changes that are not on `main` can still build locally, for example a change to the omp wrapper in `omp.nix`.
+Every 10 minutes the cache host runs the same update for only the `oh-my-pi`, `herdr-nix`, and `herdr-lazygit` inputs, so a new omp or herdr release reaches `main` soon after upstream publishes it.
+
+On a workstation, run `git pull` and `just switch` to get the update. Every host downloads from the cache host, so a server also gets what the cache host built for the workstations, for example omp. Packages download from the cache only when their build inputs match what the cache host built, so local module changes that are not on `main` can still build locally, for example a change to the omp wrapper in `omp.nix`.
 
 Run `update-git` for an immediate update. Inputs that moved since the last cache host run build locally. After you push that commit, the cache host builds the new `main` for the other workstations within about 10 minutes.
 
 The cache host's checkout always resets to the remote `main`, including after a force push.
 
-- If `main` moves during its builds, it puts the built lock on top of the new `main`.
-- If the new `main` has a different `flake.lock`, it discards its own update.
+- If `main` moves during its builds, it puts the built update on top of the new `main`.
+- If the new `main` changed `flake.lock`, `flake.nix`, or `omp/natives.json`, it discards its own update.
 
 <p align="center">
   <img src="../docs/diagrams/updates.svg" alt="Update flow: a daily timer updates inputs, builds every workstation, and pushes a signed lock. Servers deploy it with Comin and workstations pull it. A failed build or a changed lock on main discards the update. Every 10 minutes the cache host prebuilds new main commits for workstations." width="100%">

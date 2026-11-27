@@ -47,6 +47,7 @@ in
               pkgs.coreutils
               pkgs.git
               pkgs.openssh
+              pkgs.util-linux
             ];
           }
         );
@@ -121,14 +122,21 @@ in
           '';
         };
 
-        # Update every flake input on top of main, build every workstation
-        # with the result, and push the lock to main only when all builds
-        # pass. Workstations then pull a lock whose closures are cached.
+        # Update flake inputs on top of main, build every workstation with
+        # the result, and push the update to main only when all builds pass.
+        # The arguments name the inputs to update, and none means all of
+        # them. Workstations then pull a lock whose closures are cached.
         # Comin also deploys this commit to the servers. The checkout always
-        # follows the remote main, including force pushes.
+        # follows the remote main, including force pushes. The update also
+        # moves omp to its newest release, which changes flake.nix and
+        # omp/natives.json.
         systemd.services.nix-cache-update = lib.recursiveUpdate serviceDefaults {
           description = "Prebuild workstation systems with updated flake inputs";
           serviceConfig.ExecStart = script "nix-cache-update" ''
+            # The daily and the 10-minute update share the checkout, so one
+            # waits for the other.
+            exec 9>${stateDirectory}/update.lock
+            flock 9
             checkout=${stateDirectory}/update-checkout
             if [[ ! -d "$checkout/.git" ]]; then
               git clone --quiet ${repository} "$checkout"
@@ -139,17 +147,19 @@ in
               git reset --quiet --hard origin/main
               git clean --quiet -fd
             }
+            files=(flake.lock flake.nix omp/natives.json)
             # Comin deploys only commits signed by an allowed key.
             commit_lock() {
               git -c user.name="Kevin Pita" -c user.email=gitkevin@pm.me \
                 -c gpg.format=ssh -c user.signingkey=/home/${username}/.ssh/id_ed25519_sign \
-                commit --quiet --gpg-sign --message "chore: update flake.lock" -- flake.lock
+                commit --quiet --gpg-sign --message "chore: update flake.lock" -- "''${files[@]}"
             }
 
             sync_main
             base=$(git rev-parse HEAD)
-            nix flake update --flake "git+file://$checkout"
-            if git diff --quiet -- flake.lock; then
+            ${lib.getExe pkgs.omp-pin-release}
+            nix flake update "$@" --flake "git+file://$checkout"
+            if git diff --quiet -- "''${files[@]}"; then
               echo "Inputs are already current"
               exit 0
             fi
@@ -163,19 +173,20 @@ in
                 "git+file://$checkout#nixosConfigurations.$host.config.system.build.toplevel"
             done
 
-            # If main moved during the builds, put the built lock on the new
-            # main. If the new main has its own lock change, keep that one.
+            # If main moved during the builds, put the built update on the new
+            # main. If the new main changed one of the updated files, keep
+            # that change and discard this update.
             for _ in 1 2 3; do
               git fetch --quiet origin main
-              if ! git diff --quiet "$base" origin/main -- flake.lock; then
-                echo "main changed flake.lock during the builds, discarding this update"
+              if ! git diff --quiet "$base" origin/main -- "''${files[@]}"; then
+                echo "main changed ''${files[*]} during the builds, discarding this update"
                 sync_main
                 exit 0
               fi
               if [[ "$(git rev-parse origin/main)" != "$base" ]]; then
                 sync_main
                 base=$(git rev-parse HEAD)
-                git checkout --quiet "$updated" -- flake.lock
+                git checkout --quiet "$updated" -- "''${files[@]}"
                 commit_lock
               fi
               if git push --quiet git@github.com:kevinpita/nixos-config.git HEAD:refs/heads/main; then
@@ -185,6 +196,13 @@ in
             echo "Could not push the updated lock" >&2
             exit 1
           '';
+        };
+
+        # omp and herdr release often, so their inputs get the same update
+        # every 10 minutes. A run with no new release changes nothing.
+        systemd.services.nix-cache-update-fast = lib.recursiveUpdate serviceDefaults {
+          description = "Prebuild workstation systems with new omp and herdr releases";
+          serviceConfig.ExecStart = "${config.systemd.services.nix-cache-update.serviceConfig.ExecStart} oh-my-pi herdr-nix herdr-lazygit";
         };
 
         systemd.timers.nix-cache-prebuild = {
@@ -203,23 +221,46 @@ in
             RandomizedDelaySec = "1h";
           };
         };
+
+        systemd.timers.nix-cache-update-fast = {
+          wantedBy = [ "timers.target" ];
+          timerConfig = {
+            OnBootSec = "5min";
+            OnUnitInactiveSec = "10min";
+          };
+        };
       };
     };
 
   flake.modules.nixos.workstation =
-    { lib, tailnetDomain, ... }:
+    { lib, ... }:
     {
       options.nixCache.prebuild = lib.mkOption {
         type = lib.types.bool;
         default = true;
         description = "Whether cache hosts prebuild this host's system.";
       };
+    };
 
-      config.nix.settings = {
+  # Every host downloads from the cache hosts. A cache host skips itself.
+  flake.modules.nixos.base =
+    {
+      config,
+      lib,
+      tailnetDomain,
+      ...
+    }:
+    let
+      otherCacheHosts = lib.filter (
+        host: host.config.networking.hostName != config.networking.hostName
+      ) cacheHosts;
+    in
+    {
+      nix.settings = {
         extra-substituters = map (
           host: "http://${host.config.networking.hostName}.${tailnetDomain}:${toString port}"
-        ) cacheHosts;
-        extra-trusted-public-keys = map (host: host.config.nixCache.publicKey) cacheHosts;
+        ) otherCacheHosts;
+        extra-trusted-public-keys = map (host: host.config.nixCache.publicKey) otherCacheHosts;
         connect-timeout = 5;
         fallback = true;
       };
