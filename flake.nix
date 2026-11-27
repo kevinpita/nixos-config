@@ -112,8 +112,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # A release tag, because the prebuilt native addon in omp/natives.json
+    # matches only the tagged source. omp-pin-release moves both together.
     oh-my-pi = {
-      url = "github:can1357/oh-my-pi";
+      url = "github:can1357/oh-my-pi/v19.2.1";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

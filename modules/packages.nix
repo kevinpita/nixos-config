@@ -6,6 +6,7 @@
     herdr-app = (inputs.herdr-nix.overlays.default final _prev).herdr;
     inherit ((inputs.herdr-nix.overlays.default final _prev)) herdr-core;
     mcp-reva = final.callPackage ../packages/mcp-reva/package.nix { };
+    omp-pin-release = final.callPackage ../packages/omp-pin-release/package.nix { };
     open-code-review = final.callPackage ../packages/open-code-review/package.nix { };
     plymouth-nixos-grub = final.callPackage ../packages/plymouth-nixos-grub/package.nix {
       grubTheme = inputs.nixos-grub-themes.packages.${final.stdenv.hostPlatform.system}.nixos;

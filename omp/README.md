@@ -12,6 +12,7 @@ This folder owns the oh-my-pi (omp) harness configuration. `modules/omp.nix` sel
 | `patches/` | Source patches that `modules/omp.nix` applies to the omp package. See [Configuration or package?](#configuration-or-package). |
 | `plannotator/` | The npm dependency pins of the [Plannotator](#plannotator) extension. |
 | `WATCHDOG.yml` | The advisor roster: each advisor's name, model, effort, and default on/off state. `~/.omp/agent/WATCHDOG.yml` links to this file, so `/advisor configure` at user scope edits it in place. |
+| `natives.json` | The version and hash of upstream's prebuilt native addon. `omp-pin-release` writes it. Do not edit it by hand. |
 
 ## Extensions
 
@@ -109,6 +110,8 @@ One host can set `omp.authBroker.enable` to run `omp auth-broker serve` as a sys
 ## Configuration or package?
 
 Change `modules/omp.nix` for the package, wrapper settings that runtime edits must not override, or which files are installed. Change this folder for the content of those files. The `oh-my-pi` flake input provides omp. The `pstack` input pins the pstack plugin package. `modules/omp.nix` also owns the skill catalog and the pstack plugin that omp and Antigravity CLI share. See [`agents/README.md`](../agents/README.md) for where each harness reads them.
+
+The `oh-my-pi` input is a release tag, not `main`. Upstream publishes the native addon for each release on npm, and the package uses that addon, so no host compiles Rust for omp. The addon matches only the tagged source. `omp-pin-release` in [`packages/`](../packages/README.md) moves the tag in `flake.nix` and `natives.json` to the newest release together. The `update` alias and the cache host's daily update run it.
 
 The package applies two source patches for `/fork pane` and `/fork tab`. If an `oh-my-pi` update makes a patch fail to apply, port it to the new source.
 

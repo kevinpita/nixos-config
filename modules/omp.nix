@@ -160,12 +160,31 @@ in
       ompPython = (pkgs.formats.yaml { }).generate "omp-python.yml" {
         python.interpreter = lib.getExe pkgs.python3;
       };
-      # Upstream's release profile uses fat LTO with one codegen unit, which
-      # links pi-natives on a single core. withFatLto = false switches the
-      # native Rust build to thin LTO with 16 codegen units.
+      # Upstream publishes the native addon with each release, so no host
+      # compiles Rust for omp. omp/natives.json pins that addon, and
+      # omp-pin-release keeps it on the release tag of the oh-my-pi input.
+      # The addon replaces upstream's crane build, which its package reaches
+      # only through craneLib.buildPackage.
+      ompNatives = lib.importJSON ../omp/natives.json;
       ompBasePackage =
+        assert lib.assertMsg (inputs.oh-my-pi.packages.${system}.default.version == ompNatives.version)
+          "omp/natives.json pins omp ${ompNatives.version}, but the oh-my-pi input is another release. Run `update`.";
         (inputs.oh-my-pi.packages.${system}.default.override {
-          withFatLto = false;
+          craneLib.buildPackage =
+            { passthru, ... }:
+            pkgs.runCommand "omp-native-prebuilt-${ompNatives.version}"
+              {
+                src = pkgs.fetchurl {
+                  url = "https://registry.npmjs.org/@oh-my-pi/pi-natives-linux-x64/-/pi-natives-linux-x64-${ompNatives.version}.tgz";
+                  inherit (ompNatives) hash;
+                };
+                passthru = { inherit (passthru) platform; };
+              }
+              ''
+                mkdir -p "$out/lib"
+                tar -xzOf "$src" "package/${passthru.platform.addon}" \
+                  > "$out/lib/${passthru.platform.nativeLibrary}"
+              '';
         }).overrideAttrs
           (old: {
             patches = (old.patches or [ ]) ++ [

@@ -66,13 +66,18 @@
             gittime = ''git commit --amend --date="$(date -Iseconds)" --no-edit'';
             switch = "just --justfile ${config.programs.nh.flake}/justfile switch";
             # Reuses the gh login so GitHub API calls are authenticated without storing the token.
-            update = "cd ${config.programs.nh.flake} && NIX_CONFIG=\"$(gh auth token 2>/dev/null | sed 's/^/access-tokens = github.com=/')\" nix flake update";
+            # omp-pin-release moves omp to its newest release before the lock update.
+            update = "cd ${config.programs.nh.flake} && ${lib.getExe pkgs.omp-pin-release} && NIX_CONFIG=\"$(gh auth token 2>/dev/null | sed 's/^/access-tokens = github.com=/')\" nix flake update";
 
+            # The commit takes flake.nix and omp/natives.json whole, so it
+            # refuses to start when they have changes of yours.
             update-git = ''
+              git -C ${config.programs.nh.flake} diff --quiet HEAD -- flake.nix omp/natives.json || \
+                { echo "update-git: commit or stash your changes to flake.nix and omp/natives.json first" >&2; false; } && \
               update && \
-              if ! git diff --quiet flake.lock; then
-                git add flake.lock && \
-                git commit flake.lock -m "chore: update flake.lock"
+              if ! git diff --quiet flake.lock flake.nix omp/natives.json; then
+                git add flake.lock flake.nix omp/natives.json && \
+                git commit flake.lock flake.nix omp/natives.json -m "chore: update flake.lock"
               fi
             '';
           };
