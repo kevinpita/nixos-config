@@ -82,12 +82,6 @@ in
           port
         ];
 
-        # Keep prebuilds from starving the hosted services.
-        nix = {
-          daemonCPUSchedPolicy = "batch";
-          daemonIOSchedClass = "idle";
-        };
-
         services.prometheus.exporters.node.extraFlags = [
           "--collector.textfile.directory=${stateDirectory}"
         ];
