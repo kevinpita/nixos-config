@@ -82,7 +82,10 @@ One host can set `omp.authBroker.enable` to run `omp auth-broker serve` as a sys
 
 Change `modules/omp.nix` for the package, wrapper settings that runtime edits must not override, or which files are installed. Change this folder for the content of those files. The `oh-my-pi` flake input provides omp. The `pstack` input pins the pstack plugin package. `modules/omp.nix` also owns the skill catalog and the pstack plugin that omp and Antigravity CLI share. See [`agents/README.md`](../agents/README.md) for where each harness reads them.
 
-The package applies `patches/herdr-core-fork.patch` for `/fork pane` and `/fork tab` in Herdr Desktop and Core. The patch ports [upstream PR #19201](https://github.com/can1357/oh-my-pi/pull/19201), which upstream closed without a merge, and it holds only the source changes. If an `oh-my-pi` update makes the patch fail to apply, port it to the new source.
+The package applies two source patches for `/fork pane` and `/fork tab`. If an `oh-my-pi` update makes a patch fail to apply, port it to the new source.
+
+- `patches/herdr-core-fork.patch` makes them work in Herdr Desktop and Core. It ports [upstream PR #19201](https://github.com/can1357/oh-my-pi/pull/19201), which upstream closed without a merge, and it holds only the source changes.
+- `patches/fork-without-running-turn.patch` applies on top of it. While a response runs, the fork opens without a confirmation and ends at the last finished answer, so it holds nothing of the running turn. The original session continues. During the first response there is no finished answer, so the command reports an error.
 
 ## Applying changes
 

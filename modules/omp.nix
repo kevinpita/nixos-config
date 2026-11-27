@@ -168,7 +168,10 @@ in
           withFatLto = false;
         }).overrideAttrs
           (old: {
-            patches = (old.patches or [ ]) ++ [ ../omp/patches/herdr-core-fork.patch ];
+            patches = (old.patches or [ ]) ++ [
+              ../omp/patches/herdr-core-fork.patch
+              ../omp/patches/fork-without-running-turn.patch
+            ];
           });
       # pstack is a Claude Code plugin; omp loads that format through
       # --plugin-dir. Its poteto-mode scripts install commander into their own

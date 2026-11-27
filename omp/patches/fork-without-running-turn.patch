@@ -1,0 +1,169 @@
+diff --git a/packages/coding-agent/src/modes/controllers/command-controller.ts b/packages/coding-agent/src/modes/controllers/command-controller.ts
+index e68e63c..c2e1ac0 100644
+--- a/packages/coding-agent/src/modes/controllers/command-controller.ts
++++ b/packages/coding-agent/src/modes/controllers/command-controller.ts
+@@ -50,13 +50,15 @@ import type { AsyncJobSnapshotItem } from "../../session/agent-session";
+ import { buildJobTree, jobTreeGuide, jobTreeIndent } from "../view-model/overlays/job-tree";
+ import type { AuthStorage, OAuthAccountIdentity } from "../../session/auth-storage";
+ import { type CompactMode, findCompactMode } from "../../session/compact-modes";
++import { isTerminalTextAssistantAnswer } from "../../session/queued-messages";
+ import {
+ 	currentRuntimeIdentity,
+ 	formatRuntimeIdentity,
+ 	runtimeIdentityHistory,
+ 	sameRuntimeIdentity,
+ } from "../../session/runtime-identity";
+-import type { NewSessionOptions } from "../../session/session-entries";
++import type { NewSessionOptions, SessionEntry } from "../../session/session-entries";
++import { SessionManager } from "../../session/session-manager";
+ import {
+ 	cleanSourceCheckoutIfConfigured,
+ 	createSessionWorktree,
+@@ -196,6 +198,22 @@ function hasForkApiKeyOverride(argv: string[]): boolean {
+ 	return false;
+ }
+ 
++/**
++ * Where a fork taken mid-turn ends: the last finished answer on `branch`, plus
++ * what follows it outside any turn (a compaction, a model change). Undefined
++ * while the first response is still running.
++ */
++function lastFinishedAnswerId(branch: readonly SessionEntry[]): string | undefined {
++	let index = branch.findLastIndex(entry => entry.type === "message" && isTerminalTextAssistantAnswer(entry.message));
++	if (index < 0) return undefined;
++	while (index + 1 < branch.length) {
++		const next = branch[index + 1]!.type;
++		if (next === "message" || next === "custom_message") break;
++		index++;
++	}
++	return branch[index]!.id;
++}
++
+ export class CommandController {
+ 	/** The report shown: docked above the composer, or a focused sheet/page (`sheet`). */
+ 	#report: { readonly dispose: () => void; readonly sheet?: OverlayHandle } | undefined;
+@@ -1524,14 +1542,6 @@ export class CommandController {
+ 			return;
+ 		}
+ 
+-		if (this.ctx.session.isStreaming) {
+-			const confirmed = await this.ctx.showHookConfirm(
+-				"Fork while a response is running?",
+-				"The child may not include the partial response. Continue opening a fork? The current session will keep running here.",
+-			);
+-			if (!confirmed) return;
+-		}
+-
+ 		const initialSessionFile = this.ctx.sessionManager.getSessionFile();
+ 		if (!initialSessionFile) {
+ 			this.ctx.showError("Cannot open a fork in another terminal: the current session has not been persisted yet.");
+@@ -1557,6 +1567,19 @@ export class CommandController {
+ 			}
+ 		}
+ 
++		// A running turn stays out of the fork, which ends at the last finished answer.
++		// Chosen before the flush, so the flushed file holds the whole kept path.
++		let forkLeafId: string | undefined;
++		if (this.ctx.session.isStreaming) {
++			forkLeafId = lastFinishedAnswerId(this.ctx.sessionManager.getBranch());
++			if (forkLeafId === undefined) {
++				this.ctx.showError(
++					"Cannot open a fork in another terminal: the first response is still running, so there is no finished answer to fork from.",
++				);
++				return;
++			}
++		}
++
+ 		try {
+ 			await this.ctx.sessionManager.flush();
+ 		} catch (error) {
+@@ -1594,7 +1617,22 @@ export class CommandController {
+ 			) {
+ 				childArgs.push("--prompt-cache-key", this.ctx.session.agent.promptCacheKey ?? this.ctx.session.sessionId);
+ 			}
+-			childArgs.push("--fork", sourceSessionFile);
++			if (forkLeafId === undefined) {
++				childArgs.push("--fork", sourceSessionFile);
++			} else {
++				// The child cannot tell the running turn from a finished one, so the cut is made here.
++				const fork = await SessionManager.forkFrom(
++					sourceSessionFile,
++					this.ctx.sessionManager.getCwd(),
++					this.ctx.sessionManager.getSessionDir(),
++					undefined,
++					{ leafId: forkLeafId, suppressBreadcrumb: true },
++				);
++				const forkFile = fork.getSessionFile();
++				await fork.close();
++				if (!forkFile) throw new Error("the fork has no session file");
++				childArgs.push("--resume", forkFile);
++			}
+ 			// Pin only non-secret scope variables.
+ 			const command = [
+ 				...forkScopeEnvCommand({
+@@ -1624,14 +1662,15 @@ export class CommandController {
+ 			}
+ 
+ 			const result = await dependencies.launchTerminal(launchPlan.request);
++			const opened = forkLeafId === undefined ? "Opened a fork" : "Opened a fork without the running response";
+ 			if (result.warning) {
+ 				this.ctx.showWarning(
+-					`Opened a fork in ${placementInfo.displayName}, but ${result.warning} This session continues here.`,
++					`${opened} in ${placementInfo.displayName}, but ${result.warning} This session continues here.`,
+ 				);
+ 				return;
+ 			}
+ 			this.ctx.showStatus(
+-				`Opened a fork in ${placementInfo.displayName} (${placementInfo.placementLabel}); this session continues here.`,
++				`${opened} in ${placementInfo.displayName} (${placementInfo.placementLabel}); this session continues here.`,
+ 			);
+ 		} catch (error) {
+ 			logger.error("Failed to open a terminal fork", { multiplexer, error });
+diff --git a/packages/coding-agent/src/session/session-manager.ts b/packages/coding-agent/src/session/session-manager.ts
+index e01bea6..dbd2223 100644
+--- a/packages/coding-agent/src/session/session-manager.ts
++++ b/packages/coding-agent/src/session/session-manager.ts
+@@ -4397,6 +4397,7 @@ export class SessionManager {
+ 	 * auto-named `<timestamp>_<id>.jsonl` in `sessionDir`). Artifacts are copied
+ 	 * recursively by default; nested agents that deliberately share their parent's
+ 	 * artifact root may disable this with `copyArtifacts: false`.
++	 * `options.leafId` keeps only the root-to-`leafId` path instead of the whole tree.
+ 	 */
+ 	static async forkFrom(
+ 		sourcePath: string,
+@@ -4409,6 +4410,7 @@ export class SessionManager {
+ 			sessionFile?: string;
+ 			resetInheritedCost?: boolean;
+ 			repairInterruptedTail?: boolean;
++			leafId?: string;
+ 		},
+ 	): Promise<SessionManager> {
+ 		const dir = sessionDir ?? SessionManager.getDefaultSessionDir(cwd, undefined, storage);
+@@ -4428,7 +4430,7 @@ export class SessionManager {
+ 		await resolveBlobRefsInEntries(sourceEntries, manager.#blobs);
+ 
+ 		const sourceHeader = sourceEntries.find(entry => entry.type === "session") as SessionHeader | undefined;
+-		const history = sourceEntries.filter(entry => entry.type !== "session") as SessionEntry[];
++		let history = sourceEntries.filter(entry => entry.type !== "session") as SessionEntry[];
+ 		normalizeLoadedUsage(history);
+ 		if (options?.resetInheritedCost) SessionManager.#resetInheritedUsageCost(history);
+ 		manager.#resetToNewSession(
+@@ -4448,8 +4450,17 @@ export class SessionManager {
+ 		manager.#titleSource = manager.#header.titleSource;
+ 		manager.#titleUpdatedAt = nowIso();
+ 		manager.#hasTitleSlot = true;
+-		manager.#entries = history;
+ 		manager.#index.rebuild(history);
++		if (options?.leafId !== undefined) {
++			const branch = manager.#index.pathTo(options.leafId);
++			if (branch.length === 0) throw new Error(`Entry ${options.leafId} not found`);
++			// Every kept entry lies on the forked path, so an off-branch leaf marker no longer applies.
++			history = branch.map(entry =>
++				entry.activeLeafId === undefined ? entry : { ...entry, activeLeafId: undefined },
++			);
++			manager.#index.rebuild(history);
++		}
++		manager.#entries = history;
+ 		manager.sanitizeLoadedOpenAIResponsesReplayMetadata();
+ 		if (options?.repairInterruptedTail) {
+ 			SessionManager.#repairForkedInterruptedTail(history, manager.#index.pathTo());
