@@ -32,13 +32,30 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    dnie-nix.url = "github:kevinpita/dnie-nix";
+    nix-index-database = {
+      url = "github:nix-community/nix-index-database";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
-    nixos-hardware.url = "github:kevinpita/nixos-hardware";
+    dnie-nix = {
+      url = "github:kevinpita/dnie-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
-    nixos-grub-themes.url = "github:jeslie0/nixos-grub-themes";
+    nixos-hardware = {
+      url = "github:kevinpita/nixos-hardware";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
-    treefmt-nix.url = "github:numtide/treefmt-nix";
+    nixos-grub-themes = {
+      url = "github:jeslie0/nixos-grub-themes";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     sops-nix = {
       url = "github:Mic92/sops-nix";

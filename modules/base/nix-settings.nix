@@ -1,5 +1,11 @@
+{ inputs, ... }:
 {
   flake.modules.nixos.base = { pkgs, username, ... }: {
+    imports = [ inputs.nix-index-database.nixosModules.default ];
+
+    # Prebuilt index for nix-locate, the missing-command hint, and comma.
+    programs.nix-index-database.comma.enable = true;
+
     environment.systemPackages = with pkgs; [
       devenv
       dix
