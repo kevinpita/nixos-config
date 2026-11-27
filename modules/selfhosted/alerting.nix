@@ -295,12 +295,14 @@
         }
         {
           alert = "NixCacheUpdateFailed";
-          expr = ''node_systemd_unit_state{job="node",name="nix-cache-update.service",state="failed"} == 1'';
+          # The 10-minute update retries on each run. The range keeps the
+          # alert active while a retry runs.
+          expr = ''max_over_time(node_systemd_unit_state{job="node",name=~"nix-cache-update(-fast)?[.]service",state="failed"}[30m]) == 1'';
           for = "5m";
           labels.severity = "warning";
           annotations = {
             summary = "Flake input update failed on {{ $labels.host }}";
-            description = "The daily input update did not push a new flake.lock. A workstation build failed with the new inputs, or the push failed. Check journalctl -u nix-cache-update.";
+            description = "{{ $labels.name }} did not push its input update. A workstation build failed with the new inputs, or the push failed. Check journalctl -u {{ $labels.name }}.";
           };
         }
         {
