@@ -48,7 +48,7 @@ Hosts can also import individual features, such as `development` on `minidesk`.
 | [`packages/`](packages/) | Local helper packages |
 | [`lib/`](lib/) | Shared Nix helpers |
 | [`scripts/`](scripts/) | Maintenance scripts that `just` runs |
-| [`justfile`](justfile) | `just switch`, `just check`, and `just pins` |
+| [`justfile`](justfile) | Build, activation, and maintenance recipes |
 | [`treefmt.nix`](treefmt.nix) | Formatters that `nix fmt` and the formatting check run |
 | [`ci-dummy-input/`](ci-dummy-input/) | Stand-in for the private inputs in public CI |
 | [`docs/`](docs/) | Documentation diagrams |
@@ -57,6 +57,7 @@ Hosts can also import individual features, such as `development` on `minidesk`.
 
 ```bash
 just switch                  # build and activate the current host
+just boot                    # build and select the configuration for the next boot
 just check                   # evaluate every host and run the flake checks
 just pins                    # compare hand-made version pins with upstream
 nix fmt                      # format the repository

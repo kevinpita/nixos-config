@@ -13,8 +13,12 @@
         config.flake.modules.nixos.reverse-engineering
       ];
 
+      environment.etc."crypttab".text = ''
+        datos /dev/disk/by-id/ata-ST2000DM008-2FR102_WFL3CGKJ-part1 none luks,nofail,x-systemd.device-timeout=15s
+      '';
+
       fileSystems."/storage/datos" = {
-        device = "/dev/disk/by-uuid/8aebe5a1-9a38-40cc-959a-1d2fb65f36e2";
+        device = "/dev/mapper/datos";
         fsType = "btrfs";
         options = [
           "nofail"
