@@ -24,6 +24,8 @@
             theme = lib.mkDefault inputs.nixos-grub-themes.packages.${pkgs.stdenv.hostPlatform.system}.nixos;
           };
         };
+        # /tmp is scratch space, not storage.
+        tmp.cleanOnBoot = true;
       };
 
     };
