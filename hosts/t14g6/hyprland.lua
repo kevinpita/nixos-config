@@ -48,6 +48,7 @@ local function updateLaptopDisplay(removed)
         mode = "preferred",
         position = "auto",
         scale = 1,
+        vrr = 2,
         disabled = disabled,
     })
 end
